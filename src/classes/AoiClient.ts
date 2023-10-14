@@ -1,22 +1,18 @@
 import chalk from "chalk";
 import { AoiBase } from "./AoiBase";
 import { AoijsError } from "./AoiError";
+import { AoiManager, DatabaseOptions } from "./AoiManager";
 
 class AoiClient extends AoiBase {
-  constructor(token: string) {
+  #database: AoiManager;
+  constructor(
+    token: string,
+    options: {
+      database?: DatabaseOptions;
+    } = {},
+  ) {
     super(token);
-    super.on("ready", () => {
-      new Promise((res) =>
-        setTimeout(() => {
-          console.log(
-            `\n${chalk.red("[ Developer ]:")} ${chalk.yellow(
-              "If the error occurred not due to your fault but because of an external library, please make sure to report this error to: ",
-            )}${chalk.blue("https://github.com/Sempai-07/aoitelegram/issues")}`,
-          );
-          res("");
-        }, 5 * 1000),
-      );
-    });
+    this.#database = new AoiManager(options.database);
   }
 
   // @ts-ignore
@@ -30,8 +26,24 @@ class AoiClient extends AoiBase {
     });
   }
 
+  async variables(options: { [key: string]: unknown }, table?: string) {
+    await this.#database.variables(options, table);
+  }
+
   connect() {
-    super.login();
+    this.login();
+    this.on("ready", () => {
+      new Promise((res) =>
+        setTimeout(() => {
+          console.log(
+            `\n${chalk.red("[ Developer ]:")} ${chalk.yellow(
+              "If the error occurred not due to your fault but because of an external library, please make sure to report this error to: ",
+            )}${chalk.blue("https://github.com/Sempai-07/aoitelegram/issues")}`,
+          );
+          res("");
+        }, 5 * 1000),
+      );
+    });
   }
 }
 

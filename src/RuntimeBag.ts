@@ -1,8 +1,8 @@
 import { Token } from "./Lexer";
 
 class RuntimeBag {
-  public traces = new Map<Token, Token[]>();
-  public constructor() {}
+  traces = new Map<Token, Token[]>();
+  constructor() {}
 
   addTrace(parent: Token, child: Token) {}
 }

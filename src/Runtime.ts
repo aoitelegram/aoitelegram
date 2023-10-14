@@ -14,41 +14,41 @@ interface RuntimeOptions {
 }
 
 class Runtime {
-  public global = new Environment();
-  private contexts = new Map<string, Context>();
-  private evaluator = Evaluator.singleton;
-  public options: RuntimeOptions = {
+  global = new Environment();
+  #contexts = new Map<string, Context>();
+  #evaluator = Evaluator.singleton;
+  options: RuntimeOptions = {
     alwaysStrict: false,
     trimOutput: true,
   };
-  public telegram: any;
-  public constructor(telegram: any) {
-    this._prepareGlobal(telegram);
+  telegram: any;
+  constructor(telegram: any) {
+    this.#_prepareGlobal(telegram);
   }
 
-  public runInput(fileName: string, input: string) {
+  runInput(fileName: string, input: string) {
     const ast = new Parser().parseToAst(
       /* Tokens */ new Lexer(input).main(),
       this,
     );
     const ctx = this.prepareContext(fileName);
-    return this.evaluator.evaluate(ast, ctx);
+    return this.#evaluator.evaluate(ast, ctx);
   }
 
-  public prepareContext(fileName: string) {
+  prepareContext(fileName: string) {
     let env = new Environment(this.global);
     let bag = new RuntimeBag();
     let ctx = new Context(fileName, bag, env, this);
-    this.contexts.set(fileName, ctx);
+    this.#contexts.set(fileName, ctx);
 
     return ctx;
   }
 
-  public getContext(fileName: string) {
-    return this.contexts.get(fileName);
+  getContext(fileName: string) {
+    return this.#contexts.get(fileName);
   }
 
-  private _prepareGlobal(telegram: any) {
+  #_prepareGlobal(telegram: any) {
     readFunctionsInDirectory(
       __dirname.replace("classes", "function"),
       this.global,

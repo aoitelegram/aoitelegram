@@ -4,12 +4,12 @@ import { TokenArgument, TokenCall } from "./Lexer";
 import { Runtime, RuntimeOptions } from "./Runtime";
 import { Evaluator } from "./Evaluator";
 import { AoijsError } from "./classes/AoiError";
-type FnFunction = (ctx: Context) => any;
+type FnFunction = (ctx: Context) => string;
 
 class Context {
-  private _target: TokenCall | null = null;
-  public options: RuntimeOptions;
-  public constructor(
+  #_target: TokenCall | null = null;
+  options: RuntimeOptions;
+  constructor(
     public fileName: string,
     public bag: RuntimeBag,
     public env: Environment,
@@ -19,12 +19,12 @@ class Context {
   }
   async callIdentifier(node: TokenCall) {
     const fn = this.env.get(node.value);
-    let lastTarget = this._target;
+    let lastTarget = this.#_target;
     if (typeof fn === "function") {
-      this._target = node;
+      this.#_target = node;
       return (fn as FnFunction)(this);
     }
-    this._target = lastTarget;
+    this.#_target = lastTarget;
     return fn;
   }
   /**
@@ -34,12 +34,12 @@ class Context {
    * @returns
    */
   argsCheck(amount = 1, throwError = true) {
-    if ((this._target?.child.length ?? 0) < amount)
+    if ((this.#_target?.child.length ?? 0) < amount)
       if (throwError)
         throw new AoijsError(
-          `Expected ${amount} arguments but got ${this._target?.child.length}`,
+          `Expected ${amount} arguments but got ${this.#_target?.child.length}`,
           this.fileName,
-          this._target?.value,
+          this.#_target?.value,
         );
       else return false;
     return true;
@@ -52,9 +52,9 @@ class Context {
    */
   getArgs(start = -1, end = 1) {
     if (start < 0) {
-      return this._target?.child.copyWithin(start, start);
+      return this.#_target?.child.copyWithin(start, start);
     }
-    return this._target?.child.slice(start, end + 1);
+    return this.#_target?.child.slice(start, end + 1);
   }
 
   /**

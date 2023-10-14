@@ -3,42 +3,42 @@ import { AoijsError } from "./classes/AoiError";
 
 type EnvFunction = (ctx: Context) => any;
 class Environment {
-  private cache = new Map<string, any>();
-  private constant = new Map<string, boolean>();
-  public constructor(private parent?: Environment) {
+  #cache = new Map<string, any>();
+  #constant = new Map<string, boolean>();
+  constructor(private parent?: Environment) {
     if (parent && !(parent instanceof Environment))
       throw new Error("parent env must be instanceof Environment!");
   }
-  public set(name: string, value: EnvFunction): any;
+  set(name: string, value: EnvFunction): any;
   /**
-   * Sets a key-value into cache
+   * Sets a key-value into #cache
    * @param name
    * @param value
    * @returns
    */
-  public set(name: string, value: any) {
-    this.cache.set(name, value);
+  set(name: string, value: any) {
+    this.#cache.set(name, value);
     return void 0;
   }
-  public const() {}
+  const() {}
   /**
-   * Returns value by key from cache
+   * Returns value by key from #cache
    * @param name
    * @returns
    */
-  public get(name: string) {
-    return this._recursiveGet(name);
+  get(name: string) {
+    return this.#_recursiveGet(name);
   }
-  private _get(name: string) {
-    return this.cache.has(name) ? this.cache.get(name) ?? null : void 0;
+  #_get(name: string) {
+    return this.#cache.has(name) ? this.#cache.get(name) ?? null : void 0;
   }
   /**
-   * Remove value by key from cache
+   * Remove value by key from #cache
    * @param name
    * @returns
    */
-  public remove(name: string) {
-    return this.cache.delete(name);
+  remove(name: string) {
+    return this.#cache.delete(name);
   }
 
   /**
@@ -46,11 +46,11 @@ class Environment {
    * @param name
    * @returns
    */
-  private _recursiveGet(name: string) {
+  #_recursiveGet(name: string) {
     let env = this as Environment;
     while (true) {
       try {
-        let res = env._get(name);
+        let res = env.#_get(name);
         if (res === void 0)
           throw new AoijsError(
             `Identifier ${name} is not defined`,

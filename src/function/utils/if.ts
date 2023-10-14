@@ -1,6 +1,8 @@
+import { Context } from "context";
+
 export const data = {
   name: "$if",
-  callback: async (ctx: any) => {
+  callback: async (ctx: Context) => {
     ctx.argsCheck(2); // Requires 2 arguments
     const [condition, ifTrue, ifFalse] = ctx.getArgs(0, 3);
     const op_idx = condition.child.findIndex((v: any) => v.type === "operator");

@@ -3,19 +3,19 @@ import { Runtime } from "./Runtime";
 
 class Parser {
   tokens: Token[];
-  private busy: boolean;
-  public constructor() {
+  #busy: boolean;
+  constructor() {
     this.tokens = [];
-    this.busy = false;
+    this.#busy = false;
   }
 
-  public get isBusy() {
-    return this.busy;
+  get isBusy() {
+    return this.#busy;
   }
   parseToAst(tokens: Token[], runtime: Runtime): TokenProgram {
-    if (this.busy) throw new Error("Parser is busy!");
+    if (this.#busy) throw new Error("Parser is #busy!");
     this.tokens = tokens;
-    this.busy = true;
+    this.#busy = true;
     let arr = [];
     while (!this.eof()) {
       arr.push(this.parseAtom(runtime));

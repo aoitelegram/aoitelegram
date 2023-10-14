@@ -3,7 +3,7 @@ import { Token, TokenArgument, TokenCall, TokenProgram } from "./Lexer";
 
 class Evaluator {
   static singleton = new Evaluator();
-  public constructor() {}
+  constructor() {}
   async evaluate(ast: TokenProgram, ctx: Context) {
     const res = await this.visitArgument(ast, ctx);
     if (ctx.options.trimOutput && typeof res === "string") return res.trim();

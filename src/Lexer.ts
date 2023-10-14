@@ -27,10 +27,10 @@ type Token = { pos: number; line: number } & (
 );
 
 class Lexer {
-  public pos = 0;
-  public line = 0;
-  public col = 0;
-  public escape_c = false;
+  pos = 0;
+  line = 0;
+  col = 0;
+  escape_c = false;
   constructor(public input: string) {
     if (typeof input !== "string" || !input)
       throw new Error("input arg must be non-empty and typeof string!");
