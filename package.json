@@ -1,7 +1,32 @@
 {
+  "name": "aoitelegram",
+  "description": "",
+  "scripts": {
+    "build:release": "rimraf lib/ && tsc"
+  },
+  "version": "0.0.1",
+  "license": "MIT",
+  "files": [
+    "./lib",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "author": "Sempai<zadmanthegreat@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sempai-07/aoitelegram"
+  },
+  "bugs": {
+    "url": "https://github.com/Sempai-07/aoitelegram/issues"
+  },
   "dependencies": {
+    "chalk": "^2.4.2",
+    "telegramsjs": "^2.2.0",
+    "tslib": "^2.6.2"
+  },
+  "devDependencies": {
     "@telegram.ts/types": "^1.4.0",
-    "@types/node": "^20.8.5",
-    "telegramsjs": "^2.2.0"
+    "@types/node": "^20.8.6"
   }
 }
