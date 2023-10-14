@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import chalk from "chalk";
 import { Context } from "./Context";
 import { Environment } from "./Environment";
 import { Evaluator } from "./Evaluator";
@@ -71,7 +72,9 @@ function readFunctionsInDirectory(
       readFunctionsInDirectory(itemPath, parent, telegram);
     } else if (itemPath.endsWith(".js")) {
       const r = require(itemPath).data;
-      if (r) parent.set(r.name, (ctx) => r.callback(ctx, telegram));
+      if (r) {
+        parent.set(r.name, (ctx) => r.callback(ctx, telegram));
+      }
     }
   }
 }
