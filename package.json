@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@telegram.ts/types": "^1.4.0",
+    "@types/node": "^20.8.5",
+    "telegramsjs": "^2.2.0"
+  }
+}
