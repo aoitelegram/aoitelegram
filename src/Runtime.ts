@@ -7,6 +7,7 @@ import { Evaluator } from "./Evaluator";
 import { Lexer, TokenArgument, TokenOperator } from "./Lexer";
 import { Parser } from "./Parser";
 import { RuntimeBag } from "./RuntimeBag";
+import { AoiManager } from "./classes/AoiManager";
 
 interface RuntimeOptions {
   alwaysStrict: boolean;
@@ -24,14 +25,14 @@ class Runtime {
     alwaysStrict: false,
     trimOutput: true,
   };
-  telegram: any;
 
   /**
    * Constructs a new Runtime instance with a Telegram context.
-   * @param telegram - The Telegram context for the runtime.
+   * @param {any} telegram - The Telegram context for the runtime.
+   * @param {AoiManager} database - The local database.
    */
-  constructor(telegram: any) {
-    this.#_prepareGlobal(telegram);
+  constructor(telegram: any, database: AoiManager) {
+    this.#_prepareGlobal(telegram, database);
   }
 
   /**
@@ -68,11 +69,12 @@ class Runtime {
     return this.#contexts.get(fileName);
   }
 
-  #_prepareGlobal(telegram: any) {
+  #_prepareGlobal(telegram: any, database: AoiManager) {
     readFunctionsInDirectory(
       __dirname.replace("classes", "function"),
       this.global,
       telegram,
+      database,
     );
   }
 }
@@ -81,6 +83,7 @@ function readFunctionsInDirectory(
   dirPath: string,
   parent: Runtime["global"],
   telegram: any,
+  database: AoiManager,
 ) {
   const items = fs.readdirSync(dirPath);
 
@@ -89,11 +92,11 @@ function readFunctionsInDirectory(
     const stats = fs.statSync(itemPath);
 
     if (stats.isDirectory()) {
-      readFunctionsInDirectory(itemPath, parent, telegram);
+      readFunctionsInDirectory(itemPath, parent, telegram, database);
     } else if (itemPath.endsWith(".js")) {
       const r = require(itemPath).data;
       if (r) {
-        parent.set(r.name, (ctx) => r.callback(ctx, telegram));
+        parent.set(r.name, (ctx) => r.callback(ctx, telegram, database));
       }
     }
   }

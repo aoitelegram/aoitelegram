@@ -1,6 +1,7 @@
 import { TelegramBot, type Context } from "telegramsjs";
 import { UserFromGetMe, Update } from "@telegram.ts/types";
 import { AoijsError } from "./AoiError";
+import { AoiManager, DatabaseOptions } from "./AoiManager";
 import { Runtime } from "../Runtime";
 
 type AllowedUpdates = ReadonlyArray<Exclude<keyof Update, "update_id">>;
@@ -39,13 +40,20 @@ interface TelegramOptions {
  * A class that extends TelegramBot and provides additional functionality for handling commands and messages.
  */
 class AoiBase extends TelegramBot {
+  #database: AoiManager;
   /**
    * Creates a new instance of AoiBase.
    * @param {string} token - The token for authentication.
    * @param {TelegramOptions} telegram - Configuration options for the Telegram integration.
+   * @param {DatabaseOptions} options.database - Options for the database.
    */
-  constructor(token: string, telegram: TelegramOptions = {}) {
+  constructor(
+    token: string,
+    telegram?: TelegramOptions,
+    database?: DatabaseOptions,
+  ) {
     super(token, telegram);
+    this.#database = new AoiManager(database);
   }
 
   /**
@@ -59,7 +67,7 @@ class AoiBase extends TelegramBot {
     code: string,
     telegram: (TelegramBot & Context) | UserFromGetMe,
   ) {
-    const runtime = new Runtime(telegram);
+    const runtime = new Runtime(telegram, this.#database);
     await runtime.runInput(command, code);
   }
 
@@ -69,11 +77,12 @@ class AoiBase extends TelegramBot {
    * @param {string} options.code - The code to be executed when the bot is ready.
    */
   readyCommand(options: { code: string }) {
-    if (!options?.code)
+    if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "You did not specify the 'code' parameter.",
       );
+    }
     super.on("ready", async (ctx) => {
       await this.runCode("ready", options.code, ctx);
     });
@@ -85,14 +94,24 @@ class AoiBase extends TelegramBot {
    * @param {string} options.code - The code to be executed when a message is received.
    */
   messageCommand(options: { code: string }) {
-    if (!options?.code)
+    if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "You did not specify the 'code' parameter.",
       );
+    }
     super.on("message", async (ctx) => {
       await this.runCode("command", options.code, ctx);
     });
+  }
+
+  /**
+   * Set variables in the database.
+   * @param {Object} options - Key-value pairs of variables to set.
+   * @param {string} table - The database table to use (optional).
+   */
+  async variables(options: { [key: string]: unknown }, table?: string) {
+    await this.#database.variables(options, table);
   }
 }
 

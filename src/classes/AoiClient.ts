@@ -1,13 +1,12 @@
 import chalk from "chalk";
 import { AoiBase, TelegramOptions } from "./AoiBase";
+import { DatabaseOptions } from "./AoiManager";
 import { AoijsError } from "./AoiError";
-import { AoiManager, DatabaseOptions } from "./AoiManager";
 
 /**
  * A class representing an AoiClient, which extends AoiBase.
  */
 class AoiClient extends AoiBase {
-  #database: AoiManager;
   /**
    * Creates a new instance of AoiClient.
    * @param {string} token - The token for authentication.
@@ -22,8 +21,7 @@ class AoiClient extends AoiBase {
       database?: DatabaseOptions;
     } = {},
   ) {
-    super(token, options.telegram);
-    this.#database = new AoiManager(options.database);
+    super(token, options.telegram, options.database);
   }
 
   /**
@@ -47,15 +45,6 @@ class AoiClient extends AoiBase {
     super.command(options.name, (ctx) => {
       this.runCode(options.name, options.code, ctx);
     });
-  }
-
-  /**
-   * Set variables in the database.
-   * @param {Object} options - Key-value pairs of variables to set.
-   * @param {string} table - The database table to use (optional).
-   */
-  async variables(options: { [key: string]: unknown }, table?: string) {
-    await this.#database.variables(options, table);
   }
 
   /**
