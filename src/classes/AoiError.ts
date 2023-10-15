@@ -48,4 +48,68 @@ class AoijsError extends Error {
   }
 }
 
-export { AoijsError };
+/**
+ * Represents a class for handling message errors.
+ */
+class MessageError {
+  telegram: any;
+  /**
+   * Initializes a new instance of the MessageError class.
+   * @param telegram - The Telegram instance used for sending error messages.
+   */
+  constructor(telegram: any) {
+    this.telegram = telegram;
+  }
+
+  /**
+   * Sends an error message for a function with incorrect argument count.
+   * @param amount - The expected number of arguments.
+   * @param parameterCount - The actual number of arguments provided.
+   * @param func - The name of the function generating the error.
+   */
+  errorArgs(amount: number, parameterCount: number, func: string) {
+    const text = MessageError.createMessageError(
+      func,
+      `Expected ${amount} arguments but got ${parameterCount}`,
+    );
+    this.telegram.send(text, { parse_mode: "HTML" });
+  }
+
+  /**
+   * Sends an error message for an invalid variable.
+   * @param nameVar - The name of the invalid variable.
+   * @param func - The name of the function generating the error.
+   */
+  errorVar(nameVar: string, func: string) {
+    const text = MessageError.createMessageError(
+      func,
+      `Invalid variable ${nameVar} not found!`,
+    );
+    this.telegram.send(text, { parse_mode: "HTML" });
+  }
+
+  /**
+   * Sends an error message for an invalid table.
+   * @param table - The name of the invalid table.
+   * @param func - The name of the function generating the error.
+   */
+  errorTable(table: string, func: string) {
+    const text = MessageError.createMessageError(
+      func,
+      `Invalid table ${table} not found!`,
+    );
+    this.telegram.send(text, { parse_mode: "HTML" });
+  }
+
+  /**
+   * Create an MessageError message.
+   * @param func - The name of the function.
+   * @param details - Details of the error.
+   * @param line - Line number of the error.
+   */
+  static createMessageError(func: string, details: string, line?: number) {
+    return `<code>MessageError: ${func}: ${details}\n{ \nline : ${line}, \ncommand : ${func} \n}</code>`;
+  }
+}
+
+export { AoijsError, MessageError };

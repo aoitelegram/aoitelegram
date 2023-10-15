@@ -1,11 +1,13 @@
-import { Context } from "context";
+import { DataFunction } from "context";
 
-export const data = {
+const data: DataFunction = {
   name: "$async",
-  callback: (ctx: Context) => {
+  callback: (ctx) => {
     new Promise((res, rej) => {
       ctx.evaluateArgs(ctx.getArgs()).then(res).catch(rej);
     });
     return "";
   },
 };
+
+export { data };

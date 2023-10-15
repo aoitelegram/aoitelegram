@@ -1,9 +1,9 @@
-import { Context } from "context";
+import { DataFunction } from "context";
 
-export const data = {
+const data: DataFunction = {
   name: "$if",
-  callback: async (ctx: Context, event: any) => {
-    if (!ctx.argsCheck(2, true, event)) return; // Requires 2 arguments
+  callback: async (ctx, event, database, error) => {
+    if (!ctx.argsCheck(2, true, error, "$if")) return;
 
     const [condition, ifTrue, ifFalse] = ctx.getArgs(0, 3);
     const opIdx = condition.child.findIndex(
@@ -54,3 +54,5 @@ export const data = {
     throw new Error("Invalid operator!");
   },
 };
+
+export { data };

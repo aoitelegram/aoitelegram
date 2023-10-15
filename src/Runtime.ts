@@ -7,6 +7,7 @@ import { Evaluator } from "./Evaluator";
 import { Lexer, TokenArgument, TokenOperator } from "./Lexer";
 import { Parser } from "./Parser";
 import { RuntimeBag } from "./RuntimeBag";
+import { MessageError } from "./classes/AoiError";
 import { AoiManager } from "./classes/AoiManager";
 
 interface RuntimeOptions {
@@ -94,9 +95,12 @@ function readFunctionsInDirectory(
     if (stats.isDirectory()) {
       readFunctionsInDirectory(itemPath, parent, telegram, database);
     } else if (itemPath.endsWith(".js")) {
-      const r = require(itemPath).data;
-      if (r) {
-        parent.set(r.name, (ctx) => r.callback(ctx, telegram, database));
+      const dataFunc = require(itemPath).data;
+      if (dataFunc) {
+        parent.set(dataFunc.name, async (ctx) => {
+          const error = new MessageError(telegram);
+          return await dataFunc.callback(ctx, telegram, database, error);
+        });
       }
     }
   }

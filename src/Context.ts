@@ -3,7 +3,7 @@ import { RuntimeBag } from "./RuntimeBag";
 import { TokenArgument, TokenCall } from "./Lexer";
 import { Runtime, RuntimeOptions } from "./Runtime";
 import { Evaluator } from "./Evaluator";
-import { AoijsError } from "./classes/AoiError";
+import { AoijsError, MessageError } from "./classes/AoiError";
 type FnFunction = (ctx: Context) => string;
 
 class Context {
@@ -52,12 +52,12 @@ class Context {
    * @param event - Event object.
    * @param messageError - error message
    */
-  argsCheck(amount = 1, throwError = true, event: any) {
+  argsCheck(amount = 1, throwError = true, error: MessageError, func: string) {
     const target = this.#_target;
 
     if (!target || target.child.length < amount) {
       if (throwError) {
-        this.errorMessage(target, amount, event);
+        error.errorArgs(amount, target?.child.length ?? 0, func);
         return false;
       } else {
         return false;
@@ -88,41 +88,6 @@ class Context {
     return Promise.all(
       args.map((v) => Evaluator.singleton.visitArgument(v, this)),
     );
-  }
-
-  errorMessage(
-    target: TokenCall | null,
-    amount: number,
-    event: any,
-    messageError: string = "default",
-  ) {
-    const textError =
-      messageError === "default"
-        ? `Expected ${amount} arguments but got ${target?.child.length}`
-        : messageError;
-    const errorText = this.createAoiError(
-      target?.value as string,
-      textError,
-      target?.line,
-    );
-    event.telegram.sendMessage(
-      event.chat?.id ?? event.message?.chat.id,
-      errorText,
-      { parse_mode: "HTML" },
-    );
-  }
-
-  /**
-   * Create an AoiError message.
-   * @param command - The name of the command.
-   * @param details - Details of the error.
-   * @param line - Line number of the error.
-   */
-  createAoiError(command: string, details: string, line?: number) {
-    return `<code>AoiError: ${command}: ${details}\n{ 
-  line : ${line},
-  command : ${command} 
-}</code>`;
   }
 }
 

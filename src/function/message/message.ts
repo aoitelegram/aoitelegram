@@ -1,8 +1,8 @@
-import { Context } from "context";
+import { DataFunction } from "context";
 
-export const data = {
+const data: DataFunction = {
   name: "$message",
-  callback: async (ctx: Context, event: any) => {
+  callback: async (ctx, event, database, error) => {
     const text = event.text ?? event.message?.text;
     const args = await ctx.evaluateArgs(ctx.getArgs());
     let textSplit: string[] | undefined = text?.startsWith("/")
@@ -13,3 +13,5 @@ export const data = {
     return args[0] === undefined ? noArgsFunc : argsFunc;
   },
 };
+
+export { data };

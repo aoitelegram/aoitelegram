@@ -1,8 +1,10 @@
-import { Context } from "context";
+import { DataFunction } from "context";
 
-export const data = {
+const data: DataFunction = {
   name: "$ping",
-  callback: async (ctx: Context, event: any) => {
+  callback: async (ctx, event) => {
     return (await event.telegram?.ping()) ?? 0;
   },
 };
+
+export { data };

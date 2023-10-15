@@ -1,10 +1,12 @@
-import { Context } from "context";
+import { DataFunction } from "context";
 
-export const data = {
+const data: DataFunction = {
   name: "$client",
-  callback: async (ctx: Context, event: any) => {
+  callback: async (ctx, event, database, error) => {
     const args = await ctx.evaluateArgs(ctx.getArgs());
     const getMe = (await event.telegram?.getMe()) ?? event;
     return getMe[args[0]];
   },
 };
+
+export { data };

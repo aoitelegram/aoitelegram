@@ -1,10 +1,12 @@
-import { Context } from "context";
+import { DataFunction } from "context";
 
-export const data = {
+const data: DataFunction = {
   name: "$print",
-  callback: async (ctx: Context, event: any) => {
-    if (!ctx.argsCheck(1, true, event)) return;
+  callback: async (ctx, event, database, error) => {
+    if (!ctx.argsCheck(1, true, error, "$print")) return;
     console.log(...(await ctx.evaluateArgs(ctx.getArgs())));
     return "";
   },
 };
+
+export { data };
