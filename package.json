@@ -1,6 +1,6 @@
 {
   "name": "aoitelegram",
-  "description": "",
+  "description": "A powerful package to create Telegram Bots with built-in string functions",
   "main": "./lib/index.js",
   "typing": "./lib/typing/index.d.ts",
   "scripts": {

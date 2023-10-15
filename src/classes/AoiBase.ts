@@ -1,11 +1,20 @@
 import { TelegramBot, type Context } from "telegramsjs";
-import { UserFromGetMe } from "@telegram.ts/types";
+import { UserFromGetMe, Update } from "@telegram.ts/types";
 import { AoijsError } from "./AoiError";
 import { Runtime } from "../Runtime";
 
+type AllowedUpdates = ReadonlyArray<Exclude<keyof Update, "update_id">>;
+
+interface TelegramOptions {
+  limit?: number;
+  timeout?: number;
+  allowed_updates?: AllowedUpdates;
+  session?: unknown;
+}
+
 class AoiBase extends TelegramBot {
-  constructor(token: string) {
-    super(token);
+  constructor(token: string, telegram: TelegramOptions = {}) {
+    super(token, telegram);
   }
 
   async runCode(
@@ -34,4 +43,4 @@ class AoiBase extends TelegramBot {
   }
 }
 
-export { AoiBase };
+export { AoiBase, TelegramOptions };
