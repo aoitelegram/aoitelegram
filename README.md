@@ -32,21 +32,21 @@ const { AoiClient } = require("aoitelegram");
 const aoijs = new AoiClient("YOUR_BOT_TOKEN_HERE", {
   telegram: {
    /** The maximum number of updates to fetch at once. Defaults to 100. */
-   limit?: number;
+   limit: 100,
    /** The timeout for long polling in seconds. Defaults to 60 seconds. */
-   timeout?: number;
+   timeout: 60000,
    /** An array of allowed update types to receive. Defaults to all updates. */
-   allowed_updates?: AllowedUpdates;
+   allowed_updates: [],
    /** An optional session object for managing user sessions  */
-   session?: unknown;
+   session: {}
   },
   database: {
    /** The file path to the database storage. */
-   path?: string;
+   path: "./database/" 
    /** An array of table names within the database.*/
-   table?: string[];
+   table: ["main"],
    /** The file extension name used for the database file. */
-   extname?: string;
+   extname: ".sql"
   }
 });
 
