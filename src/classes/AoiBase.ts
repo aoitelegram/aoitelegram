@@ -70,7 +70,7 @@ class AoiBase extends TelegramBot {
    */
   readyCommand(options: { code: string }) {
     if (!options?.code)
-      throw new AoijsError("You did not specify the 'code' parameter.");
+      throw new AoijsError("parameter", "You did not specify the 'code' parameter.");
     super.on("ready", async (ctx) => {
       await this.runCode("ready", options.code, ctx);
     });
@@ -83,7 +83,7 @@ class AoiBase extends TelegramBot {
    */
   messageCommand(options: { code: string }) {
     if (!options?.code)
-      throw new AoijsError("You did not specify the 'code' parameter.");
+      throw new AoijsError("parameter", "You did not specify the 'code' parameter.");
     super.on("message", async (ctx) => {
       await this.runCode("command", options.code, ctx);
     });

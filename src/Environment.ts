@@ -53,6 +53,7 @@ class Environment {
         let res = env.#_get(name);
         if (res === void 0)
           throw new AoijsError(
+            "function",
             `Identifier ${name} is not defined`,
             undefined,
             name,

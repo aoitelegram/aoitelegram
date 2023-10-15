@@ -37,6 +37,7 @@ class Context {
     if ((this.#_target?.child.length ?? 0) < amount)
       if (throwError)
         throw new AoijsError(
+          "arguments",
           `Expected ${amount} arguments but got ${this.#_target?.child.length}`,
           this.fileName,
           this.#_target?.value,

@@ -3,10 +3,10 @@ class AoijsError extends Error {
   command?: string;
   functions?: string;
 
-  constructor(description: string, command?: string, functions?: string) {
+  constructor(name: string, description: string, command?: string, functions?: string) {
     super(description);
 
-    this.name = `AoijsError[null]`;
+    this.name = `AoijsError[${name}]`;
     this.description = description;
     this.command = command;
     this.functions = functions;
