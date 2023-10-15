@@ -9,6 +9,14 @@ type FnFunction = (ctx: Context) => string;
 class Context {
   #_target: TokenCall | null = null;
   options: RuntimeOptions;
+
+  /**
+   * Creates a new instance of the Context class.
+   * @param fileName - The name of the file.
+   * @param bag - RuntimeBag object.
+   * @param env - Environment object.
+   * @param runtime - Runtime object.
+   */
   constructor(
     public fileName: string,
     public bag: RuntimeBag,
@@ -17,56 +25,104 @@ class Context {
   ) {
     this.options = runtime.options;
   }
+
+  /**
+   * Call an identifier function.
+   * @param node - TokenCall object.
+   */
   async callIdentifier(node: TokenCall) {
     const fn = this.env.get(node.value);
-    let lastTarget = this.#_target;
+    const lastTarget = this.#_target;
+    this.#_target = node;
+
     if (typeof fn === "function") {
-      this.#_target = node;
-      return (fn as FnFunction)(this);
+      const result = (fn as FnFunction)(this);
+      this.#_target = lastTarget;
+      return result;
     }
+
     this.#_target = lastTarget;
     return fn;
   }
+
   /**
-   * Returns a true if provided arguments exists
-   * @param amount - Amount of argument required
-   * @param throwError - Throw error automatically
-   * @returns
+   * Check if the number of arguments is as expected.
+   * @param amount - Amount of arguments required.
+   * @param throwError - Throw error automatically.
+   * @param event - Event object.
+   * @param messageError - error message
    */
-  argsCheck(amount = 1, throwError = true) {
-    if ((this.#_target?.child.length ?? 0) < amount)
-      if (throwError)
-        throw new AoijsError(
-          "arguments",
-          `Expected ${amount} arguments but got ${this.#_target?.child.length}`,
-          this.fileName,
-          this.#_target?.value,
-        );
-      else return false;
-    return true;
-  }
-  /**
-   * Return arguments from `start` up to `end`
-   * @param start - The start of index
-   * @param end - Amount of argument returned
-   * @returns
-   */
-  getArgs(start = -1, end = 1) {
-    if (start < 0) {
-      return this.#_target?.child.copyWithin(start, start);
+  argsCheck(amount = 1, throwError = true, event: any) {
+    const target = this.#_target;
+
+    if (!target || target.child.length < amount) {
+      if (throwError) {
+        this.errorMessage(target, amount, event);
+        return false;
+      } else {
+        return false;
+      }
     }
-    return this.#_target?.child.slice(start, end + 1);
+    return true;
   }
 
   /**
-   * Evaluate and run provided arguments
-   * @param args - Arguments to run
-   * @returns
+   * Get arguments from 'start' up to 'end'.
+   * @param start - The start index.
+   * @param end - Amount of arguments to be returned.
    */
-  evaluateArgs(args: TokenArgument[]) {
+  getArgs(start = -1, end = 1) {
+    const target = this.#_target;
+
+    if (start < 0) {
+      return target?.child.copyWithin(start, start);
+    }
+    return target?.child.slice(start, end + 1);
+  }
+
+  /**
+   * Evaluate and run provided arguments.
+   * @param args - Arguments to run.
+   */
+  async evaluateArgs(args: TokenArgument[]) {
     return Promise.all(
       args.map((v) => Evaluator.singleton.visitArgument(v, this)),
     );
+  }
+
+  errorMessage(
+    target: TokenCall | null,
+    amount: number,
+    event: any,
+    messageError: string = "default",
+  ) {
+    const textError =
+      messageError === "default"
+        ? `Expected ${amount} arguments but got ${target?.child.length}`
+        : messageError;
+    const errorText = this.createAoiError(
+      target?.value as string,
+      textError,
+      target?.line,
+    );
+    event.telegram.sendMessage(
+      event.chat?.id ?? event.message?.chat.id,
+      errorText,
+      { parse_mode: "HTML" },
+    );
+  }
+
+  /**
+   * Create an AoiError message.
+   * @param command - The name of the command.
+   * @param details - Details of the error.
+   * @param line - Line number of the error.
+   */
+  createAoiError(command: string, details: string, line?: number) {
+    return `<code>AoiError: ${command}: ${details}\n{ 
+  line : ${line},
+  command : ${command} 
+}</code>`;
   }
 }
 

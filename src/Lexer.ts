@@ -4,7 +4,13 @@ const FN_DEF = /[a-z_]/i;
 
 type TokenString = { type: "string"; value: string };
 type TokenNumber = { type: "number"; value: number };
-type TokenCall = { type: "call"; value: string; child: TokenArgument[] };
+type TokenCall = {
+  type: "call";
+  value: string;
+  child: TokenArgument[];
+  pos: number;
+  line: number;
+};
 type TokenOpen = { type: "open" };
 type TokenClose = { type: "close" };
 type TokenNewArg = { type: "newArg" };
