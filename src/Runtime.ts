@@ -13,6 +13,9 @@ interface RuntimeOptions {
   trimOutput: boolean;
 }
 
+/**
+ * Represents the runtime environment for executing scripts.
+ */
 class Runtime {
   global = new Environment();
   #contexts = new Map<string, Context>();
@@ -22,10 +25,20 @@ class Runtime {
     trimOutput: true,
   };
   telegram: any;
+
+  /**
+   * Constructs a new Runtime instance with a Telegram context.
+   * @param telegram - The Telegram context for the runtime.
+   */
   constructor(telegram: any) {
     this.#_prepareGlobal(telegram);
   }
 
+  /**
+   * Runs the input script and returns the result.
+   * @param fileName - The name of the script file.
+   * @param input - The script code to execute.
+   */
   runInput(fileName: string, input: string) {
     const ast = new Parser().parseToAst(
       /* Tokens */ new Lexer(input).main(),
@@ -35,15 +48,22 @@ class Runtime {
     return this.#evaluator.evaluate(ast, ctx);
   }
 
+  /**
+   * Prepares a new execution context for a script.
+   * @param fileName - The name of the script file.
+   */
   prepareContext(fileName: string) {
     let env = new Environment(this.global);
     let bag = new RuntimeBag();
     let ctx = new Context(fileName, bag, env, this);
     this.#contexts.set(fileName, ctx);
-
     return ctx;
   }
 
+  /**
+   * Retrieves the execution context for a specific script.
+   * @param fileName - The name of the script file.
+   */
   getContext(fileName: string) {
     return this.#contexts.get(fileName);
   }
