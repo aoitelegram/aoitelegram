@@ -42,7 +42,7 @@ const aoijs = new AoiClient("YOUR_BOT_TOKEN_HERE", {
   },
   database: {
    /** The file path to the database storage. */
-   path: "./database/" 
+   path: "./database/",
    /** An array of table names within the database.*/
    table: ["main"],
    /** The file extension name used for the database file. */
