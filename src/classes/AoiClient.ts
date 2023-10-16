@@ -32,16 +32,18 @@ class AoiClient extends AoiBase {
    */
   // @ts-ignore
   command(options: { name: string; code: string }) {
-    if (!options?.name)
+    if (!options?.name) {
       throw new AoijsError(
         "parameter",
         "You did not specify the 'name' parameter.",
       );
-    if (!options?.code)
+    }
+    if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "You did not specify the 'code' parameter.",
       );
+    }
     super.command(options.name, (ctx) => {
       this.runCode(options.name, options.code, ctx);
     });
