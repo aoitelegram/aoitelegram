@@ -56,11 +56,25 @@ class LoadCommands {
             if (dataArrayFunc.name) {
               this.#aoitelegram.command({
                 name: dataArrayFunc.name,
+                typeChannel: dataArrayFunc.typeChannel,
                 code: dataArrayFunc.code,
               });
               if (log) {
                 console.log(
                   `| Loading in ${itemPath} | Loaded '${dataArrayFunc.name}' | command |`,
+                );
+              }
+            }
+
+            if (dataArrayFunc.action) {
+              this.#aoitelegram.action({
+                data: dataArrayFunc.action,
+                answer: dataArrayFunc.answer,
+                code: dataArrayFunc.code,
+              });
+              if (log) {
+                console.log(
+                  `| Loading in ${itemPath} | Loaded '${dataArrayFunc.action}' | action |`,
                 );
               }
             }
@@ -81,11 +95,25 @@ class LoadCommands {
           if (dataFunc.name) {
             this.#aoitelegram.command({
               name: dataFunc.name,
+              typeChannel: dataFunc.typeChannel,
               code: dataFunc.code,
             });
             if (log) {
               console.log(
                 `| Loading in ${itemPath} | Loaded '${dataFunc.name}' | command |`,
+              );
+            }
+          }
+
+          if (dataFunc.action) {
+            this.#aoitelegram.action({
+              data: dataFunc.action,
+              answer: dataFunc.answer,
+              code: dataFunc.code,
+            });
+            if (log) {
+              console.log(
+                `| Loading in ${itemPath} | Loaded '${dataFunc.action}' | action |`,
               );
             }
           }
@@ -123,6 +151,9 @@ class LoadCommands {
       case "message" === eventType.hasEvent:
         aoitelegram.messageCommand(data);
         break;
+      case "callback_query" === eventType.hasEvent:
+        aoitelegram.callbackQueryCommand(data);
+        break;
       default:
         throw new AoijsError(
           "loader",
@@ -141,6 +172,7 @@ class LoadCommands {
     const events: { [key: string]: string } = {
       ready: "ready",
       message: "message",
+      callback_query: "callback_query",
     };
     return { hasEvent: events[type] ?? null, parameter: type };
   }

@@ -1,3 +1,5 @@
+import { AoijsError } from "./AoiError";
+
 /**
  * Represents a single inline row containing text and callback data.
  * @interface
@@ -23,6 +25,13 @@ class AoiParse {
    * @returns {Object} - The parsed data structure.
    */
   parse(input: string) {
+    if (!input) {
+      throw new AoijsError(
+        "parameter",
+        "You did not specify the 'input' parameter.",
+      );
+    }
+
     const result: {
       inline_keyboard: InlineRow[];
     } = { inline_keyboard: [] };

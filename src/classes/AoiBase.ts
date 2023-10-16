@@ -106,6 +106,23 @@ class AoiBase extends TelegramBot {
   }
 
   /**
+   * Registers a code block to be executed in response to a callback_query.
+   * @param {Object} options - Command options.
+   * @param {string} options.code - The code to be executed when a callback_query is received.
+   */
+  callbackQueryCommand(options: { code: string }) {
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "You did not specify the 'code' parameter.",
+      );
+    }
+    super.on("callback_query", async (ctx) => {
+      await this.runCode("callback_query", options.code, ctx);
+    });
+  }
+
+  /**
    * Set variables in the database.
    * @param {Object} options - Key-value pairs of variables to set.
    * @param {string} table - The database table to use (optional).

@@ -28,10 +28,21 @@ class AoiClient extends AoiBase {
    * Define a command for the client.
    * @param {Object} options - Command options.
    * @param {string} options.name - The name of the command.
+   * @param {string | boolean} [options.typeChannel=false] - In what type of channels to watch command
    * @param {string} options.code - The code to be executed when the command is invoked.
    */
   // @ts-ignore
-  command(options: { name: string; code: string }) {
+  command(options: {
+    name: string;
+    typeChannel?:
+      | false
+      | "private"
+      | "group"
+      | "supergroup"
+      | "channel"
+      | undefined;
+    code: string;
+  }) {
     if (!options?.name) {
       throw new AoijsError(
         "parameter",
@@ -44,9 +55,42 @@ class AoiClient extends AoiBase {
         "You did not specify the 'code' parameter.",
       );
     }
-    super.command(options.name, (ctx) => {
-      this.runCode(options.name, options.code, ctx);
-    });
+    super.command(
+      options.name,
+      (ctx) => {
+        this.runCode(options.name, options.code, ctx);
+      },
+      options.typeChannel,
+    );
+  }
+
+  /**
+   * Defines an action handler.
+   * @param {string} data - The action data string or an array of action data strings.
+   * @param {boolean} [answer=false] - Whether to answer the action.
+   * @param {string} options.code - The code to be executed when the command is invoked.
+   */
+  // @ts-ignore
+  action(options: { data: string; answer?: boolean; code: string }) {
+    if (!options?.data) {
+      throw new AoijsError(
+        "parameter",
+        "You did not specify the 'data' parameter.",
+      );
+    }
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "You did not specify the 'code' parameter.",
+      );
+    }
+    super.action(
+      options.data,
+      (ctx) => {
+        this.runCode(options.data, options.code, ctx);
+      },
+      options.answer,
+    );
   }
 
   /**
