@@ -27,7 +27,7 @@ npm install aoitelegram
 Here's a quick example of how to use `aoitelegram` to create a Telegram bot:
 
 ```javascript
-const { AoiClient } = require("aoitelegram");
+const { AoiClient, LoadCommands } = require("aoitelegram");
 
 const aoijs = new AoiClient("YOUR_BOT_TOKEN_HERE", {
   telegram: {
@@ -48,6 +48,18 @@ const aoijs = new AoiClient("YOUR_BOT_TOKEN_HERE", {
    /** The file extension name used for the database file. */
    extname: ".sql"
   }
+});
+
+aoijs.readyCommand({
+  code: `$print[Starting @$client[username]]`
+});
+
+aoijs.messageCommand({
+  code: `$print[Message Handle]`
+});
+
+aoijs.callbackQueryCommand({
+  code: `$print[Action Handle]`
 });
 
 // Define a command to print a message.
@@ -73,10 +85,8 @@ Username: $client[username]
 Ping: $ping ms]`
 });
 
-// Handle messages by printing them.
-aoijs.messageCommand({
-  code: `$print[$message]`
-});
+const loader = new LoadCommands(bot)
+.loadCommands("./command/");
 
 // Set user variables in a table.
 aoijs.variables({
