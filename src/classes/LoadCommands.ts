@@ -21,23 +21,32 @@ class LoadCommands {
   /**
    * Asynchronously loads commands from the specified directory path.
    * @param {string} dirPath - The directory path from which to load commands.
+   * @param {boolean} [log] - The console load commands.
    */
-  async loadCommands(dirPath: string) {
+  async loadCommands(dirPath: string, log: boolean = true) {
+    if (!dirPath) {
+      throw new AoijsError(
+        "parameter",
+        "You did not specify the 'dirPath' parameter.",
+      );
+    }
     if (this.#count === 1) {
       dirPath = path.join(process.cwd(), dirPath);
-      const bigText = figlet.textSync("AoiTelegram");
-      console.log(bigText);
+      if (log) {
+        const bigText = figlet.textSync("AoiTelegram");
+        console.log(bigText);
+      }
       this.#count = 0;
     }
 
-    const items = await fs.readdirSync(dirPath);
+    const items = fs.readdirSync(dirPath);
 
     for (const item of items) {
       const itemPath = path.join(dirPath, item);
       const stats = fs.statSync(itemPath);
 
       if (stats.isDirectory()) {
-        await this.loadCommands(itemPath);
+        this.loadCommands(itemPath);
       } else if (itemPath.endsWith(".js")) {
         const requireFun = require(itemPath);
         const dataFunc = requireFun.data || requireFun;
@@ -49,9 +58,11 @@ class LoadCommands {
                 name: dataArrayFunc.name,
                 code: dataArrayFunc.code,
               });
-              console.log(
-                `| Loading in ${itemPath} | Loaded '${dataArrayFunc.name}' | command |`,
-              );
+              if (log) {
+                console.log(
+                  `| Loading in ${itemPath} | Loaded '${dataArrayFunc.name}' | command |`,
+                );
+              }
             }
 
             if (dataArrayFunc.type) {
@@ -59,9 +70,11 @@ class LoadCommands {
                 dataArrayFunc.type,
               );
               await this.runEvent(this.#aoitelegram, eventType, dataArrayFunc);
-              console.log(
-                `| Loading in ${itemPath} | Loaded '${dataArrayFunc.type}' | event |`,
-              );
+              if (log) {
+                console.log(
+                  `| Loading in ${itemPath} | Loaded '${dataArrayFunc.type}' | event |`,
+                );
+              }
             }
           }
         } else {
@@ -70,19 +83,21 @@ class LoadCommands {
               name: dataFunc.name,
               code: dataFunc.code,
             });
-            console.log(
-              `| Loading in ${itemPath} | Loaded '${dataFunc.name}' | command |`,
-            );
-            return;
+            if (log) {
+              console.log(
+                `| Loading in ${itemPath} | Loaded '${dataFunc.name}' | command |`,
+              );
+            }
           }
 
           if (dataFunc.type) {
             const eventType = LoadCommands.loaderEventType(dataFunc.type);
             await this.runEvent(this.#aoitelegram, eventType, dataFunc);
-            console.log(
-              `| Loading in ${itemPath} | Loaded '${dataFunc.type}' | event |`,
-            );
-            return;
+            if (log) {
+              console.log(
+                `| Loading in ${itemPath} | Loaded '${dataFunc.type}' | event |`,
+              );
+            }
           }
         }
       }
