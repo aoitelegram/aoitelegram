@@ -46,7 +46,7 @@ class LoadCommands {
       const stats = fs.statSync(itemPath);
 
       if (stats.isDirectory()) {
-        this.loadCommands(itemPath);
+        this.loadCommands(itemPath, log);
       } else if (itemPath.endsWith(".js")) {
         const requireFun = require(itemPath);
         const dataFunc = requireFun.data || requireFun;
