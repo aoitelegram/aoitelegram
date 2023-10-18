@@ -41,6 +41,7 @@ interface TelegramOptions {
  */
 class AoiBase extends TelegramBot {
   #database: AoiManager;
+  runtime: any;
   /**
    * Creates a new instance of AoiBase.
    * @param {string} token - The token for authentication.

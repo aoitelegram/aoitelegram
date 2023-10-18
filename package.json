@@ -6,7 +6,7 @@
   "scripts": {
     "build:release": "rimraf lib/ && tsc"
   },
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "MIT",
   "files": [
     "./lib",

@@ -6,12 +6,14 @@ const data: DataFunction = {
   callback: async (ctx, event, database, error) => {
     if (!ctx.argsCheck(1, true, error, "$sendMessage")) return;
     const args = await ctx.evaluateArgs(ctx.getArgs());
-
-    if (args[1]) {
-      const parse = new AoiParse().parse(args[1]);
-      event.send(args[0], { reply_markup: parse });
-      return "";
-    }
+//     const replyMessage = ctx.getArgs(1, 2);
+    
+//     if (args[1]) {
+//       event.send(args[0], { 
+//         reply_markup: replyMessage,
+//       });
+//       return "";
+//     }
     event.send(args[0]);
     return "";
   },

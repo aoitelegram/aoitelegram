@@ -9,6 +9,7 @@ type FnFunction = (ctx: Context) => string;
 class Context {
   #_target: TokenCall | null = null;
   options: RuntimeOptions;
+  buttons: any[] = [];
 
   /**
    * Creates a new instance of the Context class.
