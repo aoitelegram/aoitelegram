@@ -1,5 +1,23 @@
 import { DataFunction } from "context";
 
+function convertStringToType(input: string): any {
+    if (input === "true") {
+      return true;
+      } if (input === "false") {
+        return false;
+    } else if (input === "null") {
+        return null;
+    } else if (input === "undefined") {
+        return undefined;
+    } else if (!isNaN(parseFloat(input))) {
+        return parseFloat(input);
+    } else if (input.startsWith("{") && input.endsWith("}")) {
+        return JSON.parse(JSON.stringify(input));
+    } else {
+        return input;
+    }
+}
+
 const data: DataFunction = {
   name: "$if",
   callback: async (ctx, event, database, error) => {
@@ -17,30 +35,31 @@ const data: DataFunction = {
         : ctx.evaluateArgs([ifFalse]);
     }
 
-    const [condA, condB] = await ctx.evaluateArgs([
+    let [condA, condB] = await ctx.evaluateArgs([
       { type: "argument", child: condition.child.slice(0, opIdx) },
       { type: "argument", child: condition.child.slice(opIdx + 1) },
     ]);
+    condB = convertStringToType(condB);
 
     let res: boolean;
 
-    switch (opNode.value) {
-      case "==":
+    switch (true) {
+      case opNode.value == "==":
         res = condA == condB;
         break;
-      case "!=":
+      case opNode.value == "!=":
         res = condA != condB;
         break;
-      case ">=":
+      case opNode.value == ">=":
         res = condA >= condB;
         break;
-      case ">":
+      case opNode.value == ">":
         res = condA > condB;
         break;
-      case "<=":
+      case opNode.value == "<=":
         res = condA <= condB;
         break;
-      case "<":
+      case opNode.value == "<":
         res = condA < condB;
         break;
       default:
@@ -48,8 +67,8 @@ const data: DataFunction = {
         break;
     }
 
-    if (res === true) return ctx.evaluateArgs([ifTrue]);
-    if (res === false) return ctx.evaluateArgs([ifFalse]);
+    if (res === true) return await ctx.evaluateArgs([ifTrue]);
+    if (res === false) return await ctx.evaluateArgs([ifFalse]);
 
     throw new Error("Invalid operator!");
   },
