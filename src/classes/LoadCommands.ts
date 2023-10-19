@@ -61,6 +61,7 @@ class LoadCommands {
               });
               if (log) {
                 console.log(
+                  `|---------------------------------------------------------------------|\n`,
                   `| Loading in ${itemPath} | Loaded '${dataArrayFunc.name}' | command |`,
                 );
               }
@@ -74,6 +75,7 @@ class LoadCommands {
               });
               if (log) {
                 console.log(
+                  `|---------------------------------------------------------------------|\n`,
                   `| Loading in ${itemPath} | Loaded '${dataArrayFunc.action}' | action |`,
                 );
               }
@@ -86,6 +88,7 @@ class LoadCommands {
               await this.runEvent(this.#aoitelegram, eventType, dataArrayFunc);
               if (log) {
                 console.log(
+                  `|---------------------------------------------------------------------|\n`,
                   `| Loading in ${itemPath} | Loaded '${dataArrayFunc.type}' | event |`,
                 );
               }
@@ -100,6 +103,7 @@ class LoadCommands {
             });
             if (log) {
               console.log(
+                `|---------------------------------------------------------------------|\n`,
                 `| Loading in ${itemPath} | Loaded '${dataFunc.name}' | command |`,
               );
             }
@@ -113,6 +117,7 @@ class LoadCommands {
             });
             if (log) {
               console.log(
+                `|---------------------------------------------------------------------|\n`,
                 `| Loading in ${itemPath} | Loaded '${dataFunc.action}' | action |`,
               );
             }
@@ -123,6 +128,7 @@ class LoadCommands {
             await this.runEvent(this.#aoitelegram, eventType, dataFunc);
             if (log) {
               console.log(
+                `|---------------------------------------------------------------------|\n`,
                 `| Loading in ${itemPath} | Loaded '${dataFunc.type}' | event |`,
               );
             }

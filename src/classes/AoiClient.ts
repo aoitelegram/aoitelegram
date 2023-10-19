@@ -98,14 +98,24 @@ class AoiClient extends AoiBase {
    */
   connect() {
     this.login();
-    this.on("ready", () => {
+    this.on("ready", (ctx) => {
       new Promise((res) =>
         setTimeout(() => {
           console.log(
-            `\n${chalk.red("[ Developer ]:")} ${chalk.yellow(
-              "If the error occurred not due to your fault but because of an external library, please make sure to report this error to: ",
-            )}${chalk.blue("https://github.com/Sempai-07/aoitelegram/issues")}`,
+            "\x1b[31mAoiClient: " +
+              "\x1b[33mInitialized on \x1b[36maoitelegram \x1b[34mv" +
+              require("../../package.json").version +
+              `\x1b[0m || \x1b[32m${`@${ctx.username}`}` +
+              "\x1b[0m || \x1b[36mSempai Development\x1b[0m",
           );
+          console.log(
+            "\x1b[33mOfficial GitHub: https://github.com/Sempai-07/aoitelegram/issues\x1b[0m",
+          );
+          //           console.log(
+          //             `\n${chalk.red("[ Developer ]:")} ${chalk.yellow(
+          //               "If the error occurred not due to your fault but because of an external library, please make sure to report this error to: ",
+          //             )}${chalk.blue("https://github.com/Sempai-07/aoitelegram/issues")}`,
+          //           );
           res("");
         }, 5 * 1000),
       );
