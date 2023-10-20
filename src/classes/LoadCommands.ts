@@ -39,6 +39,15 @@ class LoadCommands {
       this.#count = 0;
     }
 
+    if (!fs.existsSync(dirPath)) {
+      throw new AoijsError(
+        "file",
+        "the specified file path was not found.",
+        dirPath,
+      );
+      return;
+    }
+
     const items = await fs.readdirSync(dirPath);
 
     for (const item of items) {
