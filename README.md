@@ -29,49 +29,50 @@ Here's a quick example of how to use `aoitelegram` to create a Telegram bot:
 ```javascript
 const { AoiClient, LoadCommands } = require("aoitelegram");
 
-const aoijs = new AoiClient("YOUR_BOT_TOKEN_HERE", {
+const aoijs = new AoiClient({
+  token: "YOUR_BOT_TOKEN_HERE",
   telegram: {
-   /** The maximum number of updates to fetch at once. Defaults to 100. */
-   limit: 100,
-   /** The timeout for long polling in seconds. Defaults to 60 seconds. */
-   timeout: 60000,
-   /** An array of allowed update types to receive. Defaults to all updates. */
-   allowed_updates: [],
-   /** An optional session object for managing user sessions  */
-   session: {}
+    /** The maximum number of updates to fetch at once. Defaults to 100. */
+    limit: 100,
+    /** The timeout for long polling in seconds. Defaults to 60 seconds. */
+    timeout: 60000,
+    /** An array of allowed update types to receive. Defaults to all updates. */
+    allowed_updates: [],
+    /** An optional session object for managing user sessions  */
+    session: {},
   },
   database: {
-   /** The file path to the database storage. */
-   path: "./database/",
-   /** An array of table names within the database.*/
-   table: ["main"],
-   /** The file extension name used for the database file. */
-   extname: ".sql"
-  }
+    /** The file path to the database storage. */
+    path: "./database/",
+    /** An array of table names within the database.*/
+    table: ["main"],
+    /** The file extension name used for the database file. */
+    extname: ".sql",
+  },
 });
 
 aoijs.readyCommand({
-  code: `$print[Starting @$client[username]]`
+  code: `$print[Starting @$client[username]]`,
 });
 
 aoijs.messageCommand({
-  code: `$print[Message Handle]`
+  code: `$print[Message Handle]`,
 });
 
 aoijs.callbackQueryCommand({
-  code: `$print[Action Handle]`
+  code: `$print[Action Handle]`,
 });
 
 // Define a command to print a message.
 aoijs.command({
   name: "say",
-  code: `$sendMessage[$message]`
+  code: `$sendMessage[$message]`,
 });
 
 // Define a command to check the bot's ping.
 aoijs.command({
   name: "ping",
-  code: `$replyMessage[Bot ping: $ping ms]`
+  code: `$replyMessage[Bot ping: $ping ms]`,
 });
 
 // Define a command to display bot information.
@@ -82,20 +83,22 @@ $replyMessage[
 Bot ID: $client[id]
 Name: $client[first_name]
 Username: $client[username]
-Ping: $ping ms]`
+Ping: $ping ms]`,
 });
 
-const loader = new LoadCommands(bot)
-.loadCommands("./command/");
+const loader = new LoadCommands(bot).loadCommands("./command/");
 
 // Set user variables in a table.
-aoijs.variables({
-  sempai: 10,
-  string: "Hello, world!",
-  aoijs: true,
-  webapp: false,
-  mz: {}
-}, "main");
+aoijs.variables(
+  {
+    sempai: 10,
+    string: "Hello, world!",
+    aoijs: true,
+    webapp: false,
+    mz: {},
+  },
+  "main",
+);
 
 // Connect to the Telegram service.
 aoijs.connect();
