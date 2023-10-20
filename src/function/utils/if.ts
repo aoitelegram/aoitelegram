@@ -1,21 +1,22 @@
 import { DataFunction } from "context";
 
 function convertStringToType(input: string): any {
-    if (input === "true") {
-      return true;
-      } if (input === "false") {
-        return false;
-    } else if (input === "null") {
-        return null;
-    } else if (input === "undefined") {
-        return undefined;
-    } else if (!isNaN(parseFloat(input))) {
-        return parseFloat(input);
-    } else if (input.startsWith("{") && input.endsWith("}")) {
-        return JSON.parse(JSON.stringify(input));
-    } else {
-        return input;
-    }
+  if (input === "true") {
+    return true;
+  }
+  if (input === "false") {
+    return false;
+  } else if (input === "null") {
+    return null;
+  } else if (input === "undefined") {
+    return undefined;
+  } else if (!isNaN(parseFloat(input))) {
+    return parseFloat(input);
+  } else if (input.startsWith("{") && input.endsWith("}")) {
+    return JSON.parse(JSON.stringify(input));
+  } else {
+    return input;
+  }
 }
 
 const data: DataFunction = {

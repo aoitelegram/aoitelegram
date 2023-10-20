@@ -39,7 +39,7 @@ class LoadCommands {
       this.#count = 0;
     }
 
-    const items = fs.readdirSync(dirPath);
+    const items = await fs.readdirSync(dirPath);
 
     for (const item of items) {
       const itemPath = path.join(dirPath, item);
