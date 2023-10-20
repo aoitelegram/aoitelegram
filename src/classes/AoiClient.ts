@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import { DataFunction } from "context";
 import { AoiBase, TelegramOptions } from "./AoiBase";
 import { DatabaseOptions } from "./AoiManager";
 import { AoijsError } from "./AoiError";
@@ -9,19 +10,19 @@ import { AoijsError } from "./AoiError";
 class AoiClient extends AoiBase {
   /**
    * Creates a new instance of AoiClient.
-   * @param {string} token - The token for authentication.
    * @param {Object} options - Configuration options for the client.
+   * @param {string} token - The token for authentication.
    * @param {TelegramOptions} options.telegram - Options for the Telegram integration.
    * @param {DatabaseOptions} options.database - Options for the database.
+   * @param {DataFunction[]} options.plugin An array of plugin functions.
    */
-  constructor(
-    token: string,
-    options: {
-      telegram?: TelegramOptions;
-      database?: DatabaseOptions;
-    } = {},
-  ) {
-    super(token, options.telegram, options.database);
+  constructor(options: {
+    token: string;
+    telegram?: TelegramOptions;
+    database?: DatabaseOptions;
+    plugin?: DataFunction[];
+  }) {
+    super(options.token, options.telegram, options.database, options.plugin);
   }
 
   /**

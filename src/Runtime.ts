@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import chalk from "chalk";
+import { DataFunction } from "context";
 import { Context } from "./Context";
 import { Environment } from "./Environment";
 import { Evaluator } from "./Evaluator";
@@ -31,9 +32,10 @@ class Runtime {
    * Constructs a new Runtime instance with a Telegram context.
    * @param {any} telegram - The Telegram context for the runtime.
    * @param {AoiManager} database - The local database.
+   * @param {DataFunction[]} options.plugin An array of plugin functions.
    */
-  constructor(telegram: any, database: AoiManager) {
-    this.#_prepareGlobal(telegram, database);
+  constructor(telegram: any, database: AoiManager, plugin?: DataFunction[]) {
+    this.#_prepareGlobal(telegram, database, plugin);
   }
 
   /**
@@ -70,13 +72,36 @@ class Runtime {
     return this.#contexts.get(fileName);
   }
 
-  #_prepareGlobal(telegram: any, database: AoiManager) {
+  #_prepareGlobal(
+    telegram: any,
+    database: AoiManager,
+    plugin?: DataFunction[],
+  ) {
     readFunctionsInDirectory(
       __dirname.replace("classes", "function"),
       this.global,
       telegram,
       database,
     );
+    if (Array.isArray(plugin)) {
+      readFunctions(plugin, this.global, telegram, database);
+    }
+  }
+}
+
+function readFunctions(
+  plugin: DataFunction[],
+  parent: Runtime["global"],
+  telegram: any,
+  database: AoiManager,
+) {
+  for (const dataFunc of plugin) {
+    if (dataFunc.name) {
+      parent.set(dataFunc.name, async (ctx) => {
+        const error = new MessageError(telegram);
+        return await dataFunc.callback(ctx, telegram, database, error);
+      });
+    }
   }
 }
 

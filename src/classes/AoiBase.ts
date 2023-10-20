@@ -1,5 +1,6 @@
 import { TelegramBot, type Context } from "telegramsjs";
 import { UserFromGetMe, Update } from "@telegram.ts/types";
+import { DataFunction } from "context";
 import { AoijsError } from "./AoiError";
 import { AoiManager, DatabaseOptions } from "./AoiManager";
 import { Runtime } from "../Runtime";
@@ -42,6 +43,7 @@ interface TelegramOptions {
 class AoiBase extends TelegramBot {
   #database: AoiManager;
   runtime: any;
+  plugin?: DataFunction[];
   /**
    * Creates a new instance of AoiBase.
    * @param {string} token - The token for authentication.
@@ -52,9 +54,11 @@ class AoiBase extends TelegramBot {
     token: string,
     telegram?: TelegramOptions,
     database?: DatabaseOptions,
+    plugin?: DataFunction[],
   ) {
     super(token, telegram);
     this.#database = new AoiManager(database);
+    this.plugin = plugin;
   }
 
   /**
@@ -68,7 +72,7 @@ class AoiBase extends TelegramBot {
     code: string,
     telegram: (TelegramBot & Context) | UserFromGetMe,
   ) {
-    const runtime = new Runtime(telegram, this.#database);
+    const runtime = new Runtime(telegram, this.#database, this.plugin);
     await runtime.runInput(command, code);
   }
 
