@@ -127,7 +127,23 @@ function readFunctionsInDirectory(
   collectionFunctions: DataFunction[],
 ) {
   let collectionFunction: DataFunction[] = [...collectionFunctions];
-  const items = fs.readdirSync(dirPath);
+  let items: string[] = [];
+
+  try {
+    items = fs.readdirSync(dirPath);
+  } catch (err) {
+    const messageError = err as { code: string };
+    if (messageError.code === "ENOTDIR") {
+      const dataFunc = require(dirPath).data;
+      if (dataFunc) {
+        collectionFunction.push({
+          name: dataFunc.name,
+          callback: dataFunc.callback,
+        });
+      }
+    }
+    return collectionFunction;
+  }
 
   for (const item of items) {
     const itemPath = path.join(dirPath, item);
