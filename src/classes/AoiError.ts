@@ -70,7 +70,7 @@ class MessageError {
   errorArgs(amount: number, parameterCount: number, func: string) {
     const text = MessageError.createMessageError(
       func,
-      `Expected ${amount} arguments but got ${parameterCount}`,
+      `Expected ${amount} arguments but got ${parameterCount}!`,
     );
     this.telegram.send(text, { parse_mode: "HTML" });
   }
