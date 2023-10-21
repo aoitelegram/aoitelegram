@@ -9,14 +9,17 @@ import fsx from "fs-extra";
  * Class representing a plugin manager for loading and managing plugins in a Node.js application.
  */
 class PluginManager {
+  #aoitelegram?: AoiClient;
   /**
    * Create an instance of the PluginManager.
    * @param {boolean} [searchingForPlugins] - Specify whether to search for plugins during initialization.
+   * @param {AoiClient} [aoitelegram] - The AoiClient instance to load commands into.
    */
-  constructor(searchingForPlugins?: boolean) {
+  constructor(searchingForPlugins?: boolean, aoitelegram?: AoiClient) {
     if (searchingForPlugins) {
       this.#searchingForPlugins();
     }
+    this.#aoitelegram = aoitelegram;
   }
 
   /**
@@ -40,6 +43,7 @@ class PluginManager {
     return readFunctionsInDirectory(
       path.join(process.cwd(), plugins),
       collectionFunction,
+      this.#aoitelegram,
     );
   }
 
@@ -76,10 +80,11 @@ class PluginManager {
       }
 
       collectionFunction.push(
-        ...readFunctionsInDirectory(
+        ...(readFunctionsInDirectory(
           path.join(pathPlugin, packageJSON),
           collectionFunction,
-        ),
+          this.#aoitelegram,
+        ) ?? []),
       );
     }
     return collectionFunction;
@@ -125,6 +130,7 @@ class PluginManager {
 function readFunctionsInDirectory(
   dirPath: string,
   collectionFunctions: DataFunction[],
+  aoitelegram?: AoiClient,
 ) {
   let collectionFunction: DataFunction[] = [...collectionFunctions];
   let items: string[] = [];
@@ -142,6 +148,10 @@ function readFunctionsInDirectory(
         });
       }
     }
+    if (aoitelegram) {
+      aoitelegram.addFunction(collectionFunction);
+      return;
+    }
     return collectionFunction;
   }
 
@@ -150,7 +160,7 @@ function readFunctionsInDirectory(
     const stats = fs.statSync(itemPath);
 
     if (stats.isDirectory()) {
-      readFunctionsInDirectory(itemPath, collectionFunction);
+      readFunctionsInDirectory(itemPath, collectionFunction, aoitelegram);
     } else if (itemPath.endsWith(".js")) {
       const dataFunc = require(itemPath).data;
       if (dataFunc) {
@@ -158,6 +168,9 @@ function readFunctionsInDirectory(
           name: dataFunc.name,
           callback: dataFunc.callback,
         });
+      }
+      if (aoitelegram) {
+        aoitelegram.addFunction(collectionFunction);
       }
     }
   }

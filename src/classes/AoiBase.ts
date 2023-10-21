@@ -77,6 +77,20 @@ class AoiBase extends TelegramBot {
   }
 
   /**
+   * Add a data function or an array of data functions to the plugin options.
+   *
+   * @param {DataFunction|DataFunction[]} options - The data function(s) to add.
+   * @returns {void}
+   */
+  addFunction(options: DataFunction | DataFunction[]) {
+    if (Array.isArray(options)) {
+      this.plugin = [...(this.plugin ?? []), ...options];
+    } else {
+      this.plugin = [...(this.plugin ?? []), options];
+    }
+  }
+
+  /**
    * Registers a code block to be executed when the bot is ready.
    * @param {Object} options - Command options.
    * @param {string} options.code - The code to be executed when the bot is ready.

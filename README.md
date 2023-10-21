@@ -106,7 +106,7 @@ aoijs.connect();
 
 ## Documentation
 
-For detailed documentation and usage instructions, please refer to the [aoitelegram Wiki](https://google.com) (In development.).
+For detailed documentation and usage instructions, please refer to the [aoitelegram Wiki](https://aoitelegram.surge.sh/) (In development.).
 
 ## License
 
