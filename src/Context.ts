@@ -1,5 +1,4 @@
 import { Environment } from "./Environment";
-import { RuntimeBag } from "./RuntimeBag";
 import { TokenArgument, TokenCall } from "./Lexer";
 import { Runtime, RuntimeOptions } from "./Runtime";
 import { Evaluator } from "./Evaluator";
@@ -7,20 +6,17 @@ import { AoijsError, MessageError } from "./classes/AoiError";
 type FnFunction = (ctx: Context) => string;
 
 class Context {
-  #_target: TokenCall | null = null;
+  #target: TokenCall | null = null;
   options: RuntimeOptions;
-  buttons: any[] = [];
 
   /**
    * Creates a new instance of the Context class.
    * @param fileName - The name of the file.
-   * @param bag - RuntimeBag object.
    * @param env - Environment object.
    * @param runtime - Runtime object.
    */
   constructor(
     public fileName: string,
-    public bag: RuntimeBag,
     public env: Environment,
     public runtime: Runtime,
   ) {
@@ -33,16 +29,16 @@ class Context {
    */
   async callIdentifier(node: TokenCall) {
     const fn = this.env.get(node.value);
-    const lastTarget = this.#_target;
-    this.#_target = node;
+    const lastTarget = this.#target;
+    this.#target = node;
 
     if (typeof fn === "function") {
       const result = (fn as FnFunction)(this);
-      this.#_target = lastTarget;
+      this.#target = lastTarget;
       return result;
     }
 
-    this.#_target = lastTarget;
+    this.#target = lastTarget;
     return fn;
   }
 
@@ -54,7 +50,7 @@ class Context {
    * @param messageError - error message
    */
   argsCheck(amount = 1, throwError = true, error: MessageError, func: string) {
-    const target = this.#_target;
+    const target = this.#target;
 
     if (!target || target.child.length < amount) {
       if (throwError) {
@@ -73,7 +69,7 @@ class Context {
    * @param end - Amount of arguments to be returned.
    */
   getArgs(start = -1, end = 1) {
-    const target = this.#_target;
+    const target = this.#target;
 
     if (start < 0) {
       return target?.child.copyWithin(start, start);

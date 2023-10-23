@@ -7,7 +7,6 @@ import { Environment } from "./Environment";
 import { Evaluator } from "./Evaluator";
 import { Lexer, TokenArgument, TokenOperator } from "./Lexer";
 import { Parser } from "./Parser";
-import { RuntimeBag } from "./RuntimeBag";
 import { MessageError } from "./classes/AoiError";
 import { AoiManager } from "./classes/AoiManager";
 
@@ -58,8 +57,7 @@ class Runtime {
    */
   prepareContext(fileName: string) {
     let env = new Environment(this.global);
-    let bag = new RuntimeBag();
-    let ctx = new Context(fileName, bag, env, this);
+    let ctx = new Context(fileName, env, this);
     this.#contexts.set(fileName, ctx);
     return ctx;
   }

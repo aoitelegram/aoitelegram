@@ -1,3 +1,5 @@
+import { AoijsError } from "./classes/AoiError";
+
 const SYNTAX = "[]\\;$";
 const OPS = /[!=<>]+$/;
 const FN_DEF = /[a-z_]/i;
@@ -47,7 +49,10 @@ class Lexer {
    */
   constructor(public input: string) {
     if (typeof input !== "string" || !input)
-      throw new Error("input arg must be non-empty and of type string!");
+      throw new AoijsError(
+        "type",
+        "input arg must be non-empty and of type string!",
+      );
   }
 
   /**
@@ -99,55 +104,60 @@ class Lexer {
 
   /**
    * Checks if a character is an operator.
-   * @param x - The character to check.
+   * @param content - The character to check.
    * @returns True if the character is an operator, otherwise false.
    */
-  isOperator(x: string) {
-    return OPS.test(x);
+  isOperator(content: string) {
+    return OPS.test(content);
   }
 
   /**
    * Checks if a character is a syntax character.
-   * @param c - The character to check.
+   * @param content - The character to check.
    * @returns True if the character is a syntax character, otherwise false.
    */
-  isSyntax(c: string) {
-    return SYNTAX.indexOf(c) > -1;
+  isSyntax(content: string) {
+    return SYNTAX.indexOf(content) > -1;
   }
 
   /**
    * Checks if a string is a valid number.
-   * @param x - The string to check.
+   * @param content - The string to check.
    * @returns True if the string is a valid number, otherwise false.
    */
-  isNumber(x: string) {
-    return parseInt(x) === Number(x);
+  isNumber(content: string) {
+    return parseInt(content) === Number(content);
   }
 
   /**
    * Parses an operator character into a token.
-   * @param x - The operator character to parse.
+   * @param character - The operator character to parse.
    * @returns A token representing the operator character.
    */
-  parseOperator(x: string): Token {
-    switch (x) {
+  parseOperator(character: string): Token {
+    switch (character) {
       case "==":
       case "!=":
       case ">=":
       case "<=":
       case ">":
       case "<":
-        return { type: "operator", value: x, pos: this.col, line: this.line };
+        return {
+          type: "operator",
+          value: character,
+          pos: this.col,
+          line: this.line,
+        };
     }
-    return { type: "string", value: x, pos: this.col, line: this.line };
+    return { type: "string", value: character, pos: this.col, line: this.line };
   }
 
   /**
    * Validates a call token and parses it.
    * @returns A parsed call token.
    */
-  validateCall(c: string) {
-    return FN_DEF.test(c);
+  validateCall(call: string) {
+    return FN_DEF.test(call);
   }
 
   /**
@@ -171,8 +181,8 @@ class Lexer {
    * Validates a string token and parses it.
    * @returns A parsed string token.
    */
-  validateString(c: string) {
-    return !(this.isSyntax(c) || this.isOperator(c));
+  validateString(content: string) {
+    return !(this.isSyntax(content) || this.isOperator(content));
   }
 
   /**
@@ -283,7 +293,7 @@ class Lexer {
           if (token?.type !== "string") {
             newArr.push(current);
             current = token;
-          } else throw new Error("dunno wat to do");
+          } else throw new AoijsError("lexer", "dunno wat to do");
         }
       }
     }

@@ -10,16 +10,13 @@ class Environment {
   #cache = new Map<string, any>();
   #constant = new Map<string, boolean>();
   constructor(private parent?: Environment) {
-    if (parent && !(parent instanceof Environment))
-      throw new Error("parent env must be instanceof Environment!");
+    if (parent && !(parent instanceof Environment)) {
+      throw new AoijsError(
+        "instanceof",
+        "parent env must be instanceof Environment!",
+      );
+    }
   }
-
-  /**
-   * Sets a key-value pair into the #cache.
-   * @param name - The name of the key.
-   * @param value - The value to associate with the key.
-   */
-  set(name: string, value: EnvFunction): any;
 
   /**
    * Sets a key-value pair into the #cache.
@@ -27,12 +24,10 @@ class Environment {
    * @param value - The value to associate with the key.
    * @returns undefined.
    */
-  set(name: string, value: any) {
+  set(name: string, value: EnvFunction) {
     this.#cache.set(name, value);
-    return void 0;
+    return undefined;
   }
-
-  const() {}
 
   /**
    * Returns the value associated with a key from the #cache.
@@ -40,11 +35,11 @@ class Environment {
    * @returns The value associated with the key, recursively looking in parent environments if necessary.
    */
   get(name: string) {
-    return this.#_recursiveGet(name);
+    return this.#recursiveGet(name);
   }
 
-  #_get(name: string) {
-    return this.#cache.has(name) ? this.#cache.get(name) ?? null : void 0;
+  #get(name: string) {
+    return this.#cache.has(name) ? this.#cache.get(name) ?? null : undefined;
   }
 
   /**
@@ -61,12 +56,12 @@ class Environment {
    * @param name - The name of the key to retrieve.
    * @returns The value associated with the key, or throws an error if not found.
    */
-  #_recursiveGet(name: string) {
+  #recursiveGet(name: string) {
     let env = this as Environment;
     while (true) {
       try {
-        let res = env.#_get(name);
-        if (res === void 0)
+        let res = env.#get(name);
+        if (res === undefined)
           throw new AoijsError(
             "function",
             `Identifier ${name} is not defined`,

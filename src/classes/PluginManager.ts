@@ -17,6 +17,11 @@ class PluginManager {
    */
   constructor(searchingForPlugins?: boolean, aoitelegram?: AoiClient) {
     if (searchingForPlugins) {
+      const pathAoiPlugins = path.join(process.cwd(), "node_modules", ".aoiplugins");
+      const existsAoiPlugins = fs.existsSync(pathAoiPlugins);
+      if (!existsAoiPlugins) {
+        fs.mkdirSync(pathAoiPlugins)
+      }
       this.#searchingForPlugins();
     }
     this.#aoitelegram = aoitelegram;

@@ -1,4 +1,5 @@
 import { Token, TokenArgument, TokenProgram, TokenString } from "./Lexer";
+import { AoijsError } from "./classes/AoiError";
 import { Runtime } from "./Runtime";
 
 /**
@@ -110,7 +111,7 @@ class Parser {
       arg = undefined;
     }
 
-    if (end === false) throw new Error("Expected ']', got none");
+    if (end === false) throw new AoijsError("symbol", "Expected ']', got none");
 
     return arr;
   }
@@ -151,7 +152,8 @@ class Parser {
       }
     }
 
-    throw new Error(
+    throw new AoijsError(
+      "parser",
       `Unexpected token of type ${token?.type} at ${token?.pos}:${token?.line}`,
     );
   }

@@ -45,7 +45,6 @@ class LoadCommands {
         "the specified file path was not found.",
         dirPath,
       );
-      return;
     }
 
     const items = await fs.readdirSync(dirPath);
@@ -145,6 +144,7 @@ class LoadCommands {
         }
       }
     }
+    return this;
   }
 
   /**

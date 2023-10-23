@@ -1,4 +1,5 @@
 import { Context } from "./Context";
+import { AoijsError } from "./classes/AoiError";
 import { Token, TokenArgument, TokenCall, TokenProgram } from "./Lexer";
 
 /**
@@ -39,7 +40,7 @@ class Evaluator {
     if (node.type === "operator") return node.value;
     if (node.type === "call") return this.visitCall(node, ctx);
     if (node.type === "argument") return this.visitArgument(node, ctx);
-    throw new Error("Unknown type of " + node.type + "!");
+    throw new AoijsError("visits", "Unknown type of " + node.type + "!");
   }
 
   /**

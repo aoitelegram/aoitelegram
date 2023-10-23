@@ -5,12 +5,12 @@ declare module "context" {
 
   interface DataFunction {
     name: string;
-    callback(
+    callback: (
       ctx: Context,
       event: any,
       database: AoiManager,
       error: MessageError,
-    ): any;
+    ) => unknown;
   }
 
   export { DataFunction };
