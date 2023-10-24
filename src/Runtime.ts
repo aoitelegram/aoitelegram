@@ -97,7 +97,8 @@ function readFunctions(
     if (dataFunc.name) {
       parent.set(dataFunc.name, async (ctx) => {
         const error = new MessageError(telegram);
-        return await dataFunc.callback(ctx, telegram, database, error);
+        const response = await dataFunc.callback(ctx, telegram, database, error);
+        return response;
       });
     }
   }
@@ -122,7 +123,8 @@ function readFunctionsInDirectory(
       if (dataFunc) {
         parent.set(dataFunc.name, async (ctx) => {
           const error = new MessageError(telegram);
-          return await dataFunc.callback(ctx, telegram, database, error);
+          const response = await dataFunc.callback(ctx, telegram, database, error);
+          return response;
         });
       }
     }

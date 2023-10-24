@@ -4,7 +4,7 @@
   "main": "./lib/index.js",
   "typing": "./lib/typing/index.d.ts",
   "scripts": {
-    "build:release": "rimraf lib/ && tsc"
+    "build:release": "rm -rf lib/ && tsc"
   },
   "version": "0.0.2",
   "license": "MIT",
@@ -23,7 +23,7 @@
     "url": "https://github.com/Sempai-07/aoitelegram/issues"
   },
   "dependencies": {
-    "chalk": "^2.4.2",
+    "chalk": "^4.1.2",
     "database-sempai": "^2.6.0",
     "figlet": "^1.6.0",
     "fs-extra": "^11.1.1",

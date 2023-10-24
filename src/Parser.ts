@@ -73,7 +73,7 @@ class Parser {
    * @param arr - The array to retrieve the last element from.
    * @returns The last element of the array.
    */
-  last(arr: any[]) {
+  last<T>(arr: T[]) {
     return arr[arr.length - 1];
   }
 

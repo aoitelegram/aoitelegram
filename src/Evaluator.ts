@@ -34,7 +34,7 @@ class Evaluator {
    * @param ctx - The context in which to visit the node.
    * @returns The result of visiting the node.
    */
-  visit(node: Token, ctx: Context): any {
+  visit(node: Token, ctx: Context) {
     if (node.type === "string") return node.value;
     if (node.type === "number") return node.value;
     if (node.type === "operator") return node.value;
@@ -63,10 +63,10 @@ class Evaluator {
   async visitArgument(
     arg: TokenProgram | TokenArgument,
     ctx: Context,
-    map = true,
-  ): Promise<any> {
+    map: boolean = true,
+  ) {
     let arr = arg.child?.copyWithin(-1, -1) ?? [];
-    let v = [];
+    let v: Token[] = [];
 
     while (arr?.length > 0) {
       let node = arr.shift() as Token;
@@ -82,7 +82,7 @@ class Evaluator {
    * @param values - The array of values to map.
    * @returns The mapped value.
    */
-  async mapValues(values: any[]) {
+  async mapValues<T>(values: T[]) {
     if (values.length <= 1) return values[0];
 
     return (await Promise.all(values.map(async (v) => String(await v)))).join(
