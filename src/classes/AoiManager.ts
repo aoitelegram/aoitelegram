@@ -39,7 +39,7 @@ class AoiManager extends CreateStorage<string, unknown> {
    * Creates a new instance of AoiManager.
    * @param {DatabaseOptions} options - Configuration options for the database connection.
    */
-  constructor(options: DatabaseOptions = {}) {
+  constructor(options: DatabaseOptions = { console: true }) {
     super(options);
     if (options.console) {
       this.on("ready", () => {
