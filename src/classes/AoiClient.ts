@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import { DataFunction } from "context";
 import { AoiBase, TelegramOptions } from "./AoiBase";
+import { AoiWarning } from "./AoiWarning";
 import { DatabaseOptions } from "./AoiManager";
 import { AoijsError } from "./AoiError";
 
@@ -9,6 +10,7 @@ import { AoijsError } from "./AoiError";
  */
 class AoiClient extends AoiBase {
   #optionConsole: boolean | undefined;
+  aoiwarning: boolean | undefined;
   /**
    * Creates a new instance of AoiClient.
    * @param {Object} options - Configuration options for the client.
@@ -23,10 +25,13 @@ class AoiClient extends AoiBase {
     database?: DatabaseOptions;
     plugin?: DataFunction[];
     console?: boolean;
+    aoiwarning?: boolean;
   }) {
     super(options.token, options.telegram, options.database, options.plugin);
     this.#optionConsole =
       options.console === undefined ? true : options.console;
+    this.aoiwarning =
+      options.aoiwarning === undefined ? true : options.aoiwarning;
   }
 
   /**
@@ -104,11 +109,12 @@ class AoiClient extends AoiBase {
   connect() {
     this.login();
     if (this.#optionConsole) {
-      this.on("ready", (ctx) => {
-        new Promise((res) =>
+      this.on("ready", async (ctx) => {
+        if (this.aoiwarning) await AoiWarning();
+        await new Promise((res) =>
           setTimeout(() => {
             console.log(
-              "\x1b[31mAoiClient: " +
+              "\x1b[31m[ AoiClient ]: " +
                 "\x1b[33mInitialized on \x1b[36maoitelegram \x1b[34mv" +
                 require("../../package.json").version +
                 `\x1b[0m || \x1b[32m${`@${ctx.username}`}` +
