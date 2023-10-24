@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import figlet from "figlet";
 import { AoiClient } from "./AoiClient";
 import { AoijsError } from "./AoiError";

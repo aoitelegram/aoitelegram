@@ -167,8 +167,9 @@ class Lexer {
    */
   parseCall(): Token {
     const fun = this.readInput(this.validateCall);
-    if (!fun)
+    if (!fun) {
       return { type: "string", value: "$", pos: this.col, line: this.line };
+    }
     return {
       type: "call",
       value: "$" + fun,
@@ -192,13 +193,14 @@ class Lexer {
    */
   parseString(): Token {
     const str = this.readInput(this.validateString);
-    if (this.isNumber(str))
+    if (this.isNumber(str)) {
       return {
         type: "number",
         value: Number(str),
         pos: this.col,
         line: this.line,
       };
+    }
     return { type: "string", value: str, pos: this.col, line: this.line };
   }
 
@@ -224,13 +226,14 @@ class Lexer {
     if (this.escape_c) {
       this.escape_c = false;
       this.next();
-      if (this.isSyntax(character) || this.isOperator(character))
+      if (this.isSyntax(character) || this.isOperator(character)) {
         return {
           type: "string",
           value: character,
           pos: this.col,
           line: this.line,
         };
+      }
       return {
         type: "string",
         value: "\\" + character,

@@ -1,8 +1,8 @@
 import { AoiClient } from "./AoiClient";
 import { AoijsError } from "./AoiError";
 import { DataFunction } from "context";
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import fsx from "fs-extra";
 
 /**

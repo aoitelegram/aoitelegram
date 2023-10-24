@@ -35,12 +35,6 @@ interface TelegramOptions {
    * @type {unknown}
    */
   session?: unknown;
-
-  /**
-   * Starting TelegramBot log
-   * @type {boolean}
-   */
-  console?: boolean;
 }
 
 /**
