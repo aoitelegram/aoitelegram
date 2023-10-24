@@ -42,7 +42,6 @@ interface TelegramOptions {
  */
 class AoiBase extends TelegramBot {
   #database: AoiManager;
-  runtime: any;
   plugin?: DataFunction[];
   /**
    * Creates a new instance of AoiBase.

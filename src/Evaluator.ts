@@ -71,7 +71,7 @@ class Evaluator {
     while (arr?.length > 0) {
       let node = arr.shift() as Token;
       let res = await this.visit(node, ctx);
-      v.push(res);
+      v.push(res as Token);
     }
 
     return map ? this.mapValues(v) : v;

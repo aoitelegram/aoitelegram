@@ -7,7 +7,7 @@ type EnvFunction = (ctx: Context) => any;
  * The Environment class represents a context in which functions and variables can be stored and retrieved.
  */
 class Environment {
-  #cache = new Map<string, any>();
+  #cache = new Map<string, EnvFunction>();
   #constant = new Map<string, boolean>();
   constructor(private parent?: Environment) {
     if (parent && !(parent instanceof Environment)) {
