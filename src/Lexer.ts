@@ -267,7 +267,7 @@ class Lexer {
       if (this.isOperator(character + this.peek())) {
         return this.parseOperator(character + this.next());
       }
-      return this.parseOperator(c);
+      return this.parseOperator(character);
     }
     return this.parseString();
   }
