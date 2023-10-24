@@ -1,3 +1,4 @@
+import chalk from "chalk";
 import { CreateStorage } from "database-sempai";
 
 /**
@@ -22,6 +23,12 @@ interface DatabaseOptions {
    * @type {string}
    */
   extname?: string;
+
+  /**
+   * Log ready database
+   * @type {boolean}
+   */
+  console?: boolean;
 }
 
 /**
@@ -34,6 +41,12 @@ class AoiManager extends CreateStorage<string, unknown> {
    */
   constructor(options: DatabaseOptions = {}) {
     super(options);
+    if (options.console) {
+      this.on("ready", () => {
+        const text = chalk.green("Database has been established");
+        console.log(text);
+      });
+    }
     this.connect();
   }
 
