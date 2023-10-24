@@ -20,12 +20,13 @@ class Evaluator {
    * @returns The result of the evaluation.
    */
   async evaluate(ast: TokenProgram, ctx: Context) {
-    const res = await this.visitArgument(ast, ctx);
+    const response = await this.visitArgument(ast, ctx);
 
     // Trim the output if required
-    if (ctx.options.trimOutput && typeof res === "string") return res.trim();
+    if (ctx.options.trimOutput && typeof response === "string")
+      return response.trim();
 
-    return res;
+    return response;
   }
 
   /**
@@ -55,26 +56,26 @@ class Evaluator {
 
   /**
    * Visits an argument node in the AST and returns the result.
-   * @param arg - The argument node to visit.
+   * @param argToken - The argument node to visit.
    * @param ctx - The context in which to visit the argument node.
    * @param map - Whether to map the values or return an array.
    * @returns The result of visiting the argument node.
    */
   async visitArgument(
-    arg: TokenProgram | TokenArgument,
+    argToken: TokenProgram | TokenArgument,
     ctx: Context,
     map: boolean = true,
   ) {
-    let arr = arg.child?.copyWithin(-1, -1) ?? [];
-    let v: Token[] = [];
+    let array = argToken.child?.copyWithin(-1, -1) ?? [];
+    let valueType: Token[] = [];
 
-    while (arr?.length > 0) {
-      let node = arr.shift() as Token;
-      let res = await this.visit(node, ctx);
-      v.push(res as Token);
+    while (array?.length > 0) {
+      let node = array.shift() as Token;
+      let response = await this.visit(node, ctx);
+      valueType.push(response as Token);
     }
 
-    return map ? this.mapValues(v) : v;
+    return map ? this.mapValues(valueType) : valueType;
   }
 
   /**

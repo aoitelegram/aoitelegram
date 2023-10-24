@@ -48,11 +48,12 @@ class Lexer {
    * @param input - The input string to tokenize.
    */
   constructor(public input: string) {
-    if (typeof input !== "string" || !input)
+    if (typeof input !== "string" || !input) {
       throw new AoijsError(
         "type",
         "input arg must be non-empty and of type string!",
       );
+    }
   }
 
   /**
@@ -62,8 +63,8 @@ class Lexer {
   main() {
     const Tokens: Token[] = [];
     while (true) {
-      let res = this.advance();
-      if (res) Tokens.push(res);
+      let response = this.advance();
+      if (response) Tokens.push(response);
       if (this.eof()) break;
     }
     return this.clean(Tokens);
@@ -165,12 +166,12 @@ class Lexer {
    * @returns A parsed call token.
    */
   parseCall(): Token {
-    const fn = this.readInput(this.validateCall);
-    if (!fn)
+    const fun = this.readInput(this.validateCall);
+    if (!fun)
       return { type: "string", value: "$", pos: this.col, line: this.line };
     return {
       type: "call",
-      value: "$" + fn,
+      value: "$" + fun,
       child: [],
       pos: this.col,
       line: this.line,
@@ -206,7 +207,7 @@ class Lexer {
    * @param validator - The validation function for characters.
    * @returns A string composed of valid characters.
    */
-  readInput(validator: (c: string) => boolean) {
+  readInput(validator: (content: string) => boolean) {
     let str = "";
     while (!this.eof() && validator.apply(this, [this.peek()])) {
       str += this.next();
@@ -219,20 +220,25 @@ class Lexer {
    * @returns The parsed token.
    */
   advance(): Token | undefined {
-    let c = this.peek();
+    let character = this.peek();
     if (this.escape_c) {
       this.escape_c = false;
       this.next();
-      if (this.isSyntax(c) || this.isOperator(c))
-        return { type: "string", value: c, pos: this.col, line: this.line };
+      if (this.isSyntax(character) || this.isOperator(character))
+        return {
+          type: "string",
+          value: character,
+          pos: this.col,
+          line: this.line,
+        };
       return {
         type: "string",
-        value: "\\" + c,
+        value: "\\" + character,
         pos: this.col,
         line: this.line,
       };
     }
-    switch (c) {
+    switch (character) {
       case "[": {
         this.next();
         return { type: "open", pos: this.col, line: this.line };
@@ -256,10 +262,11 @@ class Lexer {
       }
     }
 
-    if (this.isOperator(c)) {
+    if (this.isOperator(character)) {
       this.next();
-      if (this.isOperator(c + this.peek()))
-        return this.parseOperator(c + this.next());
+      if (this.isOperator(character + this.peek())) {
+        return this.parseOperator(character + this.next());
+      }
       return this.parseOperator(c);
     }
     return this.parseString();

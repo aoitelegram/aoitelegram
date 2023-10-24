@@ -34,13 +34,13 @@ class Parser {
     if (this.#busy) throw new Error("Parser is #busy!");
     this.tokens = tokens;
     this.#busy = true;
-    let arr: Token[] = [];
+    let array: Token[] = [];
 
     while (!this.eof()) {
-      arr.push(this.parseAtom(runtime) as Token);
+      array.push(this.parseAtom(runtime) as Token);
     }
 
-    return { type: "program", child: arr };
+    return { type: "program", child: array };
   }
 
   /**
@@ -70,11 +70,11 @@ class Parser {
 
   /**
    * Returns the last element of an array.
-   * @param arr - The array to retrieve the last element from.
+   * @param array - The array to retrieve the last element from.
    * @returns The last element of the array.
    */
-  last<T>(arr: T[]) {
-    return arr[arr.length - 1];
+  last<T>(array: T[]) {
+    return array[array.length - 1];
   }
 
   /**
@@ -83,9 +83,9 @@ class Parser {
    * @returns An array of argument tokens.
    */
   readArgument(runtime: Runtime) {
-    let arr: TokenArgument[] = [];
+    let array: TokenArgument[] = [];
     let end = false;
-    let arg: TokenArgument | undefined = { type: "argument", child: [] };
+    let argToken: TokenArgument | undefined = { type: "argument", child: [] };
     this.shift();
 
     while (!this.eof()) {
@@ -96,24 +96,24 @@ class Parser {
       }
 
       if (this.peek()?.type === "newArg") {
-        arr.push(arg);
-        arg = { type: "argument", child: [] };
+        array.push(argToken);
+        argToken = { type: "argument", child: [] };
         this.shift();
         continue;
       }
 
-      if (arg.child === undefined) arg.child = [];
-      arg.child.push(this.parseAtom(runtime) as Token);
+      if (argToken.child === undefined) argToken.child = [];
+      argToken.child.push(this.parseAtom(runtime) as Token);
     }
 
-    if (arg) {
-      arr.push(arg);
-      arg = undefined;
+    if (argToken) {
+      array.push(argToken);
+      argToken = undefined;
     }
 
     if (end === false) throw new AoijsError("symbol", "Expected ']', got none");
 
-    return arr;
+    return array;
   }
 
   /**

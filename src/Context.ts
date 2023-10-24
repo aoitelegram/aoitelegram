@@ -28,18 +28,18 @@ class Context {
    * @param node - TokenCall object.
    */
   async callIdentifier(node: TokenCall) {
-    const fn = this.env.get(node.value);
+    const fun = this.env.get(node.value);
     const lastTarget = this.#target;
     this.#target = node;
 
-    if (typeof fn === "function") {
-      const result = (fn as FnFunction)(this);
+    if (typeof fun === "function") {
+      const result = (fun as FnFunction)(this);
       this.#target = lastTarget;
       return result;
     }
 
     this.#target = lastTarget;
-    return fn;
+    return fun;
   }
 
   /**
