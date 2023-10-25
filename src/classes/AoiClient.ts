@@ -116,20 +116,20 @@ class AoiClient extends AoiBase {
         await new Promise((res) =>
           setTimeout(() => {
             console.log(
-              "\x1b[31m[ AoiClient ]: " +
-                "\x1b[33mInitialized on \x1b[36maoitelegram \x1b[34mv" +
-                require("../../package.json").version +
-                `\x1b[0m || \x1b[32m${`@${ctx.username}`}` +
-                "\x1b[0m || \x1b[36mSempai Development\x1b[0m",
+              chalk.red("[ AoiClient ]: ") +
+                chalk.yellow(
+                  `Initialized on ${chalk.cyan("aoitelegram")} ${chalk.blue(
+                    `v${require("../../package.json").version}`,
+                  )}`,
+                ) +
+                ` | ${chalk.green(`@${ctx.username}`)} |` +
+                chalk.cyan(" Sempai Development"),
             );
+
             console.log(
-              "\x1b[33mOfficial GitHub: https://github.com/Sempai-07/aoitelegram/issues\x1b[0m",
+              chalk.yellow("Official GitHub: ") +
+                chalk.blue("https://github.com/Sempai-07/aoitelegram/issues"),
             );
-            //           console.log(
-            //             `\n${chalk.red("[ Developer ]:")} ${chalk.yellow(
-            //               "If the error occurred not due to your fault but because of an external library, please make sure to report this error to: ",
-            //             )}${chalk.blue("https://github.com/Sempai-07/aoitelegram/issues")}`,
-            //           );
             res("");
           }, 5 * 1000),
         );
