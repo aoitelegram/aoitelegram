@@ -38,7 +38,7 @@
   ],
   "dependencies": {
     "chalk": "^4.1.2",
-    "database-sempai": "^2.6.0",
+    "database-sempai": "^2.7.0",
     "figlet": "^1.6.0",
     "fs-extra": "^11.1.1",
     "ms": "^2.1.3",
