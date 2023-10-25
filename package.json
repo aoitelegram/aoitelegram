@@ -6,7 +6,7 @@
   "scripts": {
     "build:release": "rm -rf lib/ && tsc"
   },
-  "version": "0.0.2",
+  "version": "0.0.3",
   "engines": {
     "node": ">=16"
   },
@@ -25,6 +25,17 @@
   "bugs": {
     "url": "https://github.com/Sempai-07/aoitelegram/issues"
   },
+  "keywords": [
+    "javascript",
+    "typescript",
+    "telegram",
+    "library",
+    "telegramapi",
+    "bot",
+    "aoi",
+    "aoitelegram",
+    "bds.js"
+  ],
   "dependencies": {
     "chalk": "^4.1.2",
     "database-sempai": "^2.6.0",

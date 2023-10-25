@@ -40,6 +40,10 @@ const aoijs = new AoiClient({
     allowed_updates: [],
     /** An optional session object for managing user sessions  */
     session: {},
+    /** Outputting system messages to the console. */
+    console: true,
+    /** Displaying messages about new versions. */
+    aoiwarning: true,
   },
   database: {
     /** The file path to the database storage. */

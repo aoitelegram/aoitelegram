@@ -17,7 +17,9 @@ class AoiClient extends AoiBase {
    * @param {string} token - The token for authentication.
    * @param {TelegramOptions} options.telegram - Options for the Telegram integration.
    * @param {DatabaseOptions} options.database - Options for the database.
-   * @param {DataFunction[]} options.plugin An array of plugin functions.
+   * @param {DataFunction[]} options.plugin - an array of plugin functions.
+   * @param {boolean} [options.console] - Outputting system messages to the console.
+   * @param {boolean} [options.aoiwarning] - Displaying messages about new versions.
    */
   constructor(options: {
     token: string;
