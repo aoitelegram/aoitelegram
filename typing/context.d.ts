@@ -5,6 +5,7 @@ declare module "context" {
 
   interface DataFunction {
     name: string;
+    version?: string;
     callback: (
       ctx: Context,
       event: any,

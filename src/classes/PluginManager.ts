@@ -1,10 +1,10 @@
-import { AoiClient } from "./AoiClient";
-import { AoijsError } from "./AoiError";
-import { DataFunction } from "context";
 import fs from "node:fs";
 import path from "node:path";
 import fsx from "fs-extra";
-
+import { AoiClient } from "./AoiClient";
+import { AoijsError } from "./AoiError";
+import { DataFunction } from "context";
+import { version } from "../../package.json";
 /**
  * Class representing a plugin manager for loading and managing plugins in a Node.js application.
  */
@@ -111,7 +111,9 @@ class PluginManager {
       fs.mkdirSync(aoiPluginsPath);
     }
 
-    fs.readdirSync(nodeModulesPath).forEach(async (folder) => {
+    const items = await fs.readdirSync(nodeModulesPath);
+
+    for (const folder of items) {
       const folderPath = path.join(nodeModulesPath, folder);
 
       if (fs.lstatSync(folderPath).isDirectory()) {
@@ -121,6 +123,12 @@ class PluginManager {
           const pluginInfo = require(aoiPluginJsonPath);
 
           if (pluginInfo.main) {
+            if (pluginInfo.version > version) {
+              throw new AoijsError(
+                "aoiplugins",
+                `To download the library "${folder}", the library version "aoitelegram" should be equal to or higher than ${pluginInfo.version}.`,
+              );
+            }
             const mainFilePath = path.join(folderPath, pluginInfo.main);
             const destPath = path.join(aoiPluginsPath, folder);
 
@@ -132,7 +140,7 @@ class PluginManager {
           }
         }
       }
-    });
+    }
   }
 }
 
@@ -153,6 +161,7 @@ function readFunctionsInDirectory(
       if (dataFunc) {
         collectionFunction.push({
           name: dataFunc.name,
+          version: dataFunc.version,
           callback: dataFunc.callback,
         });
       }
@@ -175,6 +184,7 @@ function readFunctionsInDirectory(
       if (dataFunc) {
         collectionFunction.push({
           name: dataFunc.name,
+          version: dataFunc.version,
           callback: dataFunc.callback,
         });
       }

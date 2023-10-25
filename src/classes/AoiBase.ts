@@ -4,6 +4,7 @@ import { DataFunction } from "context";
 import { AoijsError } from "./AoiError";
 import { AoiManager, DatabaseOptions } from "./AoiManager";
 import { Runtime } from "../Runtime";
+import { version } from "../../package.json";
 
 type AllowedUpdates = ReadonlyArray<Exclude<keyof Update, "update_id">>;
 
@@ -83,8 +84,22 @@ class AoiBase extends TelegramBot {
    */
   addFunction(options: DataFunction | DataFunction[]) {
     if (Array.isArray(options)) {
+      for (const optionVersion of options) {
+        if ((optionVersion.version ?? 0) > version) {
+          throw new AoijsError(
+            "aoiplugins",
+            `To load this function ${optionVersion.name}, the library version must be equal to or greater than ${optionVersion.version}.`,
+          );
+        }
+      }
       this.plugin = [...(this.plugin ?? []), ...options];
     } else {
+      if ((options.version ?? 0) > version) {
+        throw new AoijsError(
+          "aoiplugins",
+          `To load this function ${options.name}, the library version must be equal to or greater than ${options.version}.`,
+        );
+      }
       this.plugin = [...(this.plugin ?? []), options];
     }
   }
