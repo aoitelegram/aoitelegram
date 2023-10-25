@@ -1,12 +1,12 @@
 {
   "name": "aoitelegram",
   "description": "A powerful package to create Telegram Bots with built-in string functions",
-  "main": "./lib/index.js",
+  "main": "./lib/src/index.js",
   "typing": "./lib/typing/index.d.ts",
   "scripts": {
     "build:release": "rm -rf lib/ && tsc"
   },
-  "version": "0.0.3",
+  "version": "0.0.4",
   "engines": {
     "node": ">=16"
   },
