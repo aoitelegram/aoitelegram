@@ -12,7 +12,7 @@ function convertStringToType(input: string): any {
     return undefined;
   } else if (!isNaN(parseFloat(input))) {
     return parseFloat(input);
-  } else if (input.startsWith("{") && input.endsWith("}")) {
+  } else if (input?.startsWith("{") && input?.endsWith("}")) {
     return JSON.parse(JSON.stringify(input));
   } else {
     return input;
@@ -40,8 +40,8 @@ const data: DataFunction = {
       { type: "argument", child: condition.child.slice(0, opIdx) },
       { type: "argument", child: condition.child.slice(opIdx + 1) },
     ]);
+    condA = convertStringToType(condA);
     condB = convertStringToType(condB);
-
     let res: boolean;
 
     switch (true) {
