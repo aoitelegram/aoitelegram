@@ -7,7 +7,7 @@ import { Environment } from "./Environment";
 import { Evaluator } from "./Evaluator";
 import { Lexer, TokenArgument, TokenOperator } from "./Lexer";
 import { Parser } from "./Parser";
-import { MessageError } from "./classes/AoiError";
+import { AoiStopping, MessageError } from "./classes/AoiError";
 import { AoiManager } from "./classes/AoiManager";
 
 interface RuntimeOptions {
@@ -116,7 +116,6 @@ function readFunctionsInDirectory(
   database: AoiManager,
 ) {
   const items = fs.readdirSync(dirPath);
-
   for (const item of items) {
     const itemPath = path.join(dirPath, item);
     const stats = fs.statSync(itemPath);
@@ -134,6 +133,9 @@ function readFunctionsInDirectory(
             database,
             error,
           );
+          if (dataFunc.name === "$onlyIf" && response?.stop === true) {
+            throw new AoiStopping("$onlyIf stoping...");
+          }
           return response;
         });
       }

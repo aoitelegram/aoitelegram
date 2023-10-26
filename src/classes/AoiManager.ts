@@ -59,7 +59,7 @@ class AoiManager extends CreateStorage<string, unknown> {
   /**
    * Set variables in the database.
    * @param {Object} options - Key-value pairs of variables to set.
-   * @param {string} table - The database table to use (optional).
+   * @param {string | string[]} table - The database table to use (optional).
    */
   async variables(
     options: { [key: string]: unknown },

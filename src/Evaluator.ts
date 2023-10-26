@@ -21,7 +21,6 @@ class Evaluator {
    */
   async evaluate(ast: TokenProgram, ctx: Context) {
     const response = await this.visitArgument(ast, ctx);
-
     // Trim the output if required
     if (ctx.options.trimOutput && typeof response === "string")
       return response.trim();

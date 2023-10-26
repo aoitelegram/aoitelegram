@@ -1,7 +1,7 @@
 import { TelegramBot, type Context } from "telegramsjs";
 import { UserFromGetMe, Update } from "@telegram.ts/types";
 import { DataFunction } from "context";
-import { AoijsError } from "./AoiError";
+import { AoijsError, AoiStopping } from "./AoiError";
 import { AoiManager, DatabaseOptions } from "./AoiManager";
 import { Runtime } from "../Runtime";
 import { version } from "../../package.json";
@@ -72,8 +72,12 @@ class AoiBase extends TelegramBot {
     code: string,
     telegram: (TelegramBot & Context) | UserFromGetMe,
   ) {
-    const runtime = new Runtime(telegram, this.#database, this.plugin);
-    await runtime.runInput(command, code);
+    try {
+      const runtime = new Runtime(telegram, this.#database, this.plugin);
+      await runtime.runInput(command, code);
+    } catch (err) {
+      if (!(err instanceof AoiStopping)) throw err;
+    }
   }
 
   /**
@@ -158,7 +162,7 @@ class AoiBase extends TelegramBot {
   /**
    * Set variables in the database.
    * @param {Object} options - Key-value pairs of variables to set.
-   * @param {string} table - The database table to use (optional).
+   * @param {string | string[]} table - The database table to use (optional).
    */
   async variables(
     options: { [key: string]: unknown },

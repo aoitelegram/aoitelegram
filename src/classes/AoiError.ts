@@ -112,4 +112,30 @@ class MessageError {
   }
 }
 
-export { AoijsError, MessageError };
+/**
+ * Custom error class for Aoi framework to represent a stopping condition.
+ * This error is thrown when a specific condition indicates the need to stop further execution.
+ */
+class AoiStopping extends Error {
+  /**
+   * Name of the error class.
+   */
+  name: string;
+
+  /**
+   * A description or message associated with the error.
+   */
+  description: string;
+
+  /**
+   * Creates a new AoiStopping instance with the provided description.
+   * @param description - A description or message associated with the error.
+   */
+  constructor(description: string) {
+    super(description);
+    this.name = "AoiStopping";
+    this.description = description;
+  }
+}
+
+export { AoijsError, MessageError, AoiStopping };

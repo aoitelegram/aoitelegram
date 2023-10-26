@@ -1,57 +1,80 @@
 // import { DataFunction } from "context";
-//
-// const data: DataFunction = {
-//   name: "$onlyIf",
-//   callback: async (ctx, event, database, error) => {
-//     if (!ctx.argsCheck(2, true, error, "$onlyIf")) return;
-//
-//     const [condition] = ctx.getArgs(0, 1);
-//     const [ifTrue, replyMessage] = await ctx.evaluateArgs(ctx.getArgs(1, 3));
-//     const opIdx = condition.child.findIndex(
-//       (node: any) => node.type === "operator",
-//     );
-//     const opNode = condition.child[opIdx] as any;
-//
-//     const [condA, condB] = await ctx.evaluateArgs([
-//       { type: "argument", child: condition.child.slice(0, opIdx) },
-//       { type: "argument", child: condition.child.slice(opIdx + 1) },
-//     ]);
-//
-//     console.log(condA, condB)
-//
-//     let res: boolean;
-//
-//     switch (opNode.value) {
-//       case "==":
-//         res = condA == condB;
-//         break;
-//       case "!=":
-//         res = condA != condB;
-//         break;
-//       case ">=":
-//         res = condA >= condB;
-//         break;
-//       case ">":
-//         res = condA > condB;
-//         break;
-//       case "<=":
-//         res = condA <= condB;
-//         break;
-//       case "<":
-//         res = condA < condB;
-//         break;
-//       default:
-//         res = false;
-//         break;
-//     }
-//
-//     if (res) {
-//       replyMessage ? event.reply(ifTrue) : event.send(ifTrue);
-//       return { break: true };
-//     }
-//     return "";
-//   },
-// };
-//
-// export { data };
-//
+import { DataFunction } from "context";
+
+function convertStringToType(input: string): any {
+  if (input === "true") {
+    return true;
+  }
+  if (input === "false") {
+    return false;
+  } else if (input === "null") {
+    return null;
+  } else if (input === "undefined") {
+    return undefined;
+  } else if (!isNaN(parseFloat(input))) {
+    return parseFloat(input);
+  } else if (input?.startsWith("{") && input?.endsWith("}")) {
+    return JSON.parse(JSON.stringify(input));
+  } else {
+    return input;
+  }
+}
+
+const data: DataFunction = {
+  name: "$onlyIf",
+  callback: async (ctx, event, database, error) => {
+    if (!ctx.argsCheck(2, true, error, "$if")) return;
+
+    const [condition, ifTrue] = ctx.getArgs(0, 3);
+    const opIdx = condition.child.findIndex(
+      (node: any) => node.type === "operator",
+    );
+    const opNode = condition.child[opIdx] as any;
+
+    //     if (!opNode) {
+    //       return Boolean(await ctx.evaluateArgs([condition]))
+    //         ? ctx.evaluateArgs([ifTrue])
+    //         : ctx.evaluateArgs([ifFalse]);
+    //     }
+
+    let [condA, condB] = await ctx.evaluateArgs([
+      { type: "argument", child: condition.child.slice(0, opIdx) },
+      { type: "argument", child: condition.child.slice(opIdx + 1) },
+    ]);
+    condA = convertStringToType(condA);
+    condB = convertStringToType(condB);
+    let res: boolean;
+
+    switch (true) {
+      case opNode.value == "==":
+        res = condA == condB;
+        break;
+      case opNode.value == "!=":
+        res = condA != condB;
+        break;
+      case opNode.value == ">=":
+        res = condA >= condB;
+        break;
+      case opNode.value == ">":
+        res = condA > condB;
+        break;
+      case opNode.value == "<=":
+        res = condA <= condB;
+        break;
+      case opNode.value == "<":
+        res = condA < condB;
+        break;
+      default:
+        res = false;
+        break;
+    }
+
+    if (!res) {
+      const response = (await ctx.evaluateArgs([ifTrue]))[0];
+      event.send(response);
+      return { stop: true };
+    }
+  },
+};
+
+export { data };
