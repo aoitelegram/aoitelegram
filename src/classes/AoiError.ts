@@ -1,3 +1,5 @@
+import { type Context } from "telegramsjs";
+
 /**
  * A custom error class for Aoijs with additional properties for error details.
  * @extends Error
@@ -52,12 +54,12 @@ class AoijsError extends Error {
  * Represents a class for handling message errors.
  */
 class MessageError {
-  telegram: any;
+  telegram: Context["telegram"];
   /**
    * Initializes a new instance of the MessageError class.
    * @param telegram - The Telegram instance used for sending error messages.
    */
-  constructor(telegram: any) {
+  constructor(telegram: Context["telegram"]) {
     this.telegram = telegram;
   }
 
@@ -73,6 +75,7 @@ class MessageError {
       `Expected ${amount} arguments but got ${parameterCount}!`,
     );
     this.telegram.send(text, { parse_mode: "HTML" });
+    throw new AoiStopping("errorArgs");
   }
 
   /**
@@ -86,6 +89,7 @@ class MessageError {
       `Invalid variable ${nameVar} not found!`,
     );
     this.telegram.send(text, { parse_mode: "HTML" });
+    throw new AoiStopping("errorVar");
   }
 
   /**
@@ -99,6 +103,7 @@ class MessageError {
       `Invalid table ${table} not found!`,
     );
     this.telegram.send(text, { parse_mode: "HTML" });
+    throw new AoiStopping("errorTable");
   }
 
   /**
@@ -123,18 +128,12 @@ class AoiStopping extends Error {
   name: string;
 
   /**
-   * A description or message associated with the error.
+   * Creates a new AoiStopping instance with the provided fun.
+   * @param fun - A fun or message associated with the error.
    */
-  description: string;
-
-  /**
-   * Creates a new AoiStopping instance with the provided description.
-   * @param description - A description or message associated with the error.
-   */
-  constructor(description: string) {
-    super(description);
+  constructor(fun: string) {
+    super(`The team is paused due to an error in the ${fun} method.`);
     this.name = "AoiStopping";
-    this.description = description;
   }
 }
 

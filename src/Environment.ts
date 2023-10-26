@@ -1,7 +1,7 @@
 import { Context } from "./Context";
 import { AoijsError } from "./classes/AoiError";
 
-type EnvFunction = (ctx: Context) => any;
+type EnvFunction = (ctx: Context) => unknown;
 
 /**
  * The Environment class represents a context in which functions and variables can be stored and retrieved.

@@ -9,6 +9,7 @@ import { Lexer, TokenArgument, TokenOperator } from "./Lexer";
 import { Parser } from "./Parser";
 import { AoiStopping, MessageError } from "./classes/AoiError";
 import { AoiManager } from "./classes/AoiManager";
+import { type Context as EventContext } from "telegramsjs";
 
 interface RuntimeOptions {
   alwaysStrict: boolean;
@@ -29,11 +30,15 @@ class Runtime {
 
   /**
    * Constructs a new Runtime instance with a Telegram context.
-   * @param {any} telegram - The Telegram context for the runtime.
+   * @param {EventContext["telegram"]} telegram - The Telegram context for the runtime.
    * @param {AoiManager} database - The local database.
    * @param {DataFunction[]} options.plugin An array of plugin functions.
    */
-  constructor(telegram: any, database: AoiManager, plugin?: DataFunction[]) {
+  constructor(
+    telegram: EventContext["telegram"],
+    database: AoiManager,
+    plugin?: DataFunction[],
+  ) {
     this.#_prepareGlobal(telegram, database, plugin);
   }
 
@@ -71,7 +76,7 @@ class Runtime {
   }
 
   #_prepareGlobal(
-    telegram: any,
+    telegram: EventContext["telegram"],
     database: AoiManager,
     plugin?: DataFunction[],
   ) {
@@ -90,7 +95,7 @@ class Runtime {
 function readFunctions(
   plugin: DataFunction[],
   parent: Runtime["global"],
-  telegram: any,
+  telegram: EventContext["telegram"],
   database: AoiManager,
 ) {
   for (const dataFunc of plugin) {
@@ -112,7 +117,7 @@ function readFunctions(
 function readFunctionsInDirectory(
   dirPath: string,
   parent: Runtime["global"],
-  telegram: any,
+  telegram: EventContext["telegram"],
   database: AoiManager,
 ) {
   const items = fs.readdirSync(dirPath);
@@ -134,7 +139,7 @@ function readFunctionsInDirectory(
             error,
           );
           if (dataFunc.name === "$onlyIf" && response?.stop === true) {
-            throw new AoiStopping("$onlyIf stoping...");
+            throw new AoiStopping("$onlyIf");
           }
           return response;
         });
