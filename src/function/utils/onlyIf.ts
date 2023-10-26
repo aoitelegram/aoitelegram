@@ -23,9 +23,9 @@ function convertStringToType(input: string): any {
 const data: DataFunction = {
   name: "$onlyIf",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(2, true, error, "$if")) return;
+    if (!ctx.argsCheck(2, true, error, "$onlyIf")) return;
 
-    const [condition, ifTrue] = ctx.getArgs(0, 3);
+    const [condition, ifTrue] = ctx.getArgs(0, 2);
     const opIdx = condition.child.findIndex(
       (node: any) => node.type === "operator",
     );
