@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import { AoijsError } from "./AoiError";
 import { CreateStorage } from "database-sempai";
 
 /**
@@ -40,6 +41,11 @@ class AoiManager extends CreateStorage<string, unknown> {
    * @param {DatabaseOptions} options - Configuration options for the database connection.
    */
   constructor(options: DatabaseOptions = { console: true }) {
+    if (!options.table) {
+      options.table = ["main", "vars"];
+    } else if (options.table.filter((table) => table !== "vars")) {
+      options.table = [...options.table, "vars"];
+    }
     super(options);
     if (options.console) {
       this.on("ready", () => {
@@ -55,12 +61,31 @@ class AoiManager extends CreateStorage<string, unknown> {
    * @param {Object} options - Key-value pairs of variables to set.
    * @param {string} table - The database table to use (optional).
    */
-  async variables(options: { [key: string]: unknown }, table: string = "main") {
-    for (const varName in options) {
-      const hasVar = await this.has(table, varName);
-      if (!hasVar) {
-        await this.set(table, varName, options[varName]);
+  async variables(
+    options: { [key: string]: unknown },
+    tables: string | string[] = "main",
+  ) {
+    if (Array.isArray(tables)) {
+      for await (const table of tables) {
+        for (const varName in options) {
+          const hasVar = await this.has(table, varName);
+          if (!hasVar) {
+            await this.set(table, varName, options[varName]);
+          }
+        }
       }
+    } else if (typeof tables === "string") {
+      for (const varName in options) {
+        const hasVar = await this.has(tables, varName);
+        if (!hasVar) {
+          await this.set(tables, varName, options[varName]);
+        }
+      }
+    } else {
+      throw new AoijsError(
+        "parameter",
+        "the parameter should be of type 'string' or 'string[]'",
+      );
     }
   }
 }
