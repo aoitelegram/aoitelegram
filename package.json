@@ -6,7 +6,7 @@
   "scripts": {
     "build:release": "rm -rf lib/ && tsc"
   },
-  "version": "0.0.4",
+  "version": "0.1.0",
   "engines": {
     "node": ">=16"
   },

@@ -1,12 +1,12 @@
 import { DataFunction } from "context";
 
 const data: DataFunction = {
-  name: "$sendMessage",
+  name: "$var",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(1, true, error, "$sendMessage")) return;
+    if (!ctx.argsCheck(2, true, error, "$var")) return;
     const args = await ctx.evaluateArgs(ctx.getArgs());
-    event.send(args[0]);
-    return "";
+
+    return await database.set("vars", args[0], args[1]);
   },
 };
 
