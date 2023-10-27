@@ -107,6 +107,31 @@ class MessageError {
   }
 
   /**
+   * Reports an error with a specified error type and function name.
+   * @param {string} type - The expected data type.
+   * @param {string} func - The name of the function.
+   */
+  errorType(type: string, func: string) {
+    const text = MessageError.createMessageError(
+      func,
+      `Expected type ${type} in function ${func}`,
+    );
+    this.telegram.send(text, { parse_mode: "HTML" });
+    throw new AoiStopping("errorType");
+  }
+
+  /**
+   * Creates a custom error with a specific description and function name.
+   * @param {string} description - A custom description of the error.
+   * @param {string} func - The name of the function where the error occurred.
+   */
+  customError(description: string, func: string) {
+    const text = MessageError.createMessageError(func, description);
+    this.telegram.send(text, { parse_mode: "HTML" });
+    throw new AoiStopping("customError");
+  }
+
+  /**
    * Create an MessageError message.
    * @param func - The name of the function.
    * @param details - Details of the error.

@@ -48,9 +48,13 @@ class AoiManager extends CreateStorage<string, unknown> {
     }
     super(options);
     if (options.console) {
-      this.on("ready", () => {
+      this.on("ready", async () => {
         const text = chalk.green("Database has been established");
         console.log(text);
+        const allVar = await this.all("vars");
+        for (const vars in allVar) {
+          await this.delete("vars", vars);
+        }
       });
     }
     this.connect();

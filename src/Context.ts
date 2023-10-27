@@ -3,7 +3,7 @@ import { TokenArgument, TokenCall } from "./Lexer";
 import { Runtime, RuntimeOptions } from "./Runtime";
 import { Evaluator } from "./Evaluator";
 import { AoijsError, MessageError } from "./classes/AoiError";
-type FnFunction = (ctx: Context) => string;
+type FnFunction = (ctx: Context) => unknown;
 
 class Context {
   #target: TokenCall | null = null;

@@ -172,7 +172,7 @@ class Lexer {
     }
     return {
       type: "call",
-      value: "$" + fun,
+      value: `$${fun}`,
       child: [],
       pos: this.col,
       line: this.line,
