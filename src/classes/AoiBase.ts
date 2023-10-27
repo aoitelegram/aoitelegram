@@ -63,12 +63,12 @@ class AoiBase extends TelegramBot {
 
   /**
    * Executes a block of code in response to a command.
-   * @param {string} command - The name of the command.
+   * @param {string | {event: string}} command - The name of the command.
    * @param {string} code - The code to be executed.
    * @param {(TelegramBot & Context) | UserFromGetMe} telegram - The context or user for executing the code.
    */
   async runCode(
-    command: string,
+    command: string | { event: string },
     code: string,
     telegram: (TelegramBot & Context) | UserFromGetMe,
   ) {
@@ -121,7 +121,7 @@ class AoiBase extends TelegramBot {
       );
     }
     super.on("ready", async (ctx) => {
-      await this.runCode("ready", options.code, ctx);
+      await this.runCode({ event: "ready" }, options.code, ctx);
     });
   }
 
@@ -138,7 +138,7 @@ class AoiBase extends TelegramBot {
       );
     }
     super.on("message", async (ctx) => {
-      await this.runCode("command", options.code, ctx);
+      await this.runCode({ event: "message" }, options.code, ctx);
     });
   }
 
@@ -155,7 +155,7 @@ class AoiBase extends TelegramBot {
       );
     }
     super.on("callback_query", async (ctx) => {
-      await this.runCode("callback_query", options.code, ctx);
+      await this.runCode({ event: "callback_query" }, options.code, ctx);
     });
   }
 

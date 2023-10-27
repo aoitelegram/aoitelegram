@@ -47,12 +47,10 @@ class Runtime {
    * @param fileName - The name of the script file.
    * @param input - The script code to execute.
    */
-  runInput(fileName: string, input: string) {
-    const ast = new Parser().parseToAst(
-      /* Tokens */ new Lexer(input).main(),
-      this,
-    );
-    const ctx = this.prepareContext(fileName);
+  runInput(fileName: string | { event: string }, input: string) {
+    const ast = new Parser().parseToAst(new Lexer(input).main(), this);
+    const file = typeof fileName === "string" ? fileName : fileName?.event;
+    const ctx = this.prepareContext(file);
     return this.#evaluator.evaluate(ast, ctx);
   }
 
@@ -60,10 +58,11 @@ class Runtime {
    * Prepares a new execution context for a script.
    * @param fileName - The name of the script file.
    */
-  prepareContext(fileName: string) {
+  prepareContext(fileName: string | { event: string }) {
     let env = new Environment(this.global);
     let ctx = new Context(fileName, env, this);
-    this.#contexts.set(fileName, ctx);
+    const file = typeof fileName === "string" ? fileName : fileName?.event;
+    this.#contexts.set(file, ctx);
     return ctx;
   }
 
@@ -71,8 +70,9 @@ class Runtime {
    * Retrieves the execution context for a specific script.
    * @param fileName - The name of the script file.
    */
-  getContext(fileName: string) {
-    return this.#contexts.get(fileName);
+  getContext(fileName: string | { event: string }) {
+    const file = typeof fileName === "string" ? fileName : fileName?.event;
+    return this.#contexts.get(file);
   }
 
   #_prepareGlobal(

@@ -11,6 +11,7 @@ import { AoijsError } from "./AoiError";
 class AoiClient extends AoiBase {
   #optionConsole: boolean | undefined;
   aoiwarning: boolean | undefined;
+  commands: any[] = [];
   /**
    * Creates a new instance of AoiClient.
    * @param {Object} options - Configuration options for the client.
@@ -74,6 +75,7 @@ class AoiClient extends AoiBase {
       },
       options.typeChannel,
     );
+    this.#commandInfo(options);
   }
 
   /**
@@ -103,6 +105,7 @@ class AoiClient extends AoiBase {
       },
       options.answer,
     );
+    this.#commandInfo(options);
   }
 
   /**
@@ -135,6 +138,10 @@ class AoiClient extends AoiBase {
         );
       });
     }
+  }
+
+  #commandInfo(commandThis: any) {
+    this.commands = [...this.commands, commandThis];
   }
 }
 

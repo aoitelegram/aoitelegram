@@ -16,7 +16,7 @@ class Context {
    * @param runtime - Runtime object.
    */
   constructor(
-    public fileName: string,
+    public fileName: string | { event: string },
     public env: Environment,
     public runtime: Runtime,
   ) {
