@@ -72,7 +72,7 @@ class MessageError {
   errorArgs(amount: number, parameterCount: number, func: string) {
     const text = MessageError.createMessageError(
       func,
-      `Expected ${amount} arguments but got ${parameterCount}!`,
+      `Expected ${amount} arguments but got ${parameterCount}`,
     );
     this.telegram.send(text, { parse_mode: "HTML" });
     throw new AoiStopping("errorArgs");
@@ -86,7 +86,7 @@ class MessageError {
   errorVar(nameVar: string, func: string) {
     const text = MessageError.createMessageError(
       func,
-      `Invalid variable ${nameVar} not found!`,
+      `Invalid variable ${nameVar} not found`,
     );
     this.telegram.send(text, { parse_mode: "HTML" });
     throw new AoiStopping("errorVar");
@@ -100,7 +100,7 @@ class MessageError {
   errorTable(table: string, func: string) {
     const text = MessageError.createMessageError(
       func,
-      `Invalid table ${table} not found!`,
+      `Invalid table ${table} not found`,
     );
     this.telegram.send(text, { parse_mode: "HTML" });
     throw new AoiStopping("errorTable");
@@ -118,6 +118,20 @@ class MessageError {
     );
     this.telegram.send(text, { parse_mode: "HTML" });
     throw new AoiStopping("errorType");
+  }
+
+  /**
+   * Create and send an error message for an array-related error.
+   * @param {string} name - The name of the variable that does not exist.
+   * @param {string} func - The name of the function causing the error.
+   */
+  errorArray(name: string, func: string) {
+    const text = MessageError.createMessageError(
+      func,
+      `The specified variable ${name} does not exist for the array`,
+    );
+    this.telegram.send(text, { parse_mode: "HTML" });
+    throw new AoiStopping("errorArray");
   }
 
   /**

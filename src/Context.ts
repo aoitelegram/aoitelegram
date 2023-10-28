@@ -83,7 +83,7 @@ class Context {
    */
   async evaluateArgs(args: TokenArgument[]) {
     return Promise.all(
-      args.map((v) => Evaluator.singleton.visitArgument(v, this)),
+      args.map((value) => Evaluator.singleton.visitArgument(value, this)),
     );
   }
 }

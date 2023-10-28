@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import { DataFunction } from "context";
+import { Collection } from "telegramsjs";
 import { AoiBase, TelegramOptions } from "./AoiBase";
 import { AoiWarning } from "./AoiWarning";
 import { DatabaseOptions } from "./AoiManager";
@@ -11,7 +12,10 @@ import { AoijsError } from "./AoiError";
 class AoiClient extends AoiBase {
   #optionConsole: boolean | undefined;
   aoiwarning: boolean | undefined;
-  commands: any[] = [];
+  private commands: unknown[] = [];
+  private vars: Collection<string, unknown> = new Collection();
+  private array: Collection<string, unknown> = new Collection();
+  private object: Collection<string, unknown> = new Collection();
   /**
    * Creates a new instance of AoiClient.
    * @param {Object} options - Configuration options for the client.

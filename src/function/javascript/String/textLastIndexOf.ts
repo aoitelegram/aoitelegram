@@ -1,13 +1,11 @@
 import { DataFunction } from "context";
-import { toArray } from "../../utils";
 
 const data: DataFunction = {
-  name: "$includes",
+  name: "$textLastIndexOf",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(2, true, error, "$includes")) return;
+    if (!ctx.argsCheck(2, true, error, "$textLastIndexOf")) return;
     const args = await ctx.evaluateArgs(ctx.getArgs());
-
-    return toArray(args[0]).includes(args[1]);
+    return args[0].lastIndexOf(args[1]);
   },
 };
 

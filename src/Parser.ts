@@ -31,7 +31,7 @@ class Parser {
    * @returns The parsed AST.
    */
   parseToAst(tokens: Token[], runtime: Runtime): TokenProgram {
-    if (this.#busy) throw new Error("Parser is #busy!");
+    if (this.#busy) throw new AoijsError("parser", "Parser is #busy!");
     this.tokens = tokens;
     this.#busy = true;
     let array: Token[] = [];

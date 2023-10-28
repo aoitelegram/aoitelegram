@@ -18,7 +18,7 @@ async function AoiWarning() {
     }
   } catch (error) {
     const messageError = (error as { response: { data: { error: string } } })
-      .response?.data?.error;
+      .response?.data.error;
     console.warn(
       chalk.red("[ AoiWarning ]: failed to check for updates: ") +
         chalk.yellow(messageError),

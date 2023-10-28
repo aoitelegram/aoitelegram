@@ -7,8 +7,10 @@ const data: DataFunction = {
     const args = await ctx.evaluateArgs(ctx.getArgs());
     let commands;
     for await (const command of event.telegram?.commands ?? []) {
-      if (command.name === args[0] || command.data === args[0])
+      if (command.name === args[0] || command.data === args[0]) {
         commands = command;
+        break;
+      }
     }
 
     return commands?.[args[1] ?? "code"] ?? null;

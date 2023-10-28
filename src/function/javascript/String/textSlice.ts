@@ -1,12 +1,11 @@
 import { DataFunction } from "context";
 
 const data: DataFunction = {
-  name: "$var",
+  name: "$textSlice",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(2, true, error, "$var")) return;
+    if (!ctx.argsCheck(2, true, error, "$textSlice")) return;
     const args = await ctx.evaluateArgs(ctx.getArgs());
-
-    return await database.set("vars", args[0], args[1]);
+    return args[0].slice(args[1] >= 1 ? args[1] - 1 : args[1] + 1);
   },
 };
 

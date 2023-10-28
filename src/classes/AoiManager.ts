@@ -41,20 +41,11 @@ class AoiManager extends CreateStorage<string, unknown> {
    * @param {DatabaseOptions} options - Configuration options for the database connection.
    */
   constructor(options: DatabaseOptions = { console: true }) {
-    if (!options.table) {
-      options.table = ["main", "vars"];
-    } else if (options.table.filter((table) => table !== "vars")) {
-      options.table = [...options.table, "vars"];
-    }
     super(options);
     if (options.console) {
       this.on("ready", async () => {
         const text = chalk.green("Database has been established");
         console.log(text);
-        const allVar = await this.all("vars");
-        for (const vars in allVar) {
-          await this.delete("vars", vars);
-        }
       });
     }
     this.connect();

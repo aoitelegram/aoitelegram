@@ -1,12 +1,12 @@
 import { DataFunction } from "context";
-import { toArray } from "../../utils";
 
 const data: DataFunction = {
-  name: "$slice",
+  name: "$textConcat",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(2, true, error, "$slice")) return;
+    if (!ctx.argsCheck(2, true, error, "$textConcat")) return;
     const args = await ctx.evaluateArgs(ctx.getArgs());
-    return toArray(args[0]).slice(args[1] >= 1 ? args[1] - 1 : args[1] + 1);
+    const text = args.shift();
+    return text.concat(...args);
   },
 };
 

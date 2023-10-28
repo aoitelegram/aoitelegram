@@ -21,9 +21,9 @@ class Evaluator {
    */
   async evaluate(ast: TokenProgram, ctx: Context) {
     const response = await this.visitArgument(ast, ctx);
-    // Trim the output if required
-    if (ctx.options.trimOutput && typeof response === "string")
+    if (ctx.options.trimOutput && typeof response === "string") {
       return response.trim();
+    }
 
     return response;
   }
@@ -40,7 +40,7 @@ class Evaluator {
     if (node.type === "operator") return node.value;
     if (node.type === "call") return this.visitCall(node, ctx);
     if (node.type === "argument") return this.visitArgument(node, ctx);
-    throw new AoijsError("visits", "Unknown type of " + node.type + "!");
+    throw new AoijsError("visits", `Unknown type of ${node.type}!`);
   }
 
   /**
@@ -85,9 +85,9 @@ class Evaluator {
   async mapValues<T>(values: T[]) {
     if (values.length <= 1) return values[0];
 
-    return (await Promise.all(values.map(async (v) => String(await v)))).join(
-      "",
-    );
+    return (
+      await Promise.all(values.map(async (value) => String(await value)))
+    ).join("");
   }
 }
 
