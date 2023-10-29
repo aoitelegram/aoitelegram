@@ -5,8 +5,7 @@ const data: DataFunction = {
   callback: async (ctx, event, database, error) => {
     if (!ctx.argsCheck(1, true, error, "$sendMessage")) return;
     const args = await ctx.evaluateArgs(ctx.getArgs());
-    event.send(args[0]);
-    return "";
+    return await event.send(args[0]);
   },
 };
 

@@ -59,6 +59,7 @@ class AoiBase extends TelegramBot {
     super(token, telegram);
     this.#database = new AoiManager(database);
     this.plugin = plugin;
+    this.setMaxListeners(Infinity);
   }
 
   /**
