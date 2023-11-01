@@ -3,17 +3,21 @@ import { TokenArgument, TokenCall } from "./Lexer";
 import { Runtime, RuntimeOptions } from "./Runtime";
 import { Evaluator } from "./Evaluator";
 import { AoijsError, MessageError } from "./classes/AoiError";
+import { Collection } from "telegramsjs";
 type FnFunction = (ctx: Context) => unknown;
 
 class Context {
   #target: TokenCall | null = null;
   options: RuntimeOptions;
-
+  private vars: Collection<string, unknown> = new Collection();
+  private array: Collection<string, unknown> = new Collection();
+  private object: Collection<string, unknown> = new Collection();
   /**
    * Creates a new instance of the Context class.
    * @param fileName - The name of the file.
    * @param env - Environment object.
    * @param runtime - Runtime object.
+   * @param options - options
    */
   constructor(
     public fileName: string | { event: string },

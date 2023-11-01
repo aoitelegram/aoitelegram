@@ -39,7 +39,7 @@ class Runtime {
     database: AoiManager,
     plugin?: DataFunction[],
   ) {
-    this.#_prepareGlobal(telegram, database, plugin);
+    this.#prepareGlobal(telegram, database, plugin);
   }
 
   /**
@@ -59,8 +59,8 @@ class Runtime {
    * @param fileName - The name of the script file.
    */
   prepareContext(fileName: string | { event: string }) {
-    let env = new Environment(this.global);
-    let ctx = new Context(fileName, env, this);
+    const env = new Environment(this.global);
+    const ctx = new Context(fileName, env, this);
     const file = typeof fileName === "string" ? fileName : fileName?.event;
     this.#contexts.set(file, ctx);
     return ctx;
@@ -75,7 +75,7 @@ class Runtime {
     return this.#contexts.get(file);
   }
 
-  #_prepareGlobal(
+  #prepareGlobal(
     telegram: EventContext["telegram"],
     database: AoiManager,
     plugin?: DataFunction[],

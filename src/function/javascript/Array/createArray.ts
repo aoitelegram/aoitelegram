@@ -7,7 +7,7 @@ const data: DataFunction = {
     const args = await ctx.evaluateArgs(ctx.getArgs());
     const args1 = args[0];
     const args2 = args.shift();
-    return event.telegram?.array.set(args1, [...args]).size;
+    return ctx.array.set(args1, [...args]).size;
   },
 };
 
