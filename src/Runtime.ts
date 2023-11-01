@@ -49,8 +49,7 @@ class Runtime {
    */
   runInput(fileName: string | { event: string }, input: string) {
     const ast = new Parser().parseToAst(new Lexer(input).main(), this);
-    const file = typeof fileName === "string" ? fileName : fileName?.event;
-    const ctx = this.prepareContext(file);
+    const ctx = this.prepareContext(fileName);
     return this.#evaluator.evaluate(ast, ctx);
   }
 
@@ -60,7 +59,8 @@ class Runtime {
    */
   prepareContext(fileName: string | { event: string }) {
     const env = new Environment(this.global);
-    const ctx = new Context(fileName, env, this);
+    const type = typeof fileName === "string" ? "command" : "event";
+    const ctx = new Context(fileName, env, this, type);
     const file = typeof fileName === "string" ? fileName : fileName?.event;
     this.#contexts.set(file, ctx);
     return ctx;

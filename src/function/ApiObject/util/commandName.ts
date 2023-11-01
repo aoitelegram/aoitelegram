@@ -3,7 +3,7 @@ import { DataFunction } from "context";
 const data: DataFunction = {
   name: "$commandName",
   callback: async (ctx, event, database, error) => {
-    return ctx.fileName?.event ? null : ctx.fileName;
+    return ctx.fileName && ctx.type === "command" ? ctx.fileName : null;
   },
 };
 

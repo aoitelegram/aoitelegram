@@ -23,6 +23,7 @@ class Context {
     public fileName: string | { event: string },
     public env: Environment,
     public runtime: Runtime,
+    public type: string,
   ) {
     this.options = runtime.options;
   }
