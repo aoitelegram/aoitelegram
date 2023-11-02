@@ -9,7 +9,7 @@ const data: DataFunction = {
       ? text?.split(/\s+/).slice(1)
       : text?.split(/\s+/);
     const argsFunc = textSplit?.[Number(args[0]) - 1];
-    const noArgsFunc = textSplit?.join(" ");
+    const noArgsFunc = textSplit?.join?.(" ");
     return (args[0] === undefined ? noArgsFunc : argsFunc) || null;
   },
 };

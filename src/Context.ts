@@ -9,7 +9,7 @@ type FnFunction = (ctx: Context) => unknown;
 class Context {
   #target: TokenCall | null = null;
   options: RuntimeOptions;
-  private vars: Collection<string, unknown> = new Collection();
+  private localVars: Collection<string, unknown> = new Collection();
   private array: Collection<string, unknown> = new Collection();
   private object: Collection<string, unknown> = new Collection();
   /**

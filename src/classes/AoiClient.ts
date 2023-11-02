@@ -15,6 +15,7 @@ class AoiClient extends AoiBase {
   #optionConsole: boolean | undefined;
   aoiwarning: boolean | undefined;
   private commands: Collection<CommandInfoSet, unknown> = new Collection();
+  private globalVars: Collection<string, unknown> = new Collection();
   /**
    * Creates a new instance of AoiClient.
    * @param {Object} options - Configuration options for the client.
@@ -78,7 +79,7 @@ class AoiClient extends AoiBase {
       },
       options.typeChannel,
     );
-    this.#commandInfo({ name: options.name }, { ...options });
+    this.#commandInfo({ name: `/${options.name}` }, { ...options });
   }
 
   /**
