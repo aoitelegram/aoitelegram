@@ -165,13 +165,27 @@ function readFunctionsInDirectory(
     const messageError = err as { code: string };
     if (messageError.code === "ENOTDIR") {
       const dataFunc = require(dirPath).data;
-      if (dataFunc) {
+      if (dataFunc.callback && (dataFunc.type === "js" || !dataFunc.type)) {
         collectionFunction.push({
           name: dataFunc.name,
+          type: "js",
           version: dataFunc.version,
           callback: dataFunc.callback,
         });
-      }
+      } else if (dataFunc.code && dataFunc.type === "aoitelegram") {
+        collectionFunction.push({
+          name: dataFunc.name,
+          type: "aoitelegram",
+          version: dataFunc.version,
+          code: dataFunc.code,
+        });
+      } else
+        throw new AoijsError(
+          "plugins",
+          "the specified parameters for creating a custom function do not match the requirements",
+          undefined,
+          dataFunc.name,
+        );
     }
     if (aoitelegram) {
       aoitelegram.addFunction(collectionFunction);
@@ -188,13 +202,27 @@ function readFunctionsInDirectory(
       readFunctionsInDirectory(itemPath, collectionFunction, aoitelegram);
     } else if (itemPath.endsWith(".js")) {
       const dataFunc = require(itemPath).data;
-      if (dataFunc) {
+      if (dataFunc.callback && (dataFunc.type === "js" || !dataFunc.type)) {
         collectionFunction.push({
           name: dataFunc.name,
+          type: "js",
           version: dataFunc.version,
           callback: dataFunc.callback,
         });
-      }
+      } else if (dataFunc.code && dataFunc.type === "aoitelegram") {
+        collectionFunction.push({
+          name: dataFunc.name,
+          type: "aoitelegram",
+          version: dataFunc.version,
+          code: dataFunc.code,
+        });
+      } else
+        throw new AoijsError(
+          "plugins",
+          "the specified parameters for creating a custom function do not match the requirements",
+          undefined,
+          dataFunc.name,
+        );
       if (aoitelegram) {
         aoitelegram.addFunction(collectionFunction);
       }

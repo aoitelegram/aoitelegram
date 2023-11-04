@@ -6,8 +6,9 @@ declare module "context" {
 
   interface DataFunction {
     name: string;
-    version?: string;
     type?: "aoitelegram" | "js";
+    params?: string[];
+    version?: string;
     callback?: (
       ctx: Context,
       event: EventContext["telegram"],

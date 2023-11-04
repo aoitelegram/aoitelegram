@@ -135,6 +135,27 @@ async function runAoiCode(
 }
 
 /**
+ * Replaces placeholders in an input string with values from arrays.
+ * @param {string} inputString - The input string containing placeholders.
+ * @param {string[]} array - The array of placeholders to be replaced.
+ * @param {string[]} arrayParams - The array of values to replace placeholders with.
+ * @returns {string} - The updated string with replaced values.
+ */
+function updateParamsFromArray(
+  inputString: string,
+  array: string[],
+  arrayParams: string[],
+): string {
+  arrayParams.forEach((value: string, index: number) => {
+    array.forEach((valueArgs: string, indexArgs: number) => {
+      const placeholder = `{${array[index]}}`;
+      inputString = inputString.replace(placeholder, value);
+    });
+  });
+  return inputString;
+}
+
+/**
  * Reads and initializes custom functions and adds them to the parent global environment.
  * @param plugin - An array of custom function definitions.
  * @param parent - The global environment where functions will be added.
@@ -182,6 +203,12 @@ function readFunctions(
             dataFunction.name,
           );
         }
+        const params = await context.evaluateArgs(context.getArgs() ?? []);
+        dataFunction.code = updateParamsFromArray(
+          dataFunction.code,
+          dataFunction.params ?? [],
+          params as string[],
+        );
         const response = await runAoiCode(
           context.fileName,
           dataFunction.code,
