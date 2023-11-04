@@ -128,7 +128,7 @@ async function runAoiCode(
 ) {
   try {
     const aoiRuntime = new Runtime(telegram, runtime.database, runtime?.plugin);
-    await aoiRuntime.runInput(command, code);
+    return await aoiRuntime.runInput(command, code);
   } catch (error) {
     if (!(error instanceof AoiStopping)) throw error;
   }
@@ -159,7 +159,7 @@ function readFunctions(
         if (!dataFunction.callback) {
           throw new AoijsError(
             "runtime",
-            "You specified the type as 'js', so to describe the actions of this function, the 'callback' parameter is required.",
+            "you specified the type as 'js', so to describe the actions of this function, the 'callback' parameter is required",
             context.fileName,
             dataFunction.name,
           );
@@ -177,7 +177,7 @@ function readFunctions(
         if (!dataFunction.code) {
           throw new AoijsError(
             "runtime",
-            "You specified the type as 'aoitelegram', so to describe the actions of this function, the 'code' parameter is required.",
+            "you specified the type as 'aoitelegram', so to describe the actions of this function, the 'code' parameter is required",
             context.fileName,
             dataFunction.name,
           );
@@ -193,7 +193,7 @@ function readFunctions(
     } else {
       throw new AoijsError(
         "runtime",
-        "The specified parameters for creating a custom function do not match the requirements.",
+        "the specified parameters for creating a custom function do not match the requirements",
         undefined,
         dataFunction.name,
       );
