@@ -115,31 +115,38 @@ class AoiClient extends AoiBase {
   /**
    * Connect to the service and perform initialization tasks.
    */
-  connect() {
+  async connect() {
     this.login();
     if (this.#optionConsole) {
       this.on("ready", async (ctx) => {
-        if (this.aoiwarning) await AoiWarning();
-        await new Promise((res) =>
+        if (this.aoiwarning) {
+          await AoiWarning();
+        }
+
+        await new Promise((res) => {
           setTimeout(() => {
+            const version = require("../../package.json").version;
+            const ctxUsername = `@${ctx.username}`;
+
             console.log(
-              chalk.red("[ AoiClient ]: ") +
-                chalk.yellow(
-                  `Initialized on ${chalk.cyan("aoitelegram")} ${chalk.blue(
-                    `v${require("../../package.json").version}`,
-                  )}`,
-                ) +
-                ` | ${chalk.green(`@${ctx.username}`)} |` +
-                chalk.cyan(" Sempai Development"),
+              `${chalk.red("[ AoiClient ]: ")}${chalk.yellow(
+                `Initialized on ${chalk.cyan("aoitelegram")} ${chalk.blue(
+                  `v${version}`,
+                )}`,
+              )} | ${chalk.green(ctxUsername)} |${chalk.cyan(
+                " Sempai Development",
+              )}`,
             );
 
             console.log(
-              chalk.yellow("Official GitHub: ") +
-                chalk.blue("https://github.com/Sempai-07/aoitelegram/issues"),
+              `${chalk.yellow("Official GitHub: ")}${chalk.blue(
+                "https://github.com/Sempai-07/aoitelegram/issues",
+              )}`,
             );
+
             res("");
-          }, 5 * 1000),
-        );
+          }, 5 * 1000);
+        });
       });
     }
   }
