@@ -169,6 +169,39 @@ class LoadCommands {
       case "callback_query" === eventType.hasEvent:
         aoitelegram.callbackQueryCommand(data);
         break;
+      case "edited_message" === eventType.hasEvent:
+        aoitelegram.editedMessageCommand(data);
+        break;
+      case "channel_post" === eventType.hasEvent:
+        aoitelegram.channelPostCommand(data);
+        break;
+      case "edited_channel_post" === eventType.hasEvent:
+        aoitelegram.editedChannelPostCommand(data);
+        break;
+      case "inline_query" === eventType.hasEvent:
+        aoitelegram.inlineQueryCommand(data);
+        break;
+      case "shipping_query" === eventType.hasEvent:
+        aoitelegram.shippingQueryCommand(data);
+        break;
+      case "pre_checkout_query" === eventType.hasEvent:
+        aoitelegram.preCheckoutQueryCommand(data);
+        break;
+      case "poll" === eventType.hasEvent:
+        aoitelegram.pollCommand(data);
+        break;
+      case "poll_answer" === eventType.hasEvent:
+        aoitelegram.pollAnswerCommand(data);
+        break;
+      case "chat_member" === eventType.hasEvent:
+        aoitelegram.chatMemberCommand(data);
+        break;
+      case "my_chat_member" === eventType.hasEvent:
+        aoitelegram.myChatMemberCommand(data);
+        break;
+      case "chat_join_request" === eventType.hasEvent:
+        aoitelegram.chatJoinRequestCommand(data);
+        break;
       default:
         throw new AoijsError(
           "loader",
@@ -188,6 +221,17 @@ class LoadCommands {
       ready: "ready",
       message: "message",
       callback_query: "callback_query",
+      edited_message: "edited_message",
+      channel_post: "channel_post",
+      edited_channel_post: "edited_channel_post",
+      inline_query: "inline_query",
+      shipping_query: "shipping_query",
+      pre_checkout_query: "pre_checkout_query",
+      poll: "poll",
+      poll_answer: "poll_answer",
+      chat_member: "chat_member",
+      my_chat_member: "my_chat_member",
+      chat_join_request: "chat_join_request",
     };
     return { hasEvent: events[type] ?? null, parameter: type };
   }

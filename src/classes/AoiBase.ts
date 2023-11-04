@@ -179,6 +179,193 @@ class AoiBase extends TelegramBot {
   }
 
   /**
+   * Registers a code block to be executed in response to an edited_message event.
+   * @param {Object} options - Command options.
+   * @param {string} options.code - The code to be executed when an edited_message event is received.
+   */
+  editedMessageCommand(options: { code: string }) {
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "You did not specify the 'code' parameter.",
+      );
+    }
+    super.on("edited_message", async (ctx) => {
+      await this.runCode({ event: "edited_message" }, options.code, ctx);
+    });
+  }
+
+  /**
+   * Registers a code block to be executed in response to an channel_post event.
+   * @param {Object} options - Command options.
+   * @param {string} options.code - The code to be executed when an channel_post event is received.
+   */
+  channelPostCommand(options: { code: string }) {
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "You did not specify the 'code' parameter.",
+      );
+    }
+    super.on("channel_post", async (ctx) => {
+      await this.runCode({ event: "channel_post" }, options.code, ctx);
+    });
+  }
+
+  /**
+   * Registers a code block to be executed in response to an edited_channel_post event.
+   * @param {Object} options - Command options.
+   * @param {string} options.code - The code to be executed when an edited_channel_post event is received.
+   */
+  editedChannelPostCommand(options: { code: string }) {
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "You did not specify the 'code' parameter.",
+      );
+    }
+    super.on("edited_channel_post", async (ctx) => {
+      await this.runCode({ event: "edited_channel_post" }, options.code, ctx);
+    });
+  }
+
+  /**
+   * Registers a code block to be executed in response to an inline_query event.
+   * @param {Object} options - Command options.
+   * @param {string} options.code - The code to be executed when an inline_query event is received.
+   */
+  inlineQueryCommand(options: { code: string }) {
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "You did not specify the 'code' parameter.",
+      );
+    }
+    super.on("inline_query", async (ctx) => {
+      await this.runCode({ event: "inline_query" }, options.code, ctx);
+    });
+  }
+
+  /**
+   * Registers a code block to be executed in response to an shipping_query event.
+   * @param {Object} options - Command options.
+   * @param {string} options.code - The code to be executed when an shipping_query event is received.
+   */
+  shippingQueryCommand(options: { code: string }) {
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "You did not specify the 'code' parameter.",
+      );
+    }
+    super.on("shipping_query", async (ctx) => {
+      await this.runCode({ event: "shipping_query" }, options.code, ctx);
+    });
+  }
+
+  /**
+   * Registers a code block to be executed in response to an pre_checkout_query event.
+   * @param {Object} options - Command options.
+   * @param {string} options.code - The code to be executed when an pre_checkout_query event is received.
+   */
+  preCheckoutQueryCommand(options: { code: string }) {
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "You did not specify the 'code' parameter.",
+      );
+    }
+    super.on("pre_checkout_query", async (ctx) => {
+      await this.runCode({ event: "pre_checkout_query" }, options.code, ctx);
+    });
+  }
+
+  /**
+   * Registers a code block to be executed in response to an poll event.
+   * @param {Object} options - Command options.
+   * @param {string} options.code - The code to be executed when an poll event is received.
+   */
+  pollCommand(options: { code: string }) {
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "You did not specify the 'code' parameter.",
+      );
+    }
+    super.on("poll", async (ctx) => {
+      await this.runCode({ event: "poll" }, options.code, ctx);
+    });
+  }
+
+  /**
+   * Registers a code block to be executed in response to an poll_answer event.
+   * @param {Object} options - Command options.
+   * @param {string} options.code - The code to be executed when an poll_answer event is received.
+   */
+  pollAnswerCommand(options: { code: string }) {
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "You did not specify the 'code' parameter.",
+      );
+    }
+    super.on("poll_answer", async (ctx) => {
+      await this.runCode({ event: "poll_answer" }, options.code, ctx);
+    });
+  }
+
+  /**
+   * Registers a code block to be executed in response to an chat_member event.
+   * @param {Object} options - Command options.
+   * @param {string} options.code - The code to be executed when an chat_member event is received.
+   */
+  chatMemberCommand(options: { code: string }) {
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "You did not specify the 'code' parameter.",
+      );
+    }
+    super.on("chat_member", async (ctx) => {
+      await this.runCode({ event: "chat_member" }, options.code, ctx);
+    });
+  }
+
+  /**
+   * Registers a code block to be executed in response to an my_chat_member event.
+   * @param {Object} options - Command options.
+   * @param {string} options.code - The code to be executed when an my_chat_member event is received.
+   */
+  myChatMemberCommand(options: { code: string }) {
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "You did not specify the 'code' parameter.",
+      );
+    }
+    super.on("my_chat_member", async (ctx) => {
+      await this.runCode({ event: "my_chat_member" }, options.code, ctx);
+    });
+  }
+
+  /**
+   * Registers a code block to be executed in response to an chat_join_request event.
+   * @param {Object} options - Command options.
+   * @param {string} options.code - The code to be executed when an chat_join_request event is received.
+   */
+  chatJoinRequestCommand(options: { code: string }) {
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "You did not specify the 'code' parameter.",
+      );
+    }
+    super.on("chat_join_request", async (ctx) => {
+      await this.runCode({ event: "chat_join_request" }, options.code, ctx);
+    });
+  }
+
+  /**
    * Set variables in the database.
    * @param {Object} options - Key-value pairs of variables to set.
    * @param {string | string[]} table - The database table to use (optional).
