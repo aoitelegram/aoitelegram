@@ -79,7 +79,7 @@ class AoiClient extends AoiBase {
       },
       options.typeChannel,
     );
-    this.#commandInfo({ name: `/${options.name}` }, { ...options });
+    this.#commandInfo({ name: `${options.name}` }, { ...options });
   }
 
   /**

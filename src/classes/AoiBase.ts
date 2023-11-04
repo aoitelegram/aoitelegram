@@ -90,19 +90,37 @@ class AoiBase extends TelegramBot {
   addFunction(options: DataFunction | DataFunction[]) {
     if (Array.isArray(options)) {
       for (const optionVersion of options) {
-        if ((optionVersion.version ?? 0) > version) {
+        if (!optionVersion?.name) {
           throw new AoijsError(
             "aoiplugins",
-            `To load this function ${optionVersion.name}, the library version must be equal to or greater than ${optionVersion.version}.`,
+            "You did not specify the 'name' parameter.",
+          );
+        }
+        if ((optionVersion?.version ?? 0) > version) {
+          throw new AoijsError(
+            "aoiplugins",
+            `To load this function ${optionVersion?.name}, the library version must be equal to or greater than ${
+              optionVersion?.version ?? 0
+            }`,
           );
         }
       }
       this.plugin = [...(this.plugin ?? []), ...options];
     } else {
-      if ((options.version ?? 0) > version) {
+      if (!options?.name) {
         throw new AoijsError(
           "aoiplugins",
-          `To load this function ${options.name}, the library version must be equal to or greater than ${options.version}.`,
+          "You did not specify the 'name' parameter.",
+        );
+      }
+      if ((options?.version ?? 0) > version) {
+        throw new AoijsError(
+          "aoiplugins",
+          `To load this function ${
+            options.name
+          }, the library version must be equal to or greater than ${
+            options?.version ?? 0
+          }`,
         );
       }
       this.plugin = [...(this.plugin ?? []), options];

@@ -7,9 +7,10 @@ import { Environment } from "./Environment";
 import { Evaluator } from "./Evaluator";
 import { Lexer, TokenArgument, TokenOperator } from "./Lexer";
 import { Parser } from "./Parser";
-import { AoiStopping, MessageError } from "./classes/AoiError";
+import { AoijsError, AoiStopping, MessageError } from "./classes/AoiError";
 import { AoiManager } from "./classes/AoiManager";
-import { type Context as EventContext } from "telegramsjs";
+import { TelegramBot, type Context as EventContext } from "telegramsjs";
+import { UserFromGetMe } from "@telegram.ts/types";
 
 interface RuntimeOptions {
   alwaysStrict: boolean;
@@ -20,26 +21,30 @@ interface RuntimeOptions {
  * Represents the runtime environment for executing scripts.
  */
 class Runtime {
-  global = new Environment();
-  #contexts = new Map<string, Context>();
-  #evaluator = Evaluator.singleton;
+  globalEnvironment = new Environment();
+  private contexts = new Map<string, Context>();
+  private evaluator = Evaluator.singleton;
   options: RuntimeOptions = {
     alwaysStrict: false,
     trimOutput: true,
   };
+  database: AoiManager;
+  plugin?: DataFunction[];
 
   /**
    * Constructs a new Runtime instance with a Telegram context.
-   * @param {EventContext["telegram"]} telegram - The Telegram context for the runtime.
-   * @param {AoiManager} database - The local database.
-   * @param {DataFunction[]} options.plugin An array of plugin functions.
+   * @param telegram - The Telegram context for the runtime.
+   * @param database - The local database.
+   * @param plugin - An array of plugin functions.
    */
   constructor(
     telegram: EventContext["telegram"],
     database: AoiManager,
     plugin?: DataFunction[],
   ) {
-    this.#prepareGlobal(telegram, database, plugin);
+    this.database = database;
+    this.plugin = plugin;
+    this.prepareGlobal(telegram, database, plugin);
   }
 
   /**
@@ -48,9 +53,12 @@ class Runtime {
    * @param input - The script code to execute.
    */
   runInput(fileName: string | { event: string }, input: string) {
-    const ast = new Parser().parseToAst(new Lexer(input).main(), this);
-    const ctx = this.prepareContext(fileName);
-    return this.#evaluator.evaluate(ast, ctx);
+    const abstractSyntaxTree = new Parser().parseToAst(
+      new Lexer(input).main(),
+      this,
+    );
+    const context = this.prepareContext(fileName);
+    return this.evaluator.evaluate(abstractSyntaxTree, context);
   }
 
   /**
@@ -58,12 +66,18 @@ class Runtime {
    * @param fileName - The name of the script file.
    */
   prepareContext(fileName: string | { event: string }) {
-    const env = new Environment(this.global);
-    const type = typeof fileName === "string" ? "command" : "event";
-    const ctx = new Context(fileName, env, this, type);
-    const file = typeof fileName === "string" ? fileName : fileName?.event;
-    this.#contexts.set(file, ctx);
-    return ctx;
+    const environment = new Environment(this.globalEnvironment);
+    const eventType = typeof fileName === "string" ? "command" : "event";
+    const executionContext = new Context(
+      fileName,
+      environment,
+      this,
+      eventType,
+    );
+    const scriptName =
+      typeof fileName === "string" ? fileName : fileName?.event;
+    this.contexts.set(scriptName, executionContext);
+    return executionContext;
   }
 
   /**
@@ -71,52 +85,126 @@ class Runtime {
    * @param fileName - The name of the script file.
    */
   getContext(fileName: string | { event: string }) {
-    const file = typeof fileName === "string" ? fileName : fileName?.event;
-    return this.#contexts.get(file);
+    const scriptName =
+      typeof fileName === "string" ? fileName : fileName?.event;
+    return this.contexts.get(scriptName);
   }
 
-  #prepareGlobal(
+  /**
+   * Prepares the global environment for custom functions by reading functions in a directory and from custom plugins.
+   * @param telegram - The Telegram context.
+   * @param database - The local database.
+   * @param plugin - An array of custom function definitions.
+   */
+  private prepareGlobal(
     telegram: EventContext["telegram"],
     database: AoiManager,
     plugin?: DataFunction[],
   ) {
     readFunctionsInDirectory(
       __dirname.replace("classes", "function"),
-      this.global,
+      this.globalEnvironment,
       telegram,
       database,
     );
     if (Array.isArray(plugin)) {
-      readFunctions(plugin, this.global, telegram, database);
+      readFunctions(plugin, this.globalEnvironment, telegram, database, this);
     }
   }
 }
 
+/**
+ * Runs Aoi code using a Runtime instance.
+ * @param command - The command or event data for the code execution.
+ * @param code - The Aoi code to execute.
+ * @param telegram - The Telegram context.
+ * @param runtime - The Runtime instance.
+ */
+async function runAoiCode(
+  command: string | { event: string },
+  code: string,
+  telegram: (TelegramBot & EventContext) | UserFromGetMe,
+  runtime: Runtime,
+) {
+  try {
+    const aoiRuntime = new Runtime(telegram, runtime.database, runtime?.plugin);
+    await aoiRuntime.runInput(command, code);
+  } catch (error) {
+    if (!(error instanceof AoiStopping)) throw error;
+  }
+}
+
+/**
+ * Reads and initializes custom functions and adds them to the parent global environment.
+ * @param plugin - An array of custom function definitions.
+ * @param parent - The global environment where functions will be added.
+ * @param telegram - The Telegram context.
+ * @param database - The local database.
+ * @param runtime - The Runtime instance.
+ */
 function readFunctions(
   plugin: DataFunction[],
-  parent: Runtime["global"],
+  parent: Runtime["globalEnvironment"],
   telegram: EventContext["telegram"],
   database: AoiManager,
+  runtime: Runtime,
 ) {
-  for (const dataFunc of plugin) {
-    if (dataFunc.name) {
-      parent.set(dataFunc.name, async (ctx) => {
+  for (const dataFunction of plugin) {
+    if (
+      dataFunction.name &&
+      (dataFunction.type === "js" || !dataFunction.type)
+    ) {
+      parent.set(dataFunction.name, async (context) => {
         const error = new MessageError(telegram);
-        const response = await dataFunc.callback(
-          ctx,
+        if (!dataFunction.callback) {
+          throw new AoijsError(
+            "runtime",
+            "You specified the type as 'js', so to describe the actions of this function, the 'callback' parameter is required.",
+          );
+        }
+        const response = await dataFunction.callback(
+          context,
           telegram,
           database,
           error,
         );
         return response;
       });
+    } else if (dataFunction.name && dataFunction.type === "aoitelegram") {
+      parent.set(dataFunction.name, async (context) => {
+        if (!dataFunction.code) {
+          throw new AoijsError(
+            "runtime",
+            "You specified the type as 'aoitelegram', so to describe the actions of this function, the 'code' parameter is required.",
+          );
+        }
+        const response = await runAoiCode(
+          context.fileName,
+          dataFunction.code,
+          telegram,
+          runtime,
+        );
+        return response;
+      });
+    } else {
+      throw new AoijsError(
+        "runtime",
+        "The specified parameters for creating a custom function do not match the requirements.",
+      );
     }
   }
 }
 
+/**
+ * Recursively reads and initializes functions in a directory and adds them to the parent global environment.
+ * @param dirPath - The directory path to search for functions.
+ * @param parent - The global environment where functions will be added.
+ * @param telegram - The Telegram context.
+ * @param database - The local database.
+ */
 function readFunctionsInDirectory(
   dirPath: string,
-  parent: Runtime["global"],
+  parent: Runtime["globalEnvironment"],
   telegram: EventContext["telegram"],
   database: AoiManager,
 ) {
@@ -128,17 +216,17 @@ function readFunctionsInDirectory(
     if (stats.isDirectory()) {
       readFunctionsInDirectory(itemPath, parent, telegram, database);
     } else if (itemPath.endsWith(".js")) {
-      const dataFunc = require(itemPath).data;
-      if (dataFunc) {
-        parent.set(dataFunc.name, async (ctx) => {
+      const dataFunction = require(itemPath).data;
+      if (dataFunction) {
+        parent.set(dataFunction.name, async (context) => {
           const error = new MessageError(telegram);
-          const response = await dataFunc.callback(
-            ctx,
+          const response = await dataFunction.callback(
+            context,
             telegram,
             database,
             error,
           );
-          if (dataFunc.name === "$onlyIf" && response?.stop === true) {
+          if (dataFunction.name === "$onlyIf" && response?.stop === true) {
             throw new AoiStopping("$onlyIf");
           }
           return response;

@@ -144,6 +144,13 @@ class PluginManager {
   }
 }
 
+/**
+ * Recursively reads and collects custom functions from a directory, and optionally registers them with an AoiClient.
+ * @param dirPath - The directory path to search for custom functions.
+ * @param collectionFunctions - An array to collect the custom functions.
+ * @param aoitelegram - (Optional) An AoiClient to register custom functions.
+ * @returns An array of collected custom functions or registers them with the AoiClient if provided.
+ */
 function readFunctionsInDirectory(
   dirPath: string,
   collectionFunctions: DataFunction[],

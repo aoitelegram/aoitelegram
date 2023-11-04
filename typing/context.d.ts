@@ -7,12 +7,14 @@ declare module "context" {
   interface DataFunction {
     name: string;
     version?: string;
-    callback: (
+    type?: "aoitelegram" | "js";
+    callback?: (
       ctx: Context,
       event: EventContext["telegram"],
       database: AoiManager,
       error: MessageError,
     ) => unknown;
+    code?: string;
   }
 
   export { DataFunction };
