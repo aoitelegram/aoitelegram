@@ -160,6 +160,8 @@ function readFunctions(
           throw new AoijsError(
             "runtime",
             "You specified the type as 'js', so to describe the actions of this function, the 'callback' parameter is required.",
+            context.fileName,
+            dataFunction.name,
           );
         }
         const response = await dataFunction.callback(
@@ -176,6 +178,8 @@ function readFunctions(
           throw new AoijsError(
             "runtime",
             "You specified the type as 'aoitelegram', so to describe the actions of this function, the 'code' parameter is required.",
+            context.fileName,
+            dataFunction.name,
           );
         }
         const response = await runAoiCode(
@@ -190,6 +194,8 @@ function readFunctions(
       throw new AoijsError(
         "runtime",
         "The specified parameters for creating a custom function do not match the requirements.",
+        undefined,
+        dataFunction.name,
       );
     }
   }
