@@ -149,7 +149,8 @@ function updateParamsFromArray(
   arrayParams.forEach((value: string, index: number) => {
     array.forEach((valueArgs: string, indexArgs: number) => {
       const placeholder = `{${array[index]}}`;
-      inputString = inputString.replace(placeholder, value);
+      const regex = new RegExp(placeholder, "g");
+      inputString = inputString.replace(regex, value);
     });
   });
   return inputString;
