@@ -13,7 +13,7 @@ type CommandInfoSet = { data: string } | { name: string };
  */
 class AoiClient extends AoiBase {
   #optionConsole: boolean | undefined;
-  aoiwarning: boolean | undefined;
+  #aoiwarning: boolean | undefined;
   private commands: Collection<CommandInfoSet, unknown> = new Collection();
   private globalVars: Collection<string, unknown> = new Collection();
   /**
@@ -37,7 +37,7 @@ class AoiClient extends AoiBase {
     super(options.token, options.telegram, options.database, options.plugin);
     this.#optionConsole =
       options.console === undefined ? true : options.console;
-    this.aoiwarning =
+    this.#aoiwarning =
       options.aoiwarning === undefined ? true : options.aoiwarning;
   }
 
@@ -119,7 +119,7 @@ class AoiClient extends AoiBase {
     this.login();
     if (this.#optionConsole) {
       this.on("ready", async (ctx) => {
-        if (this.aoiwarning) {
+        if (this.#aoiwarning) {
           await AoiWarning();
         }
 
@@ -151,6 +151,11 @@ class AoiClient extends AoiBase {
     }
   }
 
+  /**
+   * Updates information about a command set with the provided name.
+   * @param {CommandInfoSet} name - The name of the command set to update.
+   * @param {unknown} commands - The new information to set for the command set.
+   */
   #commandInfo(name: CommandInfoSet, commands: unknown) {
     this.commands.set(name, commands);
   }
