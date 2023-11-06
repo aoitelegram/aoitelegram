@@ -38,10 +38,10 @@ type Token = { pos: number; line: number } & (
  * The Lexer class is responsible for tokenizing input strings.
  */
 class Lexer {
-  pos = 0;
-  line = 0;
-  col = 0;
-  escape_c = false;
+  currentPosition = 0;
+  currentLine = 0;
+  currentColumn = 0;
+  isEscapedCharacter = false;
 
   /**
    * Creates a new instance of the Lexer.
@@ -65,9 +65,9 @@ class Lexer {
     while (true) {
       let response = this.advance();
       if (response) Tokens.push(response);
-      if (this.eof()) break;
+      if (this.isEndOfInput()) break;
     }
-    return this.clean(Tokens);
+    return this.mergeAdjacentStringTokens(Tokens);
   }
 
   /**
@@ -75,8 +75,8 @@ class Lexer {
    * @param offset - The offset to peek (default is 0).
    * @returns The character at the specified offset.
    */
-  peek(offset = 0) {
-    return this.input[this.pos + offset];
+  getCharacterAtOffset(offset = 0) {
+    return this.input[this.currentPosition + offset];
   }
 
   /**
@@ -84,13 +84,13 @@ class Lexer {
    * Updates the line and column numbers.
    * @returns The current character.
    */
-  next() {
-    let current = this.input[this.pos++];
-    if (this.peek() === "\n") {
-      this.line += 1;
-      this.col = 0;
+  advanceToNextCharacter() {
+    let current = this.input[this.currentPosition++];
+    if (this.getCharacterAtOffset() === "\n") {
+      this.currentLine += 1;
+      this.currentColumn = 0;
     } else {
-      this.col += 1;
+      this.currentColumn += 1;
     }
     return current;
   }
@@ -99,8 +99,11 @@ class Lexer {
    * Checks if the end of the input string has been reached.
    * @returns True if the end of the input is reached, otherwise false.
    */
-  eof() {
-    return this.peek() === "" || this.peek() === undefined;
+  isEndOfInput() {
+    return (
+      this.getCharacterAtOffset() === "" ||
+      this.getCharacterAtOffset() === undefined
+    );
   }
 
   /**
@@ -146,11 +149,16 @@ class Lexer {
         return {
           type: "operator",
           value: character,
-          pos: this.col,
-          line: this.line,
+          pos: this.currentColumn,
+          line: this.currentLine,
         };
     }
-    return { type: "string", value: character, pos: this.col, line: this.line };
+    return {
+      type: "string",
+      value: character,
+      pos: this.currentColumn,
+      line: this.currentLine,
+    };
   }
 
   /**
@@ -168,14 +176,19 @@ class Lexer {
   parseCall(): Token {
     const fun = this.readInput(this.validateCall);
     if (!fun) {
-      return { type: "string", value: "$", pos: this.col, line: this.line };
+      return {
+        type: "string",
+        value: "$",
+        pos: this.currentColumn,
+        line: this.currentLine,
+      };
     }
     return {
       type: "call",
       value: `$${fun}`,
       child: [],
-      pos: this.col,
-      line: this.line,
+      pos: this.currentColumn,
+      line: this.currentLine,
     };
   }
 
@@ -197,11 +210,16 @@ class Lexer {
       return {
         type: "number",
         value: Number(str),
-        pos: this.col,
-        line: this.line,
+        pos: this.currentColumn,
+        line: this.currentLine,
       };
     }
-    return { type: "string", value: str, pos: this.col, line: this.line };
+    return {
+      type: "string",
+      value: str,
+      pos: this.currentColumn,
+      line: this.currentLine,
+    };
   }
 
   /**
@@ -211,8 +229,11 @@ class Lexer {
    */
   readInput(validator: (content: string) => boolean) {
     let str = "";
-    while (!this.eof() && validator.apply(this, [this.peek()])) {
-      str += this.next();
+    while (
+      !this.isEndOfInput() &&
+      validator.apply(this, [this.getCharacterAtOffset()])
+    ) {
+      str += this.advanceToNextCharacter();
     }
     return str;
   }
@@ -222,53 +243,65 @@ class Lexer {
    * @returns The parsed token.
    */
   advance(): Token | undefined {
-    let character = this.peek();
-    if (this.escape_c) {
-      this.escape_c = false;
-      this.next();
+    let character = this.getCharacterAtOffset();
+    if (this.isEscapedCharacter) {
+      this.isEscapedCharacter = false;
+      this.advanceToNextCharacter();
       if (this.isSyntax(character) || this.isOperator(character)) {
         return {
           type: "string",
           value: character,
-          pos: this.col,
-          line: this.line,
+          pos: this.currentColumn,
+          line: this.currentLine,
         };
       }
       return {
         type: "string",
         value: "\\" + character,
-        pos: this.col,
-        line: this.line,
+        pos: this.currentColumn,
+        line: this.currentLine,
       };
     }
     switch (character) {
       case "[": {
-        this.next();
-        return { type: "open", pos: this.col, line: this.line };
+        this.advanceToNextCharacter();
+        return {
+          type: "open",
+          pos: this.currentColumn,
+          line: this.currentLine,
+        };
       }
       case "]": {
-        this.next();
-        return { type: "close", pos: this.col, line: this.line };
+        this.advanceToNextCharacter();
+        return {
+          type: "close",
+          pos: this.currentColumn,
+          line: this.currentLine,
+        };
       }
       case ";": {
-        this.next();
-        return { type: "newArg", pos: this.col, line: this.line };
+        this.advanceToNextCharacter();
+        return {
+          type: "newArg",
+          pos: this.currentColumn,
+          line: this.currentLine,
+        };
       }
       case "\\": {
-        this.next();
-        this.escape_c = true;
+        this.advanceToNextCharacter();
+        this.isEscapedCharacter = true;
         return undefined;
       }
       case "$": {
-        this.next();
+        this.advanceToNextCharacter();
         return this.parseCall();
       }
     }
 
     if (this.isOperator(character)) {
-      this.next();
-      if (this.isOperator(character + this.peek())) {
-        return this.parseOperator(character + this.next());
+      this.advanceToNextCharacter();
+      if (this.isOperator(character + this.getCharacterAtOffset())) {
+        return this.parseOperator(character + this.advanceToNextCharacter());
       }
       return this.parseOperator(character);
     }
@@ -280,39 +313,26 @@ class Lexer {
    * @param tokens - An array of tokens to clean.
    * @returns The cleaned array of tokens.
    */
-  clean(tokens: Token[]) {
-    let newArr: Token[] = [];
-    let token: Token | undefined;
-    let current: Token | undefined;
+  mergeAdjacentStringTokens(tokens: Token[]) {
+    let mergedTokens: Token[] = [];
+    let currentToken: Token | undefined;
 
-    while (tokens.length > 0) {
-      token = tokens.shift();
-      if (!current) {
-        current = token;
-        continue;
-      }
-
-      if (current?.type === "string" && current?.type === token?.type) {
-        current.value += token.value;
-        continue;
+    for (const token of tokens) {
+      if (!currentToken) {
+        currentToken = token;
+      } else if (currentToken.type === "string" && token.type === "string") {
+        currentToken.value += token.value;
       } else {
-        if (current?.type !== "string") {
-          newArr.push(current);
-          current = token;
-        } else {
-          if (token?.type !== "string") {
-            newArr.push(current);
-            current = token;
-          } else throw new AoijsError("lexer", "dunno wat to do");
-        }
+        mergedTokens.push(currentToken);
+        currentToken = token;
       }
     }
 
-    if (current) newArr.push(current);
-    token = undefined;
-    current = undefined;
+    if (currentToken) {
+      mergedTokens.push(currentToken);
+    }
 
-    return newArr;
+    return mergedTokens;
   }
 }
 

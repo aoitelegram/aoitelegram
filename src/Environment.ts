@@ -57,24 +57,25 @@ class Environment {
    * @returns The value associated with the key, or throws an error if not found.
    */
   #recursiveGet(name: string) {
-    let env = this as Environment;
-    while (true) {
+    let currentEnv: Environment | undefined = this;
+
+    while (currentEnv) {
       try {
-        let res = env.#get(name);
-        if (res === undefined)
+        const value = currentEnv.#get(name);
+        if (value === undefined) {
           throw new AoijsError(
             "function",
             `Identifier ${name} is not defined`,
             undefined,
             name,
           );
-        return res;
-      } catch (err) {
-        if (env?.parent) {
-          env = env.parent;
-          continue;
         }
-        throw err /*undefined*/;
+        return value;
+      } catch (err) {
+        currentEnv = currentEnv.parent;
+        if (!currentEnv) {
+          throw err;
+        }
       }
     }
   }

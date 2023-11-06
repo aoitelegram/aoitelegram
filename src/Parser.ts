@@ -36,7 +36,7 @@ class Parser {
     this.#busy = true;
     let array: Token[] = [];
 
-    while (!this.eof()) {
+    while (!this.isEndOfInput()) {
       array.push(this.parseAtom(runtime) as Token);
     }
 
@@ -48,7 +48,7 @@ class Parser {
    * @param offset - The offset to peek (default is 0).
    * @returns The token at the specified offset.
    */
-  peek(offset = 0) {
+  getCharacterAtOffset(offset = 0) {
     return this.tokens[offset];
   }
 
@@ -56,7 +56,7 @@ class Parser {
    * Shifts and returns the first token from the tokens array.
    * @returns The shifted token.
    */
-  shift() {
+  popFirstToken() {
     return this.tokens.shift();
   }
 
@@ -64,7 +64,7 @@ class Parser {
    * Checks if there are no more tokens to parse.
    * @returns True if there are no more tokens, otherwise false.
    */
-  eof() {
+  isEndOfInput() {
     return this.tokens.length === 0;
   }
 
@@ -82,38 +82,47 @@ class Parser {
    * @param runtime - The runtime context.
    * @returns An array of argument tokens.
    */
-  readArgument(runtime: Runtime) {
-    let array: TokenArgument[] = [];
-    let end = false;
-    let argToken: TokenArgument | undefined = { type: "argument", child: [] };
-    this.shift();
+  readArguments(runtime: Runtime) {
+    const argument: TokenArgument[] = [];
+    let reachedEnd = false;
+    let currentArgument: TokenArgument | undefined = {
+      type: "argument",
+      child: [],
+    };
 
-    while (!this.eof()) {
-      if (this.peek()?.type === "close") {
-        end = true;
-        this.shift();
+    this.popFirstToken();
+
+    while (!this.isEndOfInput()) {
+      if (this.getCharacterAtOffset()?.type === "close") {
+        reachedEnd = true;
+        this.popFirstToken();
         break;
       }
 
-      if (this.peek()?.type === "newArg") {
-        array.push(argToken);
-        argToken = { type: "argument", child: [] };
-        this.shift();
+      if (this.getCharacterAtOffset()?.type === "newArg") {
+        argument.push(currentArgument);
+        currentArgument = { type: "argument", child: [] };
+        this.popFirstToken();
         continue;
       }
 
-      if (argToken.child === undefined) argToken.child = [];
-      argToken.child.push(this.parseAtom(runtime) as Token);
+      if (!currentArgument.child) {
+        currentArgument.child = [];
+      }
+
+      currentArgument.child.push(this.parseAtom(runtime) as Token);
     }
 
-    if (argToken) {
-      array.push(argToken);
-      argToken = undefined;
+    if (currentArgument) {
+      argument.push(currentArgument);
+      currentArgument = undefined;
     }
 
-    if (end === false) throw new AoijsError("symbol", "Expected ']', got none");
+    if (!reachedEnd) {
+      throw new AoijsError("symbol", "Expected ']', got none");
+    }
 
-    return array;
+    return argument;
   }
 
   /**
@@ -122,7 +131,7 @@ class Parser {
    * @returns An array of argument tokens.
    */
   parseParen(runtime: Runtime): TokenArgument[] {
-    return this.readArgument(runtime);
+    return this.readArguments(runtime);
   }
 
   /**
@@ -131,13 +140,14 @@ class Parser {
    * @returns The parsed token or undefined.
    */
   parseAtom(runtime: Runtime): Token | undefined {
-    let token = this.shift();
+    let token = this.popFirstToken();
 
     if (token?.type === "string") return token;
     if (token?.type === "number") return token;
     if (token?.type === "operator") return token;
     if (token?.type === "call") {
-      if (this.peek()?.type === "open") token.child = this.parseParen(runtime);
+      if (this.getCharacterAtOffset()?.type === "open")
+        token.child = this.parseParen(runtime);
       return token;
     }
 
