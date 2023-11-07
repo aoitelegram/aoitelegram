@@ -12,11 +12,11 @@ class PluginManager {
   #aoitelegram?: AoiClient;
   /**
    * Create an instance of the PluginManager.
-   * @param {boolean} [searchingForPlugins] - Specify whether to search for plugins during initialization.
+   * @param {boolean} [searchingForPlugins=true] - Specify whether to search for plugins during initialization.
    * @param {AoiClient} [aoitelegram] - The AoiClient instance to load commands into.
    */
   constructor(searchingForPlugins?: boolean, aoitelegram?: AoiClient) {
-    if (searchingForPlugins) {
+    if (searchingForPlugins === true) {
       const pathAoiPlugins = path.join(
         process.cwd(),
         "node_modules",
@@ -74,7 +74,7 @@ class PluginManager {
       if (!fs.existsSync(pathPlugin)) {
         throw new AoijsError(
           "aoiplugins",
-          "path to the specified plugin does not exist.",
+          `path to the specified plugin does not exist "${pathPlugin}"`,
         );
       }
       const packageJSON = require(
@@ -84,7 +84,10 @@ class PluginManager {
       if (!packageJSON) {
         throw new AoijsError(
           "aoiplugins",
-          "incorrect path to the specified main file in the plugin does not exist.",
+          `incorrect path to the specified main file in the plugin does not exist "${path.join(
+            pathPlugin,
+            ".aoiplugin.json",
+          )}"`,
         );
       }
 
@@ -103,7 +106,7 @@ class PluginManager {
    * Search for plugins in the 'node_modules' directory and copy them to the '.aoiplugins' directory.
    * @private
    */
-  async #searchingForPlugins() {
+  #searchingForPlugins() {
     const nodeModulesPath = path.join(process.cwd(), "node_modules");
     const aoiPluginsPath = path.join(nodeModulesPath, ".aoiplugins");
 
@@ -111,7 +114,7 @@ class PluginManager {
       fs.mkdirSync(aoiPluginsPath);
     }
 
-    const items = await fs.readdirSync(nodeModulesPath);
+    const items = fs.readdirSync(nodeModulesPath);
 
     for (const folder of items) {
       const folderPath = path.join(nodeModulesPath, folder);
@@ -126,7 +129,7 @@ class PluginManager {
             if (pluginInfo.version > version) {
               throw new AoijsError(
                 "aoiplugins",
-                `To download the library "${folder}", the library version "aoitelegram" should be equal to or higher than ${pluginInfo.version}.`,
+                `To download the library "${folder}", the library version "aoitelegram" should be equal to or higher than ${pluginInfo.version}`,
               );
             }
             const mainFilePath = path.join(folderPath, pluginInfo.main);
@@ -135,8 +138,7 @@ class PluginManager {
             if (!fs.existsSync(destPath)) {
               fs.mkdirSync(destPath);
             }
-
-            await fsx.copySync(folderPath, destPath);
+            fsx.copySync(folderPath, destPath);
           }
         }
       }
@@ -164,7 +166,7 @@ function readFunctionsInDirectory(
   } catch (err) {
     const messageError = err as { code: string };
     if (messageError.code === "ENOTDIR") {
-      const dataFunc = require(dirPath).data;
+      const dataFunc = require(dirPath).data ?? require(dirPath) ?? {};
       if (dataFunc.callback && (dataFunc.type === "js" || !dataFunc.type)) {
         collectionFunction.push({
           name: dataFunc.name,
@@ -201,7 +203,7 @@ function readFunctionsInDirectory(
     if (stats.isDirectory()) {
       readFunctionsInDirectory(itemPath, collectionFunction, aoitelegram);
     } else if (itemPath.endsWith(".js")) {
-      const dataFunc = require(itemPath).data;
+      const dataFunc = require(itemPath).data ?? require(itemPath) ?? {};
       if (dataFunc.callback && (dataFunc.type === "js" || !dataFunc.type)) {
         collectionFunction.push({
           name: dataFunc.name,

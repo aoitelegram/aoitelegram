@@ -3,7 +3,7 @@
   "description": "A powerful package to create Telegram Bots with built-in string functions",
   "main": "./lib/src/index.js",
   "typing": "./lib/typing/index.d.ts",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "scripts": {
     "build:release": "rm -rf lib/ && tsc"
   },
