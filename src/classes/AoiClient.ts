@@ -8,6 +8,24 @@ import { AoijsError } from "./AoiError";
 
 type CommandInfoSet = { data: string } | { name: string };
 
+interface CommandThis {
+  name: string;
+  typeChannel?:
+    | false
+    | "private"
+    | "group"
+    | "supergroup"
+    | "channel"
+    | undefined;
+  code: string;
+}
+
+interface ActionThis {
+  data: string;
+  answer?: boolean;
+  code: string;
+}
+
 /**
  * A class representing an AoiClient, which extends AoiBase.
  */
@@ -48,18 +66,7 @@ class AoiClient extends AoiBase {
    * @param {string | boolean} [options.typeChannel=false] - In what type of channels to watch command
    * @param {string} options.code - The code to be executed when the command is invoked.
    */
-  // @ts-ignore
-  command(options: {
-    name: string;
-    typeChannel?:
-      | false
-      | "private"
-      | "group"
-      | "supergroup"
-      | "channel"
-      | undefined;
-    code: string;
-  }) {
+  command(options: CommandThis) {
     if (!options?.name) {
       throw new AoijsError(
         "parameter",
@@ -72,7 +79,7 @@ class AoiClient extends AoiBase {
         "You did not specify the 'code' parameter.",
       );
     }
-    super.command(
+    this.telegram.command(
       options.name,
       (ctx) => {
         this.runCode(options.name, options.code, ctx);
@@ -80,6 +87,7 @@ class AoiClient extends AoiBase {
       options.typeChannel,
     );
     this.#commandInfo({ name: `${options.name}` }, { ...options });
+    return this;
   }
 
   /**
@@ -88,8 +96,7 @@ class AoiClient extends AoiBase {
    * @param {boolean} [answer=false] - Whether to answer the action.
    * @param {string} options.code - The code to be executed when the command is invoked.
    */
-  // @ts-ignore
-  action(options: { data: string; answer?: boolean; code: string }) {
+  action(options: ActionThis) {
     if (!options?.data) {
       throw new AoijsError(
         "parameter",
@@ -102,7 +109,7 @@ class AoiClient extends AoiBase {
         "You did not specify the 'code' parameter.",
       );
     }
-    super.action(
+    this.telegram.action(
       options.data,
       (ctx) => {
         this.runCode(options.data, options.code, ctx);
@@ -110,20 +117,21 @@ class AoiClient extends AoiBase {
       options.answer,
     );
     this.#commandInfo({ data: options.data }, { ...options });
+    return this;
   }
 
   /**
    * Connect to the service and perform initialization tasks.
    */
   async connect() {
-    this.login();
+    this.telegram.login();
     if (this.#optionConsole) {
-      this.on("ready", async (ctx) => {
+      this.telegram.on("ready", async (ctx) => {
         if (this.#aoiwarning) {
           await AoiWarning();
         }
 
-        await new Promise((res) => {
+        new Promise((res) => {
           setTimeout(() => {
             const version = require("../../package.json").version;
             const ctxUsername = `@${ctx.username}`;

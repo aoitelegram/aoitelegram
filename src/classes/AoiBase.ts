@@ -39,9 +39,10 @@ interface TelegramOptions {
 }
 
 /**
- * A class that extends TelegramBot and provides additional functionality for handling commands and messages.
+ * A class that provides additional functionality for handling commands and messages.
  */
-class AoiBase extends TelegramBot {
+class AoiBase {
+  telegram: TelegramBot;
   #database: AoiManager;
   plugin?: DataFunction[];
   /**
@@ -56,10 +57,10 @@ class AoiBase extends TelegramBot {
     database?: DatabaseOptions,
     plugin?: DataFunction[],
   ) {
-    super(token, telegram);
+    this.telegram = new TelegramBot(token, telegram);
     this.#database = new AoiManager(database);
     this.plugin = plugin;
-    this.setMaxListeners(Infinity);
+    this.telegram.setMaxListeners(Infinity);
   }
 
   /**
@@ -83,7 +84,6 @@ class AoiBase extends TelegramBot {
 
   /**
    * Add a data function or an array of data functions to the plugin options.
-   *
    * @param {DataFunction|DataFunction[]} options - The data function(s) to add.
    * @returns {void}
    */
@@ -139,7 +139,7 @@ class AoiBase extends TelegramBot {
         "You did not specify the 'code' parameter.",
       );
     }
-    super.on("ready", async (ctx) => {
+    this.telegram.on("ready", async (ctx) => {
       await this.runCode({ event: "ready" }, options.code, ctx);
     });
   }
@@ -156,7 +156,7 @@ class AoiBase extends TelegramBot {
         "You did not specify the 'code' parameter.",
       );
     }
-    super.on("message", async (ctx) => {
+    this.telegram.on("message", async (ctx) => {
       await this.runCode({ event: "message" }, options.code, ctx);
     });
   }
@@ -173,7 +173,7 @@ class AoiBase extends TelegramBot {
         "You did not specify the 'code' parameter.",
       );
     }
-    super.on("callback_query", async (ctx) => {
+    this.telegram.on("callback_query", async (ctx) => {
       await this.runCode({ event: "callback_query" }, options.code, ctx);
     });
   }
@@ -190,7 +190,7 @@ class AoiBase extends TelegramBot {
         "You did not specify the 'code' parameter.",
       );
     }
-    super.on("edited_message", async (ctx) => {
+    this.telegram.on("edited_message", async (ctx) => {
       await this.runCode({ event: "edited_message" }, options.code, ctx);
     });
   }
@@ -207,7 +207,7 @@ class AoiBase extends TelegramBot {
         "You did not specify the 'code' parameter.",
       );
     }
-    super.on("channel_post", async (ctx) => {
+    this.telegram.on("channel_post", async (ctx) => {
       await this.runCode({ event: "channel_post" }, options.code, ctx);
     });
   }
@@ -224,7 +224,7 @@ class AoiBase extends TelegramBot {
         "You did not specify the 'code' parameter.",
       );
     }
-    super.on("edited_channel_post", async (ctx) => {
+    this.telegram.on("edited_channel_post", async (ctx) => {
       await this.runCode({ event: "edited_channel_post" }, options.code, ctx);
     });
   }
@@ -241,7 +241,7 @@ class AoiBase extends TelegramBot {
         "You did not specify the 'code' parameter.",
       );
     }
-    super.on("inline_query", async (ctx) => {
+    this.telegram.on("inline_query", async (ctx) => {
       await this.runCode({ event: "inline_query" }, options.code, ctx);
     });
   }
@@ -258,7 +258,7 @@ class AoiBase extends TelegramBot {
         "You did not specify the 'code' parameter.",
       );
     }
-    super.on("shipping_query", async (ctx) => {
+    this.telegram.on("shipping_query", async (ctx) => {
       await this.runCode({ event: "shipping_query" }, options.code, ctx);
     });
   }
@@ -275,7 +275,7 @@ class AoiBase extends TelegramBot {
         "You did not specify the 'code' parameter.",
       );
     }
-    super.on("pre_checkout_query", async (ctx) => {
+    this.telegram.on("pre_checkout_query", async (ctx) => {
       await this.runCode({ event: "pre_checkout_query" }, options.code, ctx);
     });
   }
@@ -292,7 +292,7 @@ class AoiBase extends TelegramBot {
         "You did not specify the 'code' parameter.",
       );
     }
-    super.on("poll", async (ctx) => {
+    this.telegram.on("poll", async (ctx) => {
       await this.runCode({ event: "poll" }, options.code, ctx);
     });
   }
@@ -309,7 +309,7 @@ class AoiBase extends TelegramBot {
         "You did not specify the 'code' parameter.",
       );
     }
-    super.on("poll_answer", async (ctx) => {
+    this.telegram.on("poll_answer", async (ctx) => {
       await this.runCode({ event: "poll_answer" }, options.code, ctx);
     });
   }
@@ -326,7 +326,7 @@ class AoiBase extends TelegramBot {
         "You did not specify the 'code' parameter.",
       );
     }
-    super.on("chat_member", async (ctx) => {
+    this.telegram.on("chat_member", async (ctx) => {
       await this.runCode({ event: "chat_member" }, options.code, ctx);
     });
   }
@@ -343,7 +343,7 @@ class AoiBase extends TelegramBot {
         "You did not specify the 'code' parameter.",
       );
     }
-    super.on("my_chat_member", async (ctx) => {
+    this.telegram.on("my_chat_member", async (ctx) => {
       await this.runCode({ event: "my_chat_member" }, options.code, ctx);
     });
   }
@@ -360,7 +360,7 @@ class AoiBase extends TelegramBot {
         "You did not specify the 'code' parameter.",
       );
     }
-    super.on("chat_join_request", async (ctx) => {
+    this.telegram.on("chat_join_request", async (ctx) => {
       await this.runCode({ event: "chat_join_request" }, options.code, ctx);
     });
   }

@@ -62,7 +62,7 @@ class PluginManager {
    * @returns {DataFunction[]} An array of plugin functions.
    * @throws {AoijsError} Throws an error if the specified plugin or its main file is not found.
    */
-   loadPlugins(...plugins: string[]) {
+  loadPlugins(...plugins: string[]) {
     let collectionFunction: DataFunction[] = [];
     for (const dirFunc of plugins) {
       const pathPlugin = path.join(
@@ -106,7 +106,7 @@ class PluginManager {
    * Search for plugins in the 'node_modules' directory and copy them to the '.aoiplugins' directory.
    * @private
    */
-   #searchingForPlugins() {
+  #searchingForPlugins() {
     const nodeModulesPath = path.join(process.cwd(), "node_modules");
     const aoiPluginsPath = path.join(nodeModulesPath, ".aoiplugins");
 
