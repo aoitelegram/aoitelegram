@@ -66,6 +66,7 @@ class AoiClient extends AoiBase {
    * @param {string | boolean} [options.typeChannel=false] - In what type of channels to watch command
    * @param {string} options.code - The code to be executed when the command is invoked.
    */
+  // @ts-ignore
   command(options: CommandThis) {
     if (!options?.name) {
       throw new AoijsError(
@@ -79,10 +80,10 @@ class AoiClient extends AoiBase {
         "You did not specify the 'code' parameter.",
       );
     }
-    this.telegram.command(
+    super.command(
       options.name,
       (ctx) => {
-        this.runCode(options.name, options.code, ctx);
+        this.evaluateCommand(options.name, options.code, ctx);
       },
       options.typeChannel,
     );
@@ -96,6 +97,7 @@ class AoiClient extends AoiBase {
    * @param {boolean} [answer=false] - Whether to answer the action.
    * @param {string} options.code - The code to be executed when the command is invoked.
    */
+  // @ts-ignore
   action(options: ActionThis) {
     if (!options?.data) {
       throw new AoijsError(
@@ -109,10 +111,10 @@ class AoiClient extends AoiBase {
         "You did not specify the 'code' parameter.",
       );
     }
-    this.telegram.action(
+    super.action(
       options.data,
       (ctx) => {
-        this.runCode(options.data, options.code, ctx);
+        this.evaluateCommand(options.data, options.code, ctx);
       },
       options.answer,
     );
@@ -124,9 +126,9 @@ class AoiClient extends AoiBase {
    * Connect to the service and perform initialization tasks.
    */
   async connect() {
-    this.telegram.login();
+    super.login();
     if (this.#optionConsole) {
-      this.telegram.on("ready", async (ctx) => {
+      this.on("ready", async (ctx) => {
         if (this.#aoiwarning) {
           await AoiWarning();
         }

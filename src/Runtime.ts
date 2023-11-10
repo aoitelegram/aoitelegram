@@ -120,7 +120,7 @@ class Runtime {
  * @param telegram - The Telegram context.
  * @param runtime - The Runtime instance.
  */
-async function runAoiCode(
+async function evaluateAoiCommand(
   command: string | { event: string },
   code: string,
   telegram: (TelegramBot & EventContext) | UserFromGetMe,
@@ -211,7 +211,7 @@ function readFunctions(
           dataFunction.params ?? [],
           params as string[],
         );
-        const response = await runAoiCode(
+        const response = await evaluateAoiCommand(
           context.fileName,
           dataFunction.code,
           telegram,
