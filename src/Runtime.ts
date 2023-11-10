@@ -172,11 +172,12 @@ function readFunctions(
   runtime: Runtime,
 ) {
   for (const dataFunction of plugin) {
+    const dataFunctionName = dataFunction?.name.toLowerCase();
     if (
-      dataFunction.name &&
+      dataFunctionName &&
       (dataFunction.type === "js" || !dataFunction.type)
     ) {
-      parent.set(dataFunction.name, async (context) => {
+      parent.set(dataFunctionName, async (context) => {
         const error = new MessageError(telegram);
         if (!dataFunction.callback) {
           throw new AoijsError(
@@ -194,8 +195,8 @@ function readFunctions(
         );
         return response;
       });
-    } else if (dataFunction.name && dataFunction.type === "aoitelegram") {
-      parent.set(dataFunction.name, async (context) => {
+    } else if (dataFunctionName && dataFunction.type === "aoitelegram") {
+      parent.set(dataFunctionName, async (context) => {
         if (!dataFunction.code) {
           throw new AoijsError(
             "runtime",
@@ -251,8 +252,9 @@ function readFunctionsInDirectory(
       readFunctionsInDirectory(itemPath, parent, telegram, database);
     } else if (itemPath.endsWith(".js")) {
       const dataFunction = require(itemPath).data;
+      const dataFunctionName = dataFunction?.name.toLowerCase();
       if (dataFunction) {
-        parent.set(dataFunction.name, async (context) => {
+        parent.set(dataFunctionName, async (context) => {
           const error = new MessageError(telegram);
           const response = await dataFunction.callback(
             context,

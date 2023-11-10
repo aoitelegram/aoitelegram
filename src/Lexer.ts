@@ -185,7 +185,7 @@ class Lexer {
     }
     return {
       type: "call",
-      value: `$${fun}`,
+      value: `$${fun.toLowerCase()}`,
       child: [],
       pos: this.currentColumn,
       line: this.currentLine,
