@@ -35,12 +35,23 @@ class Evaluator {
    * @returns The result of visiting the node.
    */
   visit(node: Token, ctx: Context) {
-    if (node.type === "string") return node.value;
-    if (node.type === "number") return node.value;
-    if (node.type === "operator") return node.value;
-    if (node.type === "call") return this.visitCall(node, ctx);
-    if (node.type === "argument") return this.visitArgument(node, ctx);
-    throw new AoijsError("visits", `Unknown type of ${node.type}!`);
+    switch (node.type) {
+      case "string":
+      case "integer":
+      case "float":
+      case "boolean":
+      case "object":
+      case "null":
+      case "undefined":
+      case "operator":
+        return node.value;
+      case "call":
+        return this.visitCall(node, ctx);
+      case "argument":
+        return this.visitArgument(node, ctx);
+      default:
+        throw new AoijsError("visits", `Unknown type of ${node.type}!`);
+    }
   }
 
   /**
@@ -84,11 +95,9 @@ class Evaluator {
    */
   async mapValues<T>(values: T[]) {
     if (values.length === 0) return "";
-
-    const promises = values.map(async (value) => String(await value));
+    const promises = values.map(async (value) => await value);
     const results = await Promise.all(promises);
-
-    return results.join("");
+    return results.length === 1 ? results[0] : results.join("");
   }
 }
 

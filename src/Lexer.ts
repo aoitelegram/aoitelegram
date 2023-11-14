@@ -5,7 +5,12 @@ const OPS = /[!=<>]+$/;
 const FN_DEF = /[a-z_]/i;
 
 type TokenString = { type: "string"; value: string };
-type TokenNumber = { type: "number"; value: number };
+type TokenInteger = { type: "integer"; value: number };
+type TokenFloat = { type: "float"; value: number };
+type TokenBoolean = { type: "boolean"; value: boolean };
+type TokenNull = { type: "null"; value: null };
+type TokenObject = { type: "object"; value: object };
+type TokenUndefined = { type: "undefined"; value: undefined };
 type TokenCall = {
   type: "call";
   value: string;
@@ -26,7 +31,12 @@ type Token = { pos: number; line: number } & (
   | TokenArgument
   | TokenProgram
   | TokenString
-  | TokenNumber
+  | TokenInteger
+  | TokenFloat
+  | TokenBoolean
+  | TokenNull
+  | TokenUndefined
+  | TokenObject
   | TokenCall
   | TokenOpen
   | TokenClose
@@ -125,12 +135,82 @@ class Lexer {
   }
 
   /**
-   * Checks if a string is a valid number.
-   * @param content - The string to check.
-   * @returns True if the string is a valid number, otherwise false.
+   * Checks if a string represents a valid integer.
+   * @param {string} content - The string to check.
+   * @returns {boolean} True if the string is a valid integer or BigInt, otherwise false.
    */
-  isNumber(content: string) {
-    return parseInt(content) === Number(content);
+  isInteger(content: string): boolean {
+    let isBigInt: boolean = false;
+    try {
+      BigInt(content);
+      isBigInt = true;
+    } catch (err) {
+      isBigInt = false;
+    }
+    return (
+      Number.isInteger(Number(content)) &&
+      !this.isBoolean(content) &&
+      !this.isNull(content) &&
+      isBigInt
+    );
+  }
+
+  /**
+   * Checks if a string represents a valid floating-point number.
+   * @param {string} content - The string to check.
+   * @returns {boolean} True if the string is a valid floating-point number, otherwise false.
+   */
+  isFloat(content: string) {
+    if (!content.includes(".")) return false;
+    if (!Number.isNaN(parseFloat(content))) return true;
+    else return false;
+  }
+
+  /**
+   * Checks if a string represents a boolean value ("true" or "false").
+   * @param {string} content - The string to check.
+   * @returns {boolean} True if the string represents a boolean value, otherwise false.
+   */
+  isBoolean(content: string) {
+    if (content === "true") return true;
+    else if (content === "false") return true;
+    else return false;
+  }
+
+  /**
+   * Checks if a string represents the value null.
+   * @param {string} content - The string to check.
+   * @returns {boolean} True if the string represents the value null, otherwise false.
+   */
+  isNull(content: string) {
+    if (content === "null") return true;
+    else return false;
+  }
+
+  /**
+   * Checks if a string represents a valid JSON object.
+   * @param {string} content - The string to check.
+   * @returns {boolean} True if the string is a valid JSON object, otherwise false.
+   */
+  isObject(content: string) {
+    if (content?.startsWith("{") && content.endsWith("}")) {
+      try {
+        return !!JSON.parse(content);
+      } catch (err) {
+        return false;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Checks if a string represents the value "undefined".
+   * @param {string} content - The string to check.
+   * @returns {boolean} True if the string represents the value "undefined", otherwise false.
+   */
+  isUndefined(content: string) {
+    if (content === "undefined") return true;
+    else return false;
   }
 
   /**
@@ -206,10 +286,50 @@ class Lexer {
    */
   parseString(): Token {
     const str = this.readInput(this.validateString);
-    if (this.isNumber(str)) {
+    if (this.isInteger(str)) {
       return {
-        type: "number",
-        value: Number(str),
+        type: "integer",
+        value: parseInt(str),
+        pos: this.currentColumn,
+        line: this.currentLine,
+      };
+    }
+    if (this.isFloat(str)) {
+      return {
+        type: "float",
+        value: parseFloat(str),
+        pos: this.currentColumn,
+        line: this.currentLine,
+      };
+    }
+    if (this.isObject(str)) {
+      return {
+        type: "object",
+        value: JSON.parse(str),
+        pos: this.currentColumn,
+        line: this.currentLine,
+      };
+    }
+    if (this.isBoolean(str)) {
+      return {
+        type: "boolean",
+        value: str === "true" ? true : false,
+        pos: this.currentColumn,
+        line: this.currentLine,
+      };
+    }
+    if (this.isNull(str)) {
+      return {
+        type: "null",
+        value: null,
+        pos: this.currentColumn,
+        line: this.currentLine,
+      };
+    }
+    if (this.isUndefined(str)) {
+      return {
+        type: "undefined",
+        value: undefined,
         pos: this.currentColumn,
         line: this.currentLine,
       };
@@ -340,7 +460,6 @@ export {
   Lexer,
   Token,
   TokenString,
-  TokenNumber,
   TokenArgument,
   TokenProgram,
   TokenCall,

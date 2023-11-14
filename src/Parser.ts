@@ -31,7 +31,7 @@ class Parser {
    * @returns The parsed AST.
    */
   parseToAst(tokens: Token[], runtime: Runtime): TokenProgram {
-    if (this.#busy) throw new AoijsError("parser", "Parser is #busy!");
+    if (this.#busy) throw new AoijsError("parser", "Parser is busy!");
     this.tokens = tokens;
     this.#busy = true;
     let array: Token[] = [];
@@ -142,13 +142,23 @@ class Parser {
   parseAtom(runtime: Runtime): Token | undefined {
     let token = this.popFirstToken();
 
-    if (token?.type === "string") return token;
-    if (token?.type === "number") return token;
-    if (token?.type === "operator") return token;
-    if (token?.type === "call") {
-      if (this.getCharacterAtOffset()?.type === "open")
-        token.child = this.parseParen(runtime);
-      return token;
+    switch (token?.type) {
+      case "string":
+      case "integer":
+      case "float":
+      case "boolean":
+      case "object":
+      case "null":
+      case "undefined":
+      case "operator":
+        return token;
+      case "call":
+        if (this.getCharacterAtOffset()?.type === "open") {
+          token.child = this.parseParen(runtime);
+        }
+        return token;
+      default:
+        return token;
     }
 
     if (runtime.options.alwaysStrict === false) {
