@@ -3,7 +3,7 @@ import { DataFunction } from "context";
 const data: DataFunction = {
   name: "$ping",
   callback: async (ctx, event) => {
-    return (await event.telegram?.ping()) ?? null;
+    return await event.telegram?.ping();
   },
 };
 

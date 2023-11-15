@@ -6,7 +6,7 @@ const data: DataFunction = {
     const addedToAttachmentMenu =
       event.from.added_to_attachment_menu ??
       event.message?.from.added_to_attachment_menu;
-    return addedToAttachmentMenu || null;
+    return addedToAttachmentMenu;
   },
 };
 

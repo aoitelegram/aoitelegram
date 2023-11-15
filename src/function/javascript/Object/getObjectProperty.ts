@@ -29,7 +29,7 @@ const data: DataFunction = {
     if (!ctx.argsCheck(1, true, error, "$getObjectProperty")) return;
     const args = await ctx.evaluateArgs(ctx.getArgs());
     const object = JSON.parse(JSON.stringify(args[0]));
-    return getObjectKey(object, args[1]) ?? null;
+    return getObjectKey(object, args[1]);
   },
 };
 

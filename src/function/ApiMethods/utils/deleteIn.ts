@@ -10,7 +10,7 @@ const data: DataFunction = {
     setTimeout(() => {
       event.deleteMessage(args[1] ?? messageId).catch(() => console.log());
     }, args[0] * 1000);
-    return "";
+    return undefined;
   },
 };
 

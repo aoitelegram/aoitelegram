@@ -5,7 +5,7 @@ const data: DataFunction = {
   callback: async (ctx, event, database, error) => {
     const languageCode =
       event.from.language_code ?? event.message?.from.language_code;
-    return languageCode || null;
+    return languageCode;
   },
 };
 

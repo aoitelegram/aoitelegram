@@ -6,7 +6,7 @@ const data: DataFunction = {
     new Promise((res, rej) => {
       ctx.evaluateArgs(ctx.getArgs()).then(res).catch(rej);
     });
-    return "";
+    return undefined;
   },
 };
 

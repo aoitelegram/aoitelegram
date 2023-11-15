@@ -17,9 +17,9 @@ const data: DataFunction = {
       error.errorTable(args[2], "$setVar");
       return;
     }
-    //    if (!(await database.hasTable()))
+
     await database.set(args[2], args[0], args[1]);
-    return "";
+    return undefined;
   },
 };
 

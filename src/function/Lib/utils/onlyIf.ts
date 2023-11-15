@@ -1,24 +1,5 @@
 import { DataFunction } from "context";
 
-function convertStringToType(input: string): any {
-  if (input === "true") {
-    return true;
-  }
-  if (input === "false") {
-    return false;
-  } else if (input === "null") {
-    return null;
-  } else if (input === "undefined") {
-    return undefined;
-  } else if (!isNaN(parseFloat(input))) {
-    return parseFloat(input);
-  } else if (input?.startsWith?.("{") && input?.endsWith?.("}")) {
-    return JSON.parse(JSON.stringify(input));
-  } else {
-    return input;
-  }
-}
-
 const data: DataFunction = {
   name: "$onlyIf",
   callback: async (ctx, event, database, error) => {
@@ -30,12 +11,10 @@ const data: DataFunction = {
     );
     const opNode = condition.child[opIdx] as any;
 
-    let [condA, condB] = await ctx.evaluateArgs([
+    const [condA, condB] = await ctx.evaluateArgs([
       { type: "argument", child: condition.child.slice(0, opIdx) },
       { type: "argument", child: condition.child.slice(opIdx + 1) },
     ]);
-    condA = convertStringToType(condA);
-    condB = convertStringToType(condB);
     let res: boolean;
 
     switch (true) {
