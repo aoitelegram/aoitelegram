@@ -39,12 +39,17 @@ class Evaluator {
       case "string":
       case "integer":
       case "float":
+      case "nan":
       case "boolean":
       case "object":
       case "null":
       case "undefined":
       case "operator":
         return node.value;
+      case "open":
+        return "[";
+      case "close":
+        return "]";
       case "call":
         return this.visitCall(node, ctx);
       case "argument":

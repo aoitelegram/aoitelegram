@@ -1,12 +1,9 @@
 import { AoijsError } from "./classes/AoiError";
 
-const SYNTAX = "[]\\;$";
-const OPS = /[!=<>]+$/;
-const FN_DEF = /[a-z_]/i;
-
 type TokenString = { type: "string"; value: string };
 type TokenInteger = { type: "integer"; value: number };
 type TokenFloat = { type: "float"; value: number };
+type TokenNaN = { type: "nan"; value: number };
 type TokenBoolean = { type: "boolean"; value: boolean };
 type TokenNull = { type: "null"; value: null };
 type TokenObject = { type: "object"; value: object };
@@ -23,7 +20,7 @@ type TokenClose = { type: "close" };
 type TokenNewArg = { type: "newArg" };
 type TokenOperator = {
   type: "operator";
-  value: "==" | "!=" | ">=" | "<=" | ">" | "<" | "!";
+  value: "==" | "!=" | ">=" | "<=" | ">" | "<";
 };
 type TokenArgument = { type: "argument"; child: Token[] };
 type TokenProgram = { type: "program"; child: Token[] };
@@ -33,6 +30,7 @@ type Token = { pos: number; line: number } & (
   | TokenString
   | TokenInteger
   | TokenFloat
+  | TokenNaN
   | TokenBoolean
   | TokenNull
   | TokenUndefined
@@ -71,13 +69,13 @@ class Lexer {
    * @returns An array of tokens.
    */
   main() {
-    const Tokens: Token[] = [];
+    const tokens: Token[] = [];
     while (true) {
       let response = this.advance();
-      if (response) Tokens.push(response);
+      if (response) tokens.push(response);
       if (this.isEndOfInput()) break;
     }
-    return this.mergeAdjacentStringTokens(Tokens);
+    return this.mergeAdjacentStringTokens(tokens);
   }
 
   /**
@@ -122,7 +120,7 @@ class Lexer {
    * @returns True if the character is an operator, otherwise false.
    */
   isOperator(content: string) {
-    return OPS.test(content);
+    return /[!=<>]+$/.test(content);
   }
 
   /**
@@ -131,15 +129,15 @@ class Lexer {
    * @returns True if the character is a syntax character, otherwise false.
    */
   isSyntax(content: string) {
-    return SYNTAX.indexOf(content) > -1;
+    return "[]\\;$".indexOf(content) > -1;
   }
 
   /**
    * Checks if a string represents a valid integer.
    * @param {string} content - The string to check.
-   * @returns {boolean} True if the string is a valid integer or BigInt, otherwise false.
+   * @returns {boolean} True if the string is a valid integer, otherwise false.
    */
-  isInteger(content: string): boolean {
+  isInteger(content: string) {
     let isBigInt: boolean = false;
     try {
       BigInt(content);
@@ -214,6 +212,16 @@ class Lexer {
   }
 
   /**
+   * Checks if a string represents the value "NaN".
+   * @param {string} content - The string to check.
+   * @returns {boolean} True if the string represents the value "NaN", otherwise false.
+   */
+  isNaN(content: string) {
+    if (content === "NaN") return true;
+    else return false;
+  }
+
+  /**
    * Parses an operator character into a token.
    * @param character - The operator character to parse.
    * @returns A token representing the operator character.
@@ -246,7 +254,7 @@ class Lexer {
    * @returns A parsed call token.
    */
   validateCall(call: string) {
-    return FN_DEF.test(call);
+    return /[a-z_]/i.test(call);
   }
 
   /**
@@ -298,6 +306,14 @@ class Lexer {
       return {
         type: "float",
         value: parseFloat(str),
+        pos: this.currentColumn,
+        line: this.currentLine,
+      };
+    }
+    if (this.isNaN(str)) {
+      return {
+        type: "nan",
+        value: NaN,
         pos: this.currentColumn,
         line: this.currentLine,
       };

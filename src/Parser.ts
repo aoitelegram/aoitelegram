@@ -141,11 +141,11 @@ class Parser {
    */
   parseAtom(runtime: Runtime): Token | undefined {
     let token = this.popFirstToken();
-
     switch (token?.type) {
       case "string":
       case "integer":
       case "float":
+      case "nan":
       case "boolean":
       case "object":
       case "null":
