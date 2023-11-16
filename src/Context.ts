@@ -75,11 +75,11 @@ class Context {
    */
   getArgs(start = -1, end = 1) {
     const target = this.#target;
-
+    if (!target) return [];
     if (start < 0) {
-      return target?.child.copyWithin(start, start);
+      return target.child.copyWithin(start, start);
     }
-    return target?.child.slice(start, end + 1);
+    return target.child.slice(start, end + 1);
   }
 
   /**

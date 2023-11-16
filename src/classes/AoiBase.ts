@@ -92,7 +92,7 @@ class AoiBase extends TelegramBot {
         if (!optionVersion?.name) {
           throw new AoijsError(
             "aoiplugins",
-            "You did not specify the 'name' parameter.",
+            "you did not specify the 'name' parameter",
           );
         }
         if ((optionVersion?.version ?? 0) > version) {
@@ -109,7 +109,7 @@ class AoiBase extends TelegramBot {
       if (!options?.name) {
         throw new AoijsError(
           "aoiplugins",
-          "You did not specify the 'name' parameter.",
+          "you did not specify the 'name' parameter",
         );
       }
       if ((options?.version ?? 0) > version) {

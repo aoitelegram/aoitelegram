@@ -46,10 +46,6 @@ class Evaluator {
       case "undefined":
       case "operator":
         return node.value;
-      case "open":
-        return "[";
-      case "close":
-        return "]";
       case "call":
         return this.visitCall(node, ctx);
       case "argument":
@@ -84,7 +80,7 @@ class Evaluator {
     let array = argument.child?.copyWithin(-1, -1) ?? [];
     let valueType: Token[] = [];
 
-    while (array?.length > 0) {
+    while (array.length > 0) {
       let node = array.shift() as Token;
       let response = await this.visit(node, context);
       valueType.push(response as Token);

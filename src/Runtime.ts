@@ -26,7 +26,7 @@ class Runtime {
   private evaluator = Evaluator.singleton;
   options: RuntimeOptions = {
     alwaysStrict: false,
-    trimOutput: true,
+    trimOutput: false,
   };
   database: AoiManager;
   plugin?: DataFunction[];
@@ -205,7 +205,7 @@ function readFunctions(
             dataFunction.name,
           );
         }
-        const params = await context.evaluateArgs(context.getArgs() ?? []);
+        const params = await context.evaluateArgs(context.getArgs());
         dataFunction.code = updateParamsFromArray(
           dataFunction.code,
           dataFunction.params ?? [],

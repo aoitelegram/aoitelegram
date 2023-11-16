@@ -71,13 +71,13 @@ class AoiClient extends AoiBase {
     if (!options?.name) {
       throw new AoijsError(
         "parameter",
-        "You did not specify the 'name' parameter.",
+        "you did not specify the 'name' parameter",
       );
     }
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "You did not specify the 'code' parameter.",
+        "you did not specify the 'code' parameter",
       );
     }
     super.command(
@@ -102,13 +102,13 @@ class AoiClient extends AoiBase {
     if (!options?.data) {
       throw new AoijsError(
         "parameter",
-        "You did not specify the 'data' parameter.",
+        "you did not specify the 'data' parameter",
       );
     }
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "You did not specify the 'code' parameter.",
+        "you did not specify the 'code' parameter",
       );
     }
     super.action(

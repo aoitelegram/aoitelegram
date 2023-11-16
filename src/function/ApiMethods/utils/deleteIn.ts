@@ -8,7 +8,7 @@ const data: DataFunction = {
     const chatId = event.chat.id ?? event.message?.chat.id;
     const messageId = event.message_id ?? event.message?.message_id;
     setTimeout(() => {
-      event.deleteMessage(args[1] ?? messageId).catch(() => console.log());
+      event.deleteMessage(args[1] ?? messageId).catch(() => console.log);
     }, args[0] * 1000);
     return undefined;
   },

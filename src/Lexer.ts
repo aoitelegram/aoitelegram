@@ -393,7 +393,7 @@ class Lexer {
       }
       return {
         type: "string",
-        value: "\\" + character,
+        value: `\\${character}`,
         pos: this.currentColumn,
         line: this.currentLine,
       };

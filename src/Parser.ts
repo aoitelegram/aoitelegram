@@ -57,7 +57,7 @@ class Parser {
    * @returns The shifted token.
    */
   popFirstToken() {
-    return this.tokens.shift();
+    return this.tokens.shift() as Token;
   }
 
   /**
@@ -137,11 +137,11 @@ class Parser {
   /**
    * Parses a single token in the input.
    * @param runtime - The runtime context.
-   * @returns The parsed token or undefined.
+   * @returns The parsed token.
    */
-  parseAtom(runtime: Runtime): Token | undefined {
+  parseAtom(runtime: Runtime) {
     let token = this.popFirstToken();
-    switch (token?.type) {
+    switch (token.type) {
       case "string":
       case "integer":
       case "float":
@@ -162,7 +162,7 @@ class Parser {
     }
 
     if (runtime.options.alwaysStrict === false) {
-      switch (token?.type) {
+      switch (token.type) {
         case "open":
           return { value: "[", type: "string" } as Token;
         case "close":
@@ -174,7 +174,7 @@ class Parser {
 
     throw new AoijsError(
       "parser",
-      `Unexpected token of type ${token?.type} at ${token?.pos}:${token?.line}`,
+      `Unexpected token of type ${token.type} at ${token.pos}:${token.line}`,
     );
   }
 }

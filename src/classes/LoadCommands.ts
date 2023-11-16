@@ -27,7 +27,7 @@ class LoadCommands {
     if (!dirPath) {
       throw new AoijsError(
         "parameter",
-        "You did not specify the 'dirPath' parameter.",
+        "you did not specify the 'dirPath' parameter",
       );
     }
     if (this.#count === 1) {
@@ -42,7 +42,7 @@ class LoadCommands {
     if (!fs.existsSync(dirPath)) {
       throw new AoijsError(
         "file",
-        "the specified file path was not found.",
+        "the specified file path was not found",
         dirPath,
       );
     }
