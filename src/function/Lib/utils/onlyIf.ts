@@ -1,4 +1,5 @@
 import { DataFunction } from "context";
+import { parse } from "../../parser";
 
 const data: DataFunction = {
   name: "$onlyIf",
@@ -11,10 +12,11 @@ const data: DataFunction = {
     );
     const opNode = condition.child[opIdx] as any;
 
-    const [condA, condB] = await ctx.evaluateArgs([
+    let [condA, condB] = await ctx.evaluateArgs([
       { type: "argument", child: condition.child.slice(0, opIdx) },
       { type: "argument", child: condition.child.slice(opIdx + 1) },
     ]);
+    condA = parse(condA);
     let res: boolean;
 
     switch (true) {

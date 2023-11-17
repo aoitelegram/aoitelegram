@@ -1,4 +1,5 @@
 import { DataFunction } from "context";
+import { parse } from "../../parser";
 
 const data: DataFunction = {
   name: "$if",
@@ -17,11 +18,12 @@ const data: DataFunction = {
         : ctx.evaluateArgs([ifFalse]);
     }
 
-    const [condA, condB] = await ctx.evaluateArgs([
+    let [condA, condB] = await ctx.evaluateArgs([
       { type: "argument", child: condition.child.slice(0, opIdx) },
       { type: "argument", child: condition.child.slice(opIdx + 1) },
     ]);
     let res: boolean;
+    condA = parse(condA);
 
     switch (true) {
       case opNode.value == "==":

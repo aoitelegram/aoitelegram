@@ -152,6 +152,10 @@ class Parser {
       case "undefined":
       case "operator":
         return token;
+      case "open":
+        return "[";
+      case "close":
+        return "]";
       case "call":
         if (this.getCharacterAtOffset()?.type === "open") {
           token.child = this.parseParen(runtime);
