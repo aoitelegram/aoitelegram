@@ -8,29 +8,33 @@ type EnvFunction = (ctx: Context) => unknown;
  */
 class Environment {
   #cache = new Map<string, EnvFunction>();
-  #constant = new Map<string, boolean>();
+
+  /**
+   * Constructs an environment with an optional parent environment.
+   * @param parent - The parent environment, if any.
+   * @throws AoijsError if the parent environment is not an instance of Environment.
+   */
   constructor(private parent?: Environment) {
     if (parent && !(parent instanceof Environment)) {
       throw new AoijsError(
         "instanceof",
-        "parent env must be instanceof Environment!",
+        "Parent environment must be an instance of Environment!",
       );
     }
   }
 
   /**
-   * Sets a key-value pair into the #cache.
+   * Sets a key-value pair into the private #cache.
    * @param name - The name of the key.
    * @param value - The value to associate with the key.
    * @returns undefined.
    */
   set(name: string, value: EnvFunction) {
     this.#cache.set(name, value);
-    return undefined;
   }
 
   /**
-   * Returns the value associated with a key from the #cache.
+   * Returns the value associated with a key from the private #cache.
    * @param name - The name of the key.
    * @returns The value associated with the key, recursively looking in parent environments if necessary.
    */
@@ -38,12 +42,8 @@ class Environment {
     return this.#recursiveGet(name);
   }
 
-  #get(name: string) {
-    return this.#cache.has(name) ? this.#cache.get(name) ?? null : undefined;
-  }
-
   /**
-   * Removes a key-value pair from the #cache.
+   * Removes a key-value pair from the private #cache.
    * @param name - The name of the key to remove.
    * @returns true if the key-value pair was removed, false if the key was not found.
    */
@@ -55,6 +55,7 @@ class Environment {
    * Recursively gets a value from the current environment and its parent environments.
    * @param name - The name of the key to retrieve.
    * @returns The value associated with the key, or throws an error if not found.
+   * @throws AoijsError if the identifier is not defined.
    */
   #recursiveGet(name: string) {
     let currentEnv: Environment | undefined = this;
@@ -78,6 +79,17 @@ class Environment {
         }
       }
     }
+  }
+
+  /**
+   * Private method to get a value from the private #cache.
+   * @param name - The name of the key.
+   * @returns The value associated with the key, or undefined if the key is not found.
+   */
+  #get(name: string) {
+    return this.#cache.has(name)
+      ? this.#cache.get(name) ?? undefined
+      : undefined;
   }
 }
 
