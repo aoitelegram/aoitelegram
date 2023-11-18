@@ -64,6 +64,7 @@ class LoadCommands {
             if (dataArrayFunc.name) {
               this.#aoitelegram.command({
                 name: dataArrayFunc.name,
+                aliases: dataArrayFunc.aliases,
                 typeChannel: dataArrayFunc.typeChannel,
                 code: dataArrayFunc.code,
               });
@@ -106,6 +107,7 @@ class LoadCommands {
           if (dataFunc.name) {
             this.#aoitelegram.command({
               name: dataFunc.name,
+              aliases: dataFunc.aliases,
               typeChannel: dataFunc.typeChannel,
               code: dataFunc.code,
             });

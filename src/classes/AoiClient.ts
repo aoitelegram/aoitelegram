@@ -1,30 +1,14 @@
 import chalk from "chalk";
 import { DataFunction } from "context";
 import { Collection } from "telegramsjs";
-import { AoiBase, TelegramOptions } from "./AoiBase";
+import { AoijsError } from "./AoiError";
 import { AoiWarning } from "./AoiWarning";
 import { DatabaseOptions } from "./AoiManager";
-import { AoijsError } from "./AoiError";
+import { Command, CommandDescription } from "../helpers/Command";
+import { Action, ActionDescription } from "../helpers/Action";
+import { AoiBase, TelegramOptions } from "./AoiBase";
 
 type CommandInfoSet = { data: string } | { name: string };
-
-interface CommandThis {
-  name: string;
-  typeChannel?:
-    | false
-    | "private"
-    | "group"
-    | "supergroup"
-    | "channel"
-    | undefined;
-  code: string;
-}
-
-interface ActionThis {
-  data: string;
-  answer?: boolean;
-  code: string;
-}
 
 /**
  * A class representing an AoiClient, which extends AoiBase.
@@ -32,6 +16,8 @@ interface ActionThis {
 class AoiClient extends AoiBase {
   #optionConsole: boolean | undefined;
   #aoiwarning: boolean | undefined;
+  registerCommand: Command = new Command(this);
+  registerAction: Action = new Action(this);
   private commands: Collection<CommandInfoSet, unknown> = new Collection();
   private globalVars: Collection<string, unknown> = new Collection();
   /**
@@ -67,7 +53,7 @@ class AoiClient extends AoiBase {
    * @param {string} options.code - The code to be executed when the command is invoked.
    */
   // @ts-ignore
-  command(options: CommandThis) {
+  command(options: CommandDescription) {
     if (!options?.name) {
       throw new AoijsError(
         "parameter",
@@ -80,14 +66,8 @@ class AoiClient extends AoiBase {
         "you did not specify the 'code' parameter",
       );
     }
-    super.command(
-      options.name,
-      (ctx) => {
-        this.evaluateCommand(options.name, options.code, ctx);
-      },
-      options.typeChannel,
-    );
-    this.#commandInfo({ name: `${options.name}` }, { ...options });
+    this.registerCommand.register(options);
+    this.#commandInfo({ name: `/${options.name}` }, { ...options });
     return this;
   }
 
@@ -98,7 +78,7 @@ class AoiClient extends AoiBase {
    * @param {string} options.code - The code to be executed when the command is invoked.
    */
   // @ts-ignore
-  action(options: ActionThis) {
+  action(options: ActionDescription) {
     if (!options?.data) {
       throw new AoijsError(
         "parameter",
@@ -111,13 +91,7 @@ class AoiClient extends AoiBase {
         "you did not specify the 'code' parameter",
       );
     }
-    super.action(
-      options.data,
-      (ctx) => {
-        this.evaluateCommand(options.data, options.code, ctx);
-      },
-      options.answer,
-    );
+    this.registerAction.register(options);
     this.#commandInfo({ data: options.data }, { ...options });
     return this;
   }
@@ -126,13 +100,13 @@ class AoiClient extends AoiBase {
    * Connect to the service and perform initialization tasks.
    */
   async connect() {
-    super.login();
+    await this.registerCommand.handler();
+    await this.registerAction.handler();
     if (this.#optionConsole) {
       this.on("ready", async (ctx) => {
         if (this.#aoiwarning) {
           await AoiWarning();
         }
-
         new Promise((res) => {
           setTimeout(() => {
             const version = require("../../package.json").version;
@@ -155,10 +129,11 @@ class AoiClient extends AoiBase {
             );
 
             res("");
-          }, 5 * 1000);
+          }, 4 * 1000);
         });
       });
     }
+    super.login();
   }
 
   /**
