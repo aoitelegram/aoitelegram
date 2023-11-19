@@ -1,7 +1,6 @@
-import { DataFunction } from "context";
 import { parse } from "../../parser";
 
-const data: DataFunction = {
+export default {
   name: "$onlyIf",
   callback: async (ctx, event, database, error) => {
     if (!ctx.argsCheck(2, true, error, "$onlyIf")) return;
@@ -53,5 +52,3 @@ const data: DataFunction = {
     }
   },
 };
-
-export { data };

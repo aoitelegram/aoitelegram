@@ -1,6 +1,4 @@
-import { DataFunction } from "context";
-
-const data: DataFunction = {
+export default {
   name: "$var",
   callback: async (ctx, event, database, error) => {
     if (!ctx.argsCheck(2, true, error, "$var")) return;
@@ -9,5 +7,3 @@ const data: DataFunction = {
     return event.telegram?.globalVars.set(args[0], args[1]);
   },
 };
-
-export { data };

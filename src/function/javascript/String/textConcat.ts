@@ -1,6 +1,4 @@
-import { DataFunction } from "context";
-
-const data: DataFunction = {
+export default {
   name: "$textConcat",
   callback: async (ctx, event, database, error) => {
     if (!ctx.argsCheck(2, true, error, "$textConcat")) return;
@@ -9,5 +7,3 @@ const data: DataFunction = {
     return text.concat(...args);
   },
 };
-
-export { data };

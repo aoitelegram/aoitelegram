@@ -1,5 +1,3 @@
-import { DataFunction } from "context";
-
 interface Data {
   [key: string]: any;
 }
@@ -23,7 +21,7 @@ function getObjectKey<T extends Data, K extends keyof T>(
   return getProperty(data, properties) as T[K];
 }
 
-const data: DataFunction = {
+export default {
   name: "$getObjectProperty",
   callback: async (ctx, event, database, error) => {
     if (!ctx.argsCheck(1, true, error, "$getObjectProperty")) return;
@@ -32,5 +30,3 @@ const data: DataFunction = {
     return getObjectKey(object, args[1]);
   },
 };
-
-export { data };

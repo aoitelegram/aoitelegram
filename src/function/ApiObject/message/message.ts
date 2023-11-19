@@ -1,6 +1,4 @@
-import { DataFunction } from "context";
-
-const data: DataFunction = {
+export default {
   name: "$message",
   callback: async (ctx, event, database, error) => {
     const text = event.text ?? event.message?.text;
@@ -13,5 +11,3 @@ const data: DataFunction = {
     return args[0] === undefined ? noArgsFunc : argsFunc;
   },
 };
-
-export { data };

@@ -1,6 +1,4 @@
-import { DataFunction } from "context";
-
-const data: DataFunction = {
+export default {
   name: "$commandInfo",
   callback: async (ctx, event, database, error) => {
     if (!ctx.argsCheck(1, true, error, "$commandInfo")) return;
@@ -9,5 +7,3 @@ const data: DataFunction = {
     return commands?.[args[1] ?? "code"];
   },
 };
-
-export { data };

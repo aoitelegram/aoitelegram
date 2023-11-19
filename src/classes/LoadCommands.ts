@@ -57,7 +57,7 @@ class LoadCommands {
         this.loadCommands(itemPath, log);
       } else if (itemPath.endsWith(".js")) {
         const requireFun = require(itemPath);
-        const dataFunc = requireFun.data || requireFun;
+        const dataFunc = requireFun.default || requireFun;
 
         if (Array.isArray(dataFunc)) {
           for (const dataArrayFunc of dataFunc) {

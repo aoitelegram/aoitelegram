@@ -1,6 +1,4 @@
-import { DataFunction } from "context";
-
-const data: DataFunction = {
+export default {
   name: "$replaceAll",
   callback: async (ctx, event, database, error) => {
     if (!ctx.argsCheck(3, true, error, "$replaceAll")) return;
@@ -8,5 +6,3 @@ const data: DataFunction = {
     return args[0].replaceAll(args[1], args[2]);
   },
 };
-
-export { data };

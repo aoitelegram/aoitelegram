@@ -2,7 +2,7 @@ declare module "context" {
   import { Context } from "../Context";
   import { AoiManager } from "../src/classes/AoiManager";
   import { MessageError } from "../src/classes/AoiError";
-  import { type Context as EventContext } from "telegramsjs";
+  import { TelegramBot, Context as EventContext } from "telegramsjs";
 
   type DataFunction =
     | {
@@ -18,7 +18,7 @@ declare module "context" {
         version?: string;
         callback: (
           ctx: Context,
-          event: EventContext["telegram"],
+          event: TelegramBot & Context,
           database: AoiManager,
           error: MessageError,
         ) => unknown;

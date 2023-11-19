@@ -1,6 +1,4 @@
-import { DataFunction } from "context";
-
-const data: DataFunction = {
+export default {
   name: "$async",
   callback: (ctx) => {
     new Promise((res, rej) => {
@@ -9,5 +7,3 @@ const data: DataFunction = {
     return undefined;
   },
 };
-
-export { data };

@@ -1,7 +1,6 @@
-import { DataFunction } from "context";
 import { parse } from "../../parser";
 
-const data: DataFunction = {
+export default {
   name: "$if",
   callback: async (ctx, event, database, error) => {
     if (!ctx.argsCheck(2, true, error, "$if")) return;
@@ -55,5 +54,3 @@ const data: DataFunction = {
     throw new Error("Invalid operator!");
   },
 };
-
-export { data };

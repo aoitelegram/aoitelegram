@@ -1,10 +1,6 @@
-import { DataFunction } from "context";
-
-const data: DataFunction = {
+export default {
   name: "$token",
   callback: async (ctx, event, database, error) => {
     return event.telegram?.token;
   },
 };
-
-export { data };

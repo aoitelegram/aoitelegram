@@ -1,6 +1,4 @@
-import { DataFunction } from "context";
-
-const data: DataFunction = {
+export default {
   name: "$languageCode",
   callback: async (ctx, event, database, error) => {
     const languageCode =
@@ -8,5 +6,3 @@ const data: DataFunction = {
     return languageCode;
   },
 };
-
-export { data };

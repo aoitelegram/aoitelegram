@@ -1,11 +1,8 @@
-import { DataFunction } from "context";
 import { version } from "../../../../package.json";
 
-const data: DataFunction = {
+export default {
   name: "$aoiversion",
   callback: async (ctx, event, database, error) => {
     return version;
   },
 };
-
-export { data };

@@ -251,7 +251,7 @@ function readFunctionsInDirectory(
     if (stats.isDirectory()) {
       readFunctionsInDirectory(itemPath, parent, telegram, database);
     } else if (itemPath.endsWith(".js")) {
-      const dataFunction = require(itemPath).data;
+      const dataFunction = require(itemPath).default;
       const dataFunctionName = dataFunction?.name.toLowerCase();
       if (dataFunction) {
         parent.set(dataFunctionName, async (context) => {

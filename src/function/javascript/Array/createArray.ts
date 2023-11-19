@@ -1,6 +1,4 @@
-import { DataFunction } from "context";
-
-const data: DataFunction = {
+export default {
   name: "$createArray",
   callback: async (ctx, event, database, error) => {
     if (!ctx.argsCheck(2, true, error, "$createArray")) return;
@@ -10,5 +8,3 @@ const data: DataFunction = {
     return ctx.array.set(args1, [...args]).size;
   },
 };
-
-export { data };

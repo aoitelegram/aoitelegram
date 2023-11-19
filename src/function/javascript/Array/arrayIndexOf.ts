@@ -1,6 +1,4 @@
-import { DataFunction } from "context";
-
-const data: DataFunction = {
+export default {
   name: "$arrayIndexOf",
   callback: async (ctx, event, database, error) => {
     if (!ctx.argsCheck(2, true, error, "$arrayIndexOf")) return;
@@ -14,5 +12,3 @@ const data: DataFunction = {
     return array.indexOf(args[1]);
   },
 };
-
-export { data };

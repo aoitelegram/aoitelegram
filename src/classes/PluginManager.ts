@@ -164,7 +164,7 @@ function readFunctionsInDirectory(
   } catch (err) {
     const messageError = err as { code: string };
     if (messageError.code === "ENOTDIR") {
-      const dataFunc = require(dirPath).data ?? require(dirPath) ?? {};
+      const dataFunc = require(dirPath).default ?? require(dirPath) ?? {};
       if (dataFunc.callback && (dataFunc.type === "js" || !dataFunc.type)) {
         collectionFunction.push({
           name: dataFunc.name,
@@ -201,7 +201,7 @@ function readFunctionsInDirectory(
     if (stats.isDirectory()) {
       readFunctionsInDirectory(itemPath, collectionFunction, aoitelegram);
     } else if (itemPath.endsWith(".js")) {
-      const dataFunc = require(itemPath).data ?? require(itemPath) ?? {};
+      const dataFunc = require(itemPath).default ?? require(itemPath) ?? {};
       if (dataFunc.callback && (dataFunc.type === "js" || !dataFunc.type)) {
         collectionFunction.push({
           name: dataFunc.name,

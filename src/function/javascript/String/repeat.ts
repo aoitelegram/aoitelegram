@@ -1,6 +1,4 @@
-import { DataFunction } from "context";
-
-const data: DataFunction = {
+export default {
   name: "$repeat",
   callback: async (ctx, event, database, error) => {
     if (!ctx.argsCheck(2, true, error, "$repeat")) return;
@@ -8,5 +6,3 @@ const data: DataFunction = {
     return args[0].repeat(args[1] - 1);
   },
 };
-
-export { data };

@@ -1,6 +1,4 @@
-import { DataFunction } from "context";
-
-const data: DataFunction = {
+export default {
   name: "$deleteVar",
   callback: async (ctx, event, database, error) => {
     if (!ctx.argsCheck(1, true, error, "$deleteVar")) return;
@@ -14,5 +12,3 @@ const data: DataFunction = {
     return await database.delete(args[2], args[0], args[1]);
   },
 };
-
-export { data };

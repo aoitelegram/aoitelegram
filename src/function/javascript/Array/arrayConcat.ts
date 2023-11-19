@@ -1,6 +1,4 @@
-import { DataFunction } from "context";
-
-const data: DataFunction = {
+export default {
   name: "$arrayConcat",
   callback: async (ctx, event, database, error) => {
     if (!ctx.argsCheck(2, true, error, "$arrayConcat")) return;
@@ -14,5 +12,3 @@ const data: DataFunction = {
     return array.concat(...args);
   },
 };
-
-export { data };

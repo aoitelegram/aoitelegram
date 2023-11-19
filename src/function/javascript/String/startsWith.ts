@@ -1,6 +1,4 @@
-import { DataFunction } from "context";
-
-const data: DataFunction = {
+export default {
   name: "$startsWith",
   callback: async (ctx, event, database, error) => {
     if (!ctx.argsCheck(2, true, error, "$startsWith")) return;
@@ -8,5 +6,3 @@ const data: DataFunction = {
     return args[0].startsWith(args[1]);
   },
 };
-
-export { data };

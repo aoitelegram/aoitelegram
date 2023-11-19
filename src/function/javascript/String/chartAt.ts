@@ -1,6 +1,4 @@
-import { DataFunction } from "context";
-
-const data: DataFunction = {
+export default {
   name: "$chartAt",
   callback: async (ctx, event, database, error) => {
     if (!ctx.argsCheck(2, true, error, "$chartAt")) return;
@@ -8,5 +6,3 @@ const data: DataFunction = {
     return args[0].charAt(args[1] - 1);
   },
 };
-
-export { data };

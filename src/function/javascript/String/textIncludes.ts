@@ -1,6 +1,4 @@
-import { DataFunction } from "context";
-
-const data: DataFunction = {
+export default {
   name: "$textIncludes",
   callback: async (ctx, event, database, error) => {
     if (!ctx.argsCheck(2, true, error, "$textIncludes")) return;
@@ -9,5 +7,3 @@ const data: DataFunction = {
     return args[0].includes(args[1]);
   },
 };
-
-export { data };

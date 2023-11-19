@@ -1,6 +1,4 @@
-import { DataFunction } from "context";
-
-const data: DataFunction = {
+export default {
   name: "$toUpperCase",
   callback: async (ctx, event, database, error) => {
     if (!ctx.argsCheck(1, true, error, "$toUpperCase")) return;
@@ -8,5 +6,3 @@ const data: DataFunction = {
     return args[0].toUpperCase();
   },
 };
-
-export { data };

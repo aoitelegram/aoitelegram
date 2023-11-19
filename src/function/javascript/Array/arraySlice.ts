@@ -1,6 +1,4 @@
-import { DataFunction } from "context";
-
-const data: DataFunction = {
+export default {
   name: "$arraySlice",
   callback: async (ctx, event, database, error) => {
     if (!ctx.argsCheck(2, true, error, "$arraySlice")) return;
@@ -14,5 +12,3 @@ const data: DataFunction = {
     return array.slice(args[1] >= 1 ? args[1] - 1 : args[1] + 1);
   },
 };
-
-export { data };

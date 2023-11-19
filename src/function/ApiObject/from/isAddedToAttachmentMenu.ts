@@ -1,6 +1,4 @@
-import { DataFunction } from "context";
-
-const data: DataFunction = {
+export default {
   name: "$isAddedToAttachmentMenu",
   callback: async (ctx, event, database, error) => {
     const addedToAttachmentMenu =
@@ -9,5 +7,3 @@ const data: DataFunction = {
     return addedToAttachmentMenu;
   },
 };
-
-export { data };

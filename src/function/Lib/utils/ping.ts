@@ -1,10 +1,6 @@
-import { DataFunction } from "context";
-
-const data: DataFunction = {
+export default {
   name: "$ping",
   callback: async (ctx, event) => {
     return await event.telegram?.ping();
   },
 };
-
-export { data };
