@@ -1,12 +1,31 @@
 import { TelegramBot, type Context } from "telegramsjs";
 import { UserFromGetMe, Update } from "@telegram.ts/types";
-import { DataFunction } from "context";
-import { AoijsError, AoiStopping } from "./AoiError";
+import { AoijsError, AoiStopping, MessageError } from "./AoiError";
 import { AoiManager, DatabaseOptions } from "./AoiManager";
 import { Runtime } from "../Runtime";
 import { version } from "../../package.json";
 
 type AllowedUpdates = ReadonlyArray<Exclude<keyof Update, "update_id">>;
+
+type DataFunction =
+  | {
+      name: string;
+      type: "aoitelegram";
+      version?: string;
+      params?: string[];
+      code: string;
+    }
+  | {
+      name: string;
+      type?: "js";
+      version?: string;
+      callback: (
+        ctx: Context,
+        event: TelegramBot & Context,
+        database: AoiManager,
+        error: MessageError,
+      ) => unknown;
+    };
 
 /**
  * Configuration options for interacting with the Telegram API.
@@ -405,4 +424,4 @@ class AoiBase extends TelegramBot {
   }
 }
 
-export { AoiBase, TelegramOptions };
+export { AoiBase, DataFunction, TelegramOptions };

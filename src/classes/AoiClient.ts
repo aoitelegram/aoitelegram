@@ -1,12 +1,11 @@
 import chalk from "chalk";
-import { DataFunction } from "context";
 import { Collection } from "telegramsjs";
 import { AoijsError } from "./AoiError";
 import { AoiWarning } from "./AoiWarning";
 import { DatabaseOptions } from "./AoiManager";
 import { Command, CommandDescription } from "../helpers/Command";
 import { Action, ActionDescription } from "../helpers/Action";
-import { AoiBase, TelegramOptions } from "./AoiBase";
+import { AoiBase, DataFunction, TelegramOptions } from "./AoiBase";
 
 type CommandInfoSet = { data: string } | { name: string };
 

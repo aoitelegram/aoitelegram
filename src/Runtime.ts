@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
 import chalk from "chalk";
-import { DataFunction } from "context";
 import { Context } from "./Context";
 import { Environment } from "./Environment";
 import { Evaluator } from "./Evaluator";
@@ -9,6 +8,7 @@ import { Lexer, TokenArgument, TokenOperator } from "./Lexer";
 import { Parser } from "./Parser";
 import { AoijsError, AoiStopping, MessageError } from "./classes/AoiError";
 import { AoiManager } from "./classes/AoiManager";
+import { DataFunction } from "./classes/AoiBase";
 import { TelegramBot, type Context as EventContext } from "telegramsjs";
 import { UserFromGetMe } from "@telegram.ts/types";
 
