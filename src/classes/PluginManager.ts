@@ -45,7 +45,7 @@ class PluginManager {
     if (type !== "dir" && type !== "node_modules") {
       throw new AoijsError(
         "parameter",
-        "You did not specify the 'type' parameter.",
+        "you did not specify the 'type' parameter",
       );
     }
     let collectionFunction: DataFunction[] = [];
@@ -128,7 +128,7 @@ class PluginManager {
             if (pluginInfo.version > version) {
               throw new AoijsError(
                 "aoiplugins",
-                `To download the library "${folder}", the library version "aoitelegram" should be equal to or higher than ${pluginInfo.version}`,
+                `to download the library "${folder}", the library version "aoitelegram" should be equal to or higher than ${pluginInfo.version}`,
               );
             }
             const mainFilePath = path.join(folderPath, pluginInfo.main);

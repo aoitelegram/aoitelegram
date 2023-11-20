@@ -117,7 +117,7 @@ class AoiBase extends TelegramBot {
         if ((optionVersion?.version ?? 0) > version) {
           throw new AoijsError(
             "aoiplugins",
-            `To load this function ${optionVersion?.name}, the library version must be equal to or greater than ${
+            `to load this function ${optionVersion?.name}, the library version must be equal to or greater than ${
               optionVersion?.version ?? 0
             }`,
           );
@@ -134,7 +134,7 @@ class AoiBase extends TelegramBot {
       if ((options?.version ?? 0) > version) {
         throw new AoijsError(
           "aoiplugins",
-          `To load this function ${
+          `to load this function ${
             options.name
           }, the library version must be equal to or greater than ${
             options?.version ?? 0
@@ -154,7 +154,7 @@ class AoiBase extends TelegramBot {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "You did not specify the 'code' parameter.",
+        "you did not specify the 'code' parameter",
       );
     }
     this.on("ready", async (ctx) => {
@@ -171,7 +171,7 @@ class AoiBase extends TelegramBot {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "You did not specify the 'code' parameter.",
+        "you did not specify the 'code' parameter",
       );
     }
     this.on("message", async (ctx) => {
@@ -188,7 +188,7 @@ class AoiBase extends TelegramBot {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "You did not specify the 'code' parameter.",
+        "you did not specify the 'code' parameter",
       );
     }
     this.on("callback_query", async (ctx) => {
@@ -209,7 +209,7 @@ class AoiBase extends TelegramBot {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "You did not specify the 'code' parameter.",
+        "you did not specify the 'code' parameter",
       );
     }
     this.on("edited_message", async (ctx) => {
@@ -230,7 +230,7 @@ class AoiBase extends TelegramBot {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "You did not specify the 'code' parameter.",
+        "you did not specify the 'code' parameter",
       );
     }
     this.on("channel_post", async (ctx) => {
@@ -247,7 +247,7 @@ class AoiBase extends TelegramBot {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "You did not specify the 'code' parameter.",
+        "you did not specify the 'code' parameter",
       );
     }
     this.on("edited_channel_post", async (ctx) => {
@@ -268,7 +268,7 @@ class AoiBase extends TelegramBot {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "You did not specify the 'code' parameter.",
+        "you did not specify the 'code' parameter",
       );
     }
     this.on("inline_query", async (ctx) => {
@@ -285,7 +285,7 @@ class AoiBase extends TelegramBot {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "You did not specify the 'code' parameter.",
+        "you did not specify the 'code' parameter",
       );
     }
     this.on("shipping_query", async (ctx) => {
@@ -306,7 +306,7 @@ class AoiBase extends TelegramBot {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "You did not specify the 'code' parameter.",
+        "you did not specify the 'code' parameter",
       );
     }
     this.on("pre_checkout_query", async (ctx) => {
@@ -327,7 +327,7 @@ class AoiBase extends TelegramBot {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "You did not specify the 'code' parameter.",
+        "you did not specify the 'code' parameter",
       );
     }
     this.on("poll", async (ctx) => {
@@ -344,7 +344,7 @@ class AoiBase extends TelegramBot {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "You did not specify the 'code' parameter.",
+        "you did not specify the 'code' parameter",
       );
     }
     this.on("poll_answer", async (ctx) => {
@@ -361,7 +361,7 @@ class AoiBase extends TelegramBot {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "You did not specify the 'code' parameter.",
+        "you did not specify the 'code' parameter",
       );
     }
     this.on("chat_member", async (ctx) => {
@@ -378,7 +378,7 @@ class AoiBase extends TelegramBot {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "You did not specify the 'code' parameter.",
+        "you did not specify the 'code' parameter",
       );
     }
     this.on("my_chat_member", async (ctx) => {
@@ -399,7 +399,7 @@ class AoiBase extends TelegramBot {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "You did not specify the 'code' parameter.",
+        "you did not specify the 'code' parameter",
       );
     }
     this.on("chat_join_request", async (ctx) => {

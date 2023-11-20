@@ -51,7 +51,7 @@ class Evaluator {
       case "argument":
         return this.visitArgument(node, ctx);
       default:
-        throw new AoijsError("visits", `Unknown type of ${node.type}!`);
+        throw new AoijsError("visits", `unknown type of ${node.type}!`);
     }
   }
 

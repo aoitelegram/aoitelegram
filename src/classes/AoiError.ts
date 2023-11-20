@@ -171,7 +171,7 @@ class AoiStopping extends Error {
    * @param fun - A fun or message associated with the error.
    */
   constructor(fun: string) {
-    super(`The team is paused due to an error in the ${fun} method.`);
+    super(`the team is paused due to an error in the ${fun} method.`);
     this.name = "AoiStopping";
   }
 }

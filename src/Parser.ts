@@ -119,7 +119,7 @@ class Parser {
     }
 
     if (!reachedEnd) {
-      throw new AoijsError("symbol", "Expected ']', got none");
+      throw new AoijsError("symbol", "expected ']', got none");
     }
 
     return argument;
@@ -178,7 +178,7 @@ class Parser {
 
     throw new AoijsError(
       "parser",
-      `Unexpected token of type ${token.type} at ${token.pos}:${token.line}`,
+      `unexpected token of type ${token.type} at ${token.pos}:${token.line}`,
     );
   }
 }

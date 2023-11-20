@@ -18,7 +18,7 @@ class Environment {
     if (parent && !(parent instanceof Environment)) {
       throw new AoijsError(
         "instanceof",
-        "Parent environment must be an instance of Environment!",
+        "parent environment must be an instance of Environment!",
       );
     }
   }
@@ -66,7 +66,7 @@ class Environment {
         if (value === undefined) {
           throw new AoijsError(
             "function",
-            `Identifier ${name} is not defined`,
+            `identifier ${name} is not defined`,
             undefined,
             name,
           );
