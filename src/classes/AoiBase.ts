@@ -62,22 +62,23 @@ interface TelegramOptions {
  */
 class AoiBase extends TelegramBot {
   #database: AoiManager;
-  plugin?: DataFunction[];
+  customFunction?: DataFunction[];
   /**
    * Creates a new instance of AoiBase.
    * @param {string} token - The token for authentication.
    * @param {TelegramOptions} telegram - Configuration options for the Telegram integration.
    * @param {DatabaseOptions} options.database - Options for the database.
+   * @param {DataFunction[]} options.customFunction - an array of custom functions.
    */
   constructor(
     token: string,
     telegram?: TelegramOptions,
     database?: DatabaseOptions,
-    plugin?: DataFunction[],
+    customFunction?: DataFunction[],
   ) {
     super(token, telegram);
     this.#database = new AoiManager(database);
-    this.plugin = plugin;
+    this.customFunction = customFunction;
     this.setMaxListeners(Infinity);
   }
 
@@ -93,7 +94,11 @@ class AoiBase extends TelegramBot {
     telegram: (TelegramBot & Context) | UserFromGetMe,
   ) {
     try {
-      const runtime = new Runtime(telegram, this.#database, this.plugin);
+      const runtime = new Runtime(
+        telegram,
+        this.#database,
+        this.customFunction,
+      );
       await runtime.runInput(command, code);
     } catch (err) {
       if (!(err instanceof AoiStopping)) throw err;
@@ -101,7 +106,7 @@ class AoiBase extends TelegramBot {
   }
 
   /**
-   * Add a data function or an array of data functions to the plugin options.
+   * Add a data function or an array of data functions to the customFunction options.
    * @param {DataFunction|DataFunction[]} options - The data function(s) to add.
    * @returns {void}
    */
@@ -110,30 +115,30 @@ class AoiBase extends TelegramBot {
       for (const optionVersion of options) {
         if (!optionVersion?.name) {
           throw new AoijsError(
-            "aoiplugins",
+            "customFunction",
             "you did not specify the 'name' parameter",
           );
         }
         if ((optionVersion?.version ?? 0) > version) {
           throw new AoijsError(
-            "aoiplugins",
+            "customFunction",
             `to load this function ${optionVersion?.name}, the library version must be equal to or greater than ${
               optionVersion?.version ?? 0
             }`,
           );
         }
       }
-      this.plugin = [...(this.plugin ?? []), ...options];
+      this.customFunction = [...(this.customFunction ?? []), ...options];
     } else {
       if (!options?.name) {
         throw new AoijsError(
-          "aoiplugins",
+          "customFunction",
           "you did not specify the 'name' parameter",
         );
       }
       if ((options?.version ?? 0) > version) {
         throw new AoijsError(
-          "aoiplugins",
+          "customFunction",
           `to load this function ${
             options.name
           }, the library version must be equal to or greater than ${
@@ -141,7 +146,7 @@ class AoiBase extends TelegramBot {
           }`,
         );
       }
-      this.plugin = [...(this.plugin ?? []), options];
+      this.customFunction = [...(this.customFunction ?? []), options];
     }
   }
 

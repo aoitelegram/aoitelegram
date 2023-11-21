@@ -29,22 +29,22 @@ class Runtime {
     trimOutput: false,
   };
   database: AoiManager;
-  plugin?: DataFunction[];
+  customFunction?: DataFunction[];
 
   /**
    * Constructs a new Runtime instance with a Telegram context.
    * @param telegram - The Telegram context for the runtime.
    * @param database - The local database.
-   * @param plugin - An array of plugin functions.
+   * @param customFunction - An array of customFunction functions.
    */
   constructor(
     telegram: EventContext["telegram"],
     database: AoiManager,
-    plugin?: DataFunction[],
+    customFunction?: DataFunction[],
   ) {
     this.database = database;
-    this.plugin = plugin;
-    this.prepareGlobal(telegram, database, plugin);
+    this.customFunction = customFunction;
+    this.prepareGlobal(telegram, database, customFunction);
   }
 
   /**
@@ -94,12 +94,12 @@ class Runtime {
    * Prepares the global environment for custom functions by reading functions in a directory and from custom plugins.
    * @param telegram - The Telegram context.
    * @param database - The local database.
-   * @param plugin - An array of custom function definitions.
+   * @param customFunction - An array of custom function definitions.
    */
   private prepareGlobal(
     telegram: EventContext["telegram"],
     database: AoiManager,
-    plugin?: DataFunction[],
+    customFunction?: DataFunction[],
   ) {
     readFunctionsInDirectory(
       __dirname.replace("classes", "function"),
@@ -107,8 +107,14 @@ class Runtime {
       telegram,
       database,
     );
-    if (Array.isArray(plugin)) {
-      readFunctions(plugin, this.globalEnvironment, telegram, database, this);
+    if (Array.isArray(customFunction)) {
+      readFunctions(
+        customFunction,
+        this.globalEnvironment,
+        telegram,
+        database,
+        this,
+      );
     }
   }
 }
@@ -127,7 +133,11 @@ async function evaluateAoiCommand(
   runtime: Runtime,
 ) {
   try {
-    const aoiRuntime = new Runtime(telegram, runtime.database, runtime?.plugin);
+    const aoiRuntime = new Runtime(
+      telegram,
+      runtime.database,
+      runtime?.customFunction,
+    );
     return await aoiRuntime.runInput(command, code);
   } catch (error) {
     if (!(error instanceof AoiStopping)) throw error;
@@ -147,9 +157,9 @@ function updateParamsFromArray(
   arrayParams: string[],
 ): string {
   arrayParams.forEach((value: string, index: number) => {
+    const placeholder = `{${array[index]}}`;
+    const regex = new RegExp(placeholder, "g");
     array.forEach((valueArgs: string, indexArgs: number) => {
-      const placeholder = `{${array[index]}}`;
-      const regex = new RegExp(placeholder, "g");
       inputString = inputString.replace(regex, value);
     });
   });
@@ -158,20 +168,20 @@ function updateParamsFromArray(
 
 /**
  * Reads and initializes custom functions and adds them to the parent global environment.
- * @param plugin - An array of custom function definitions.
+ * @param customFunction - An array of custom function definitions.
  * @param parent - The global environment where functions will be added.
  * @param telegram - The Telegram context.
  * @param database - The local database.
  * @param runtime - The Runtime instance.
  */
 function readFunctions(
-  plugin: DataFunction[],
+  customFunction: DataFunction[],
   parent: Runtime["globalEnvironment"],
   telegram: EventContext["telegram"],
   database: AoiManager,
   runtime: Runtime,
 ) {
-  for (const dataFunction of plugin) {
+  for (const dataFunction of customFunction) {
     const dataFunctionName = dataFunction?.name.toLowerCase();
     if (
       dataFunctionName &&
