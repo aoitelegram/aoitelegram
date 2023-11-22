@@ -15,6 +15,7 @@ type CommandInfoSet = { data: string } | { name: string };
 class AoiClient extends AoiBase {
   #optionConsole: boolean | undefined;
   #aoiwarning: boolean | undefined;
+  #warningmanager: AoiWarning;
   registerCommand: Command = new Command(this);
   registerAction: Action = new Action(this);
   private commands: Collection<CommandInfoSet, unknown> = new Collection();
@@ -28,6 +29,7 @@ class AoiClient extends AoiBase {
    * @param {DataFunction[]} options.customFunction - an array of customFunction functions.
    * @param {boolean} [options.console] - Outputting system messages to the console.
    * @param {boolean} [options.aoiwarning] - Displaying messages about new versions.
+   * @param {boolean} [options.autoUpdate] - Checks for available package updates and performs an update if enabled
    */
   constructor(options: {
     token: string;
@@ -36,6 +38,7 @@ class AoiClient extends AoiBase {
     customFunction?: DataFunction[];
     console?: boolean;
     aoiwarning?: boolean;
+    autoUpdate?: boolean;
   }) {
     super(
       options.token,
@@ -47,6 +50,9 @@ class AoiClient extends AoiBase {
       options.console === undefined ? true : options.console;
     this.#aoiwarning =
       options.aoiwarning === undefined ? true : options.aoiwarning;
+    this.#warningmanager = new AoiWarning(
+      options.autoUpdate === undefined ? true : options.autoUpdate,
+    );
   }
 
   /**
@@ -106,11 +112,11 @@ class AoiClient extends AoiBase {
   async connect() {
     await this.registerCommand.handler();
     await this.registerAction.handler();
+    if (this.#aoiwarning) {
+      await this.#warningmanager.checkUpdates();
+    }
     if (this.#optionConsole) {
       this.on("ready", async (ctx) => {
-        if (this.#aoiwarning) {
-          await AoiWarning();
-        }
         new Promise((res) => {
           setTimeout(() => {
             const version = require("../../package.json").version;
