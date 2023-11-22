@@ -19,12 +19,14 @@ type DataFunction =
       name: string;
       type?: "js";
       version?: string;
-      callback: (
-        ctx: Context,
-        event: TelegramBot & Context,
-        database: AoiManager,
-        error: MessageError,
-      ) => unknown;
+      callback:
+        | string
+        | ((
+            ctx: Context,
+            event: TelegramBot & Context,
+            database: AoiManager,
+            error: MessageError,
+          ) => unknown);
     };
 
 /**

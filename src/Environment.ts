@@ -1,13 +1,15 @@
 import { Context } from "./Context";
 import { AoijsError } from "./classes/AoiError";
 
-type EnvFunction = (ctx: Context) => unknown;
+type EnvironmentFunction = (ctx: Context) => unknown;
+type EnvironmentVariable = string;
+type EnvironmentResult = EnvironmentFunction | EnvironmentVariable;
 
 /**
  * The Environment class represents a context in which functions and variables can be stored and retrieved.
  */
 class Environment {
-  #cache = new Map<string, EnvFunction>();
+  #cache = new Map<string, EnvironmentResult>();
 
   /**
    * Constructs an environment with an optional parent environment.
@@ -29,7 +31,7 @@ class Environment {
    * @param value - The value to associate with the key.
    * @returns undefined.
    */
-  set(name: string, value: EnvFunction) {
+  set(name: string, value: EnvironmentResult) {
     this.#cache.set(name, value);
   }
 

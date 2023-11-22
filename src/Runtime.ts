@@ -197,13 +197,22 @@ function readFunctions(
             dataFunction.name,
           );
         }
-        const response = await dataFunction.callback(
-          context,
-          telegram,
-          database,
-          error,
-        );
-        return response;
+        if (typeof dataFunction.callback === "function") {
+          const response = await dataFunction.callback(
+            context,
+            telegram,
+            database,
+            error,
+          );
+          return response;
+        } else if (typeof dataFunction.callback === "string") {
+          return dataFunction.callback;
+        } else {
+          throw new AoijsError(
+            "runtime",
+            "the 'callback' should be either a function or a string",
+          );
+        }
       });
     } else if (dataFunctionName && dataFunction.type === "aoitelegram") {
       parent.set(dataFunctionName, async (context) => {
@@ -263,7 +272,7 @@ function readFunctionsInDirectory(
     } else if (itemPath.endsWith(".js")) {
       const dataFunction = require(itemPath).default;
       const dataFunctionName = dataFunction?.name.toLowerCase();
-      if (dataFunction) {
+      if (dataFunction && typeof dataFunction.callback === "function") {
         parent.set(dataFunctionName, async (context) => {
           const error = new MessageError(telegram);
           const response = await dataFunction.callback(
