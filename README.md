@@ -53,6 +53,8 @@ const aoijs = new AoiClient({
   console: true,
   /** Displaying messages about new versions. */
   aoiwarning: true,
+  /** Checks for available package updates and performs an update if enabled */
+  autoUpdate: true,
 });
 
 aoijs.readyCommand({
