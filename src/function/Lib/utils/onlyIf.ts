@@ -7,9 +7,9 @@ export default {
 
     const [condition, ifTrue, replyMessage] = ctx.getArgs(0, 2);
     const opIdx = condition.child.findIndex(
-      (node: any) => node.type === "operator",
+      (node) => node.type === "operator",
     );
-    const opNode = condition.child[opIdx] as any;
+    const opNode = condition.child[opIdx];
 
     let [condA, condB] = await ctx.evaluateArgs([
       { type: "argument", child: condition.child.slice(0, opIdx) },
@@ -18,23 +18,23 @@ export default {
     condA = parse(condA);
     let res: boolean;
 
-    switch (true) {
-      case opNode?.value == "==":
+    switch (opNode.value) {
+      case opNode.value == "==":
         res = condA == condB;
         break;
-      case opNode?.value == "!=":
+      case opNode.value == "!=":
         res = condA != condB;
         break;
-      case opNode?.value == ">=":
+      case opNode.value == ">=":
         res = condA >= condB;
         break;
-      case opNode?.value == ">":
+      case opNode.value == ">":
         res = condA > condB;
         break;
-      case opNode?.value == "<=":
+      case opNode.value == "<=":
         res = condA <= condB;
         break;
-      case opNode?.value == "<":
+      case opNode.value == "<":
         res = condA < condB;
         break;
       default:

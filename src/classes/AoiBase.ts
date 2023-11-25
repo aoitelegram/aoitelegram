@@ -150,6 +150,7 @@ class AoiBase extends TelegramBot {
       }
       this.customFunction = [...(this.customFunction ?? []), options];
     }
+    return this;
   }
 
   /**
@@ -167,6 +168,7 @@ class AoiBase extends TelegramBot {
     this.on("ready", async (ctx) => {
       await this.evaluateCommand({ event: "ready" }, options.code, ctx);
     });
+    return this;
   }
 
   /**
@@ -184,6 +186,7 @@ class AoiBase extends TelegramBot {
     this.on("message", async (ctx) => {
       await this.evaluateCommand({ event: "message" }, options.code, ctx);
     });
+    return this;
   }
 
   /**
@@ -205,6 +208,7 @@ class AoiBase extends TelegramBot {
         ctx,
       );
     });
+    return this;
   }
 
   /**
@@ -226,6 +230,7 @@ class AoiBase extends TelegramBot {
         ctx,
       );
     });
+    return this;
   }
 
   /**
@@ -243,6 +248,7 @@ class AoiBase extends TelegramBot {
     this.on("channel_post", async (ctx) => {
       await this.evaluateCommand({ event: "channel_post" }, options.code, ctx);
     });
+    return this;
   }
 
   /**
@@ -264,6 +270,7 @@ class AoiBase extends TelegramBot {
         ctx,
       );
     });
+    return this;
   }
 
   /**
@@ -281,6 +288,7 @@ class AoiBase extends TelegramBot {
     this.on("inline_query", async (ctx) => {
       await this.evaluateCommand({ event: "inline_query" }, options.code, ctx);
     });
+    return this;
   }
 
   /**
@@ -302,6 +310,7 @@ class AoiBase extends TelegramBot {
         ctx,
       );
     });
+    return this;
   }
 
   /**
@@ -323,6 +332,7 @@ class AoiBase extends TelegramBot {
         ctx,
       );
     });
+    return this;
   }
 
   /**
@@ -340,6 +350,7 @@ class AoiBase extends TelegramBot {
     this.on("poll", async (ctx) => {
       await this.evaluateCommand({ event: "poll" }, options.code, ctx);
     });
+    return this;
   }
 
   /**
@@ -357,6 +368,7 @@ class AoiBase extends TelegramBot {
     this.on("poll_answer", async (ctx) => {
       await this.evaluateCommand({ event: "poll_answer" }, options.code, ctx);
     });
+    return this;
   }
 
   /**
@@ -374,6 +386,7 @@ class AoiBase extends TelegramBot {
     this.on("chat_member", async (ctx) => {
       await this.evaluateCommand({ event: "chat_member" }, options.code, ctx);
     });
+    return this;
   }
 
   /**
@@ -395,6 +408,7 @@ class AoiBase extends TelegramBot {
         ctx,
       );
     });
+    return this;
   }
 
   /**
@@ -416,6 +430,7 @@ class AoiBase extends TelegramBot {
         ctx,
       );
     });
+    return this;
   }
 
   /**

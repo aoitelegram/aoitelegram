@@ -90,10 +90,8 @@ function isNaN(content: string) {
 /**
  * Checks typeof value.
  * @param {string} character - The string to check.
- * @returns {any} - value
  */
 function parse(character: string) {
-  if (!character) return character;
   switch (true) {
     case isInteger(character):
       return parseInt(character);

@@ -29,7 +29,7 @@ Here's a quick example of how to use `aoitelegram` to create a Telegram bot:
 ```javascript
 const { AoiClient, LoadCommands } = require("aoitelegram");
 
-const aoijs = new AoiClient({
+const bot = new AoiClient({
   token: "YOUR_BOT_TOKEN_HERE",
   telegram: {
     /** The maximum number of updates to fetch at once. Defaults to 100. */
@@ -57,32 +57,32 @@ const aoijs = new AoiClient({
   autoUpdate: true,
 });
 
-aoijs.readyCommand({
+bot.readyCommand({
   code: `$print[Starting @$client[username]]`,
 });
 
-aoijs.messageCommand({
+bot.messageCommand({
   code: `$print[Message Handle]`,
 });
 
-aoijs.callbackQueryCommand({
+bot.callbackQueryCommand({
   code: `$print[Action Handle]`,
 });
 
 // Define a command to print a message.
-aoijs.command({
+bot.command({
   name: "say",
   code: `$sendMessage[$message]`,
 });
 
 // Define a command to check the bot's ping.
-aoijs.command({
+bot.command({
   name: "ping",
   code: `$replyMessage[Bot ping: $ping ms]`,
 });
 
 // Define a command to display bot information.
-aoijs.command({
+bot.command({
   name: "botinfo",
   code: `
 $replyMessage[
@@ -95,7 +95,7 @@ Ping: $ping ms]`,
 const loader = new LoadCommands(bot).loadCommands("./command/");
 
 // Set user variables in a table.
-aoijs.variables(
+bot.variables(
   {
     sempai: 10,
     string: "Hello, world!",
@@ -107,7 +107,7 @@ aoijs.variables(
 );
 
 // Connect to the Telegram service.
-aoijs.connect();
+bot.connect();
 ```
 
 ## Documentation
