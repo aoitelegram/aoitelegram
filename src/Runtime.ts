@@ -271,6 +271,7 @@ function readFunctionsInDirectory(
       readFunctionsInDirectory(itemPath, parent, telegram, database);
     } else if (itemPath.endsWith(".js")) {
       const dataFunction = require(itemPath).default;
+      if (!dataFunction?.name) continue;
       const dataFunctionName = dataFunction?.name.toLowerCase();
       if (dataFunction && typeof dataFunction.callback === "function") {
         parent.set(dataFunctionName, async (context) => {

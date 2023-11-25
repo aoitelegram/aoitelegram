@@ -24,7 +24,7 @@ export default {
     let res: boolean;
     condA = parse(condA);
 
-    switch (opNode?.value) {
+    switch (true) {
       case opNode.value == "==":
         res = condA == condB;
         break;
