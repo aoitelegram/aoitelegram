@@ -118,6 +118,7 @@
     "./JavaScript/Object/*",
     "./JavaScript/String/*",
     "./Lib/database/*",
+    "./Lib/math/*",
     "./Lib/utils/*",
     "./*"
   ]
