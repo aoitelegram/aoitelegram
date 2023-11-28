@@ -76,7 +76,7 @@ class LoadCommands {
               }
             }
 
-            if (dataArrayFunc.action) {
+            if (dataArrayFunc.data) {
               this.#aoitelegram.action({
                 data: dataArrayFunc.data,
                 answer: dataArrayFunc.answer,
@@ -132,7 +132,7 @@ class LoadCommands {
             }
           }
 
-          if (dataFunc.action) {
+          if (dataFunc.data) {
             this.#aoitelegram.action({
               data: dataFunc.data,
               answer: dataFunc.answer,
