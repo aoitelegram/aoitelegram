@@ -78,14 +78,27 @@ class LoadCommands {
 
             if (dataArrayFunc.action) {
               this.#aoitelegram.action({
-                data: dataArrayFunc.action,
+                data: dataArrayFunc.data,
                 answer: dataArrayFunc.answer,
                 code: dataArrayFunc.code,
               });
               if (log) {
                 console.log(
                   `|---------------------------------------------------------------------|\n`,
-                  `| Loading in ${itemPath} | Loaded '${dataArrayFunc.action}' | action |`,
+                  `| Loading in ${itemPath} | Loaded '${dataArrayFunc.data}' | action |`,
+                );
+              }
+            }
+
+            if (dataArrayFunc.id) {
+              this.#aoitelegram.timeoutCommand({
+                id: dataArrayFunc.id,
+                code: dataArrayFunc.code,
+              });
+              if (log) {
+                console.log(
+                  `|---------------------------------------------------------------------|\n`,
+                  `| Loading in ${itemPath} | Loaded '${dataArrayFunc.id}' | timeout |`,
                 );
               }
             }
@@ -121,14 +134,27 @@ class LoadCommands {
 
           if (dataFunc.action) {
             this.#aoitelegram.action({
-              data: dataFunc.action,
+              data: dataFunc.data,
               answer: dataFunc.answer,
               code: dataFunc.code,
             });
             if (log) {
               console.log(
                 `|---------------------------------------------------------------------|\n`,
-                `| Loading in ${itemPath} | Loaded '${dataFunc.action}' | action |`,
+                `| Loading in ${itemPath} | Loaded '${dataFunc.data}' | action |`,
+              );
+            }
+          }
+
+          if (dataFunc.id) {
+            this.#aoitelegram.timeoutCommand({
+              id: dataFunc.id,
+              code: dataFunc.code,
+            });
+            if (log) {
+              console.log(
+                `|---------------------------------------------------------------------|\n`,
+                `| Loading in ${itemPath} | Loaded '${dataFunc.id}' | timeout |`,
               );
             }
           }

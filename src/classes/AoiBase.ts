@@ -1,7 +1,7 @@
 import { TelegramBot, type Context } from "telegramsjs";
 import { UserFromGetMe, Update } from "@telegram.ts/types";
-import { AoijsError, AoiStopping, MessageError } from "./AoiError";
 import { AoiManager, DatabaseOptions } from "./AoiManager";
+import { AoijsError, AoiStopping, MessageError } from "./AoiError";
 import { Runtime } from "../Runtime";
 import { version } from "../../package.json";
 
