@@ -6,9 +6,7 @@ export default {
     if (!ctx.argsCheck(2, true, error, "$if")) return;
 
     const [condition, ifTrue, ifFalse] = ctx.getArgs(0, 3);
-    const opIdx = condition.child.findIndex(
-      (node) => node.type === "operator",
-    );
+    const opIdx = condition.child.findIndex((node) => node.type === "operator");
     const opNode = condition.child[opIdx];
 
     if (!opNode) {

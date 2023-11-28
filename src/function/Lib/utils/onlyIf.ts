@@ -6,9 +6,7 @@ export default {
     if (!ctx.argsCheck(2, true, error, "$onlyIf")) return;
 
     const [condition, ifTrue, replyMessage] = ctx.getArgs(0, 2);
-    const opIdx = condition.child.findIndex(
-      (node) => node.type === "operator",
-    );
+    const opIdx = condition.child.findIndex((node) => node.type === "operator");
     const opNode = condition.child[opIdx];
 
     let [condA, condB] = await ctx.evaluateArgs([

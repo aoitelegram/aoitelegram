@@ -5,9 +5,11 @@ import { AoiWarning } from "./AoiWarning";
 import { DatabaseOptions } from "./AoiManager";
 import { Command, CommandDescription } from "../helpers/Command";
 import { Action, ActionDescription } from "../helpers/Action";
+import { Timeout, TimeoutDescription } from "../helpers/Timeout";
+import { TimeoutManager } from "../helpers/TimeoutManager";
 import { AoiBase, DataFunction, TelegramOptions } from "./AoiBase";
 
-type CommandInfoSet = { data: string } | { name: string };
+type CommandInfoSet = { data: string } | { name: string } | { id: string };
 
 /**
  * A class representing an AoiClient, which extends AoiBase.
@@ -18,6 +20,8 @@ class AoiClient extends AoiBase {
   #warningmanager: AoiWarning;
   registerCommand: Command = new Command(this);
   registerAction: Action = new Action(this);
+  registerTimeout: Timeout = new Timeout(this);
+  timeoutManager: TimeoutManager = new TimeoutManager(this);
   private commands: Collection<CommandInfoSet, unknown> = new Collection();
   private globalVars: Collection<string, unknown> = new Collection();
   /**
@@ -106,12 +110,31 @@ class AoiClient extends AoiBase {
     return this;
   }
 
+  timeoutCommand(options: TimeoutDescription) {
+    if (!options?.id) {
+      throw new AoijsError(
+        "parameter",
+        "you did not specify the 'id' parameter",
+      );
+    }
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "you did not specify the 'code' parameter",
+      );
+    }
+    this.registerTimeout.register(options);
+    this.#commandInfo({ id: options.id }, { ...options });
+    return this;
+  }
+
   /**
    * Connect to the service and perform initialization tasks.
    */
   async connect() {
     await this.registerCommand.handler();
     await this.registerAction.handler();
+    await this.registerTimeout.handler();
     if (this.#aoiwarning) {
       await this.#warningmanager.checkUpdates();
     }
