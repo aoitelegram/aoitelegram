@@ -1,4 +1,5 @@
-import { TelegramBot, type Context } from "telegramsjs";
+import { setInterval } from "node:timers";
+import { TelegramBot, Context } from "telegramsjs";
 import { UserFromGetMe, Update } from "@telegram.ts/types";
 import { AoiManager, DatabaseOptions } from "./AoiManager";
 import { AoijsError, AoiStopping, MessageError } from "./AoiError";
@@ -150,6 +151,25 @@ class AoiBase extends TelegramBot {
       }
       this.customFunction = [...(this.customFunction ?? []), options];
     }
+    return this;
+  }
+
+  /**
+   * Executes a command in a loop at a specified interval.
+   * @param {Object} options - Loop configuration options.
+   * @param {number} options.every - Interval in milliseconds for executing the code.
+   * @param {string} options.code - The command code to be executed in the loop.
+   */
+  loopCommand(options: { every?: number; code: string }) {
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "you did not specify the 'code' parameter",
+      );
+    }
+    setInterval(async () => {
+      await this.evaluateCommand({ event: "loop" }, options.code, this);
+    }, options.every ?? 60000);
     return this;
   }
 

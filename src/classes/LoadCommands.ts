@@ -185,7 +185,7 @@ class LoadCommands {
   runEvent(
     aoitelegram: AoiClient,
     eventType: { hasEvent: string | null; parameter: string },
-    data: { code: string },
+    data: { every?: number; code: string },
   ) {
     switch (true) {
       case "ready" === eventType.hasEvent:
@@ -230,6 +230,9 @@ class LoadCommands {
       case "chat_join_request" === eventType.hasEvent:
         aoitelegram.chatJoinRequestCommand(data);
         break;
+      case "loop" === eventType.hasEvent:
+        aoitelegram.loopCommand(data);
+        break;
       default:
         throw new AoijsError(
           "loader",
@@ -240,7 +243,6 @@ class LoadCommands {
 
   /**
    * Get the loader event type based on a given type string.
-   *
    * @param {string} type - The type of the event.
    * @returns {{ hasEvent: string | null; parameter: string }} - An object with 'hasEvent' and 'parameter' properties representing the event type.
    */
@@ -260,6 +262,7 @@ class LoadCommands {
       chat_member: "chat_member",
       my_chat_member: "my_chat_member",
       chat_join_request: "chat_join_request",
+      loop: "loop",
     };
     return { hasEvent: events[type] ?? null, parameter: type };
   }

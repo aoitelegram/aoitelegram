@@ -70,7 +70,7 @@ class MessageError {
    * @param func - The name of the function generating the error.
    */
   errorArgs(amount: number, parameterCount: number, func: string) {
-    const text = MessageError.createMessageError(
+    const text = this.createMessageError(
       func,
       `Expected ${amount} arguments but got ${parameterCount}`,
     );
@@ -84,7 +84,7 @@ class MessageError {
    * @param func - The name of the function generating the error.
    */
   errorVar(nameVar: string, func: string) {
-    const text = MessageError.createMessageError(
+    const text = this.createMessageError(
       func,
       `Invalid variable ${nameVar} not found`,
     );
@@ -98,7 +98,7 @@ class MessageError {
    * @param func - The name of the function generating the error.
    */
   errorTable(table: string, func: string) {
-    const text = MessageError.createMessageError(
+    const text = this.createMessageError(
       func,
       `Invalid table ${table} not found`,
     );
@@ -112,7 +112,7 @@ class MessageError {
    * @param {string} func - The name of the function.
    */
   errorType(type: string, func: string) {
-    const text = MessageError.createMessageError(
+    const text = this.createMessageError(
       func,
       `Expected type ${type} in function ${func}`,
     );
@@ -126,7 +126,7 @@ class MessageError {
    * @param {string} func - The name of the function causing the error.
    */
   errorArray(name: string, func: string) {
-    const text = MessageError.createMessageError(
+    const text = this.createMessageError(
       func,
       `The specified variable ${name} does not exist for the array`,
     );
@@ -140,7 +140,7 @@ class MessageError {
    * @param {string} func - The name of the function where the error occurred.
    */
   customError(description: string, func: string) {
-    const text = MessageError.createMessageError(func, description);
+    const text = this.createMessageError(func, description);
     this.telegram.send(text, { parse_mode: "HTML" });
     throw new AoiStopping("customError");
   }
@@ -151,8 +151,14 @@ class MessageError {
    * @param details - Details of the error.
    * @param line - Line number of the error.
    */
-  static createMessageError(func: string, details: string, line?: number) {
-    return `<code>MessageError: ${func}: ${details}\n{ \nline : ${line}, \ncommand : ${func} \n}</code>`;
+  createMessageError(func: string, details: string, line?: number) {
+    if (!this.telegram.send) {
+      throw new Error(
+        `ConsoleError: ${func}: ${details}\n{\n  line: ${line},\n  command: ${func}\n}`,
+      );
+    } else {
+      return `<code>MessageError: ${func}: ${details}\n{ \nline : ${line}, \ncommand : ${func} \n}</code>`;
+    }
   }
 }
 
