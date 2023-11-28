@@ -3,11 +3,11 @@ import { Collection } from "telegramsjs";
 import { AoijsError } from "./AoiError";
 import { AoiWarning } from "./AoiWarning";
 import { DatabaseOptions } from "./AoiManager";
+import { TimeoutManager } from "../helpers/TimeoutManager";
+import { AoiBase, DataFunction, TelegramOptions } from "./AoiBase";
 import { Command, CommandDescription } from "../helpers/Command";
 import { Action, ActionDescription } from "../helpers/Action";
 import { Timeout, TimeoutDescription } from "../helpers/Timeout";
-import { TimeoutManager } from "../helpers/TimeoutManager";
-import { AoiBase, DataFunction, TelegramOptions } from "./AoiBase";
 
 type CommandInfoSet = { data: string } | { name: string } | { id: string };
 
@@ -61,7 +61,7 @@ class AoiClient extends AoiBase {
 
   /**
    * Define a command for the client.
-   * @param {Object} options - Command options.
+   * @param {CommandDescription} options - Command options.
    * @param {string} options.name - The name of the command.
    * @param {string | boolean} [options.typeChannel=false] - In what type of channels to watch command
    * @param {string} options.code - The code to be executed when the command is invoked.
@@ -87,8 +87,9 @@ class AoiClient extends AoiBase {
 
   /**
    * Defines an action handler.
-   * @param {string} data - The action data string or an array of action data strings.
-   * @param {boolean} [answer=false] - Whether to answer the action.
+   * @param {ActionDescription} options - Command options.
+   * @param {string} options.data - The action data string or an array of action data strings.
+   * @param {boolean} [options.answer=false] - Whether to answer the action.
    * @param {string} options.code - The code to be executed when the command is invoked.
    */
   // @ts-ignore
@@ -110,6 +111,12 @@ class AoiClient extends AoiBase {
     return this;
   }
 
+  /**
+   * Defines an timeout handler.
+   * @param {TimeoutDescription} options - Command options.
+   * @param {string} options.id - The unique identifier for the timeout command.
+   * @param {string} options.code - The code or content associated with the timeout command.
+   */
   timeoutCommand(options: TimeoutDescription) {
     if (!options?.id) {
       throw new AoijsError(
