@@ -113,4 +113,35 @@ function parse(character: string) {
   }
 }
 
-export { parse };
+interface Data {
+  [key: string]: any;
+}
+
+/**
+ * Retrieves a nested property value from an object based on the provided path.
+ * @template T - The type of the input data object.
+ * @template K - The key type of the property to retrieve from the object.
+ * @param {T} data - The input data object.
+ * @param {string} path - The dot-separated path of the property to retrieve.
+ * @returns {T[K] | undefined} - The value of the nested property or undefined if not found.
+ */
+function getObjectKey<T extends Data, K extends keyof T>(
+  data: T,
+  path: string,
+): T[K] {
+  const properties = path.split(".");
+  function getProperty(obj: Data, props: string[]): any {
+    const [currentProp, ...rest] = props;
+    if (obj && obj[currentProp]) {
+      if (rest.length > 0) {
+        return getProperty(obj[currentProp], rest);
+      } else {
+        return obj[currentProp];
+      }
+    }
+    return undefined;
+  }
+  return getProperty(data, properties) as T[K];
+}
+
+export { parse, getObjectKey };

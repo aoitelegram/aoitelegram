@@ -1,4 +1,4 @@
-import { getObjectKey } from "../../JavaScript/Object/getObjectProperty";
+import { getObjectKey } from "../../parser";
 
 export default {
   name: "$eventData",

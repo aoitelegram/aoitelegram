@@ -1,25 +1,4 @@
-interface Data {
-  [key: string]: any;
-}
-
-export function getObjectKey<T extends Data, K extends keyof T>(
-  data: T,
-  path: string,
-): T[K] {
-  const properties = path.split(".");
-  function getProperty(obj: Data, props: string[]): any {
-    const [currentProp, ...rest] = props;
-    if (obj && obj[currentProp]) {
-      if (rest.length > 0) {
-        return getProperty(obj[currentProp], rest);
-      } else {
-        return obj[currentProp];
-      }
-    }
-    return undefined;
-  }
-  return getProperty(data, properties) as T[K];
-}
+import { getObjectKey } from "../../parser";
 
 export default {
   name: "$getObjectProperty",
