@@ -106,7 +106,6 @@ bot.variables(
   "main",
 );
 
-// Connect to the Telegram service.
 bot.connect();
 ```
 
