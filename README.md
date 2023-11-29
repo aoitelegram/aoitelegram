@@ -101,7 +101,7 @@ bot.variables(
     string: "Hello, world!",
     aoijs: true,
     webapp: false,
-    mz: {},
+    mz: [],
   },
   "main",
 );
