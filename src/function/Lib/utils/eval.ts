@@ -1,8 +1,8 @@
 export default {
   name: "$eval",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(1, true, error, "$eval")) return;
-    const content = await ctx.evaluateArgs(ctx.getArgs());
+    ctx.argsCheck(1, error, "$eval");
+    const content = await ctx.getEvaluateArgs();
     return event.telegram
       .evaluateCommand(ctx.fileName, ...content, event)
       .then((res: unknown) => res)

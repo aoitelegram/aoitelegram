@@ -1,8 +1,8 @@
 export default {
   name: "$textIncludes",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(2, true, error, "$textIncludes")) return;
-    const args = await ctx.evaluateArgs(ctx.getArgs());
+    ctx.argsCheck(2, error, "$textIncludes");
+    const args = await ctx.getEvaluateArgs();
 
     return args[0].includes(args[1]);
   },

@@ -1,8 +1,8 @@
 export default {
   name: "$chartAt",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(2, true, error, "$chartAt")) return;
-    const args = await ctx.evaluateArgs(ctx.getArgs());
+    ctx.argsCheck(2, error, "$chartAt");
+    const args = await ctx.getEvaluateArgs();
     return args[0].charAt(args[1] - 1);
   },
 };

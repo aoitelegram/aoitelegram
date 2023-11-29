@@ -1,8 +1,8 @@
 export default {
   name: "$arrayJoin",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(2, true, error, "$arrayJoin")) return;
-    const args = await ctx.evaluateArgs(ctx.getArgs());
+    ctx.argsCheck(2, error, "$arrayJoin");
+    const args = await ctx.getEvaluateArgs();
 
     if (!ctx.array.has(args[0])) {
       error.errorArray(args[0], "$arrayJoin");

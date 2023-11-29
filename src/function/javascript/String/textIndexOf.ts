@@ -1,8 +1,8 @@
 export default {
   name: "$textIndexOf",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(2, true, error, "$textIndexOf")) return;
-    const args = await ctx.evaluateArgs(ctx.getArgs());
+    ctx.argsCheck(2, error, "$textIndexOf");
+    const args = await ctx.getEvaluateArgs();
     return args[0].indexOf(args[1]);
   },
 };

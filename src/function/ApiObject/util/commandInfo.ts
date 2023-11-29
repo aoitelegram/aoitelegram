@@ -1,8 +1,8 @@
 export default {
   name: "$commandInfo",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(1, true, error, "$commandInfo")) return;
-    const args = await ctx.evaluateArgs(ctx.getArgs());
+    ctx.argsCheck(1, error, "$commandInfo");
+    const args = await ctx.getEvaluateArgs();
     const commands = event.telegram?.commands.get({ name: args[0] });
     return commands?.[args[1] ?? "code"];
   },

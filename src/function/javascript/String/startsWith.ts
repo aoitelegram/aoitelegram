@@ -1,8 +1,8 @@
 export default {
   name: "$startsWith",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(2, true, error, "$startsWith")) return;
-    const args = await ctx.evaluateArgs(ctx.getArgs());
+    ctx.argsCheck(2, error, "$startsWith");
+    const args = await ctx.getEvaluateArgs();
     return args[0].startsWith(args[1]);
   },
 };

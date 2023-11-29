@@ -1,8 +1,8 @@
 export default {
   name: "$arrayIndexOf",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(2, true, error, "$arrayIndexOf")) return;
-    const args = await ctx.evaluateArgs(ctx.getArgs());
+    ctx.argsCheck(2, error, "$arrayIndexOf");
+    const args = await ctx.getEvaluateArgs();
 
     if (!ctx.array.has(args[0])) {
       error.errorArray(args[0], "$arrayIndexOf");

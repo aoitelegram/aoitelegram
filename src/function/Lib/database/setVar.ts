@@ -1,8 +1,8 @@
 export default {
   name: "$setVar",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(2, true, error, "$setVar")) return;
-    const args = await ctx.evaluateArgs(ctx.getArgs());
+    ctx.argsCheck(2, error, "$setVar");
+    const args = await ctx.getEvaluateArgs();
 
     if (!(await database.has("main", args[0]))) {
       error.errorVar(args[0], "$setVar");

@@ -1,8 +1,8 @@
 export default {
   name: "$endsWith",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(2, true, error, "$endsWith")) return;
-    const args = await ctx.evaluateArgs(ctx.getArgs());
+    ctx.argsCheck(2, error, "$endsWith");
+    const args = await ctx.getEvaluateArgs();
     return args[0].endsWith(args[1]);
   },
 };

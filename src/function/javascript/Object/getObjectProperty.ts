@@ -24,8 +24,8 @@ export function getObjectKey<T extends Data, K extends keyof T>(
 export default {
   name: "$getObjectProperty",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(1, true, error, "$getObjectProperty")) return;
-    const args = await ctx.evaluateArgs(ctx.getArgs());
+    ctx.argsCheck(1, error, "$getObjectProperty");
+    const args = await ctx.getEvaluateArgs();
     const object = JSON.parse(JSON.stringify(args[0]));
     return getObjectKey(object, args[1]);
   },

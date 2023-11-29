@@ -1,8 +1,8 @@
 export default {
   name: "$arrayAt",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(2, true, error, "$arrayAt")) return;
-    const args = await ctx.evaluateArgs(ctx.getArgs());
+    ctx.argsCheck(2, error, "$arrayAt");
+    const args = await ctx.getEvaluateArgs();
 
     if (!ctx.array.has(args[0])) {
       error.errorArray(args[0], "$arrayAt");

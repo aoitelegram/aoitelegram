@@ -1,8 +1,8 @@
 export default {
   name: "$print",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(1, true, error, "$print")) return;
-    console.log(...(await ctx.evaluateArgs(ctx.getArgs())));
+    ctx.argsCheck(1, error, "$print");
+    console.log(...(await ctx.getEvaluateArgs()));
     return undefined;
   },
 };

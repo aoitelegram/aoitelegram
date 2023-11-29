@@ -1,8 +1,8 @@
 export default {
   name: "$getVar",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(1, true, error, "$getVar")) return;
-    const args = await ctx.evaluateArgs(ctx.getArgs());
+    ctx.argsCheck(1, error, "$getVar");
+    const args = await ctx.getEvaluateArgs();
     args[1] === undefined ? (args[1] = "main") : null;
 
     if (!(await database.hasTable(args[1]))) {

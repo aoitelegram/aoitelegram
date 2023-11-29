@@ -3,7 +3,7 @@ import { parse } from "../../parser";
 export default {
   name: "$onlyIf",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(2, true, error, "$onlyIf")) return;
+    ctx.argsCheck(2, error, "$onlyIf");
 
     const [condition, ifTrue, replyMessage] = ctx.getArgs(0, 2);
     const opIdx = condition.child.findIndex((node) => node.type === "operator");

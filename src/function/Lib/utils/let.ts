@@ -1,8 +1,8 @@
 export default {
   name: "$let",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(2, true, error, "$let")) return;
-    const args = await ctx.evaluateArgs(ctx.getArgs());
+    ctx.argsCheck(2, error, "$let");
+    const args = await ctx.getEvaluateArgs();
 
     return ctx.localVars.set(args[0], args[1]);
   },

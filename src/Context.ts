@@ -50,22 +50,14 @@ class Context {
   /**
    * Check if the number of arguments is as expected.
    * @param amount - Amount of arguments required.
-   * @param throwError - Throw error automatically.
-   * @param event - Event object.
-   * @param messageError - error message
+   * @param error - Error class.
+   * @param func - error message function.
    */
-  argsCheck(amount = 1, throwError = true, error: MessageError, func: string) {
+  argsCheck(amount = 1, error: MessageError, func: string) {
     const target = this.#target;
-
     if (!target || target.child.length < amount) {
-      if (throwError) {
-        error.errorArgs(amount, target?.child.length ?? 0, func);
-        return false;
-      } else {
-        return false;
-      }
+      error.errorArgs(amount, target?.child.length ?? 0, func);
     }
-    return true;
   }
 
   /**
@@ -93,9 +85,9 @@ class Context {
   }
 
   /**
-   * Get arguments from 'start' up to 'end' and evaluate arguments.
-   * @param start - The start index.
-   * @param end - Amount of arguments to be returned.
+   * Retrieve and evaluate arguments from the 'start' index up to a specified 'end' count.
+   * @param start - The starting index for retrieving arguments.
+   * @param end - The number of arguments to be retrieved and evaluated.
    */
   async getEvaluateArgs(start = -1, end = 1) {
     const asyncArgs = await this.getArgs(start, end);

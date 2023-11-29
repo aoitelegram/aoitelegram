@@ -9,8 +9,8 @@ function hasObject(arg: any): arg is object {
 export default {
   name: "$setTimeout",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(2, true, error, "$setTimeout")) return;
-    const args = await ctx.evaluateArgs(ctx.getArgs());
+    ctx.argsCheck(2, error, "$setTimeout");
+    const args = await ctx.getEvaluateArgs();
     if (args[2]) {
       if (!hasObject(args[2])) {
         error.customError("Error object", "$setTimeout");

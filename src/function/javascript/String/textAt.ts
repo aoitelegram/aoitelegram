@@ -1,8 +1,8 @@
 export default {
   name: "$textAt",
   callback: async (ctx, event, database, error) => {
-    if (!ctx.argsCheck(2, true, error, "$textAt")) return;
-    const args = await ctx.evaluateArgs(ctx.getArgs());
+    ctx.argsCheck(2, error, "$textAt");
+    const args = await ctx.getEvaluateArgs();
     return args[0].at(args[1] >= 1 ? args[1] - 1 : args[1]);
   },
 };
