@@ -153,12 +153,32 @@ class MessageError {
    */
   createMessageError(func: string, details: string, line?: number) {
     if (!this.telegram.send) {
-      throw new Error(
-        `ConsoleError: ${func}: ${details}\n{\n  line: ${line},\n  command: ${func}\n}`,
-      );
+      throw new ConsoleError(func, details, line);
     } else {
       return `<code>MessageError: ${func}: ${details}\n{ \nline : ${line}, \ncommand : ${func} \n}</code>`;
     }
+  }
+}
+
+/**
+ * Custom error class for handling console-related errors.
+ */
+class ConsoleError extends Error {
+  name: string;
+  details: string;
+  line?: number;
+
+  /**
+   * Creates an instance of ConsoleError.
+   * @param {string} func - The name of the function where the error occurred.
+   * @param {string} details - Details or additional information about the error.
+   * @param {number | undefined} line - The line number where the error occurred (optional).
+   */
+  constructor(func: string, details: string, line?: number) {
+    super(details);
+    this.name = `ConsoleError[${func}]`;
+    this.details = details;
+    this.line = line;
   }
 }
 
@@ -173,11 +193,11 @@ class AoiStopping extends Error {
   name: string;
 
   /**
-   * Creates a new AoiStopping instance with the provided fun.
-   * @param fun - A fun or message associated with the error.
+   * Creates a new AoiStopping instance with the provided func.
+   * @param func - A fun or message associated with the error.
    */
-  constructor(fun: string) {
-    super(`the team is paused due to an error in the ${fun} method.`);
+  constructor(func: string) {
+    super(`the team is paused due to an error in the ${func} method.`);
     this.name = "AoiStopping";
   }
 }
