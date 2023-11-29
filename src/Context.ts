@@ -91,6 +91,17 @@ class Context {
       args.map((value) => Evaluator.singleton.visitArgument(value, this)),
     );
   }
+
+  /**
+   * Get arguments from 'start' up to 'end' and evaluate arguments.
+   * @param start - The start index.
+   * @param end - Amount of arguments to be returned.
+   */
+  async getEvaluateArgs(start = -1, end = 1) {
+    const asyncArgs = await this.getArgs(start, end);
+    const asyncEvaluate = await this.evaluateArgs(asyncArgs);
+    return asyncEvaluate;
+  }
 }
 
 export { Context };
