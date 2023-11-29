@@ -294,68 +294,64 @@ class Lexer {
    */
   parseString(): Token {
     const str = this.readInput(this.validateString);
-    if (this.isInteger(str)) {
-      return {
-        type: "integer",
-        value: parseInt(str),
-        pos: this.currentColumn,
-        line: this.currentLine,
-      };
+    switch (true) {
+      case this.isInteger(str):
+        return {
+          type: "integer",
+          value: parseInt(str),
+          pos: this.currentColumn,
+          line: this.currentLine,
+        };
+      case this.isFloat(str):
+        return {
+          type: "float",
+          value: parseFloat(str),
+          pos: this.currentColumn,
+          line: this.currentLine,
+        };
+      case this.isNaN(str):
+        return {
+          type: "nan",
+          value: NaN,
+          pos: this.currentColumn,
+          line: this.currentLine,
+        };
+      case this.isObject(str):
+        return {
+          type: "object",
+          value: JSON.parse(str),
+          pos: this.currentColumn,
+          line: this.currentLine,
+        };
+      case this.isBoolean(str):
+        return {
+          type: "boolean",
+          value: str === "true",
+          pos: this.currentColumn,
+          line: this.currentLine,
+        };
+      case this.isNull(str):
+        return {
+          type: "null",
+          value: null,
+          pos: this.currentColumn,
+          line: this.currentLine,
+        };
+      case this.isUndefined(str):
+        return {
+          type: "undefined",
+          value: undefined,
+          pos: this.currentColumn,
+          line: this.currentLine,
+        };
+      default:
+        return {
+          type: "string",
+          value: str,
+          pos: this.currentColumn,
+          line: this.currentLine,
+        };
     }
-    if (this.isFloat(str)) {
-      return {
-        type: "float",
-        value: parseFloat(str),
-        pos: this.currentColumn,
-        line: this.currentLine,
-      };
-    }
-    if (this.isNaN(str)) {
-      return {
-        type: "nan",
-        value: NaN,
-        pos: this.currentColumn,
-        line: this.currentLine,
-      };
-    }
-    if (this.isObject(str)) {
-      return {
-        type: "object",
-        value: JSON.parse(str),
-        pos: this.currentColumn,
-        line: this.currentLine,
-      };
-    }
-    if (this.isBoolean(str)) {
-      return {
-        type: "boolean",
-        value: str === "true" ? true : false,
-        pos: this.currentColumn,
-        line: this.currentLine,
-      };
-    }
-    if (this.isNull(str)) {
-      return {
-        type: "null",
-        value: null,
-        pos: this.currentColumn,
-        line: this.currentLine,
-      };
-    }
-    if (this.isUndefined(str)) {
-      return {
-        type: "undefined",
-        value: undefined,
-        pos: this.currentColumn,
-        line: this.currentLine,
-      };
-    }
-    return {
-      type: "string",
-      value: str,
-      pos: this.currentColumn,
-      line: this.currentLine,
-    };
   }
 
   /**
