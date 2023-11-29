@@ -2,7 +2,7 @@ interface Data {
   [key: string]: any;
 }
 
-function getObjectKey<T extends Data, K extends keyof T>(
+export function getObjectKey<T extends Data, K extends keyof T>(
   data: T,
   path: string,
 ): T[K] {
