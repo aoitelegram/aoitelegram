@@ -42,11 +42,10 @@ class AoiWarning {
           await this.updateToLatestVersion(latestVersion);
         }
       }
-    } catch (error: any) {
-      const messageError = error.response?.data.error;
+    } catch (error) {
       console.warn(
         chalk.red("[ AoiWarning ]: failed to check for updates: ") +
-          chalk.yellow(messageError),
+          chalk.yellow(error),
       );
     }
   }
@@ -75,10 +74,10 @@ class AoiWarning {
       });
 
       process.exit();
-    } catch (error: any) {
+    } catch (error) {
       console.error(
         chalk.red("[ AoiWarning ]: failed to update to the latest version: ") +
-          chalk.yellow(error.message),
+          chalk.yellow(error),
       );
     }
   }
