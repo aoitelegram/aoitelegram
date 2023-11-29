@@ -154,6 +154,26 @@ class AoiBase extends TelegramBot {
   }
 
   /**
+   * Removes function(s) from the customFunction array based on provided options.
+   * @param {string | string[]} options - The name of the function to remove or an array of function names.
+   */
+  removeFunction(options: string | string[]) {
+    if (!this.customFunction) return false;
+    if (Array.isArray(options)) {
+      for (const name of options) {
+        this.customFunction = this.customFunction.filter(
+          (func) => func.name !== name,
+        );
+      }
+    } else {
+      this.customFunction = this.customFunction.filter(
+        (func) => func.name !== options,
+      );
+    }
+    return true;
+  }
+
+  /**
    * Executes a command in a loop at a specified interval.
    * @param {Object} options - Loop configuration options.
    * @param {number} options.every - Interval in milliseconds for executing the code.
