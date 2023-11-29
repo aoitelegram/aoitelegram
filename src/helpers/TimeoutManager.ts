@@ -3,6 +3,7 @@ import { EventEmitter } from "node:events";
 import { CreateStorage } from "database-sempai";
 import { AoijsError } from "../classes/AoiError";
 import { AoiClient } from "../classes/AoiClient";
+import { DatabaseOptions } from "../classes/AoiManager";
 
 interface ValueDatabase {
   id: string;
@@ -23,9 +24,10 @@ class TimeoutManager extends CreateStorage<string, ValueDatabase> {
   /**
    * Constructs a new TimeoutManager instance.
    * @param telegram The AoiClient instance.
+   * @param options Configuration options for the database connection.
    */
-  constructor(telegram: AoiClient) {
-    super({ table: ["timeout"] });
+  constructor(telegram: AoiClient, options?: DatabaseOptions) {
+    super({ ...options, table: ["timeout"] });
     this.telegram = telegram;
 
     /**

@@ -1,6 +1,6 @@
 import { setInterval } from "node:timers";
+import { Update } from "@telegram.ts/types";
 import { TelegramBot, Context } from "telegramsjs";
-import { UserFromGetMe, Update } from "@telegram.ts/types";
 import { AoiManager, DatabaseOptions } from "./AoiManager";
 import { AoijsError, AoiStopping, MessageError } from "./AoiError";
 import { Runtime } from "../Runtime";
@@ -89,12 +89,12 @@ class AoiBase extends TelegramBot {
    * Executes a block of code in response to a command.
    * @param {string | {event: string}} command - The name of the command.
    * @param {string} code - The code to be executed.
-   * @param {(TelegramBot & Context) | UserFromGetMe} telegram - The context or user for executing the code.
+   * @param {unknown} telegram - The context or user for executing the code.
    */
   async evaluateCommand(
     command: string | { event: string },
     code: string,
-    telegram: (TelegramBot & Context) | UserFromGetMe,
+    telegram: unknown,
   ) {
     try {
       const runtime = new Runtime(
@@ -111,7 +111,6 @@ class AoiBase extends TelegramBot {
   /**
    * Add a data function or an array of data functions to the customFunction options.
    * @param {DataFunction|DataFunction[]} options - The data function(s) to add.
-   * @returns {void}
    */
   addFunction(options: DataFunction | DataFunction[]) {
     if (Array.isArray(options)) {

@@ -21,7 +21,7 @@ class AoiClient extends AoiBase {
   registerCommand: Command = new Command(this);
   registerAction: Action = new Action(this);
   registerTimeout: Timeout = new Timeout(this);
-  timeoutManager: TimeoutManager = new TimeoutManager(this);
+  timeoutManager: TimeoutManager;
   private commands: Collection<CommandInfoSet, unknown> = new Collection();
   private globalVars: Collection<string, unknown> = new Collection();
   /**
@@ -57,6 +57,7 @@ class AoiClient extends AoiBase {
     this.#warningmanager = new AoiWarning(
       options.autoUpdate === undefined ? true : options.autoUpdate,
     );
+    this.timeoutManager = new TimeoutManager(this, options.database);
   }
 
   /**
