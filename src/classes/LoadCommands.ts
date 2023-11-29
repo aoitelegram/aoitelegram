@@ -103,6 +103,19 @@ class LoadCommands {
               }
             }
 
+            if (dataArrayFunc.awaited) {
+              this.#aoitelegram.awaitedCommand({
+                awaited: dataArrayFunc.awaited,
+                code: dataArrayFunc.code,
+              });
+              if (log) {
+                console.log(
+                  `|---------------------------------------------------------------------|\n`,
+                  `| Loading in ${itemPath} | Loaded '${dataArrayFunc.awaited}' | awaited |`,
+                );
+              }
+            }
+
             if (dataArrayFunc.type) {
               const eventType = LoadCommands.loaderEventType(
                 dataArrayFunc.type,
@@ -155,6 +168,19 @@ class LoadCommands {
               console.log(
                 `|---------------------------------------------------------------------|\n`,
                 `| Loading in ${itemPath} | Loaded '${dataFunc.id}' | timeout |`,
+              );
+            }
+          }
+
+          if (dataFunc.awaited) {
+            this.#aoitelegram.awaitedCommand({
+              awaited: dataFunc.awaited,
+              code: dataFunc.code,
+            });
+            if (log) {
+              console.log(
+                `|---------------------------------------------------------------------|\n`,
+                `| Loading in ${itemPath} | Loaded '${dataFunc.awaited}' | awaited |`,
               );
             }
           }

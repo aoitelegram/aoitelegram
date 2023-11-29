@@ -1,5 +1,5 @@
 import { AoiClient } from "../classes/AoiClient";
-import { ValueDatabase } from "./TimeoutManager";
+import { ValueDatabase } from "./manager/TimeoutManager";
 
 interface TimeoutDescription {
   id: string;
@@ -65,17 +65,23 @@ class Timeout {
    * Sets up the event handler for timeouts.
    */
   handler() {
-    // @ts-ignore
-    // prettier-ignore
-    this.telegram.on("timeout",  async (timeoutData: AoiClient, context: ValueDatabase) => {
+    this.telegram.on(
+      // @ts-ignore
+      "timeout",
+      async (timeoutData: AoiClient, context: ValueDatabase) => {
         for (const timeout of this.timeouts) {
           if (timeout.id !== context.id) continue;
+
+          const timeoutDataParsed = JSON.parse(`${context.data}`);
 
           await this.telegram.addFunction({
             name: "$timeoutData",
             callback: async (ctx) => {
               const args = await ctx.getEvaluateArgs();
-              return getObjectKey(JSON.parse(`${context.data}`), args[0] ?? "") ?? context.data;
+              return (
+                getObjectKey(timeoutDataParsed, args[0] ?? "") ??
+                timeoutDataParsed
+              );
             },
           });
 
@@ -84,7 +90,7 @@ class Timeout {
             timeout.code,
             timeoutData,
           );
-          
+
           await this.telegram.removeFunction("$timeoutData");
           break;
         }
@@ -93,4 +99,4 @@ class Timeout {
   }
 }
 
-export { Timeout, TimeoutDescription };
+export { Timeout, getObjectKey, TimeoutDescription };

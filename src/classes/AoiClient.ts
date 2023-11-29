@@ -3,13 +3,17 @@ import { Collection } from "telegramsjs";
 import { AoijsError } from "./AoiError";
 import { AoiWarning } from "./AoiWarning";
 import { DatabaseOptions } from "./AoiManager";
-import { TimeoutManager } from "../helpers/TimeoutManager";
+import { TimeoutManager } from "../helpers/manager/TimeoutManager";
+import { AwaitedManager } from "../helpers/manager/AwaitedManager";
 import { AoiBase, DataFunction, TelegramOptions } from "./AoiBase";
 import { Command, CommandDescription } from "../helpers/Command";
 import { Action, ActionDescription } from "../helpers/Action";
 import { Timeout, TimeoutDescription } from "../helpers/Timeout";
+import { Awaited, AwaitedDescription } from "../helpers/Awaited";
 
-type CommandInfoSet = { data: string } | { name: string } | { id: string };
+interface CommandInfoSet {
+  [key: string]: string;
+}
 
 /**
  * A class representing an AoiClient, which extends AoiBase.
@@ -21,7 +25,9 @@ class AoiClient extends AoiBase {
   registerCommand: Command = new Command(this);
   registerAction: Action = new Action(this);
   registerTimeout: Timeout = new Timeout(this);
+  registerAwaited: Awaited = new Awaited(this);
   timeoutManager: TimeoutManager;
+  awaitedManager: AwaitedManager;
   private commands: Collection<CommandInfoSet, unknown> = new Collection();
   private globalVars: Collection<string, unknown> = new Collection();
   /**
@@ -58,6 +64,7 @@ class AoiClient extends AoiBase {
       options.autoUpdate === undefined ? true : options.autoUpdate,
     );
     this.timeoutManager = new TimeoutManager(this, options.database);
+    this.awaitedManager = new AwaitedManager(this);
   }
 
   /**
@@ -137,12 +144,38 @@ class AoiClient extends AoiBase {
   }
 
   /**
+   * Adds an awaited command with the specified options.
+   * @param {AwaitedDescription} options - Options for the awaited command.
+   * @param {string} options.awaited - The name or identifier of the awaited event.
+   * @param {string} options.code - The code or content associated with the awaited command.
+   */
+  awaitedCommand(options: AwaitedDescription) {
+    if (!options?.awaited) {
+      throw new AoijsError(
+        "parameter",
+        "you did not specify the 'awaited' parameter",
+      );
+    }
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "you did not specify the 'code' parameter",
+      );
+    }
+    this.registerAwaited.register(options);
+    this.#commandInfo({ awaited: options.awaited }, { ...options });
+
+    return this;
+  }
+
+  /**
    * Connect to the service and perform initialization tasks.
    */
   async connect() {
     await this.registerCommand.handler();
     await this.registerAction.handler();
     await this.registerTimeout.handler();
+    await this.registerAwaited.handler();
     if (this.#aoiwarning) {
       await this.#warningmanager.checkUpdates();
     }

@@ -1,9 +1,9 @@
 import { setTimeout } from "node:timers";
 import { EventEmitter } from "node:events";
 import { CreateStorage } from "database-sempai";
-import { AoijsError } from "../classes/AoiError";
-import { AoiClient } from "../classes/AoiClient";
-import { DatabaseOptions } from "../classes/AoiManager";
+import { AoijsError } from "../../classes/AoiError";
+import { AoiClient } from "../../classes/AoiClient";
+import { DatabaseOptions } from "../../classes/AoiManager";
 
 interface ValueDatabase {
   id: string;
@@ -17,7 +17,7 @@ interface ValueDatabase {
  */
 class TimeoutManager extends CreateStorage<string, ValueDatabase> {
   /**
-   * The AoiClient instance.
+   * A reference to the AoiClient instance.
    */
   private telegram: AoiClient;
 
@@ -64,7 +64,7 @@ class TimeoutManager extends CreateStorage<string, ValueDatabase> {
       if (context.milliseconds <= 5000) {
         throw new AoijsError(
           "timeout",
-          `The specified time should be greater than 5000 milliseconds. Timeout ID: ${context.id}`,
+          `the specified time should be greater than 5000 milliseconds. Timeout ID: ${context.id}`,
         );
       }
 
