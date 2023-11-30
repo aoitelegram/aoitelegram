@@ -88,6 +88,15 @@ function isNaN(content: string) {
 }
 
 /**
+ * Checks if a string represents the value "number".
+ * @param {string} content - The string to check.
+ * @returns {boolean} True if the string represents the value "number", otherwise false.
+ */
+function isNumber(content: string) {
+  return isFloat(content) || isInteger(content);
+}
+
+/**
  * Checks typeof value.
  * @param {string} character - The string to check.
  */
@@ -103,13 +112,37 @@ function parse(character: string) {
     case isObject(character):
       return JSON.parse(character);
     case isBoolean(character):
-      return character === "true" ? true : false;
+      return character === "true";
     case isNull(character):
       return null;
     case isUndefined(character):
       return undefined;
     default:
       return character;
+  }
+}
+
+/**
+ * Checks typeof value.
+ * @param {string} character - The string to check.
+ */
+function toParse(character: string) {
+  character = `${character}`;
+  switch (true) {
+    case isNumber(character):
+      return "number";
+    case isNaN(character):
+      return "nan";
+    case isObject(character):
+      return "object";
+    case isBoolean(character):
+      return "boolean";
+    case isNull(character):
+      return "null";
+    case isUndefined(character):
+      return "undefined";
+    default:
+      return "unknown";
   }
 }
 
@@ -144,4 +177,4 @@ function getObjectKey<T extends Data, K extends keyof T>(
   return getProperty(data, properties) as T[K];
 }
 
-export { parse, getObjectKey };
+export { parse, toParse, getObjectKey };

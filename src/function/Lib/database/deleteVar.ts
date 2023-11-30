@@ -1,7 +1,7 @@
 export default {
   name: "$deleteVar",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$deleteVar");
+    ctx.argsCheck(1, error);
     const args = await ctx.getEvaluateArgs();
     args[2] === undefined ? (args[2] = "main") : null;
 

@@ -1,14 +1,16 @@
+import { Collection } from "telegramsjs";
+import { Evaluator } from "./Evaluator";
 import { Environment } from "./Environment";
+import { toParse } from "./function/parser";
 import { TokenArgument, TokenCall } from "./Lexer";
 import { Runtime, RuntimeOptions } from "./Runtime";
-import { Evaluator } from "./Evaluator";
 import { AoijsError, MessageError } from "./classes/AoiError";
-import { Collection } from "telegramsjs";
 type FnFunction = (ctx: Context) => unknown;
+let target: TokenCall = {} as TokenCall;
 
 class Context {
-  #target: TokenCall | null = null;
   options: RuntimeOptions;
+  private target: TokenCall = {} as TokenCall;
   private localVars: Collection<string, unknown> = new Collection();
   private array: Collection<string, unknown> = new Collection();
   private object: Collection<string, unknown> = new Collection();
@@ -34,16 +36,16 @@ class Context {
    */
   async callIdentifier(node: TokenCall) {
     const fun = this.env.get(node.value);
-    const lastTarget = this.#target;
-    this.#target = node;
-
+    const lastTarget = this.target;
+    this.target = node;
+    target = node;
     if (typeof fun === "function") {
       const result = (fun as FnFunction)(this);
-      this.#target = lastTarget;
+      this.target = lastTarget;
       return result;
     }
 
-    this.#target = lastTarget;
+    this.target = lastTarget;
     return fun;
   }
 
@@ -51,12 +53,16 @@ class Context {
    * Check if the number of arguments is as expected.
    * @param amount - Amount of arguments required.
    * @param error - Error class.
-   * @param func - error message function.
    */
-  argsCheck(amount = 1, error: MessageError, func: string) {
-    const target = this.#target;
+  argsCheck(amount = 1, error: MessageError) {
+    const target = this.target;
     if (!target || target.child.length < amount) {
-      error.errorArgs(amount, target?.child.length ?? 0, func);
+      error.errorArgs(
+        amount,
+        target.child.length ?? 0,
+        target.value,
+        target.line,
+      );
     }
   }
 
@@ -66,7 +72,7 @@ class Context {
    * @param end - Amount of arguments to be returned.
    */
   getArgs(start = -1, end = 1) {
-    const target = this.#target;
+    const target = this.target;
     if (!target) return [];
     if (start < 0) {
       return target.child.copyWithin(start, start);
@@ -93,6 +99,38 @@ class Context {
     const asyncArgs = await this.getArgs(start, end);
     const asyncEvaluate = await this.evaluateArgs(asyncArgs);
     return asyncEvaluate;
+  }
+
+  /**
+   * Checks whether the provided arguments match the expected argument types for a function.
+   * @param arguments Array of arguments to be checked.
+   * @param errorMessage Object to handle error messages.
+   * @param expectedArgumentTypes Array of expected argument types.
+   */
+  checkArgumentTypes<T extends string>(
+    argument: T[],
+    errorMessage: MessageError,
+    expectedArgumentTypes: string[],
+  ) {
+    for (
+      let argumentIndex = 0;
+      argumentIndex < argument.length;
+      argumentIndex++
+    ) {
+      const actualArgumentType = toParse(argument[argumentIndex]);
+      const expectedArgumentType = expectedArgumentTypes[argumentIndex];
+
+      if (actualArgumentType === "unknown") continue;
+      if (actualArgumentType !== expectedArgumentType) {
+        errorMessage.customError(
+          `The ${argumentIndex + 1}-th argument of the function ${
+            target.value
+          } is expected to have the type ${expectedArgumentType}, but the actual value passed to the argument has the type ${actualArgumentType}`,
+          target.value,
+          target.line,
+        );
+      }
+    }
   }
 }
 

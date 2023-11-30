@@ -1,7 +1,7 @@
 export default {
   name: "$arrayConcat",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$arrayConcat");
+    ctx.argsCheck(2, error);
     const args = await ctx.getEvaluateArgs();
 
     if (!ctx.array.has(args[0])) {

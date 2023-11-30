@@ -9,7 +9,7 @@ function hasObject(arg: any): arg is object {
 export default {
   name: "$loop",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$loop");
+    ctx.argsCheck(2, error);
     const args = await ctx.getEvaluateArgs();
     if (args[2]) {
       if (!hasObject(args[2])) {
