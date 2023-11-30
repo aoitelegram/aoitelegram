@@ -117,15 +117,21 @@ class Context {
       argumentIndex < argument.length;
       argumentIndex++
     ) {
-      const actualArgumentType = toParse(argument[argumentIndex]);
-      const expectedArgumentType = expectedArgumentTypes[argumentIndex];
+      const actualArgumentType = toParse(argument[argumentIndex]) ?? "unknown";
+      const expectedArgumentTypeSet = new Set(
+        expectedArgumentTypes[argumentIndex]
+          .split("|")
+          .map((arg) => arg.trim()),
+      );
 
       if (actualArgumentType === "unknown") continue;
-      if (actualArgumentType !== expectedArgumentType) {
+      if (!expectedArgumentTypeSet.has(actualArgumentType)) {
         errorMessage.customError(
           `The ${argumentIndex + 1}-th argument of the function ${
             target.value
-          } is expected to have the type ${expectedArgumentType}, but the actual value passed to the argument has the type ${actualArgumentType}`,
+          } is expected to have one of the types ${
+            expectedArgumentTypes[argumentIndex]
+          }, but the actual value passed to the argument has the type ${actualArgumentType}`,
           target.value,
           target.line,
         );

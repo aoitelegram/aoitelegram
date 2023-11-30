@@ -1,3 +1,5 @@
+const parseStringJSON = require("parsejson");
+
 /**
  * Checks if a string represents a valid integer.
  * @param {string} content - The string to check.
@@ -59,7 +61,7 @@ function isNull(content: string) {
 function isObject(content: string) {
   if (content?.startsWith("{") && content.endsWith("}")) {
     try {
-      return !!JSON.parse(content);
+      return !!parseJSON(content);
     } catch (err) {
       return false;
     }
@@ -96,6 +98,13 @@ function isNumber(content: string) {
   return isFloat(content) || isInteger(content);
 }
 
+function parseJSON(objStr: string | object) {
+  if (typeof objStr === "object") return objStr;
+  if (typeof objStr === "string") {
+    return parseStringJSON(objStr);
+  }
+}
+
 /**
  * Checks typeof value.
  * @param {string} character - The string to check.
@@ -110,7 +119,7 @@ function parse(character: string) {
     case isNaN(character):
       return NaN;
     case isObject(character):
-      return JSON.parse(character);
+      return parseJSON(character);
     case isBoolean(character):
       return character === "true";
     case isNull(character):

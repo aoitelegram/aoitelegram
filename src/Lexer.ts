@@ -1,4 +1,5 @@
 import { AoijsError } from "./classes/AoiError";
+import { parseJSON } from "./helpers/Timeout";
 
 type TokenString = { type: "string"; value: string };
 type TokenInteger = { type: "integer"; value: number };
@@ -193,7 +194,7 @@ class Lexer {
   isObject(content: string) {
     if (content?.startsWith("{") && content.endsWith("}")) {
       try {
-        return !!JSON.parse(content);
+        return !!parseJSON(content);
       } catch (err) {
         return false;
       }
@@ -319,7 +320,7 @@ class Lexer {
       case this.isObject(str):
         return {
           type: "object",
-          value: JSON.parse(str),
+          value: parseJSON(str),
           pos: this.currentColumn,
           line: this.currentLine,
         };

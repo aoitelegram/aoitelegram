@@ -1,5 +1,5 @@
 import { setInterval, clearInterval } from "node:timers";
-import { getObjectKey } from "./Timeout";
+import { getObjectKey, parseJSON } from "./Timeout";
 import { AoiClient } from "../classes/AoiClient";
 
 interface AwaitedDescription {
@@ -58,7 +58,7 @@ class Awaited {
           if (awaitedDescription.awaited !== awaited.awaited) continue;
 
           const intervalId = setInterval(async () => {
-            const awaitedData = JSON.parse(`${awaited.data}`);
+            const awaitedData = parseJSON(awaited.data);
             await this.telegram.addFunction([
               {
                 name: "$awaitedData",
