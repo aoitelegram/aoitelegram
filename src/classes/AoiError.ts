@@ -68,11 +68,18 @@ class MessageError {
    * @param amount - The expected number of arguments.
    * @param parameterCount - The actual number of arguments provided.
    * @param func - The name of the function generating the error.
+   * @param line - Line number of the error.
    */
-  errorArgs(amount: number, parameterCount: number, func: string) {
+  errorArgs(
+    amount: number,
+    parameterCount: number,
+    func: string,
+    line?: number,
+  ) {
     const text = this.createMessageError(
       func,
       `Expected ${amount} arguments but got ${parameterCount}`,
+      line,
     );
     this.telegram.send(text, { parse_mode: "HTML" });
     throw new AoiStopping("errorArgs");
@@ -138,9 +145,10 @@ class MessageError {
    * Creates a custom error with a specific description and function name.
    * @param {string} description - A custom description of the error.
    * @param {string} func - The name of the function where the error occurred.
+   * @param line - Line number of the error.
    */
-  customError(description: string, func: string) {
-    const text = this.createMessageError(func, description);
+  customError(description: string, func: string, line?: number) {
+    const text = this.createMessageError(func, description, line);
     this.telegram.send(text, { parse_mode: "HTML" });
     throw new AoiStopping("customError");
   }
@@ -155,7 +163,7 @@ class MessageError {
     if (!this.telegram.send) {
       throw new ConsoleError(func, details, line);
     } else {
-      return `<code>MessageError: ${func}: ${details}\n{ \nline : ${line}, \ncommand : ${func} \n}</code>`;
+      return `Error[${func}]: <code>${details}\n{ \nline : ${line}, \ncommand : ${func} \n}</code>`;
     }
   }
 }
