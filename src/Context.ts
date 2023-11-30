@@ -117,7 +117,7 @@ class Context {
       argumentIndex < argument.length;
       argumentIndex++
     ) {
-      const actualArgumentType = toParse(argument[argumentIndex]) ?? "unknown";
+      const actualArgumentType = toParse(argument[argumentIndex]);
       const expectedArgumentTypeSet = new Set(
         expectedArgumentTypes[argumentIndex]
           .split("|")
