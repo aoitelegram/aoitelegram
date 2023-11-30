@@ -1,4 +1,4 @@
-import { setInterval } from "node:timers";
+import { setInterval, clearInterval } from "node:timers";
 import { Update } from "@telegram.ts/types";
 import { TelegramBot, Context } from "telegramsjs";
 import { AoiManager, DatabaseOptions } from "./AoiManager";
@@ -186,8 +186,13 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    setInterval(async () => {
+    const intervalId = setInterval(async () => {
+      await this.addFunction({
+        name: "$break",
+        callback: () => clearInterval(intervalId),
+      })
       await this.evaluateCommand({ event: "loop" }, options.code, this);
+      await this.removeFunction("$break");
     }, options.every ?? 60000);
     return this;
   }

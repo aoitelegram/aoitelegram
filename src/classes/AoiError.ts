@@ -114,20 +114,6 @@ class MessageError {
   }
 
   /**
-   * Reports an error with a specified error type and function name.
-   * @param {string} type - The expected data type.
-   * @param {string} func - The name of the function.
-   */
-  errorType(type: string, func: string) {
-    const text = this.createMessageError(
-      func,
-      `Expected type ${type} in function ${func}`,
-    );
-    this.telegram.send(text, { parse_mode: "HTML" });
-    throw new AoiStopping("errorType");
-  }
-
-  /**
    * Create and send an error message for an array-related error.
    * @param {string} name - The name of the variable that does not exist.
    * @param {string} func - The name of the function causing the error.

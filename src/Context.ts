@@ -103,7 +103,7 @@ class Context {
 
   /**
    * Checks whether the provided arguments match the expected argument types for a function.
-   * @param arguments Array of arguments to be checked.
+   * @param argument Array of arguments to be checked.
    * @param errorMessage Object to handle error messages.
    * @param expectedArgumentTypes Array of expected argument types.
    */

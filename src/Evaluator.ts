@@ -77,7 +77,7 @@ class Evaluator {
     context: Context,
     mapValues = true,
   ) {
-    let array = argument.child?.copyWithin(-1, -1) ?? [];
+    let array = argument?.child?.copyWithin(-1, -1) ?? [];
     let valueType: Token[] = [];
 
     while (array.length > 0) {
