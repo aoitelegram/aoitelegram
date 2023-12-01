@@ -10,6 +10,7 @@ let target: TokenCall = {} as TokenCall;
 
 class Context {
   options: RuntimeOptions;
+  callback_query: unknown[] = [];
   private target: TokenCall = {} as TokenCall;
   private localVars: Collection<string, unknown> = new Collection();
   private array: Collection<string, unknown> = new Collection();

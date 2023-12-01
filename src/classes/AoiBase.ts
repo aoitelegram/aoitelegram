@@ -190,7 +190,7 @@ class AoiBase extends TelegramBot {
       await this.addFunction({
         name: "$break",
         callback: () => clearInterval(intervalId),
-      })
+      });
       await this.evaluateCommand({ event: "loop" }, options.code, this);
       await this.removeFunction("$break");
     }, options.every ?? 60000);
