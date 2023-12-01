@@ -11,7 +11,7 @@
     "build:tsc:function": "tsc --project ./src/function/tsconfig.json"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=14"
   },
   "license": "MIT",
   "files": [
