@@ -276,16 +276,24 @@ function readFunctionsInDirectory(
       if (dataFunction && typeof dataFunction.callback === "function") {
         parent.set(dataFunctionName, async (context) => {
           const error = new MessageError(telegram);
-          const response = await dataFunction.callback(
-            context,
-            telegram,
-            database,
-            error,
-          );
-          if (dataFunction.name === "$onlyIf" && response?.stop === true) {
-            throw new AoiStopping("$onlyIf");
+          try {
+            const response = await dataFunction.callback(
+              context,
+              telegram,
+              database,
+              error,
+            );
+            if (dataFunction.name === "$onlyIf" && response?.stop === true) {
+              throw new AoiStopping("$onlyIf");
+            }
+            return response;
+          } catch (err) {
+            const errorMessage = `${err}`.split(":")?.[1].trimStart() || err;
+            error.customError(
+              `Failed to usage ${dataFunctionName}: ${errorMessage}`,
+              dataFunctionName,
+            );
           }
-          return response;
         });
       }
     }
