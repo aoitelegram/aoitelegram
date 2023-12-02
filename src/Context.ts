@@ -54,14 +54,15 @@ class Context {
    * Check if the number of arguments is as expected.
    * @param amount - Amount of arguments required.
    * @param error - Error class.
+   * @param func - Error function
    */
-  argsCheck(amount = 1, error: MessageError) {
+  argsCheck(amount = 1, error: MessageError, func?: string) {
     const target = this.target;
     if (!target || target.child.length < amount) {
       error.errorArgs(
         amount,
         target.child.length ?? 0,
-        target.value,
+        func ?? target.value,
         target.line,
       );
     }

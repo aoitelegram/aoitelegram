@@ -61,7 +61,7 @@ class AoiClient extends AoiBase {
     this.#aoiwarning =
       options.aoiwarning === undefined ? true : options.aoiwarning;
     this.#warningmanager = new AoiWarning(
-      options.autoUpdate === undefined ? true : options.autoUpdate,
+      options.autoUpdate === undefined ? false : options.autoUpdate,
     );
     this.timeoutManager = new TimeoutManager(this, options.database);
     this.awaitedManager = new AwaitedManager(this);
