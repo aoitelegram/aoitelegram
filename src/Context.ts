@@ -122,7 +122,7 @@ class Context {
       const actualArgumentType = toParse(argument[argumentIndex]);
       const expectedArgumentTypeSet = new Set(
         expectedArgumentTypes[argumentIndex]
-          .split("|")
+          ?.split("|")
           .map((arg) => arg.trim()),
       );
 
