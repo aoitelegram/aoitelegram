@@ -1,3 +1,5 @@
+import ms from "ms";
+
 function hasObject(arg: any): arg is object {
   try {
     return !!JSON.parse(arg);
@@ -17,7 +19,7 @@ export default {
       }
     }
     await event.telegram?.awaitedManager.addAwaited(args[0], {
-      milliseconds: args[1],
+      milliseconds: +ms(args[1]),
       data: args[2],
       context: event,
     });

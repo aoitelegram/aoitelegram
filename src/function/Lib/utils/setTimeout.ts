@@ -1,3 +1,5 @@
+import ms from "ms";
+
 function hasObject(arg: any): arg is object {
   try {
     return !!JSON.parse(arg);
@@ -13,11 +15,11 @@ export default {
     const args = await ctx.getEvaluateArgs();
     ctx.checkArgumentTypes(args, error, [
       "string",
-      "number",
+      "string",
       "object | undefined",
     ]);
     await event.telegram?.timeoutManager.addTimeout(args[0], {
-      milliseconds: args[1],
+      milliseconds: +ms(args[1]),
       data: args[2],
     });
   },
