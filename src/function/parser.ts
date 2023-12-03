@@ -186,4 +186,92 @@ function getObjectKey<T extends Data, K extends keyof T>(
   return getProperty(data, properties) as T[K];
 }
 
-export { parse, toParse, getObjectKey };
+/**
+ * Formats the given time duration in milliseconds into a structured time object.
+ *
+ * @param {number} milliseconds - The time duration in milliseconds.
+ */
+function formatTime(milliseconds: number) {
+  /**
+   * Calculates the value of a specific time unit based on the given milliseconds.
+   * @param {number} unitInMilliseconds - The duration of the time unit in milliseconds.
+   * @returns {number} - The calculated value of the time unit.
+   */
+  const calculateUnit = (unitInMilliseconds: number): number => {
+    const result = Math.trunc(Math.abs(milliseconds) / unitInMilliseconds);
+    milliseconds -= result * unitInMilliseconds;
+    return result;
+  };
+
+  const timeData = {
+    units: {
+      years: calculateUnit(31536000000),
+      months: calculateUnit(2628746000),
+      weeks: calculateUnit(604800000),
+      days: calculateUnit(86400000),
+      hours: calculateUnit(3600000),
+      minutes: calculateUnit(60000),
+      seconds: calculateUnit(1000),
+      ms: calculateUnit(1),
+    },
+    /**
+     * Converts the timeData.units object into a human-readable time string.
+     *
+     * @returns {string} - The humanized time string.
+     */
+    humanize: () => {
+      const timeString = Object.entries(timeData.units)
+        .slice(0, -1)
+        .map(([unit, value]) => {
+          if (value) {
+            const abbreviation = ["months", "ms"].includes(unit)
+              ? unit.slice(0, 3)
+              : unit.slice(0, 1);
+            return `${value}${abbreviation}`;
+          }
+          return "";
+        })
+        .filter(Boolean);
+
+      return timeString.join(" ");
+    },
+  };
+
+  return timeData;
+}
+
+/**
+ * Replaces placeholders in the given text with corresponding values from the provided date object.
+ * @param {{
+ *   years: number,
+ *   months: number,
+ *   weeks: number,
+ *   days: number,
+ *   hours: number,
+ *   minutes: number,
+ *   seconds: number,
+ *   ms: number
+ * }} date - The date object containing unit values.
+ * @param {string} text - The text containing placeholders to be replaced.
+ */
+function replaceData(
+  date: {
+    years: number;
+    months: number;
+    weeks: number;
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+    ms: number;
+  },
+  text: string,
+) {
+  Object.entries(date).map((unit) => {
+    const regexp = new RegExp(`%${unit[0]}%`, "g");
+    text = text.replace(regexp, `${unit[1]}`);
+  });
+  return text;
+}
+
+export { parse, toParse, getObjectKey, formatTime, replaceData };

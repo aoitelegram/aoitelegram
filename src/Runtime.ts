@@ -17,6 +17,17 @@ interface RuntimeOptions {
   trimOutput: boolean;
 }
 
+function getStopping(name: string) {
+  switch (name) {
+    case "$onlyIf":
+      return true;
+    case "$cooldown":
+      return true;
+    default:
+      return false;
+  }
+}
+
 /**
  * Represents the runtime environment for executing scripts.
  */
@@ -276,17 +287,14 @@ function readFunctionsInDirectory(
       if (dataFunction && typeof dataFunction.callback === "function") {
         parent.set(dataFunctionName, async (context) => {
           const error = new MessageError(telegram);
+          let response;
           try {
-            const response = await dataFunction.callback(
+            response = await dataFunction.callback(
               context,
               telegram,
               database,
               error,
             );
-            if (dataFunction.name === "$onlyIf" && response?.stop === true) {
-              throw new AoiStopping("$onlyIf");
-            }
-            return response;
           } catch (err) {
             const errorMessage = `${err}`.split(":")?.[1].trimStart() || err;
             error.customError(
@@ -294,6 +302,10 @@ function readFunctionsInDirectory(
               dataFunctionName,
             );
           }
+          if (getStopping(dataFunction.name) && response) {
+            throw new AoiStopping(dataFunction.name);
+          }
+          return response;
         });
       }
     }

@@ -82,7 +82,7 @@ class AoiBase extends TelegramBot {
     super(token, telegram);
     this.#database = new AoiManager(database);
     this.customFunction = customFunction;
-    this.setMaxListeners(Infinity);
+    //    this.setMaxListeners(Infinity);
   }
 
   /**
@@ -210,7 +210,10 @@ class AoiBase extends TelegramBot {
       );
     }
     this.on("ready", async (ctx) => {
-      await this.evaluateCommand({ event: "ready" }, options.code, ctx);
+      await this.evaluateCommand({ event: "ready" }, options.code, {
+        ...ctx,
+        telegram: this,
+      });
     });
     return this;
   }

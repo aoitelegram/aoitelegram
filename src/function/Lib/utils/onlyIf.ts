@@ -46,7 +46,7 @@ export default {
         if (replyMessage) event.reply(response);
         else event.send(response);
       }
-      return { stop: true };
+      return true;
     }
   },
 };
