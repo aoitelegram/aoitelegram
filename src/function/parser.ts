@@ -138,6 +138,8 @@ function parse(character: string) {
  */
 function toParse(character: string) {
   switch (true) {
+    case isUndefined(character):
+      return "undefined";
     case isNumber(character):
       return "number";
     case isNaN(character):
@@ -148,8 +150,6 @@ function toParse(character: string) {
       return "boolean";
     case isNull(character):
       return "null";
-    case isUndefined(character):
-      return "undefined";
     default:
       return "string";
   }

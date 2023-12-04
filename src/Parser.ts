@@ -2,6 +2,10 @@ import { Token, TokenArgument, TokenProgram, TokenString } from "./Lexer";
 import { AoijsError } from "./classes/AoiError";
 import { Runtime } from "./Runtime";
 
+function replaceSymbol(content: string) {
+  return content.replace(/\\n/g, "\n");
+}
+
 /**
  * The Parser class is responsible for parsing tokens into an Abstract Syntax Tree (AST).
  */
@@ -143,6 +147,8 @@ class Parser {
     let token = this.popFirstToken();
     switch (token.type) {
       case "string":
+        token.value = replaceSymbol(token.value);
+        return token;
       case "integer":
       case "float":
       case "nan":
