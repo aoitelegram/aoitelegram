@@ -36,6 +36,7 @@ class AoiClient extends AoiBase {
    * @param {string} token - The token for authentication.
    * @param {TelegramOptions} options.telegram - Options for the Telegram integration.
    * @param {DatabaseOptions} options.database - Options for the database.
+   * @param {string[]} options.disableFunctions - Functions that will be removed from the library's loading functions.
    * @param {DataFunction[]} options.customFunction - an array of customFunction functions.
    * @param {boolean} [options.console] - Outputting system messages to the console.
    * @param {boolean} [options.aoiwarning] - Displaying messages about new versions.
@@ -45,6 +46,7 @@ class AoiClient extends AoiBase {
     token: string;
     telegram?: TelegramOptions;
     database?: DatabaseOptions;
+    disableFunctions?: string[];
     customFunction?: DataFunction[];
     console?: boolean;
     aoiwarning?: boolean;
@@ -55,6 +57,7 @@ class AoiClient extends AoiBase {
       options.telegram,
       options.database,
       options.customFunction,
+      options.disableFunctions,
     );
     this.#optionConsole =
       options.console === undefined ? true : options.console;

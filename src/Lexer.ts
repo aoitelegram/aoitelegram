@@ -208,8 +208,8 @@ class Lexer {
    * @returns {boolean} True if the string represents the value "undefined", otherwise false.
    */
   isUndefined(content: string) {
-    if (content === "undefined") return true;
-    else if (content.trim() === "") return true;
+    if (content.trim() === "") return true;
+    else if (content === "undefined") return true;
     else return false;
   }
 
@@ -297,6 +297,13 @@ class Lexer {
   parseString(): Token {
     const str = this.readInput(this.validateString);
     switch (true) {
+      case this.isUndefined(str):
+        return {
+          type: "undefined",
+          value: undefined,
+          pos: this.currentColumn,
+          line: this.currentLine,
+        };
       case this.isInteger(str):
         return {
           type: "integer",
@@ -336,13 +343,6 @@ class Lexer {
         return {
           type: "null",
           value: null,
-          pos: this.currentColumn,
-          line: this.currentLine,
-        };
-      case this.isUndefined(str):
-        return {
-          type: "undefined",
-          value: undefined,
           pos: this.currentColumn,
           line: this.currentLine,
         };

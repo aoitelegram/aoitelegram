@@ -41,21 +41,25 @@ class Runtime {
   };
   database: AoiManager;
   customFunction?: DataFunction[];
+  disableFunctions?: string[];
 
   /**
    * Constructs a new Runtime instance with a Telegram context.
    * @param telegram - The Telegram context for the runtime.
    * @param database - The local database.
    * @param customFunction - An array of customFunction functions.
+   * @param options.disableFunctions - Functions that will be removed from the library's loading functions.
    */
   constructor(
     telegram: EventContext["telegram"],
     database: AoiManager,
     customFunction?: DataFunction[],
+    disableFunctions?: string[],
   ) {
     this.database = database;
-    this.customFunction = customFunction;
-    this.prepareGlobal(telegram, database, customFunction);
+    this.customFunction = customFunction || [];
+    this.disableFunctions = disableFunctions || [];
+    this.prepareGlobal(telegram, database, customFunction, disableFunctions);
   }
 
   /**
@@ -106,17 +110,20 @@ class Runtime {
    * @param telegram - The Telegram context.
    * @param database - The local database.
    * @param customFunction - An array of custom function definitions.
+   * @param disableFunctions - Functions that will be removed from the library's loading functions.
    */
   private prepareGlobal(
     telegram: EventContext["telegram"],
     database: AoiManager,
     customFunction?: DataFunction[],
+    disableFunctions?: string[],
   ) {
     readFunctionsInDirectory(
       __dirname.replace("classes", "function"),
       this.globalEnvironment,
       telegram,
       database,
+      disableFunctions || [],
     );
     if (Array.isArray(customFunction)) {
       readFunctions(
@@ -148,6 +155,7 @@ async function evaluateAoiCommand(
       telegram,
       runtime.database,
       runtime?.customFunction,
+      runtime?.disableFunctions,
     );
     return await aoiRuntime.runInput(command, code);
   } catch (error) {
@@ -266,24 +274,36 @@ function readFunctions(
  * @param parent - The global environment where functions will be added.
  * @param telegram - The Telegram context.
  * @param database - The local database.
+ * @param disableFunctions - Functions that will be removed from the library's loading functions.
  */
 function readFunctionsInDirectory(
   dirPath: string,
   parent: Runtime["globalEnvironment"],
   telegram: EventContext["telegram"],
   database: AoiManager,
+  disableFunctions: string[],
 ) {
   const items = fs.readdirSync(dirPath);
+  const disableFunctionsSet = new Set(
+    disableFunctions.map((func) => func.toLowerCase()),
+  );
   for (const item of items) {
     const itemPath = path.join(dirPath, item);
     const stats = fs.statSync(itemPath);
 
     if (stats.isDirectory()) {
-      readFunctionsInDirectory(itemPath, parent, telegram, database);
+      readFunctionsInDirectory(
+        itemPath,
+        parent,
+        telegram,
+        database,
+        disableFunctions,
+      );
     } else if (itemPath.endsWith(".js")) {
       const dataFunction = require(itemPath).default;
       if (!dataFunction?.name) continue;
-      const dataFunctionName = dataFunction?.name.toLowerCase();
+      const dataFunctionName = dataFunction.name.toLowerCase();
+      if (disableFunctionsSet.has(dataFunctionName)) continue;
       if (dataFunction && typeof dataFunction.callback === "function") {
         parent.set(dataFunctionName, async (context) => {
           const error = new MessageError(telegram);

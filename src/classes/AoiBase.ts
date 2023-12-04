@@ -65,24 +65,27 @@ interface TelegramOptions {
  */
 class AoiBase extends TelegramBot {
   #database: AoiManager;
-  customFunction?: DataFunction[];
+  customFunction: DataFunction[];
+  disableFunctions: string[];
   /**
    * Creates a new instance of AoiBase.
    * @param {string} token - The token for authentication.
    * @param {TelegramOptions} telegram - Configuration options for the Telegram integration.
    * @param {DatabaseOptions} options.database - Options for the database.
-   * @param {DataFunction[]} options.customFunction - an array of custom functions.
+   * @param {DataFunction[]} options.customFunction - An array of custom functions.
+   * @param {string[]} options.disableFunctions - Functions that will be removed from the library's loading functions.
    */
   constructor(
     token: string,
     telegram?: TelegramOptions,
     database?: DatabaseOptions,
     customFunction?: DataFunction[],
+    disableFunctions?: string[],
   ) {
     super(token, telegram);
     this.#database = new AoiManager(database);
-    this.customFunction = customFunction;
-    //    this.setMaxListeners(Infinity);
+    this.customFunction = customFunction || [];
+    this.disableFunctions = disableFunctions || [];
   }
 
   /**
@@ -101,6 +104,7 @@ class AoiBase extends TelegramBot {
         telegram,
         this.#database,
         this.customFunction,
+        this.disableFunctions,
       );
       await runtime.runInput(command, code);
     } catch (err) {
