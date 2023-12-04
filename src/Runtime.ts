@@ -296,6 +296,7 @@ function readFunctionsInDirectory(
               error,
             );
           } catch (err) {
+            if (err instanceof AoiStopping) return;
             const errorMessage = `${err}`.split(":")?.[1].trimStart() || err;
             error.customError(
               `Failed to usage ${dataFunctionName}: ${errorMessage}`,

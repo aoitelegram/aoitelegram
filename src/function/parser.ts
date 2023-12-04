@@ -136,7 +136,6 @@ function parse(character: string) {
  * @param {string} character - The string to check.
  */
 function toParse(character: string) {
-  character = `${character}`;
   switch (true) {
     case isNumber(character):
       return "number";
@@ -151,7 +150,7 @@ function toParse(character: string) {
     case isUndefined(character):
       return "undefined";
     default:
-      return "unknown";
+      return "string";
   }
 }
 

@@ -8,16 +8,17 @@ export default {
     const args = await ctx.getEvaluateArgs();
     const userId = event.from?.id || event.message?.from.id;
     const chatId = event.chat?.id || event.message?.chat.id;
+    const defaultTable = args[5] || database.table[0];
     ctx.checkArgumentTypes(args, error, ["string", "string"]);
 
     const cooldownKey = `${userId}_${chatId}_${ms(args[0])}`;
-    const userCooldown = (await database.get("main", cooldownKey)) || 0;
+    const userCooldown = (await database.get(defaultTable, cooldownKey)) || 0;
     const cooldown = userCooldown + +ms(args[0]) - Date.now();
     if (cooldown > 0) {
       event.reply(replaceData(formatTime(cooldown).units, args[1]));
       return true;
     } else {
-      await database.set("main", cooldownKey, Date.now());
+      await database.set(defaultTable, cooldownKey, Date.now());
     }
   },
 };

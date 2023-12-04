@@ -172,13 +172,13 @@ class AoiClient extends AoiBase {
    * Connect to the service and perform initialization tasks.
    */
   async connect() {
+    if (this.#aoiwarning) {
+      await this.#warningmanager.checkUpdates();
+    }
     await this.registerCommand.handler();
     await this.registerAction.handler();
     await this.registerTimeout.handler();
     await this.registerAwaited.handler();
-    if (this.#aoiwarning) {
-      await this.#warningmanager.checkUpdates();
-    }
     if (this.#optionConsole) {
       this.on("ready", async (ctx) => {
         new Promise((res) => {

@@ -119,14 +119,16 @@ class Context {
       argumentIndex < argument.length;
       argumentIndex++
     ) {
-      const actualArgumentType = toParse(argument[argumentIndex]);
+      const actualArgumentType = toParse(`${argument[argumentIndex]}`);
+      if (!expectedArgumentTypes[argumentIndex]) {
+        expectedArgumentTypes[argumentIndex] = "unknown";
+      }
       const expectedArgumentTypeSet = new Set(
         expectedArgumentTypes[argumentIndex]
-          ?.split("|")
+          .split("|")
           .map((arg) => arg.trim()),
       );
-
-      if (actualArgumentType === "unknown") continue;
+      if (expectedArgumentTypeSet.has("unknown")) continue;
       if (!expectedArgumentTypeSet.has(actualArgumentType)) {
         errorMessage.customError(
           `The ${argumentIndex + 1}-th argument of the function ${

@@ -3,12 +3,12 @@ export default {
   callback: async (ctx, event, database, error) => {
     ctx.argsCheck(1, error);
     const args = await ctx.getEvaluateArgs();
-    args[1] === undefined ? (args[1] = "main") : null;
+    const defaultTable = args[1] || database.table[0];
 
-    if (!(await database.hasTable(args[1]))) {
-      error.errorTable(args[1], "$hasVar");
+    if (!(await database.hasTable(defaultTable))) {
+      error.errorTable(defaultTable, "$hasVar");
       return;
     }
-    return await database.has(args[1], args[0]);
+    return await database.has(defaultTable, args[0]);
   },
 };
