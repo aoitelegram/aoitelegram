@@ -1,4 +1,4 @@
-import { getObjectKey } from "../../parser";
+import { getObjectKey } from "../parser";
 
 export default {
   name: "$eventData",

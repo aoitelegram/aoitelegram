@@ -1,5 +1,5 @@
 import ms from "ms";
-import { formatTime, replaceData } from "../../parser";
+import { formatTime, replaceData } from "../parser";
 
 export default {
   name: "$cooldown",

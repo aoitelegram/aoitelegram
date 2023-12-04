@@ -109,17 +109,17 @@
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
   "include": [
-    "./ApiMethods/message/*",
-    "./ApiMethods/utils/*",
-    "./ApiObject/from/*",
-    "./ApiObject/message/*",
-    "./ApiObject/util/*",
-    "./JavaScript/Array/*",
-    "./JavaScript/Object/*",
-    "./JavaScript/String/*",
-    "./Lib/database/*",
-    "./Lib/math/*",
-    "./Lib/utils/*",
+    "./awaited/*",
+    "./client/*",
+    "./database/*",
+    "./info/*",
+    "./javascript/array/*",
+    "./javascript/object/*",
+    "./javascript/string/*",
+    "./math/*",
+    "./message/*",
+    "./misc/*",
+    "./util/*",
     "./*"
   ]
 }
