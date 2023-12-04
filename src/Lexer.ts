@@ -161,7 +161,7 @@ class Lexer {
    */
   isFloat(content: string) {
     if (!content.includes(".")) return false;
-    if (!Number.isNaN(parseFloat(content))) return true;
+    if (!isNaN(parseFloat(content))) return true;
     else return false;
   }
 
@@ -209,6 +209,7 @@ class Lexer {
    */
   isUndefined(content: string) {
     if (content === "undefined") return true;
+    else if (content.trim() === "") return true;
     else return false;
   }
 

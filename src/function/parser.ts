@@ -76,6 +76,7 @@ function isObject(content: string) {
  */
 function isUndefined(content: string) {
   if (content === "undefined") return true;
+  else if (content.trim() === "") return true;
   else return false;
 }
 
