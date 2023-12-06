@@ -1,6 +1,8 @@
+import os from "node:os";
+
 export default {
-  name: "$token",
+  name: "$getOSTCpus",
   callback: async (ctx, event, database, error) => {
-    return event.telegram?.token;
+    return os.cpus();
   },
 };

@@ -1,8 +1,8 @@
 export default {
-  name: "$client",
+  name: "$toString",
   callback: async (ctx, event, database, error) => {
+    ctx.argsCheck(1, error);
     const args = await ctx.getEvaluateArgs();
-    const getMe = (await event.telegram?.getMe()) ?? event;
-    return getMe[args[0]];
+    return `${args[0]}`;
   },
 };

@@ -36,7 +36,15 @@ class Action {
    * @returns This ActionHandler instance for method chaining.
    */
   register(action: ActionDescription) {
-    this.actions.push(action);
+    const existingIndex = this.actions.findIndex(
+      (map) => map.data === action.data,
+    );
+    if (existingIndex !== -1) {
+      this.actions[existingIndex] = action;
+    } else {
+      this.actions.push(action);
+    }
+
     return this;
   }
 

@@ -1,9 +1,11 @@
-import { setInterval, clearInterval } from "node:timers";
+import { Runtime } from "../Runtime";
+import { AoiClient } from "./AoiClient";
 import { Update } from "@telegram.ts/types";
 import { TelegramBot, Context } from "telegramsjs";
+import { setInterval, clearInterval } from "node:timers";
+import { CombinedEventFunctions } from "./AoiTyping";
 import { AoiManager, DatabaseOptions } from "./AoiManager";
 import { AoijsError, AoiStopping, MessageError } from "./AoiError";
-import { Runtime } from "../Runtime";
 import { version } from "../../package.json";
 
 type AllowedUpdates = ReadonlyArray<Exclude<keyof Update, "update_id">>;
@@ -89,24 +91,49 @@ class AoiBase extends TelegramBot {
   }
 
   /**
+   * Register event listeners for the bot.
+   * ```ts
+   * bot.on("ready", client => {
+   *  console.log(`Starting ${client.username}`);
+   * });
+   *
+   * bot.on("message", message => {
+   *  message.reply(`Hello ${message.first_name}`);
+   * });
+   * ```
+   * @param event The event or an array of events to listen for.
+   * @param listener The callback function to be executed when the event(s) occur.
+   * @returns This instance of the bot for method chaining.
+   */
+  on<T extends keyof CombinedEventFunctions>(
+    event: T,
+    listener: CombinedEventFunctions[T],
+  ): this;
+
+  on(event: string, listener: (...data: any[]) => void) {
+    super.on(event, listener);
+    return this;
+  }
+
+  /**
    * Executes a block of code in response to a command.
    * @param {string | {event: string}} command - The name of the command.
    * @param {string} code - The code to be executed.
-   * @param {unknown} telegram - The context or user for executing the code.
+   * @param {unknown} eventData - The context or user for executing the code.
    */
   async evaluateCommand(
     command: string | { event: string },
     code: string,
-    telegram: unknown,
+    eventData: unknown,
   ) {
     try {
       const runtime = new Runtime(
-        telegram,
+        eventData,
         this.#database,
         this.customFunction,
         this.disableFunctions,
       );
-      await runtime.runInput(command, code);
+      return await runtime.runInput(command, code);
     } catch (err) {
       if (!(err instanceof AoiStopping)) throw err;
     }

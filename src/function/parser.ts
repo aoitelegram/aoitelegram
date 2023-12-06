@@ -59,7 +59,11 @@ function isNull(content: string) {
  * @returns {boolean} True if the string is a valid JSON object, otherwise false.
  */
 function isObject(content: string) {
-  if (content?.startsWith("{") && content.endsWith("}")) {
+  if (
+    (content?.startsWith("{") && content?.endsWith("}")) ||
+    typeof content === "object"
+  ) {
+    console.log(parseJSON(content));
     try {
       return !!parseJSON(content);
     } catch (err) {
@@ -102,7 +106,7 @@ function isNumber(content: string) {
 function parseJSON(objStr: string | object) {
   if (typeof objStr === "object") return objStr;
   if (typeof objStr === "string") {
-    return parseStringJSON(objStr);
+    return parseStringJSON(objStr) || JSON.parse(objStr);
   }
 }
 

@@ -10,20 +10,27 @@ import { AoijsError } from "./AoiError";
 class LoadCommands {
   #aoitelegram: AoiClient;
   #count: number = 1;
+  path?: string;
   /**
    * Constructor for LoadCommands.
    * @param {AoiClient} aoitelegram - The AoiClient instance to load commands into.
    */
   constructor(aoitelegram: AoiClient) {
     this.#aoitelegram = aoitelegram;
+    aoitelegram.loadCommands = this;
   }
 
   /**
    * Asynchronously loads commands from the specified directory path.
    * @param {string} dirPath - The directory path from which to load commands.
-   * @param {boolean} [log] - The console load commands.
+   * @param {boolean} [log=true] - The console load commands.
+   * @param {boolean} [updated=false] - The updated commands
    */
-  async loadCommands(dirPath: string, log: boolean = true) {
+  async loadCommands(
+    dirPath: string,
+    log: boolean = true,
+    updated: boolean = false,
+  ) {
     if (!dirPath) {
       throw new AoijsError(
         "parameter",
@@ -37,6 +44,7 @@ class LoadCommands {
         console.log(bigText);
       }
       this.#count = 0;
+      this.path = dirPath;
     }
 
     if (!fs.existsSync(dirPath)) {
@@ -54,8 +62,9 @@ class LoadCommands {
       const stats = fs.statSync(itemPath);
 
       if (stats.isDirectory()) {
-        this.loadCommands(itemPath, log);
+        this.loadCommands(itemPath, log, updated);
       } else if (itemPath.endsWith(".js")) {
+        delete require.cache[itemPath];
         const requireFun = require(itemPath);
         const dataFunc = requireFun.default || requireFun;
 
@@ -116,7 +125,7 @@ class LoadCommands {
               }
             }
 
-            if (dataArrayFunc.type) {
+            if (dataArrayFunc.type && !updated) {
               const eventType = LoadCommands.loaderEventType(
                 dataArrayFunc.type,
               );
@@ -185,7 +194,7 @@ class LoadCommands {
             }
           }
 
-          if (dataFunc.type) {
+          if (dataFunc.type && !updated) {
             const eventType = LoadCommands.loaderEventType(dataFunc.type);
             await this.runEvent(this.#aoitelegram, eventType, dataFunc);
             if (log) {

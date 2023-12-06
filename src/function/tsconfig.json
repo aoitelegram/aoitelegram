@@ -113,12 +113,11 @@
     "./client/*",
     "./database/*",
     "./info/*",
-    "./javascript/array/*",
-    "./javascript/object/*",
-    "./javascript/string/*",
+    "./javascript/**/*",
     "./math/*",
     "./message/*",
     "./misc/*",
+    "./module/**/*",
     "./util/*",
     "./*"
   ]

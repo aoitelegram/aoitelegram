@@ -42,7 +42,14 @@ class Command {
    * @returns This CommandHandler instance for method chaining.
    */
   register(command: CommandDescription) {
-    this.commands.push(command);
+    const existingIndex = this.commands.findIndex(
+      (map) => map.name === command.name,
+    );
+    if (existingIndex !== -1) {
+      this.commands[existingIndex] = command;
+    } else {
+      this.commands.push(command);
+    }
     return this;
   }
 

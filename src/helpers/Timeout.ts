@@ -34,7 +34,7 @@ function parseJSON(objStr: string | object) {
   if (!objStr) return {};
   if (typeof objStr === "object") return objStr;
   if (typeof objStr === "string") {
-    return parseStringJSON(objStr);
+    return parseStringJSON(objStr) || JSON.parse(objStr);
   }
 }
 
@@ -66,7 +66,15 @@ class Timeout {
    * @returns The Timeout instance for chaining.
    */
   register(timeout: TimeoutDescription): Timeout {
-    this.timeouts.push(timeout);
+    const existingIndex = this.timeouts.findIndex(
+      (map) => map.id === timeout.id,
+    );
+    if (existingIndex !== -1) {
+      this.timeouts[existingIndex] = timeout;
+    } else {
+      this.timeouts.push(timeout);
+    }
+
     return this;
   }
 
@@ -74,37 +82,33 @@ class Timeout {
    * Sets up the event handler for timeouts.
    */
   handler() {
-    this.telegram.on(
-      // @ts-ignore
-      "timeout",
-      async (timeoutData: AoiClient, context: ValueDatabase) => {
-        for (const timeout of this.timeouts) {
-          if (timeout.id !== context.id) continue;
+    this.telegram.on("timeout", async (timeoutData, context) => {
+      for (const timeout of this.timeouts) {
+        if (timeout.id !== context.id) continue;
 
-          const timeoutDataParsed = parseJSON(context.data) as Data;
+        const timeoutDataParsed = parseJSON(context.data) as Data;
 
-          await this.telegram.addFunction({
-            name: "$timeoutData",
-            callback: async (ctx) => {
-              const args = await ctx.getEvaluateArgs();
-              return (
-                getObjectKey(timeoutDataParsed, args[0] ?? "") ??
-                timeoutDataParsed
-              );
-            },
-          });
+        await this.telegram.addFunction({
+          name: "$timeoutData",
+          callback: async (ctx) => {
+            const args = await ctx.getEvaluateArgs();
+            return (
+              getObjectKey(timeoutDataParsed, args[0] ?? "") ??
+              timeoutDataParsed
+            );
+          },
+        });
 
-          await this.telegram.evaluateCommand(
-            { event: "timeout" },
-            timeout.code,
-            timeoutData,
-          );
+        await this.telegram.evaluateCommand(
+          { event: "timeout" },
+          timeout.code,
+          timeoutData,
+        );
 
-          await this.telegram.removeFunction("$timeoutData");
-          break;
-        }
-      },
-    );
+        await this.telegram.removeFunction("$timeoutData");
+        break;
+      }
+    });
   }
 }
 

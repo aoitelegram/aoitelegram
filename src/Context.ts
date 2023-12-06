@@ -15,6 +15,7 @@ class Context {
   private localVars: Collection<string, unknown> = new Collection();
   private array: Collection<string, unknown> = new Collection();
   private object: Collection<string, unknown> = new Collection();
+  private random: Collection<string, unknown> = new Collection();
   /**
    * Creates a new instance of the Context class.
    * @param fileName - The name of the file.
@@ -119,7 +120,10 @@ class Context {
       argumentIndex < argument.length;
       argumentIndex++
     ) {
-      const actualArgumentType = toParse(`${argument[argumentIndex]}`);
+      const actualArgumentType =
+        typeof argument[argumentIndex] === "object"
+          ? "object"
+          : toParse(`${argument[argumentIndex]}`);
       if (!expectedArgumentTypes[argumentIndex]) {
         expectedArgumentTypes[argumentIndex] = "unknown";
       }
@@ -128,8 +132,45 @@ class Context {
           .split("|")
           .map((arg) => arg.trim()),
       );
+
       if (expectedArgumentTypeSet.has("unknown")) continue;
-      if (!expectedArgumentTypeSet.has(actualArgumentType)) {
+
+      const isVariadic = new Set(
+        expectedArgumentTypes[argumentIndex]
+          .split("|")
+          .map((arg) => arg.trim().includes("...")),
+      ).has(true);
+      if (isVariadic) {
+        const variadicTypes = new Set(
+          expectedArgumentTypes[argumentIndex]
+            .split("|")
+            .map((arg) => arg.trim())
+            .join(" ")
+            .split("...")
+            .map((arg) => (arg ? arg.trim() : undefined)),
+        );
+        const variadicTypesName = expectedArgumentTypes[argumentIndex];
+        const sliceTypes = argument.slice(argumentIndex);
+        for (
+          let argumentIndex = 0;
+          argumentIndex < sliceTypes.length;
+          argumentIndex++
+        ) {
+          const nextExpectedType = toParse(`${sliceTypes[argumentIndex]}`);
+          const actualArgumentType = toParse(`${sliceTypes[argumentIndex]}`);
+          if (variadicTypesName.includes("...unknown")) break;
+          if (!variadicTypes.has(nextExpectedType)) {
+            errorMessage.customError(
+              `The ${argumentIndex + 1}-th argument of the function ${
+                target.value
+              } is expected to have the type ${variadicTypesName} after the variadic parameter, but the actual value passed to the argument has the type ${actualArgumentType}`,
+              target.value,
+              target.line,
+            );
+          }
+        }
+        break;
+      } else if (!expectedArgumentTypeSet.has(actualArgumentType)) {
         errorMessage.customError(
           `The ${argumentIndex + 1}-th argument of the function ${
             target.value

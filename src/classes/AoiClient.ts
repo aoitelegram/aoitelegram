@@ -2,6 +2,7 @@ import chalk from "chalk";
 import { Collection } from "telegramsjs";
 import { AoijsError } from "./AoiError";
 import { AoiWarning } from "./AoiWarning";
+import { LoadCommands } from "./LoadCommands";
 import { DatabaseOptions } from "./AoiManager";
 import { TimeoutManager } from "../helpers/manager/TimeoutManager";
 import { AwaitedManager } from "../helpers/manager/AwaitedManager";
@@ -10,6 +11,7 @@ import { Command, CommandDescription } from "../helpers/Command";
 import { Action, ActionDescription } from "../helpers/Action";
 import { Timeout, TimeoutDescription } from "../helpers/Timeout";
 import { Awaited, AwaitedDescription } from "../helpers/Awaited";
+import { version } from "../../package.json";
 
 interface CommandInfoSet {
   [key: string]: string;
@@ -22,12 +24,15 @@ class AoiClient extends AoiBase {
   #optionConsole: boolean | undefined;
   #aoiwarning: boolean | undefined;
   #warningmanager: AoiWarning;
+  functionError: boolean | undefined;
+  sendMessageErrror: boolean | undefined;
   registerCommand: Command = new Command(this);
   registerAction: Action = new Action(this);
   registerTimeout: Timeout = new Timeout(this);
   registerAwaited: Awaited = new Awaited(this);
   timeoutManager: TimeoutManager;
   awaitedManager: AwaitedManager;
+  loadCommands?: LoadCommands;
   private commands: Collection<CommandInfoSet, unknown> = new Collection();
   private globalVars: Collection<string, unknown> = new Collection();
   /**
@@ -37,7 +42,9 @@ class AoiClient extends AoiBase {
    * @param {TelegramOptions} options.telegram - Options for the Telegram integration.
    * @param {DatabaseOptions} options.database - Options for the database.
    * @param {string[]} options.disableFunctions - Functions that will be removed from the library's loading functions.
-   * @param {DataFunction[]} options.customFunction - an array of customFunction functions.
+   * @param {DataFunction[]} options.customFunction - An array of customFunction functions.
+   * @param {boolean} options.functionError - For the error handler of functions.
+   * @param {boolean} options.sendMessageError - To disable text errors.
    * @param {boolean} [options.console] - Outputting system messages to the console.
    * @param {boolean} [options.aoiwarning] - Displaying messages about new versions.
    * @param {boolean} [options.autoUpdate] - Checks for available package updates and performs an update if enabled
@@ -48,6 +55,8 @@ class AoiClient extends AoiBase {
     database?: DatabaseOptions;
     disableFunctions?: string[];
     customFunction?: DataFunction[];
+    functionError?: boolean;
+    sendMessageErrror?: boolean;
     console?: boolean;
     aoiwarning?: boolean;
     autoUpdate?: boolean;
@@ -66,6 +75,8 @@ class AoiClient extends AoiBase {
     this.#warningmanager = new AoiWarning(
       options.autoUpdate === undefined ? false : options.autoUpdate,
     );
+    this.functionError = options.functionError;
+    this.sendMessageErrror = options.sendMessageErrror;
     this.timeoutManager = new TimeoutManager(this, options.database);
     this.awaitedManager = new AwaitedManager(this);
   }
@@ -172,6 +183,25 @@ class AoiClient extends AoiBase {
   }
 
   /**
+   * Adds a function error command to handle errors.
+   * @param {Object} options - Options for the function error command.
+   * @param {string} options.code - The code to be executed on function error.
+   */
+  functionErrorCommand(options: { code: string }) {
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "you did not specify the 'code' parameter",
+      );
+    }
+    this.on("functionError", async (context, event) => {
+      event.telegram.functionError = false;
+      this.evaluateCommand({ event: "functionError" }, options.code, event);
+    });
+    return this;
+  }
+
+  /**
    * Connect to the service and perform initialization tasks.
    */
   async connect() {
@@ -186,7 +216,6 @@ class AoiClient extends AoiBase {
       this.on("ready", async (ctx) => {
         new Promise((res) => {
           setTimeout(() => {
-            const version = require("../../package.json").version;
             const ctxUsername = `@${ctx.username}`;
 
             console.log(

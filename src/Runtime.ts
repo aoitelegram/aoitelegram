@@ -2,8 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import chalk from "chalk";
 import { Context } from "./Context";
-import { Environment } from "./Environment";
 import { Evaluator } from "./Evaluator";
+import { Environment } from "./Environment";
 import { Lexer, TokenArgument, TokenOperator } from "./Lexer";
 import { Parser } from "./Parser";
 import { AoijsError, AoiStopping, MessageError } from "./classes/AoiError";
@@ -22,6 +22,8 @@ function getStopping(name: string) {
     case "$onlyIf":
       return true;
     case "$cooldown":
+      return true;
+    case "$argsCheck":
       return true;
     default:
       return false;
@@ -45,13 +47,13 @@ class Runtime {
 
   /**
    * Constructs a new Runtime instance with a Telegram context.
-   * @param telegram - The Telegram context for the runtime.
+   * @param eventData - The Telegram context for the runtime.
    * @param database - The local database.
    * @param customFunction - An array of customFunction functions.
    * @param options.disableFunctions - Functions that will be removed from the library's loading functions.
    */
   constructor(
-    telegram: EventContext["telegram"],
+    eventData: EventContext["telegram"],
     database: AoiManager,
     customFunction?: DataFunction[],
     disableFunctions?: string[],
@@ -59,7 +61,7 @@ class Runtime {
     this.database = database;
     this.customFunction = customFunction || [];
     this.disableFunctions = disableFunctions || [];
-    this.prepareGlobal(telegram, database, customFunction, disableFunctions);
+    this.prepareGlobal(eventData, database, customFunction, disableFunctions);
   }
 
   /**
@@ -107,13 +109,13 @@ class Runtime {
 
   /**
    * Prepares the global environment for custom functions by reading functions in a directory and from custom plugins.
-   * @param telegram - The Telegram context.
+   * @param eventData - The Telegram context.
    * @param database - The local database.
    * @param customFunction - An array of custom function definitions.
    * @param disableFunctions - Functions that will be removed from the library's loading functions.
    */
   private prepareGlobal(
-    telegram: EventContext["telegram"],
+    eventData: EventContext["telegram"],
     database: AoiManager,
     customFunction?: DataFunction[],
     disableFunctions?: string[],
@@ -121,7 +123,7 @@ class Runtime {
     readFunctionsInDirectory(
       __dirname.replace("classes", "function"),
       this.globalEnvironment,
-      telegram,
+      eventData,
       database,
       disableFunctions || [],
     );
@@ -129,7 +131,7 @@ class Runtime {
       readFunctions(
         customFunction,
         this.globalEnvironment,
-        telegram,
+        eventData,
         database,
         this,
       );
@@ -141,18 +143,18 @@ class Runtime {
  * Runs Aoi code using a Runtime instance.
  * @param command - The command or event data for the code execution.
  * @param code - The Aoi code to execute.
- * @param telegram - The Telegram context.
+ * @param eventData - The Telegram context.
  * @param runtime - The Runtime instance.
  */
 async function evaluateAoiCommand(
   command: string | { event: string },
   code: string,
-  telegram: (TelegramBot & EventContext) | UserFromGetMe,
+  eventData: (TelegramBot & EventContext) | UserFromGetMe,
   runtime: Runtime,
 ) {
   try {
     const aoiRuntime = new Runtime(
-      telegram,
+      eventData,
       runtime.database,
       runtime?.customFunction,
       runtime?.disableFunctions,
@@ -189,14 +191,14 @@ function updateParamsFromArray(
  * Reads and initializes custom functions and adds them to the parent global environment.
  * @param customFunction - An array of custom function definitions.
  * @param parent - The global environment where functions will be added.
- * @param telegram - The Telegram context.
+ * @param eventData - The Telegram context.
  * @param database - The local database.
  * @param runtime - The Runtime instance.
  */
 function readFunctions(
   customFunction: DataFunction[],
   parent: Runtime["globalEnvironment"],
-  telegram: EventContext["telegram"],
+  eventData: EventContext["telegram"],
   database: AoiManager,
   runtime: Runtime,
 ) {
@@ -207,7 +209,7 @@ function readFunctions(
       (dataFunction.type === "js" || !dataFunction.type)
     ) {
       parent.set(dataFunctionName, async (context) => {
-        const error = new MessageError(telegram);
+        const error = new MessageError(eventData);
         if (!dataFunction.callback) {
           throw new AoijsError(
             "runtime",
@@ -219,7 +221,7 @@ function readFunctions(
         if (typeof dataFunction.callback === "function") {
           const response = await dataFunction.callback(
             context,
-            telegram,
+            eventData,
             database,
             error,
           );
@@ -252,7 +254,7 @@ function readFunctions(
         const response = await evaluateAoiCommand(
           context.fileName,
           dataFunction.code,
-          telegram,
+          eventData,
           runtime,
         );
         return response;
@@ -272,14 +274,14 @@ function readFunctions(
  * Recursively reads and initializes functions in a directory and adds them to the parent global environment.
  * @param dirPath - The directory path to search for functions.
  * @param parent - The global environment where functions will be added.
- * @param telegram - The Telegram context.
+ * @param eventData - The Telegram context.
  * @param database - The local database.
  * @param disableFunctions - Functions that will be removed from the library's loading functions.
  */
 function readFunctionsInDirectory(
   dirPath: string,
   parent: Runtime["globalEnvironment"],
-  telegram: EventContext["telegram"],
+  eventData: EventContext["telegram"],
   database: AoiManager,
   disableFunctions: string[],
 ) {
@@ -295,33 +297,62 @@ function readFunctionsInDirectory(
       readFunctionsInDirectory(
         itemPath,
         parent,
-        telegram,
+        eventData,
         database,
         disableFunctions,
       );
     } else if (itemPath.endsWith(".js")) {
       const dataFunction = require(itemPath).default;
       if (!dataFunction?.name) continue;
+
       const dataFunctionName = dataFunction.name.toLowerCase();
       if (disableFunctionsSet.has(dataFunctionName)) continue;
+
       if (dataFunction && typeof dataFunction.callback === "function") {
         parent.set(dataFunctionName, async (context) => {
-          const error = new MessageError(telegram);
+          const error = new MessageError(eventData);
           let response;
           try {
             response = await dataFunction.callback(
               context,
-              telegram,
+              eventData,
               database,
               error,
             );
           } catch (err) {
             if (err instanceof AoiStopping) return;
             const errorMessage = `${err}`.split(":")?.[1].trimStart() || err;
-            error.customError(
-              `Failed to usage ${dataFunctionName}: ${errorMessage}`,
-              dataFunctionName,
-            );
+
+            if (eventData.telegram?.functionError) {
+              eventData.telegram.addFunction({
+                name: "$handleError",
+                callback: async (
+                  ctx: Context,
+                  event: EventContext["telegram"],
+                  database: AoiManager,
+                  error: MessageError,
+                ) => {
+                  const [property = "error"] = await ctx.getEvaluateArgs();
+                  ctx.checkArgumentTypes([property as string], error, [
+                    "string",
+                  ]);
+                  const dataError = {
+                    error: errorMessage,
+                    function: dataFunctionName,
+                    command: context.fileName,
+                  } as { [key: string]: unknown };
+                  return dataError[property as string] ?? dataError;
+                },
+              });
+              eventData.telegram.emit("functionError", context, eventData);
+              eventData.telegram.removeFunction("$handleError");
+            }
+            if (eventData.telegram?.sendMessageError) {
+              error.customError(
+                `Failed to usage ${dataFunctionName}: ${errorMessage}`,
+                dataFunctionName,
+              );
+            }
           }
           if (getStopping(dataFunction.name) && response) {
             throw new AoiStopping(dataFunction.name);

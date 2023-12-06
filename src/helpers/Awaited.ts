@@ -42,7 +42,15 @@ class Awaited {
    * @returns {Awaited} The Awaited instance.
    */
   register(awaited: AwaitedDescription): Awaited {
-    this.awaiteds.push(awaited);
+    const existingIndex = this.awaiteds.findIndex(
+      (map) => map.awaited === awaited.awaited,
+    );
+    if (existingIndex !== -1) {
+      this.awaiteds[existingIndex] = awaited;
+    } else {
+      this.awaiteds.push(awaited);
+    }
+
     return this;
   }
 
@@ -50,43 +58,37 @@ class Awaited {
    * Sets up a handler for awaited events.
    */
   handler(): void {
-    this.telegram.on(
-      // @ts-ignore
-      "awaited",
-      async (awaited: AwaitedEvent, context: unknown) => {
-        for (const awaitedDescription of this.awaiteds) {
-          if (awaitedDescription.awaited !== awaited.awaited) continue;
+    this.telegram.on("awaited", async (awaited, context) => {
+      for (const awaitedDescription of this.awaiteds) {
+        if (awaitedDescription.awaited !== awaited.awaited) continue;
 
-          const intervalId = setInterval(async () => {
-            const awaitedData = parseJSON(awaited.data);
-            await this.telegram.addFunction([
-              {
-                name: "$awaitedData",
-                callback: async (ctx) => {
-                  const args = await ctx.getEvaluateArgs();
-                  return (
-                    getObjectKey(awaitedData, args[0] ?? "") ?? awaitedData
-                  );
-                },
+        const intervalId = setInterval(async () => {
+          const awaitedData = parseJSON(awaited.data);
+          await this.telegram.addFunction([
+            {
+              name: "$awaitedData",
+              callback: async (ctx) => {
+                const args = await ctx.getEvaluateArgs();
+                return getObjectKey(awaitedData, args[0] ?? "") ?? awaitedData;
               },
-              {
-                name: "$break",
-                callback: () => clearInterval(intervalId),
-              },
-            ]);
+            },
+            {
+              name: "$break",
+              callback: () => clearInterval(intervalId),
+            },
+          ]);
 
-            await this.telegram.evaluateCommand(
-              { event: "awaited" },
-              awaitedDescription.code,
-              context,
-            );
+          await this.telegram.evaluateCommand(
+            { event: "awaited" },
+            awaitedDescription.code,
+            context,
+          );
 
-            await this.telegram.removeFunction(["$awaitedData", "$break"]);
-          }, awaited.milliseconds);
-        }
-      },
-    );
+          await this.telegram.removeFunction(["$awaitedData", "$break"]);
+        }, awaited.milliseconds);
+      }
+    });
   }
 }
 
-export { Awaited, AwaitedDescription };
+export { Awaited, AwaitedDescription, AwaitedEvent };
