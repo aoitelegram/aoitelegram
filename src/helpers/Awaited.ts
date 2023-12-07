@@ -64,7 +64,7 @@ class Awaited {
 
         const intervalId = setInterval(async () => {
           const awaitedData = parseJSON(awaited.data);
-          await this.telegram.addFunction([
+          this.telegram.addFunction([
             {
               name: "$awaitedData",
               callback: async (ctx) => {
@@ -84,7 +84,7 @@ class Awaited {
             context,
           );
 
-          await this.telegram.removeFunction(["$awaitedData", "$break"]);
+          this.telegram.removeFunction(["$awaitedData", "$break"]);
         }, awaited.milliseconds);
       }
     });

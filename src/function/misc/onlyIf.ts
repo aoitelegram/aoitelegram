@@ -5,7 +5,7 @@ export default {
   callback: async (ctx, event, database, error) => {
     ctx.argsCheck(2, error);
 
-    const [condition, ifTrue, replyMessage] = ctx.getArgs(0, 2);
+    const [condition, ifTrue] = ctx.getArgs(0, 2);
     const opIdx = condition.child.findIndex((node) => node.type === "operator");
     const opNode = condition.child[opIdx];
 
@@ -44,7 +44,7 @@ export default {
     if (!res) {
       const response = (await ctx.evaluateArgs([ifTrue]))[0];
       if (!!response) {
-        if (replyMessage) event.reply(response);
+        if (ctx.replyMessage) event.reply(response);
         else event.send(response);
       }
       return true;

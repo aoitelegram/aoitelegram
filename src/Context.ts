@@ -2,15 +2,16 @@ import { Collection } from "telegramsjs";
 import { Evaluator } from "./Evaluator";
 import { Environment } from "./Environment";
 import { toParse } from "./function/parser";
-import { TokenArgument, TokenCall } from "./Lexer";
 import { Runtime, RuntimeOptions } from "./Runtime";
 import { AoijsError, MessageError } from "./classes/AoiError";
+import { TokenArgument, TokenCall, TokenValue } from "./Lexer";
 type FnFunction = (ctx: Context) => unknown;
 let target: TokenCall = {} as TokenCall;
 
 class Context {
   options: RuntimeOptions;
   callback_query: unknown[] = [];
+  replyMessage: boolean = false;
   private target: TokenCall = {} as TokenCall;
   private localVars: Collection<string, unknown> = new Collection();
   private array: Collection<string, unknown> = new Collection();
@@ -87,7 +88,7 @@ class Context {
    * Evaluate and run provided arguments.
    * @param args - Arguments to run.
    */
-  async evaluateArgs(args: TokenArgument[]) {
+  async evaluateArgs(args: TokenArgument[]): Promise<TokenValue[]> {
     return Promise.all(
       args.map((value) => Evaluator.singleton.visitArgument(value, this)),
     );
@@ -98,7 +99,7 @@ class Context {
    * @param start - The starting index for retrieving arguments.
    * @param end - The number of arguments to be retrieved and evaluated.
    */
-  async getEvaluateArgs(start = -1, end = 1) {
+  async getEvaluateArgs(start = -1, end = 1): Promise<TokenValue[]> {
     const asyncArgs = await this.getArgs(start, end);
     const asyncEvaluate = await this.evaluateArgs(asyncArgs);
     return asyncEvaluate;

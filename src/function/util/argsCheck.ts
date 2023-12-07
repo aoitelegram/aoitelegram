@@ -2,13 +2,11 @@ export default {
   name: "$argsCheck",
   callback: async (ctx, event, database, error) => {
     ctx.argsCheck(2, error);
-    const [condition, errorMessage = "", replyMessage = false] =
-      await ctx.getEvaluateArgs();
+    const [condition, errorMessage = ""] = await ctx.getEvaluateArgs();
     const msgArgs = event.text?.split(/\s+/).length - 1 || 0;
-    ctx.checkArgumentTypes([condition, errorMessage, replyMessage], error, [
+    ctx.checkArgumentTypes([condition, errorMessage], error, [
       "string",
       "string | undefined",
-      "boolean",
     ]);
 
     if (
@@ -38,7 +36,7 @@ export default {
             : checkers["=="];
 
     if (!check && errorMessage !== "") {
-      if (replyMessage) event.reply(errorMessage);
+      if (ctx.replyMessage) event.reply(errorMessage);
       else event.send(errorMessage);
       return true;
     }

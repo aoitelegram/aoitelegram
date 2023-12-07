@@ -38,15 +38,22 @@ export default {
     try {
       const response = await fetch(apiUrl, config as RequestInit);
       if (response.status === 404) {
-        event.reply(
-          errorMessage || `Failed To Request To API: ${response.statusText}`,
-        );
+        if (ctx.replyMessage)
+          event.reply(
+            errorMessage || `Failed To Request To API: ${response.statusText}`,
+          );
+        else
+          event.send(
+            errorMessage || `Failed To Request To API: ${response.statusText}`,
+          );
         return undefined;
       }
       const text = await response.text();
       return JSON.parse(text).result;
     } catch (err) {
-      event.reply(errorMessage || `Failed To Request To API: ${err}`);
+      if (ctx.replyMessage)
+        event.reply(errorMessage || `Failed To Request To API: ${err}`);
+      else event.send(errorMessage || `Failed To Request To API: ${err}`);
       return undefined;
     }
   },

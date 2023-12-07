@@ -43,6 +43,20 @@ type Token = { pos: number; line: number } & (
   | TokenOperator
 );
 
+type TokenValue =
+  | string
+  | number
+  | boolean
+  | null
+  | object
+  | undefined
+  | "=="
+  | "!="
+  | ">="
+  | "<="
+  | ">"
+  | "<";
+
 /**
  * The Lexer class is responsible for tokenizing input strings.
  */
@@ -481,4 +495,5 @@ export {
   TokenClose,
   TokenNewArg,
   TokenOperator,
+  TokenValue,
 };

@@ -197,6 +197,7 @@ class AoiClient extends AoiBase {
     this.on("functionError", async (context, event) => {
       event.telegram.functionError = false;
       this.evaluateCommand({ event: "functionError" }, options.code, event);
+      event.telegram.functionError = true;
     });
     return this;
   }

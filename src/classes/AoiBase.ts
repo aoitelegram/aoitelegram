@@ -133,7 +133,7 @@ class AoiBase extends TelegramBot {
         this.customFunction,
         this.disableFunctions,
       );
-      return await runtime.runInput(command, code);
+      return runtime.runInput(command, code);
     } catch (err) {
       if (!(err instanceof AoiStopping)) throw err;
     }
@@ -218,12 +218,12 @@ class AoiBase extends TelegramBot {
       );
     }
     const intervalId = setInterval(async () => {
-      await this.addFunction({
+      this.addFunction({
         name: "$break",
         callback: () => clearInterval(intervalId),
       });
       await this.evaluateCommand({ event: "loop" }, options.code, this);
-      await this.removeFunction("$break");
+      this.removeFunction("$break");
     }, options.every ?? 60000);
     return this;
   }

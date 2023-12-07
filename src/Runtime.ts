@@ -25,6 +25,14 @@ function getStopping(name: string) {
       return true;
     case "$argsCheck":
       return true;
+    case "$onlyClientPerms":
+      return true;
+    case "$onlyIfMessageContains":
+      return true;
+    case "$onlyForIDs":
+      return true;
+    case "$onlyPerms":
+      return true;
     default:
       return false;
   }
@@ -121,7 +129,7 @@ class Runtime {
     disableFunctions?: string[],
   ) {
     readFunctionsInDirectory(
-      __dirname.replace("classes", "function"),
+      path.join(__dirname, "/function/"),
       this.globalEnvironment,
       eventData,
       database,
@@ -146,7 +154,7 @@ class Runtime {
  * @param eventData - The Telegram context.
  * @param runtime - The Runtime instance.
  */
-async function evaluateAoiCommand(
+function evaluateAoiCommand(
   command: string | { event: string },
   code: string,
   eventData: (TelegramBot & EventContext) | UserFromGetMe,
@@ -159,7 +167,7 @@ async function evaluateAoiCommand(
       runtime?.customFunction,
       runtime?.disableFunctions,
     );
-    return await aoiRuntime.runInput(command, code);
+    return aoiRuntime.runInput(command, code);
   } catch (error) {
     if (!(error instanceof AoiStopping)) throw error;
   }
@@ -204,15 +212,18 @@ function readFunctions(
 ) {
   for (const dataFunction of customFunction) {
     const dataFunctionName = dataFunction?.name.toLowerCase();
-    if (
-      dataFunctionName &&
-      (dataFunction.type === "js" || !dataFunction.type)
-    ) {
+    if (!dataFunctionName?.startsWith("$")) {
+      throw new AoijsError(
+        "customFunction",
+        "the function name should begin with the symbol $",
+      );
+    }
+    if (dataFunction.type === "js" || !dataFunction.type) {
       parent.set(dataFunctionName, async (context) => {
         const error = new MessageError(eventData);
         if (!dataFunction.callback) {
           throw new AoijsError(
-            "runtime",
+            "customFunction",
             "you specified the type as 'js', so to describe the actions of this function, the 'callback' parameter is required",
             context.fileName,
             dataFunction.name,
@@ -230,16 +241,16 @@ function readFunctions(
           return dataFunction.callback;
         } else {
           throw new AoijsError(
-            "runtime",
+            "customFunction",
             "the 'callback' should be either a function or a string",
           );
         }
       });
-    } else if (dataFunctionName && dataFunction.type === "aoitelegram") {
+    } else if (dataFunction.type === "aoitelegram") {
       parent.set(dataFunctionName, async (context) => {
         if (!dataFunction.code) {
           throw new AoijsError(
-            "runtime",
+            "customFunction",
             "you specified the type as 'aoitelegram', so to describe the actions of this function, the 'code' parameter is required",
             context.fileName,
             dataFunction.name,
@@ -261,7 +272,7 @@ function readFunctions(
       });
     } else {
       throw new AoijsError(
-        "runtime",
+        "customFunction",
         "the specified parameters for creating a custom function do not match the requirements",
         undefined,
         dataFunction.name,
@@ -285,11 +296,77 @@ function readFunctionsInDirectory(
   database: AoiManager,
   disableFunctions: string[],
 ) {
-  const items = fs.readdirSync(dirPath);
   const disableFunctionsSet = new Set(
     disableFunctions.map((func) => func.toLowerCase()),
   );
-  for (const item of items) {
+
+  const processFile = (itemPath: string) => {
+    delete require.cache[itemPath];
+    const dataFunction = require(itemPath).default;
+    if (!dataFunction?.name) return;
+    const dataFunctionName = dataFunction.name.toLowerCase();
+    if (disableFunctionsSet.has(dataFunctionName)) return;
+
+    if (dataFunction && typeof dataFunction.callback === "function") {
+      parent.set(dataFunctionName, async (context) => {
+        const error = new MessageError(eventData);
+        let response;
+
+        try {
+          response = await dataFunction.callback(
+            context,
+            eventData,
+            database,
+            error,
+          );
+        } catch (err) {
+          if (err instanceof AoiStopping) return;
+
+          const errorMessage = `${err}`.split(":")?.[1].trimStart() || err;
+
+          if (eventData.telegram?.functionError) {
+            eventData.telegram.addFunction({
+              name: "$handleError",
+              callback: async (
+                ctx: Context,
+                event: EventContext["telegram"],
+                database: AoiManager,
+                error: MessageError,
+              ) => {
+                const [property = "error"] = await ctx.getEvaluateArgs();
+                ctx.checkArgumentTypes([property as string], error, ["string"]);
+
+                const dataError = {
+                  error: errorMessage,
+                  function: dataFunctionName,
+                  command: context.fileName,
+                } as { [key: string]: unknown };
+
+                return dataError[property as string] ?? dataError;
+              },
+            });
+            eventData.telegram.emit("functionError", context, eventData);
+            eventData.telegram.removeFunction("$handleError");
+          }
+
+          if (eventData.telegram?.sendMessageError) {
+            error.customError(
+              `Failed to usage ${dataFunctionName}: ${errorMessage}`,
+              dataFunctionName,
+            );
+          }
+        }
+
+        if (getStopping(dataFunction.name) && response) {
+          throw new AoiStopping(dataFunction.name);
+        }
+
+        return response;
+      });
+    }
+  };
+
+  const processItem = (item: string) => {
     const itemPath = path.join(dirPath, item);
     const stats = fs.statSync(itemPath);
 
@@ -302,66 +379,12 @@ function readFunctionsInDirectory(
         disableFunctions,
       );
     } else if (itemPath.endsWith(".js")) {
-      const dataFunction = require(itemPath).default;
-      if (!dataFunction?.name) continue;
-
-      const dataFunctionName = dataFunction.name.toLowerCase();
-      if (disableFunctionsSet.has(dataFunctionName)) continue;
-
-      if (dataFunction && typeof dataFunction.callback === "function") {
-        parent.set(dataFunctionName, async (context) => {
-          const error = new MessageError(eventData);
-          let response;
-          try {
-            response = await dataFunction.callback(
-              context,
-              eventData,
-              database,
-              error,
-            );
-          } catch (err) {
-            if (err instanceof AoiStopping) return;
-            const errorMessage = `${err}`.split(":")?.[1].trimStart() || err;
-
-            if (eventData.telegram?.functionError) {
-              eventData.telegram.addFunction({
-                name: "$handleError",
-                callback: async (
-                  ctx: Context,
-                  event: EventContext["telegram"],
-                  database: AoiManager,
-                  error: MessageError,
-                ) => {
-                  const [property = "error"] = await ctx.getEvaluateArgs();
-                  ctx.checkArgumentTypes([property as string], error, [
-                    "string",
-                  ]);
-                  const dataError = {
-                    error: errorMessage,
-                    function: dataFunctionName,
-                    command: context.fileName,
-                  } as { [key: string]: unknown };
-                  return dataError[property as string] ?? dataError;
-                },
-              });
-              eventData.telegram.emit("functionError", context, eventData);
-              eventData.telegram.removeFunction("$handleError");
-            }
-            if (eventData.telegram?.sendMessageError) {
-              error.customError(
-                `Failed to usage ${dataFunctionName}: ${errorMessage}`,
-                dataFunctionName,
-              );
-            }
-          }
-          if (getStopping(dataFunction.name) && response) {
-            throw new AoiStopping(dataFunction.name);
-          }
-          return response;
-        });
-      }
+      processFile(itemPath);
     }
-  }
+  };
+
+  const items = fs.readdirSync(dirPath);
+  items.forEach(processItem);
 }
 
 export { Runtime, RuntimeOptions };

@@ -278,4 +278,17 @@ function replaceData(
   return text;
 }
 
-export { parse, toParse, getObjectKey, formatTime, replaceData };
+/**
+ * Retrieves the value at a given index in an array.
+ * Supports negative indices, where -1 corresponds to the last element, -2 to the second-to-last, and so on.
+ * @param {ArrayLike<T>} arr - The input array or array-like object.
+ * @param {number} index - The index to retrieve the value from.
+ * @returns {T | undefined} - The value at the specified index, or undefined if index is out of range.
+ * @template T
+ */
+function arrayAt<T>(arr: ArrayLike<T>, index: number): T | undefined {
+  const realIndex = index >= 0 ? index : arr.length + index;
+  return arr[realIndex];
+}
+
+export { parse, toParse, getObjectKey, formatTime, replaceData, arrayAt };
