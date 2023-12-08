@@ -63,7 +63,6 @@ function isObject(content: string) {
     (content?.startsWith("{") && content?.endsWith("}")) ||
     typeof content === "object"
   ) {
-    console.log(parseJSON(content));
     try {
       return !!parseJSON(content);
     } catch (err) {

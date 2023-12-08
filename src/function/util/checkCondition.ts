@@ -9,12 +9,12 @@ export default {
         condition.includes(search),
       )
     ) {
-      return error.customError("Valid operators", "$checkCondition");
+      error.customError("Invalid operators", "$checkCondition");
     }
     try {
       const result = eval(condition);
       if (result !== true && result !== false) {
-        return error.customError("Invalid condition", "$checkCondition");
+        error.customError("Invalid condition", "$checkCondition");
       }
       return result;
     } catch (err) {

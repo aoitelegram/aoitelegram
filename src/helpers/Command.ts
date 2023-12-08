@@ -59,27 +59,31 @@ class Command {
   handler() {
     this.telegram.on("message:text", async (message) => {
       const messageArgs = message.text.split(/\s+/);
-      for (const command of this.commands) {
-        if (command.typeChannel && command.typeChannel !== message.chat?.type)
+      const commandIdentifier = messageArgs[0];
+
+      if (!message.chat || !this.commands.length) return;
+
+      const filteredCommands = this.commands.filter(
+        (command) =>
+          !command.typeChannel || command.typeChannel === message.chat.type,
+      );
+
+      for (const command of filteredCommands) {
+        const aliasesRegex = new RegExp(
+          `^/(?:${(command.aliases || []).join("|")})$`,
+        );
+        if (
+          !aliasesRegex.test(commandIdentifier) &&
+          `/${command.name}` !== commandIdentifier
+        )
           continue;
 
-        for (const alias of command.aliases ?? []) {
-          if (`/${alias}` !== messageArgs[0]) continue;
-
-          await this.telegram.evaluateCommand(
-            messageArgs[0],
-            command.code,
-            message,
-          );
-          break;
-        }
-
-        if (`/${command.name}` !== messageArgs[0]) continue;
         await this.telegram.evaluateCommand(
-          messageArgs[0],
+          commandIdentifier,
           command.code,
           message,
         );
+        break;
       }
     });
   }

@@ -58,8 +58,7 @@ class TimeoutManager extends CreateStorage<string, ValueDatabase> {
      * Handles the 'addTimeout' event, which is emitted when a new timeout is scheduled.
      * @param context The context object containing timeout details.
      */
-    // @ts-ignore
-    this.on("addTimeout", (context: ValueDatabase) => {
+    this.telegram.on("addTimeout", (context) => {
       if (!context) return;
       if (context.milliseconds <= 5000) {
         throw new AoijsError(
@@ -94,8 +93,7 @@ class TimeoutManager extends CreateStorage<string, ValueDatabase> {
       id,
       date: Date.now(),
     };
-
-    this.emit("addTimeout", data);
+    this.telegram.emit("addTimeout", data);
     await this.set("timeout", id, data);
   }
 }

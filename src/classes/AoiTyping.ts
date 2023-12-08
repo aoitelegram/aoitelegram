@@ -48,6 +48,7 @@ interface EventHandlers {
   timeout: (client: AoiClient, database: ValueDatabase) => void;
   awaited: (event: AwaitedEvent, data: unknown) => void;
   functionError: (client: AoiClient, context: Context & AoiClient) => void;
+  addTimeout: (context: ValueDatabase) => void;
 }
 
 type CombinedEventFunctions = EventHandlers & EventDataMap<Buffer>;

@@ -55,8 +55,11 @@ class Action {
     this.telegram.on("callback_query:data", async (query) => {
       const data = query.data;
 
-      for (const action of this.actions) {
-        if (action.data !== data) continue;
+      if (!this.actions.length) return;
+
+      const action = this.actions.find((action) => action.data === data);
+
+      if (action) {
         if (action.answer) {
           await query.answerCallbackQuery().catch(() => console.log);
         }
@@ -66,7 +69,6 @@ class Action {
           action.code,
           query,
         );
-        break;
       }
     });
   }
