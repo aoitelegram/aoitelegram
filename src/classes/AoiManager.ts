@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import { Collection } from "telegramsjs";
 import { AoijsError } from "./AoiError";
 import { CreateStorage } from "database-sempai";
 
@@ -36,6 +37,7 @@ interface DatabaseOptions {
  * A class that extends CreateStorage and is responsible for managing database operations.
  */
 class AoiManager extends CreateStorage<string, unknown> {
+  collection: Collection<string, unknown> = new Collection();
   /**
    * Creates a new instance of AoiManager.
    * @param {DatabaseOptions} options - Configuration options for the database connection.
@@ -49,6 +51,15 @@ class AoiManager extends CreateStorage<string, unknown> {
       });
     }
     this.connect();
+  }
+  
+  /**
+ * Retrieves the default value for a specific variable from a given table.
+ * @param {string} vars - The variable name.
+ * @param {string} table - The table name where the variable is stored.
+ */
+  defaultValue(vars: string, table: string) {
+    return this.collection.get(`${vars}_${table}`);
   }
 
   /**
@@ -64,6 +75,7 @@ class AoiManager extends CreateStorage<string, unknown> {
       for await (const table of tables) {
         for (const varName in options) {
           const hasVar = await this.has(table, varName);
+          this.collection.set(`${varName}_${table}`, options[varName]);
           if (!hasVar) {
             await this.set(table, varName, options[varName]);
           }
@@ -72,6 +84,7 @@ class AoiManager extends CreateStorage<string, unknown> {
     } else if (typeof tables === "string") {
       for (const varName in options) {
         const hasVar = await this.has(tables, varName);
+        this.collection.set(`${varName}_${tables}`, options[varName]);
         if (!hasVar) {
           await this.set(tables, varName, options[varName]);
         }

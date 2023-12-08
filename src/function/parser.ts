@@ -217,16 +217,11 @@ function formatTime(milliseconds: number) {
       minutes: calculateUnit(60000),
       seconds: calculateUnit(1000),
       ms: calculateUnit(1),
-    },
-    /**
-     * Converts the timeData.units object into a human-readable time string.
-     *
-     * @returns {string} - The humanized time string.
-     */
-    humanize: () => {
+      fullTime: function (): string {
       const timeString = Object.entries(timeData.units)
         .slice(0, -1)
         .map(([unit, value]) => {
+          if (unit === "fullTime") return "";
           if (value) {
             const abbreviation = ["months", "ms"].includes(unit)
               ? unit.slice(0, 3)
@@ -239,8 +234,8 @@ function formatTime(milliseconds: number) {
 
       return timeString.join(" ");
     },
+    },
   };
-
   return timeData;
 }
 
@@ -268,12 +263,13 @@ function replaceData(
     minutes: number;
     seconds: number;
     ms: number;
+    fullTime: () => string;
   },
   text: string,
 ) {
   Object.entries(date).map((unit) => {
     const regexp = new RegExp(`%${unit[0]}%`, "g");
-    text = text.replace(regexp, `${unit[1]}`);
+    text = text.replace(regexp, typeof unit[1] === "function" ? unit[1]() : `${unit[1]}`);
   });
   return text;
 }

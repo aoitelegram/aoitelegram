@@ -1,7 +1,7 @@
 import fs from "node:fs";
 
 export default {
-  name: "$existsFile",
+  name: "$fileExists",
   callback: async (ctx, event, database, error) => {
     ctx.argsCheck(1, error);
     const args = await ctx.getEvaluateArgs();

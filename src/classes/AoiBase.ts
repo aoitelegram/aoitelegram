@@ -133,7 +133,7 @@ class AoiBase extends TelegramBot {
         this.customFunction,
         this.disableFunctions,
       );
-      return runtime.runInput(command, code);
+      return await runtime.runInput(command, code);
     } catch (err) {
       if (!(err instanceof AoiStopping)) throw err;
     }

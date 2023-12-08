@@ -10,7 +10,7 @@ type EnvironmentResult = EnvironmentFunction | EnvironmentVariable;
  */
 class Environment {
   #cache = new Map<string, EnvironmentResult>();
-
+  
   /**
    * Constructs an environment with an optional parent environment.
    * @param parent - The parent environment, if any.

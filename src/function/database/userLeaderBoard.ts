@@ -18,7 +18,6 @@ interface UsersData {
 function replaceText(text: string, chatData: ChatData) {
   return text
     .replace(/{top}/g, `${chatData.top}`)
-    .replace(/{top}/g, `${chatData.top}`)
     .replace(/{id}/g, `${chatData.id}`)
     .replace(/{first_name}/g, `${chatData.first_name}`)
     .replace(/{last_name}/g, `${chatData.last_name}`)
@@ -55,8 +54,8 @@ export default {
 
     for (const entryKey in allEntries) {
       const entryValue = await database.get(defaultTable, entryKey);
-      const [userId] = entryKey.split("_");
-      if (`${userId}_${chatId}_${args[1]}` !== entryKey) continue;
+      const [, userId] = entryKey.split("_");
+      if (`user_${userId}_${chatId}_${args[1]}` !== entryKey) continue;
 
       if (!isNaN(Number(entryValue))) {
         users.push({ entry: Number(entryValue), user: entryKey });
@@ -71,7 +70,7 @@ export default {
 
     for (let index = 0; index < users.length; index++) {
       if (index + 1 === Number(args[4] || 10)) break;
-      const [user] = users[index].user.split("_");
+      const [, user] = users[index].user.split("_");
       const chatUserData = await event.getChatMember(user);
       leaderboardText += replaceText(args[3], {
         ...chatUserData.user,

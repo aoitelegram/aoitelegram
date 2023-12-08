@@ -20,18 +20,14 @@ interface RuntimeOptions {
 function getStopping(name: string) {
   switch (name) {
     case "$onlyIf":
-      return true;
     case "$cooldown":
-      return true;
     case "$argsCheck":
-      return true;
-    case "$onlyClientPerms":
-      return true;
-    case "$onlyIfMessageContains":
-      return true;
-    case "$onlyForIDs":
-      return true;
     case "$onlyPerms":
+    case "$onlyForIDs":
+    case "$chatCooldown":
+    case "$globalCooldown":
+    case "$onlyClientPerms":
+    case "$onlyIfMessageContains":
       return true;
     default:
       return false;
