@@ -21,7 +21,7 @@ function replaceText(text: string, chatData: ChatData) {
     .replace(/{title}/g, `${chatData.title}`)
     .replace(/{description}/g, `${chatData.description}`)
     .replace(/{invite_link}/g, `${chatData.invite_link}`)
-    .replace(/{value}/g, `${chatData.value}`)
+    .replace(/{value}/g, `${chatData.value}`);
 }
 
 export default {

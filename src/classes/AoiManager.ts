@@ -52,12 +52,12 @@ class AoiManager extends CreateStorage<string, unknown> {
     }
     this.connect();
   }
-  
+
   /**
- * Retrieves the default value for a specific variable from a given table.
- * @param {string} vars - The variable name.
- * @param {string} table - The table name where the variable is stored.
- */
+   * Retrieves the default value for a specific variable from a given table.
+   * @param {string} vars - The variable name.
+   * @param {string} table - The table name where the variable is stored.
+   */
   defaultValue(vars: string, table: string) {
     return this.collection.get(`${vars}_${table}`);
   }

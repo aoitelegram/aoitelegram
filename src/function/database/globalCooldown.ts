@@ -15,7 +15,8 @@ export default {
     const userCooldown = (await database.get(defaultTable, cooldownKey)) || 0;
     const cooldown = userCooldown + +ms(args[0]) - Date.now();
     if (cooldown > 0) {
-      if (ctx.replyMessage) event.reply(replaceData(formatTime(cooldown).units, args[1]));
+      if (ctx.replyMessage)
+        event.reply(replaceData(formatTime(cooldown).units, args[1]));
       else event.send(replaceData(formatTime(cooldown).units, args[1]));
       return true;
     } else {

@@ -5,7 +5,11 @@ export default {
     const args = await ctx.getEvaluateArgs();
     const chatId = event.chat?.id || event.message?.chat.id;
     const defaultTable = args[2] || database.table[0];
-    ctx.checkArgumentTypes(args, error, ["string", "string | number | undefined", "string | undefined"]);
+    ctx.checkArgumentTypes(args, error, [
+      "string",
+      "string | number | undefined",
+      "string | undefined",
+    ]);
 
     const variableName = args[0];
 
@@ -27,7 +31,10 @@ export default {
     }
 
     for (const userId of affectedUserIds) {
-      const defaultValue = await database.defaultValue(variableName, defaultTable);
+      const defaultValue = await database.defaultValue(
+        variableName,
+        defaultTable,
+      );
       const userVariableKey = `user_${userId}_${chatId}_${variableName}`;
       await database.set(defaultTable, userVariableKey, defaultValue);
     }

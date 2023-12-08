@@ -218,22 +218,22 @@ function formatTime(milliseconds: number) {
       seconds: calculateUnit(1000),
       ms: calculateUnit(1),
       fullTime: function (): string {
-      const timeString = Object.entries(timeData.units)
-        .slice(0, -1)
-        .map(([unit, value]) => {
-          if (unit === "fullTime") return "";
-          if (value) {
-            const abbreviation = ["months", "ms"].includes(unit)
-              ? unit.slice(0, 3)
-              : unit.slice(0, 1);
-            return `${value}${abbreviation}`;
-          }
-          return "";
-        })
-        .filter(Boolean);
+        const timeString = Object.entries(timeData.units)
+          .slice(0, -1)
+          .map(([unit, value]) => {
+            if (unit === "fullTime") return "";
+            if (value) {
+              const abbreviation = ["months", "ms"].includes(unit)
+                ? unit.slice(0, 3)
+                : unit.slice(0, 1);
+              return `${value}${abbreviation}`;
+            }
+            return "";
+          })
+          .filter(Boolean);
 
-      return timeString.join(" ");
-    },
+        return timeString.join(" ");
+      },
     },
   };
   return timeData;
@@ -269,7 +269,10 @@ function replaceData(
 ) {
   Object.entries(date).map((unit) => {
     const regexp = new RegExp(`%${unit[0]}%`, "g");
-    text = text.replace(regexp, typeof unit[1] === "function" ? unit[1]() : `${unit[1]}`);
+    text = text.replace(
+      regexp,
+      typeof unit[1] === "function" ? unit[1]() : `${unit[1]}`,
+    );
   });
   return text;
 }

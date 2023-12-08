@@ -5,7 +5,11 @@ export default {
     const args = await ctx.getEvaluateArgs();
     const chatId = event.chat?.id || event.message?.chat.id;
     const defaultTable = args[2] || database.table[0];
-    ctx.checkArgumentTypes(args, error, ["string", "string | number | undefined", "string | undefined"]);
+    ctx.checkArgumentTypes(args, error, [
+      "string",
+      "string | number | undefined",
+      "string | undefined",
+    ]);
 
     const variableName = args[0];
 
@@ -22,7 +26,7 @@ export default {
 
       if (variableKey !== variableName) continue;
       affectedIds.push(key);
-      
+
       const defaultValue = await database.defaultValue(key, defaultTable);
       await database.set(defaultTable, key, defaultValue);
     }

@@ -6,7 +6,11 @@ export default {
     const messageId = event.message_id || event.message?.message_id;
     const chatId = event.chat?.id || event.message?.chat.id;
     const defaultTable = args[2] || database.table[0];
-    ctx.checkArgumentTypes(args, error, ["string", "string | number", "string | undefined"]);
+    ctx.checkArgumentTypes(args, error, [
+      "string",
+      "string | number",
+      "string | undefined",
+    ]);
 
     if (!(await database.has(defaultTable, args[0]))) {
       error.errorVar(args[0], "$getMessageVar");
