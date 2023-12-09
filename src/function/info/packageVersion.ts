@@ -1,8 +1,7 @@
-// @ts-ignore
 import { version } from "../../../package.json";
 
 export default {
-  name: "$aoiversion",
+  name: "$packageVersion",
   callback: async (ctx, event, database, error) => {
     return version;
   },
