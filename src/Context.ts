@@ -45,6 +45,7 @@ class Context {
     if (typeof fun === "function") {
       const result = (fun as FnFunction)(this);
       this.target = lastTarget;
+      target = node;
       return result;
     }
 

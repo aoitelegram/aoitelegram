@@ -6,7 +6,7 @@ export default {
     ctx.checkArgumentTypes([condition], error, ["string"]);
     if (
       !["==", "!=", "<=", ">=", "||", "&&", "<", ">"].some((search) =>
-        condition.includes(search),
+        condition?.includes(search),
       )
     ) {
       error.customError("Invalid operators", "$checkCondition");

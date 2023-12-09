@@ -9,7 +9,7 @@ export default {
     condition = await ctx.evaluateArgs([condition]);
     if (
       !["==", "!=", "<=", ">=", "||", "&&", "<", ">"].some((search) =>
-        condition[0].includes(search),
+        condition[0]?.includes(search),
       )
     ) {
       error.customError("Invalid operators", "$onlyIf");
