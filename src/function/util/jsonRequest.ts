@@ -1,6 +1,6 @@
-import fetch, { RequestInit } from "node-fetch";
 import { Agent } from "node:https";
-import { getObjectKey } from "../parser";
+import fetch, { RequestInit } from "node-fetch";
+import { getObjectKey, parseJSON } from "../parser";
 
 function buildJSONConfig(data) {
   const apiConfig = {
@@ -24,16 +24,24 @@ export default {
   name: "$jsonRequest",
   callback: async (ctx, event, database, error) => {
     ctx.argsCheck(1, error);
-    const [apiUrl, property = {}, errorMessage] = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes([apiUrl, property, errorMessage], error, [
-      "string",
-      "object",
-      "string | undefined",
-    ]);
+    const [apiUrl, requestData = {}, property, errorMessage] =
+      await ctx.getEvaluateArgs();
+    ctx.checkArgumentTypes(
+      [apiUrl, requestData, property, errorMessage],
+      error,
+      [
+        "string",
+        "object | undefined",
+        "string | undefined",
+        "string | undefined",
+      ],
+    );
 
-    const sanitizedData = Object.keys(property)
-      .filter((key) => property[key] !== undefined && property[key] !== null)
-      .reduce((acc, key) => ({ ...acc, [key]: property[key] }), {});
+    const sanitizedData = Object.keys(requestData)
+      .filter(
+        (key) => requestData[key] !== undefined && requestData[key] !== null,
+      )
+      .reduce((acc, key) => ({ ...acc, [key]: requestData[key] }), {});
     const config = buildJSONConfig(sanitizedData);
     try {
       const response = await fetch(apiUrl, config as RequestInit);
@@ -48,8 +56,8 @@ export default {
           );
         return undefined;
       }
-      const text = await response.text();
-      return JSON.parse(text).result;
+      const text = await response.json();
+      return getObjectKey(text, property);
     } catch (err) {
       if (ctx.replyMessage)
         event.reply(errorMessage || `Failed To Request To API: ${err}`);

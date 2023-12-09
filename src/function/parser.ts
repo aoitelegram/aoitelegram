@@ -174,6 +174,7 @@ function getObjectKey<T extends Data, K extends keyof T>(
   data: T,
   path: string,
 ): T[K] {
+  if (!path) return data as T[K];
   const properties = path.split(".");
   function getProperty(obj: Data, props: string[]): any {
     const [currentProp, ...rest] = props;
@@ -289,4 +290,12 @@ function arrayAt<T>(arr: ArrayLike<T>, index: number): T | undefined {
   return arr[realIndex];
 }
 
-export { parse, toParse, getObjectKey, formatTime, replaceData, arrayAt };
+export {
+  parse,
+  toParse,
+  parseJSON,
+  getObjectKey,
+  formatTime,
+  replaceData,
+  arrayAt,
+};

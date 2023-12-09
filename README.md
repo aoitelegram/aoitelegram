@@ -9,10 +9,13 @@
 
 ## Features
 
-- Easy setup and configuration for Telegram bot integration.
-- Event-driven approach for handling ready events and messages.
-- Command management for defining and executing bot commands.
-- User session management with variables and tables.
+**Over 200 Pre-built Functions:** aoitelegram comes equipped with more than 200 pre-built functions, empowering you to effortlessly create dynamic and interactive Telegram bots.
+
+**Built-in Customizable Local Database:** With aoitelegram, you have a robust customizable local database right out of the box.
+
+**Built-in Custom Function System:** aoitelegram offers an easy way to create your custom functions if something is missing. Additionally, it includes the `PluginManager` class out of the box, aiding you in interacting with other `npm` packages containing custom functions for `aoitelegram`.
+
+**User-Friendly Design:** aoitelegram is perfect for beginners with its straightforward function interface. The `$` prefix simplifies command writing, ensuring a swift launch for your bot. 🚀
 
 ## Installation
 
@@ -49,6 +52,14 @@ const bot = new AoiClient({
     /** The file extension name used for the database file. */
     extname: ".sql",
   },
+  /** Functions that will be removed from the library's loading functions. **/
+  disableFunctions: [],
+  /** An array of customFunction functions **/
+  customFunction: [],
+  /** For the error handler of functions **/
+  functionError: true,
+  /** To disable text errors **/
+  sendMessageError: true,
   /** Outputting system messages to the console. */
   console: true,
   /** Displaying messages about new versions. */
@@ -57,8 +68,12 @@ const bot = new AoiClient({
   autoUpdate: true,
 });
 
+client.functionErrorCommand({
+  code: `$sendMessage[Sorry, but there was an error in the $handleError[function] function within the $handleError[command] command: $handleError[error]]`,
+});
+
 bot.readyCommand({
-  code: `$print[Starting @$client[username]]`,
+  code: `$print[Starting @$clientUsername]`,
 });
 
 bot.messageCommand({
@@ -86,10 +101,11 @@ bot.command({
   name: "botinfo",
   code: `
 $replyMessage[
-Bot ID: $client[id]
-Name: $client[first_name]
-Username: $client[username]
-Ping: $ping ms]`,
+Bot ID: $clientId
+Name: $clientFirstName
+Username: $clientUsername
+Ping: $ping ms
+]`,
 });
 
 const loader = new LoadCommands(bot).loadCommands("./command/");
