@@ -1,7 +1,7 @@
 export default {
   name: "$deleteVar",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error);
+    ctx.argsCheck(1, error, "$deleteVar");
     const args = await ctx.getEvaluateArgs();
     const defaultTable = args[2] || database.table[0];
 

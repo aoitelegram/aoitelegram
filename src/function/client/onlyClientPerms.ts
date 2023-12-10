@@ -1,7 +1,7 @@
 export default {
   name: "$onlyClientPerms",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error);
+    ctx.argsCheck(1, error, "$onlyClientPerms");
     const [perms, messageError] = await ctx.getEvaluateArgs();
     ctx.checkArgumentTypes([perms, messageError], error, [
       "string",

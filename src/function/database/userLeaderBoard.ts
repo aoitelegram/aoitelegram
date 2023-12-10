@@ -31,7 +31,7 @@ function replaceText(text: string, chatData: ChatData) {
 export default {
   name: "$userLeaderBoard",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error);
+    ctx.argsCheck(2, error, "$userLeaderBoard");
 
     const args = await ctx.getEvaluateArgs();
     const userId = event.from?.id || event.message?.from?.id;

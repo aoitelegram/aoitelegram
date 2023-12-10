@@ -1,7 +1,7 @@
 export default {
   name: "$setVar",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error);
+    ctx.argsCheck(2, error, "$setVar");
     const args = await ctx.getEvaluateArgs();
     const defaultTable = args[2] || database.table[0];
 

@@ -12,25 +12,26 @@ class Context {
   options: RuntimeOptions;
   callback_query: unknown[] = [];
   replyMessage: boolean = false;
-  private target: TokenCall = {} as TokenCall;
-  private localVars: Collection<string, unknown> = new Collection();
-  private array: Collection<string, unknown> = new Collection();
-  private object: Collection<string, unknown> = new Collection();
-  private random: Collection<string, unknown> = new Collection();
+  target: TokenCall = {} as TokenCall;
+  localVars: Collection<string, unknown> = new Collection();
+  array: Collection<string, unknown> = new Collection();
+  random: Collection<string, unknown> = new Collection();
   /**
    * Creates a new instance of the Context class.
    * @param fileName - The name of the file.
    * @param env - Environment object.
    * @param runtime - Runtime object.
-   * @param options - options
+   * @param varReplaceOption - Compilation of # variables
    */
   constructor(
     public fileName: string | { event: string },
     public env: Environment,
     public runtime: Runtime,
     public type: string,
+    public varReplaceOption: boolean,
   ) {
     this.options = runtime.options;
+    this.varReplaceOption = varReplaceOption;
   }
 
   /**
@@ -60,13 +61,14 @@ class Context {
    * @param func - Error function
    */
   argsCheck(amount = 1, error: MessageError, func?: string) {
-    const target = this.target;
-    if (!target || target.child.length < amount) {
+    const argsTarget = this.target;
+    target = { value: func } as TokenCall;
+    if (!argsTarget || argsTarget.child.length < amount) {
       error.errorArgs(
         amount,
-        target.child.length ?? 0,
-        func ?? target.value,
-        target.line,
+        argsTarget.child.length ?? 0,
+        func ?? argsTarget.value,
+        argsTarget.line,
       );
     }
   }

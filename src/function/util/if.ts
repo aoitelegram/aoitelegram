@@ -1,9 +1,10 @@
 import { parse } from "../parser";
+import { ConditionChecker } from "../condition";
 
 export default {
   name: "$if",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error);
+    ctx.argsCheck(2, error, "$if");
 
     let [condition, ifTrue, ifFalse] = ctx.getArgs(0, 3);
     condition = await ctx.evaluateArgs([condition]);
@@ -16,7 +17,7 @@ export default {
     }
 
     try {
-      const result = eval(condition[0]);
+      const result = eval(ConditionChecker.solve(condition[0]));
       if (result !== true && result !== false) {
         error.customError("Invalid condition", "$if");
       }

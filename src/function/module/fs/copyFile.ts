@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 export default {
   name: "$copyFile",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error);
+    ctx.argsCheck(2, error, "$copyFile");
     const args = await ctx.getEvaluateArgs();
     ctx.checkArgumentTypes(args, error, ["string", "string"]);
 

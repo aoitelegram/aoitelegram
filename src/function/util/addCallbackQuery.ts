@@ -9,7 +9,7 @@ function pushIndexArray(index, value, array) {
 export default {
   name: "$addCallbackQuery",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(3, error);
+    ctx.argsCheck(3, error, "$addCallbackQuery");
     const args = await ctx.getEvaluateArgs();
     ctx.checkArgumentTypes(args, error, ["number", "string", "string"]);
     pushIndexArray(

@@ -1,7 +1,7 @@
 export default {
   name: "$arrayIncludes",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error);
+    ctx.argsCheck(2, error, "$arrayIncludes");
     const args = await ctx.getEvaluateArgs();
 
     if (!ctx.array.has(args[0])) {

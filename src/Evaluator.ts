@@ -83,6 +83,16 @@ class Evaluator {
     while (array.length > 0) {
       let node = array.shift() as Token;
       let response = await this.visit(node, context);
+      if (context.varReplaceOption) {
+        const search = /&([^\s&,]+)([.,\-\|]*)/g;
+        const matches = [...`${response}`.matchAll(search)];
+        matches.forEach(([_, key]) => {
+          if (typeof response !== "string") return;
+          const regExp = new RegExp(`&${key}`, "g");
+          const value = context.localVars.get(key);
+          response = response.replace(regExp, value as string);
+        });
+      }
       valueType.push(response as Token);
     }
 

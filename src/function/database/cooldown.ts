@@ -4,7 +4,7 @@ import { formatTime, replaceData } from "../parser";
 export default {
   name: "$cooldown",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error);
+    ctx.argsCheck(2, error, "$cooldown");
     const args = await ctx.getEvaluateArgs();
     const userId = event.from?.id || event.message?.from.id;
     const chatId = event.chat?.id || event.message?.chat.id;

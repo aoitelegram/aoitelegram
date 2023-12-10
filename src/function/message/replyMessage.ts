@@ -1,7 +1,7 @@
 export default {
   name: "$replyMessage",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error);
+    ctx.argsCheck(1, error, "$replyMessage");
     const args = await ctx.getEvaluateArgs();
     const callback_query = ctx.callback_query;
     ctx.callback_query = [];

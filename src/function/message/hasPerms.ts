@@ -1,7 +1,7 @@
 export default {
   name: "$hasPerms",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error);
+    ctx.argsCheck(1, error, "$hasPerms");
     const [perms, userId = event.from?.id || event.message?.from.id] =
       await ctx.getEvaluateArgs();
     ctx.checkArgumentTypes([perms, userId], error, [

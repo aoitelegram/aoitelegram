@@ -1,7 +1,7 @@
 export default {
   name: "$onlyChatPerms",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error);
+    ctx.argsCheck(2, error, "$onlyChatPerms");
     const [perms, messageError] = await ctx.getEvaluateArgs();
     ctx.checkArgumentTypes([perms, messageError], error, ["string", "string"]);
     const getPerms = await event.getChat();

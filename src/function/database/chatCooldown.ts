@@ -4,7 +4,7 @@ import { formatTime, replaceData } from "../parser";
 export default {
   name: "$chatCooldown",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error);
+    ctx.argsCheck(2, error, "$chatCooldown");
     const args = await ctx.getEvaluateArgs();
     const chatId = event.chat?.id || event.message?.chat.id;
     const defaultTable = args[5] || database.table[0];

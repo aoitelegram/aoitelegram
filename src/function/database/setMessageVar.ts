@@ -1,7 +1,7 @@
 export default {
   name: "$setMessageVar",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error);
+    ctx.argsCheck(2, error, "$setMessageVar");
     const args = await ctx.getEvaluateArgs();
     const messageId = event.message_id || event.message?.message_id;
     const chatId = event.chat?.id || event.message?.chat.id;

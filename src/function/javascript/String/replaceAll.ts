@@ -1,9 +1,9 @@
 export default {
   name: "$replaceAll",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(3, error);
+    ctx.argsCheck(3, error, "$replaceAll");
     const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["string"]);
-    return args[0].replaceAll(args[1], args[2]);
+    const regex = new RegExp(args[1], "g");
+    return `${args[0]}`.replace(regex, args[2]);
   },
 };

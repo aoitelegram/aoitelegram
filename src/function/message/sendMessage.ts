@@ -1,7 +1,7 @@
 export default {
   name: "$sendMessage",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error);
+    ctx.argsCheck(1, error, "$sendMessage");
     const [
       text,
       parse_mode,

@@ -27,7 +27,7 @@ function replaceText(text: string, chatData: ChatData) {
 export default {
   name: "$chatLeaderBoard",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error);
+    ctx.argsCheck(1, error, "$chatLeaderBoard");
 
     const args = await ctx.getEvaluateArgs();
     const defaultTable = args[4] || database.table[0];

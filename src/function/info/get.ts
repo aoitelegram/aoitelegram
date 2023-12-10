@@ -1,7 +1,7 @@
 export default {
   name: "$get",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error);
+    ctx.argsCheck(1, error, "$get");
     const args = await ctx.evaluateArgs(ctx.getArgs(0, 2));
     const reponse =
       args[1] === "global"

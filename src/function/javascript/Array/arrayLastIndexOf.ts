@@ -1,7 +1,7 @@
 export default {
   name: "$arraLastIndexOf",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error);
+    ctx.argsCheck(2, error, "$arraLastIndexOf");
     const args = await ctx.getEvaluateArgs();
 
     if (!ctx.array.has(args[0])) {

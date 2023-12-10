@@ -1,7 +1,7 @@
 export default {
   name: "$trunc",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error);
+    ctx.argsCheck(1, error, "$trunc");
     const args = await ctx.getEvaluateArgs();
     ctx.checkArgumentTypes(args, error, ["number"]);
 

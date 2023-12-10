@@ -1,12 +1,12 @@
 export default {
   name: "$argsCheck",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error);
+    ctx.argsCheck(2, error, "$argsCheck");
     const [condition, errorMessage = ""] = await ctx.getEvaluateArgs();
     const msgArgs = event.text?.split(/\s+/).length - 1 || 0;
     ctx.checkArgumentTypes([condition, errorMessage], error, [
       "string",
-      "string | undefined",
+      "unknown",
     ]);
 
     if (

@@ -69,6 +69,7 @@ class AoiBase extends TelegramBot {
   #database: AoiManager;
   customFunction: DataFunction[];
   disableFunctions: string[];
+  varReplaceOption: boolean;
   /**
    * Creates a new instance of AoiBase.
    * @param {string} token - The token for authentication.
@@ -76,6 +77,7 @@ class AoiBase extends TelegramBot {
    * @param {DatabaseOptions} options.database - Options for the database.
    * @param {DataFunction[]} options.customFunction - An array of custom functions.
    * @param {string[]} options.disableFunctions - Functions that will be removed from the library's loading functions.
+   * @param {boolean} options.varReplaceOption - Compilation of # variables.
    */
   constructor(
     token: string,
@@ -83,11 +85,13 @@ class AoiBase extends TelegramBot {
     database?: DatabaseOptions,
     customFunction?: DataFunction[],
     disableFunctions?: string[],
+    varReplaceOption?: boolean,
   ) {
     super(token, telegram);
     this.#database = new AoiManager(database);
     this.customFunction = customFunction || [];
     this.disableFunctions = disableFunctions || [];
+    this.varReplaceOption = varReplaceOption || false;
   }
 
   /**
@@ -132,6 +136,7 @@ class AoiBase extends TelegramBot {
         this.#database,
         this.customFunction,
         this.disableFunctions,
+        this.varReplaceOption,
       );
       return await runtime.runInput(command, code);
     } catch (err) {

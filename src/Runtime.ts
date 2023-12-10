@@ -46,8 +46,9 @@ class Runtime {
     trimOutput: false,
   };
   database: AoiManager;
-  customFunction?: DataFunction[];
-  disableFunctions?: string[];
+  customFunction: DataFunction[];
+  disableFunctions: string[];
+  varReplaceOption: boolean;
 
   /**
    * Constructs a new Runtime instance with a Telegram context.
@@ -55,16 +56,19 @@ class Runtime {
    * @param database - The local database.
    * @param customFunction - An array of customFunction functions.
    * @param options.disableFunctions - Functions that will be removed from the library's loading functions.
+   * @param options.varReplaceOption - Compilation of # variables.
    */
   constructor(
     eventData: EventContext["telegram"],
     database: AoiManager,
     customFunction?: DataFunction[],
     disableFunctions?: string[],
+    varReplaceOption?: boolean,
   ) {
     this.database = database;
     this.customFunction = customFunction || [];
     this.disableFunctions = disableFunctions || [];
+    this.varReplaceOption = varReplaceOption || false;
     this.prepareGlobal(eventData, database, customFunction, disableFunctions);
   }
 
@@ -94,6 +98,7 @@ class Runtime {
       environment,
       this,
       eventType,
+      this.varReplaceOption,
     );
     const scriptName =
       typeof fileName === "string" ? fileName : fileName?.event;

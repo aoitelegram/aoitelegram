@@ -3,7 +3,7 @@ import { arrayAt } from "../parser";
 export default {
   name: "$onlyForIDs",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error);
+    ctx.argsCheck(1, error, "$onlyForIDs");
     const [...IDs] = await ctx.getEvaluateArgs();
     ctx.checkArgumentTypes([IDs], error, ["...number | ...string"]);
     const userId = event.from?.id || event.message?.from.id;

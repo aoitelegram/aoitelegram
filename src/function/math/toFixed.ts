@@ -1,7 +1,7 @@
 export default {
-  name: "$divide",
+  name: "$toFixed",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error);
+    ctx.argsCheck(1, error, "$toFixed");
     const args = await ctx.getEvaluateArgs();
     ctx.checkArgumentTypes(args, error, ["number", "number | undefined"]);
 

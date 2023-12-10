@@ -1,9 +1,8 @@
 export default {
   name: "$toLowerCase",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error);
+    ctx.argsCheck(1, error, "$toLowerCase");
     const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["string"]);
-    return args[0].toLowerCase();
+    return `${args[0]}`.toLowerCase();
   },
 };

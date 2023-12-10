@@ -23,7 +23,7 @@ function buildJSONConfig(data) {
 export default {
   name: "$jsonRequest",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error);
+    ctx.argsCheck(1, error, "$jsonRequest");
     const [apiUrl, requestData = {}, property, errorMessage] =
       await ctx.getEvaluateArgs();
     ctx.checkArgumentTypes(

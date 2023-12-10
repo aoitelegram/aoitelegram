@@ -1,7 +1,7 @@
 export default {
   name: "$setUserVar",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error);
+    ctx.argsCheck(2, error, "$setUserVar");
     const args = await ctx.getEvaluateArgs();
     const userId = event.from?.id || event.message?.from.id;
     const chatId = event.chat?.id || event.message?.chat.id;

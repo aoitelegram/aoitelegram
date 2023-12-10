@@ -1,7 +1,7 @@
 export default {
   name: "$random",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error);
+    ctx.argsCheck(2, error, "$random");
     const [min, max, useCache = true] = await ctx.getEvaluateArgs();
     ctx.checkArgumentTypes([min, max, useCache], error, [
       "number",

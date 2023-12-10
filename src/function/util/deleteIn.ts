@@ -1,7 +1,7 @@
 export default {
   name: "$deleteIn",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error);
+    ctx.argsCheck(1, error, "$deleteIn");
     const args = await ctx.getEvaluateArgs();
     const chatId = event.chat.id ?? event.message?.chat.id;
     const messageId = event.message_id ?? event.message?.message_id;

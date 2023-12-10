@@ -1,7 +1,7 @@
 export default {
   name: "$divide",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error);
+    ctx.argsCheck(2, error, "$divide");
     const args = await ctx.getEvaluateArgs();
     ctx.checkArgumentTypes(args, error, ["number", "number"]);
 
