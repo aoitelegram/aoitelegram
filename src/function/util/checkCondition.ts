@@ -7,8 +7,8 @@ export default {
     const [condition] = await ctx.getEvaluateArgs();
     ctx.checkArgumentTypes([condition], error, ["string"]);
     if (
-      !["==", "!=", "<=", ">=", "||", "&&", "<", ">"].some((search) =>
-        condition?.includes(search),
+      !["==", "!=", "<=", ">=", "||", "&&", "<", ">"].some(
+        (search) => condition?.includes(search),
       )
     ) {
       error.customError("Invalid operators", "$checkCondition");

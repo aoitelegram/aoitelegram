@@ -9,8 +9,8 @@ export default {
     let [condition, ifTrue, ifFalse] = ctx.getArgs(0, 3);
     condition = await ctx.evaluateArgs([condition]);
     if (
-      !["==", "!=", "<=", ">=", "||", "&&", "<", ">"].some((search) =>
-        condition[0]?.includes(search),
+      !["==", "!=", "<=", ">=", "||", "&&", "<", ">"].some(
+        (search) => condition[0]?.includes(search),
       )
     ) {
       error.customError("Invalid operators", "$if");

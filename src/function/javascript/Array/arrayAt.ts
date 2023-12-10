@@ -8,6 +8,6 @@ export default {
       error.errorArray(args[0], "$arrayAt");
     }
     const array = ctx.array.get(args[0]);
-    return array[args[1] - 1 >= 1 ? args[1] - 1 : args[1] - 1]
+    return array[args[1] - 1 >= 1 ? args[1] - 1 : args[1] - 1];
   },
 };
