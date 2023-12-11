@@ -21,7 +21,7 @@ class Context {
    * @param fileName - The name of the file.
    * @param env - Environment object.
    * @param runtime - Runtime object.
-   * @param varReplaceOption - Compilation of # variables
+   * @param varReplaceOption - Compilation of &localVar& variables
    */
   constructor(
     public fileName: string | { event: string },

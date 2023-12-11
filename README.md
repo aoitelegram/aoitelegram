@@ -60,6 +60,8 @@ const bot = new AoiClient({
   functionError: true,
   /** To disable text errors **/
   sendMessageError: true,
+  /** Compilation of &localVar& variables **/
+  varReplaceOption: false,
   /** Outputting system messages to the console. */
   console: true,
   /** Displaying messages about new versions. */

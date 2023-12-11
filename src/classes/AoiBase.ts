@@ -77,7 +77,7 @@ class AoiBase extends TelegramBot {
    * @param {DatabaseOptions} options.database - Options for the database.
    * @param {DataFunction[]} options.customFunction - An array of custom functions.
    * @param {string[]} options.disableFunctions - Functions that will be removed from the library's loading functions.
-   * @param {boolean} options.varReplaceOption - Compilation of # variables.
+   * @param {boolean} options.varReplaceOption - Compilation of &localVar& variables.
    */
   constructor(
     token: string,

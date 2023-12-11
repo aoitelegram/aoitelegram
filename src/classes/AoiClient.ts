@@ -45,7 +45,7 @@ class AoiClient extends AoiBase {
    * @param {DataFunction[]} options.customFunction - An array of customFunction functions.
    * @param {boolean} options.functionError - For the error handler of functions.
    * @param {boolean} options.sendMessageError - To disable text errors.
-   * @param {boolean} options.varReplaceOption - Compilation of # variables.
+   * @param {boolean} options.varReplaceOption - Compilation of &localVar& variables.
    * @param {boolean} [options.console] - Outputting system messages to the console.
    * @param {boolean} [options.aoiwarning] - Displaying messages about new versions.
    * @param {boolean} [options.autoUpdate] - Checks for available package updates and performs an update if enabled

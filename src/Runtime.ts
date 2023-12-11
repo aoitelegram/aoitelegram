@@ -56,7 +56,7 @@ class Runtime {
    * @param database - The local database.
    * @param customFunction - An array of customFunction functions.
    * @param options.disableFunctions - Functions that will be removed from the library's loading functions.
-   * @param options.varReplaceOption - Compilation of # variables.
+   * @param options.varReplaceOption - Compilation of &localVar& variables.
    */
   constructor(
     eventData: EventContext["telegram"],
