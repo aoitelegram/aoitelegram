@@ -6,8 +6,6 @@ import { Token, TokenArgument, TokenCall, TokenProgram } from "./Lexer";
  * The Evaluator class is responsible for evaluating the Abstract Syntax Tree (AST).
  */
 class Evaluator {
-  static singleton = new Evaluator();
-
   /**
    * Creates a new instance of the Evaluator.
    */
@@ -21,7 +19,7 @@ class Evaluator {
    */
   async evaluate(ast: TokenProgram, ctx: Context) {
     const response = await this.visitArgument(ast, ctx);
-    if (ctx.options.trimOutput && typeof response === "string") {
+    if (typeof response === "string") {
       return response.trim();
     }
 

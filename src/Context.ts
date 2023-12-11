@@ -1,21 +1,21 @@
 import { Collection } from "telegramsjs";
+import { Runtime } from "./Runtime";
 import { Evaluator } from "./Evaluator";
 import { Environment } from "./Environment";
 import { toParse } from "./function/parser";
-import { Runtime, RuntimeOptions } from "./Runtime";
 import { AoijsError, MessageError } from "./classes/AoiError";
 import { TokenArgument, TokenCall, TokenValue } from "./Lexer";
 type FnFunction = (ctx: Context) => unknown;
 let target: TokenCall = {} as TokenCall;
 
 class Context {
-  options: RuntimeOptions;
   callback_query: unknown[] = [];
   replyMessage: boolean = false;
   target: TokenCall = {} as TokenCall;
   localVars: Collection<string, unknown> = new Collection();
   array: Collection<string, unknown> = new Collection();
   random: Collection<string, unknown> = new Collection();
+  evaluator: Evaluator = new Evaluator();
   /**
    * Creates a new instance of the Context class.
    * @param fileName - The name of the file.
@@ -30,7 +30,6 @@ class Context {
     public type: string,
     public varReplaceOption: boolean,
   ) {
-    this.options = runtime.options;
     this.varReplaceOption = varReplaceOption;
   }
 
@@ -93,7 +92,7 @@ class Context {
    */
   async evaluateArgs(args: TokenArgument[]): Promise<TokenValue[]> {
     return Promise.all(
-      args.map((value) => Evaluator.singleton.visitArgument(value, this)),
+      args.map((value) => this.evaluator.visitArgument(value, this)),
     );
   }
 

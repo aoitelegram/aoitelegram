@@ -163,19 +163,14 @@ class Parser {
           token.child = this.parseParen(runtime);
         }
         return token;
+      case "open":
+        return { value: "[", type: "string" } as Token;
+      case "close":
+        return { value: "]", type: "string" } as Token;
+      case "newArg":
+        return { value: ";", type: "string" } as Token;
       default:
         return token;
-    }
-
-    if (runtime.options.alwaysStrict === false) {
-      switch (token.type) {
-        case "open":
-          return { value: "[", type: "string" } as Token;
-        case "close":
-          return { value: "]", type: "string" } as Token;
-        case "newArg":
-          return { value: ";", type: "string" } as Token;
-      }
     }
 
     throw new AoijsError(

@@ -12,11 +12,6 @@ import { DataFunction } from "./classes/AoiBase";
 import { TelegramBot, type Context as EventContext } from "telegramsjs";
 import { UserFromGetMe } from "@telegram.ts/types";
 
-interface RuntimeOptions {
-  alwaysStrict: boolean;
-  trimOutput: boolean;
-}
-
 function getStopping(name: string) {
   switch (name) {
     case "$onlyIf":
@@ -40,11 +35,7 @@ function getStopping(name: string) {
 class Runtime {
   globalEnvironment = new Environment();
   private contexts = new Map<string, Context>();
-  private evaluator = Evaluator.singleton;
-  options: RuntimeOptions = {
-    alwaysStrict: false,
-    trimOutput: false,
-  };
+  private evaluator = new Evaluator();
   database: AoiManager;
   customFunction: DataFunction[];
   disableFunctions: string[];
@@ -388,4 +379,4 @@ function readFunctionsInDirectory(
   items.forEach(processItem);
 }
 
-export { Runtime, RuntimeOptions };
+export { Runtime };
