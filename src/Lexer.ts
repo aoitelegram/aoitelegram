@@ -1,5 +1,5 @@
+import { parseJSON } from "./function/parser";
 import { AoijsError } from "./classes/AoiError";
-import { parseJSON } from "./helpers/Timeout";
 
 type TokenString = { type: "string"; value: string };
 type TokenInteger = { type: "integer"; value: number };
@@ -19,10 +19,6 @@ type TokenCall = {
 type TokenOpen = { type: "open" };
 type TokenClose = { type: "close" };
 type TokenNewArg = { type: "newArg" };
-type TokenOperator = {
-  type: "operator";
-  value: "==" | "!=" | ">=" | "<=" | ">" | "<";
-};
 type TokenArgument = { type: "argument"; child: Token[] };
 type TokenProgram = { type: "program"; child: Token[] };
 type Token = { pos: number; line: number } & (
@@ -40,22 +36,9 @@ type Token = { pos: number; line: number } & (
   | TokenOpen
   | TokenClose
   | TokenNewArg
-  | TokenOperator
 );
 
-type TokenValue =
-  | string
-  | number
-  | boolean
-  | null
-  | object
-  | undefined
-  | "=="
-  | "!="
-  | ">="
-  | "<="
-  | ">"
-  | "<";
+type TokenValue = string | number | boolean | null | object | undefined;
 
 /**
  * The Lexer class is responsible for tokenizing input strings.
@@ -238,34 +221,6 @@ class Lexer {
   }
 
   /**
-   * Parses an operator character into a token.
-   * @param character - The operator character to parse.
-   * @returns A token representing the operator character.
-   */
-  parseOperator(character: string): Token {
-    switch (character) {
-      case "==":
-      case "!=":
-      case ">=":
-      case "<=":
-      case ">":
-      case "<":
-        return {
-          type: "operator",
-          value: character,
-          pos: this.currentColumn,
-          line: this.currentLine,
-        };
-    }
-    return {
-      type: "string",
-      value: character,
-      pos: this.currentColumn,
-      line: this.currentLine,
-    };
-  }
-
-  /**
    * Validates a call token and parses it.
    * @returns A parsed call token.
    */
@@ -301,7 +256,7 @@ class Lexer {
    * @returns A parsed string token.
    */
   validateString(content: string) {
-    return !(this.isSyntax(content) || this.isOperator(content));
+    return !this.isSyntax(content);
   }
 
   /**
@@ -395,7 +350,7 @@ class Lexer {
     if (this.isEscapedCharacter) {
       this.isEscapedCharacter = false;
       this.advanceToNextCharacter();
-      if (this.isSyntax(character) || this.isOperator(character)) {
+      if (this.isSyntax(character)) {
         return {
           type: "string",
           value: character,
@@ -445,14 +400,6 @@ class Lexer {
         return this.parseCall();
       }
     }
-
-    if (this.isOperator(character)) {
-      this.advanceToNextCharacter();
-      if (this.isOperator(character + this.getCharacterAtOffset())) {
-        return this.parseOperator(character + this.advanceToNextCharacter());
-      }
-      return this.parseOperator(character);
-    }
     return this.parseString();
   }
 
@@ -494,6 +441,5 @@ export {
   TokenOpen,
   TokenClose,
   TokenNewArg,
-  TokenOperator,
   TokenValue,
 };

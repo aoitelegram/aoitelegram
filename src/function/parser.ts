@@ -114,8 +114,10 @@ function parseJSON(objStr: string | object) {
  * @param {string} character - The string to check.
  */
 function parse(character: string) {
-  if (!character) return character;
+  if (!character && character?.trim() !== "") return character;
   switch (true) {
+    case isUndefined(character):
+      return undefined;
     case isInteger(character):
       return parseInt(character);
     case isFloat(character):
@@ -128,8 +130,6 @@ function parse(character: string) {
       return character === "true";
     case isNull(character):
       return null;
-    case isUndefined(character):
-      return undefined;
     default:
       return character;
   }

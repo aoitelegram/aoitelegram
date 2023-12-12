@@ -42,7 +42,6 @@ class Evaluator {
       case "object":
       case "null":
       case "undefined":
-      case "operator":
         return node.value;
       case "call":
         return this.visitCall(node, ctx);

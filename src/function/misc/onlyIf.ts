@@ -1,4 +1,3 @@
-import { parse } from "../parser";
 import { ConditionChecker } from "../condition";
 
 export default {

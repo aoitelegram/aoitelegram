@@ -156,7 +156,6 @@ class Parser {
       case "object":
       case "null":
       case "undefined":
-      case "operator":
         return token;
       case "call":
         if (this.getCharacterAtOffset()?.type === "open") {

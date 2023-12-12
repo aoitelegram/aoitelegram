@@ -1,5 +1,5 @@
-const parseStringJSON = require("parsejson");
 import { AoiClient } from "../classes/AoiClient";
+import { getObjectKey } from "../function/parser";
 import { ValueDatabase } from "./manager/TimeoutManager";
 
 interface TimeoutDescription {
@@ -9,33 +9,6 @@ interface TimeoutDescription {
 
 interface Data {
   [key: string]: any;
-}
-
-function getObjectKey<T extends Data, K extends keyof T>(
-  data: T,
-  path: string,
-): T[K] {
-  const properties = path.split(".");
-  function getProperty(obj: Data, props: string[]): any {
-    const [currentProp, ...rest] = props;
-    if (obj && obj[currentProp]) {
-      if (rest.length > 0) {
-        return getProperty(obj[currentProp], rest);
-      } else {
-        return obj[currentProp];
-      }
-    }
-    return undefined;
-  }
-  return getProperty(data, properties) as T[K];
-}
-
-function parseJSON(objStr: string | object) {
-  if (!objStr) return {};
-  if (typeof objStr === "object") return objStr;
-  if (typeof objStr === "string") {
-    return parseStringJSON(objStr) || JSON.parse(objStr);
-  }
 }
 
 /**
@@ -86,7 +59,7 @@ class Timeout {
       for (const timeout of this.timeouts) {
         if (timeout.id !== context.id) continue;
 
-        const timeoutDataParsed = parseJSON(context.data) as Data;
+        const timeoutDataParsed = context.data as Data;
 
         this.telegram.addFunction({
           name: "$timeoutData",
@@ -112,4 +85,4 @@ class Timeout {
   }
 }
 
-export { Timeout, getObjectKey, parseJSON, TimeoutDescription };
+export { Timeout, TimeoutDescription };

@@ -2,7 +2,7 @@ import { Collection } from "telegramsjs";
 import { Runtime } from "./Runtime";
 import { Evaluator } from "./Evaluator";
 import { Environment } from "./Environment";
-import { toParse } from "./function/parser";
+import { parse, toParse } from "./function/parser";
 import { AoijsError, MessageError } from "./classes/AoiError";
 import { TokenArgument, TokenCall, TokenValue } from "./Lexer";
 type FnFunction = (ctx: Context) => unknown;
@@ -92,7 +92,9 @@ class Context {
    */
   async evaluateArgs(args: TokenArgument[]): Promise<TokenValue[]> {
     return Promise.all(
-      args.map((value) => this.evaluator.visitArgument(value, this)),
+      args.map(async (value) =>
+        parse(`${await this.evaluator.visitArgument(value, this)}`),
+      ),
     );
   }
 
@@ -105,6 +107,48 @@ class Context {
     const asyncArgs = await this.getArgs(start, end);
     const asyncEvaluate = await this.evaluateArgs(asyncArgs);
     return asyncEvaluate;
+  }
+
+  /**
+   * Asynchronously retrieves arguments related to AOI.
+   */
+  async getAoiArgs() {
+    const target = this.target;
+    if (!target) {
+      return {
+        inside: "",
+        total: "[]",
+        splits: [] as TokenValue[],
+      };
+    }
+    const getArgs = await this.getEvaluateArgs();
+    return {
+      inside: getArgs.join(","),
+      total: `[${getArgs.join(";")}]`,
+      splits: getArgs,
+      addBrackets() {
+        return getArgs
+          .join(";")
+          .replace(/#RIGHT#/g, "[")
+          .replace(/#LEFT#/g, "]")
+          .replace(/#SEMI#/g, ";")
+          .replace(/#COLON#/g, ":")
+          .replace(/#CHAR#/g, "$")
+          .replace(/#RIGHT_CLICK#/g, ">")
+          .replace(/#LEFT_CLICK#/g, "<")
+          .replace(/#EQUAL#/g, "=")
+          .replace(/#RIGHT_BRACKET#/g, "{")
+          .replace(/#LEFT_BRACKET#/g, "}")
+          .replace(/#COMMA#/g, ",")
+          .replace(/#LB#/g, "(")
+          .replace(/#RB#/g, ")")
+          .replace(/#AND#/g, "&&")
+          .replace(/#OR#/g, "||");
+      },
+      toString() {
+        return `${getArgs.join(";")}`;
+      },
+    };
   }
 
   /**

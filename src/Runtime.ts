@@ -1,11 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import chalk from "chalk";
+import { Parser } from "./Parser";
 import { Context } from "./Context";
 import { Evaluator } from "./Evaluator";
 import { Environment } from "./Environment";
-import { Lexer, TokenArgument, TokenOperator } from "./Lexer";
-import { Parser } from "./Parser";
+import { Lexer, TokenArgument } from "./Lexer";
 import { AoijsError, AoiStopping, MessageError } from "./classes/AoiError";
 import { AoiManager } from "./classes/AoiManager";
 import { DataFunction } from "./classes/AoiBase";
