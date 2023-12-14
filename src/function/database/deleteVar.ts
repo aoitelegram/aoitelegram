@@ -3,9 +3,9 @@ export default {
   callback: async (ctx, event, database, error) => {
     ctx.argsCheck(1, error, "$deleteVar");
     const args = await ctx.getEvaluateArgs();
-    const defaultTable = args[2] || database.table[0];
+    const defaultTable = args[2] || database.tables[0];
 
-    if (!(await database.hasTable(defaultTable))) {
+    if (!database.hasTable(defaultTable)) {
       error.errorTable(defaultTable, "$deleteVar");
       return;
     }

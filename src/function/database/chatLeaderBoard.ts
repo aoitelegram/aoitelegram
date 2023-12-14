@@ -30,7 +30,7 @@ export default {
     ctx.argsCheck(1, error, "$chatLeaderBoard");
 
     const args = await ctx.getEvaluateArgs();
-    const defaultTable = args[4] || database.table[0];
+    const defaultTable = args[4] || database.tables[0];
 
     ctx.checkArgumentTypes(args, error, [
       "string",

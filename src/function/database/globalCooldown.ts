@@ -8,7 +8,7 @@ export default {
     const args = await ctx.getEvaluateArgs();
     const userId = event.from?.id || event.message?.from.id;
     const commandName = ctx.fileName;
-    const defaultTable = args[5] || database.table[0];
+    const defaultTable = args[5] || database.tables[0];
     ctx.checkArgumentTypes(args, error, ["string", "string"]);
 
     const cooldownKey = `${userId}_${commandName}_${ms(args[0])}`;

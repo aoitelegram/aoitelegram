@@ -4,7 +4,7 @@ export default {
     ctx.argsCheck(1, error, "$resetUserVar");
     const args = await ctx.getEvaluateArgs();
     const chatId = event.chat?.id || event.message?.chat.id;
-    const defaultTable = args[2] || database.table[0];
+    const defaultTable = args[2] || database.tables[0];
     ctx.checkArgumentTypes(args, error, [
       "string",
       "string | number | undefined",
@@ -13,7 +13,7 @@ export default {
 
     const variableName = args[0];
 
-    if (!(await database.has(defaultTable, variableName))) {
+    if (!database.has(defaultTable, variableName)) {
       error.errorVar(variableName, "$resetUserVar");
       return;
     }

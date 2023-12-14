@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import { Collection } from "telegramsjs";
 import { AoijsError } from "./AoiError";
-import { CreateStorage } from "database-sempai";
+import { KeyValue } from "@aoitelegram/database";
 
 /**
  * Configuration options for the database connection.
@@ -18,7 +18,7 @@ interface DatabaseOptions {
    * An array of table names within the database.
    * @type {string[]}
    */
-  table?: string[];
+  tables?: string[];
 
   /**
    * The file extension name used for the database file.
@@ -34,9 +34,9 @@ interface DatabaseOptions {
 }
 
 /**
- * A class that extends CreateStorage and is responsible for managing database operations.
+ * A class that extends KeyValue and is responsible for managing database operations.
  */
-class AoiManager extends CreateStorage<string, unknown> {
+class AoiManager extends KeyValue<string, unknown> {
   collection: Collection<string, unknown> = new Collection();
   /**
    * Creates a new instance of AoiManager.
