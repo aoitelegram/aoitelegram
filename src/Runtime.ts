@@ -146,7 +146,7 @@ class Runtime {
  * @param eventData - The Telegram context.
  * @param runtime - The Runtime instance.
  */
-function evaluateAoiCommand(
+async function evaluateAoiCommand(
   command: string | { event: string },
   code: string,
   eventData: (TelegramBot & EventContext) | UserFromGetMe,
@@ -159,7 +159,7 @@ function evaluateAoiCommand(
       runtime?.customFunction,
       runtime?.disableFunctions,
     );
-    return aoiRuntime.runInput(command, code);
+    return await aoiRuntime.runInput(command, code);
   } catch (error) {
     if (!(error instanceof AoiStopping)) throw error;
   }
@@ -176,14 +176,15 @@ function updateParamsFromArray(
   inputString: string,
   array: string[],
   arrayParams: string[],
-): string {
-  arrayParams.forEach((value: string, index: number) => {
-    const placeholder = `{${array[index]}}`;
-    const regex = new RegExp(placeholder, "g");
-    array.forEach((valueArgs: string, indexArgs: number) => {
-      inputString = inputString.replace(regex, value);
-    });
-  });
+) {
+  arrayParams = [
+    ...arrayParams,
+    ...Array(array.length - arrayParams.length).fill(undefined),
+  ];
+  for (let i = 0; i < array.length; i++) {
+    const regex = new RegExp(`{${array[i]}}`, "g");
+    inputString = inputString.replace(regex, arrayParams[i]);
+  }
   return inputString;
 }
 
@@ -251,15 +252,15 @@ function readFunctions(
             dataFunction.name,
           );
         }
-        const params = await context.evaluateArgs(context.getArgs());
-        dataFunction.code = updateParamsFromArray(
+        const params = await context.getEvaluateArgs();
+        const dataFunctionCode = updateParamsFromArray(
           dataFunction.code,
           dataFunction.params ?? [],
           params as string[],
         );
         const response = await evaluateAoiCommand(
           context.fileName,
-          dataFunction.code,
+          dataFunctionCode,
           eventData,
           runtime,
         );

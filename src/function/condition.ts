@@ -25,9 +25,9 @@ class ConditionChecker {
     let pass = true;
 
     if (operator === "==") {
-      pass = parts[0].trim() === parts[1].trim();
+      pass = parts[0].trim() == parts[1].trim();
     } else if (operator === "!=") {
-      pass = parts[0].trim() !== parts[1].trim();
+      pass = parts[0].trim() != parts[1].trim();
     } else {
       const [num1, num2] = parts.map((x) =>
         isNaN(Number(x)) ? x.trim() : Number(x.trim()),
