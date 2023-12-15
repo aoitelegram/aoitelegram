@@ -16,6 +16,7 @@ class Context {
   array: Collection<string, unknown> = new Collection();
   random: Collection<string, unknown> = new Collection();
   evaluator: Evaluator = new Evaluator();
+  stopping?: boolean;
   /**
    * Creates a new instance of the Context class.
    * @param fileName - The name of the file.
@@ -149,6 +150,14 @@ class Context {
         return `${getArgs.join(";")}`;
       },
     };
+  }
+
+  /**
+   * Set the stopping flag for the operation.
+   * @param stopping - Flag indicating whether to stop the operation.
+   */
+  setStopping(stopping: boolean = false) {
+    this.stopping = stopping;
   }
 
   /**

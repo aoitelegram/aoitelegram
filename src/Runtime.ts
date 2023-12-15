@@ -228,6 +228,9 @@ function readFunctions(
             database,
             error,
           );
+          if (context.stopping) {
+            throw new AoiStopping(dataFunction.name);
+          }
           return response;
         } else if (typeof dataFunction.callback === "string") {
           return dataFunction.callback;
