@@ -5,7 +5,7 @@ export default {
     const content = await ctx.getEvaluateArgs();
     const evaluate = await event.telegram.evaluateCommand(
       ctx.fileName,
-      content.join(", "),
+      ...content.join(", "),
       event,
     );
     return eval(evaluate);

@@ -65,8 +65,8 @@ const bot = new AoiClient({
   /** Outputting system messages to the console. */
   console: true,
   /** Displaying messages about new versions. */
-  aoiwarning: true,
-  /** Checks for available package updates and performs an update if enabled */
+  aoiWarning: true,
+  /** Checks for available package updates and performs an update if enabled (beta) */
   autoUpdate: true,
 });
 

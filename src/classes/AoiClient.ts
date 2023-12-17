@@ -22,7 +22,7 @@ interface CommandInfoSet {
  */
 class AoiClient extends AoiBase {
   #optionConsole: boolean | undefined;
-  #aoiwarning: boolean | undefined;
+  #aoiWarning: boolean | undefined;
   #warningmanager: AoiWarning;
   functionError: boolean | undefined;
   sendMessageErrror: boolean | undefined;
@@ -47,7 +47,7 @@ class AoiClient extends AoiBase {
    * @param {boolean} options.sendMessageError - To disable text errors.
    * @param {boolean} options.varReplaceOption - Compilation of &localVar& variables.
    * @param {boolean} [options.console] - Outputting system messages to the console.
-   * @param {boolean} [options.aoiwarning] - Displaying messages about new versions.
+   * @param {boolean} [options.aoiWarning] - Displaying messages about new versions.
    * @param {boolean} [options.autoUpdate] - Checks for available package updates and performs an update if enabled
    */
   constructor(options: {
@@ -60,7 +60,7 @@ class AoiClient extends AoiBase {
     sendMessageErrror?: boolean;
     varReplaceOption?: boolean;
     console?: boolean;
-    aoiwarning?: boolean;
+    aoiWarning?: boolean;
     autoUpdate?: boolean;
   }) {
     super(
@@ -73,8 +73,8 @@ class AoiClient extends AoiBase {
     );
     this.#optionConsole =
       options.console === undefined ? true : options.console;
-    this.#aoiwarning =
-      options.aoiwarning === undefined ? true : options.aoiwarning;
+    this.#aoiWarning =
+      options.aoiWarning === undefined ? true : options.aoiWarning;
     this.#warningmanager = new AoiWarning(
       options.autoUpdate === undefined ? false : options.autoUpdate,
     );
@@ -209,7 +209,7 @@ class AoiClient extends AoiBase {
    * Connect to the service and perform initialization tasks.
    */
   async connect() {
-    if (this.#aoiwarning) {
+    if (this.#aoiWarning) {
       await this.#warningmanager.checkUpdates();
     }
     await this.registerCommand.handler();

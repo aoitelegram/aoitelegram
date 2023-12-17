@@ -64,7 +64,7 @@ class AoiWarning {
 
       console.log(chalk.green("Restarting the project..."));
 
-      process.on("exit", async () => {
+      process.once("exit", async () => {
         spawn(process.argv.shift() as string, process.argv, {
           cwd: process.cwd(),
           detached: true,
