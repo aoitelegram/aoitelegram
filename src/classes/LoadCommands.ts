@@ -268,6 +268,15 @@ class LoadCommands {
       case "loop" === eventType.hasEvent:
         aoitelegram.loopCommand(data);
         break;
+      case "variableCreate" === eventType.hasEvent:
+        aoitelegram.variableCreateCommand(data);
+        break;
+      case "variableUpdate" === eventType.hasEvent:
+        aoitelegram.variableUpdateCommand(data);
+        break;
+      case "variableDelete" === eventType.hasEvent:
+        aoitelegram.variableDeleteCommand(data);
+        break;
       default:
         throw new AoijsError(
           "loader",
@@ -298,6 +307,9 @@ class LoadCommands {
       my_chat_member: "my_chat_member",
       chat_join_request: "chat_join_request",
       loop: "loop",
+      variableCreate: "variableCreate",
+      variableUpdate: "variableUpdate",
+      variableDelete: "variableDelete",
     };
     return { hasEvent: events[type] ?? null, parameter: type };
   }

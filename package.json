@@ -43,7 +43,7 @@
     "aoi.js"
   ],
   "dependencies": {
-    "@aoitelegram/database": "^0.0.1",
+    "@aoitelegram/database": "^0.0.2",
     "chalk": "^4.1.2",
     "database-sempai": "^2.7.0",
     "figlet": "^1.7.0",

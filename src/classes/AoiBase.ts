@@ -1,6 +1,7 @@
 import { Runtime } from "../Runtime";
 import { AoiClient } from "./AoiClient";
 import { Update } from "@telegram.ts/types";
+import { getObjectKey } from "../function/parser";
 import { TelegramBot, Context } from "telegramsjs";
 import { setInterval, clearInterval } from "node:timers";
 import { CombinedEventFunctions } from "./AoiTyping";
@@ -512,6 +513,111 @@ class AoiBase extends TelegramBot {
         options.code,
         ctx,
       );
+    });
+    return this;
+  }
+
+  /**
+   * Registers a code block to be executed in response to an variables create event.
+   * @param {Object} options - Command options.
+   * @param {string} options.code - The code to be executed when an create event is received.
+   */
+  variableCreateCommand(options: { code: string }) {
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "you did not specify the 'code' parameter",
+      );
+    }
+    this.#database.on("create", async (newVariable) => {
+      this.addFunction({
+        name: "$newVariable",
+        callback: async (context, eventData, database, error) => {
+          const [path = "value"] = await context.getEvaluateArgs();
+          context.checkArgumentTypes([path], error, ["string"]);
+          const result = getObjectKey(newVariable, path);
+          return result;
+        },
+      });
+      await this.evaluateCommand({ event: "variableCreate" }, options.code, {
+        newVariable,
+        telegram: this,
+      });
+      this.removeFunction(["$newVariable"]);
+    });
+    return this;
+  }
+
+  /**
+   * Registers a code block to be executed in response to an variables updated event.
+   * @param {Object} options - Command options.
+   * @param {string} options.code - The code to be executed when an updated event is received.
+   */
+  variableUpdateCommand(options: { code: string }) {
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "you did not specify the 'code' parameter",
+      );
+    }
+    this.#database.on("update", async (newVariable, oldVariable) => {
+      this.addFunction([
+        {
+          name: "$newVariable",
+          callback: async (context, eventData, database, error) => {
+            const [path = "value"] = await context.getEvaluateArgs();
+            context.checkArgumentTypes([path], error, ["string"]);
+            const result = getObjectKey(newVariable, path);
+            return result;
+          },
+        },
+        {
+          name: "$oldVariable",
+          callback: async (context, eventData, database, error) => {
+            const [path = "value"] = await context.getEvaluateArgs();
+            context.checkArgumentTypes([path], error, ["string"]);
+            const result = getObjectKey(oldVariable, path);
+            return result;
+          },
+        },
+      ]);
+      await this.evaluateCommand({ event: "variableUpdate" }, options.code, {
+        newVariable,
+        oldVariable,
+        telegram: this,
+      });
+      this.removeFunction(["$newVariable", "$oldVariable"]);
+    });
+    return this;
+  }
+
+  /**
+   * Registers a code block to be executed in response to an variables delete event.
+   * @param {Object} options - Command options.
+   * @param {string} options.code - The code to be executed when an delete event is received.
+   */
+  variableDeleteCommand(options: { code: string }) {
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "you did not specify the 'code' parameter",
+      );
+    }
+    this.#database.on("delete", async (oldVariable) => {
+      this.addFunction({
+        name: "$oldVariable",
+        callback: async (context, eventData, database, error) => {
+          const [path = "value"] = await context.getEvaluateArgs();
+          context.checkArgumentTypes([path], error, ["string"]);
+          const result = getObjectKey(oldVariable, path);
+          return result;
+        },
+      });
+      await this.evaluateCommand({ event: "variableDelete" }, options.code, {
+        oldVariable,
+        telegram: this,
+      });
+      this.removeFunction("$oldVariable");
     });
     return this;
   }
