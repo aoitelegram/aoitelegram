@@ -48,7 +48,7 @@ const bot = new AoiClient({
     /** The file path to the database storage. */
     path: "./database/",
     /** An array of table names within the database.*/
-    table: ["main"],
+    tables: ["main"],
     /** The file extension name used for the database file. */
     extname: ".sql",
   },
