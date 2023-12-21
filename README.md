@@ -1,4 +1,4 @@
-# aoitelegram
+# AoiTelegram
 
 [![NPM Version](https://img.shields.io/npm/v/aoitelegram)](https://www.npmjs.com/package/aoitelegram)
 [![Bot API](https://img.shields.io/badge/Bot%20API-v.6.9-00aced.svg?style=flat-square&logo=telegram)](https://core.telegram.org/bots/api)
@@ -9,13 +9,13 @@
 
 ## Features
 
-**Over 200 Pre-built Functions:** aoitelegram comes equipped with more than 200 pre-built functions, empowering you to effortlessly create dynamic and interactive Telegram bots.
+- **Over 150 Pre-built Functions:** aoitelegram comes equipped with more than 150 pre-built functions, empowering you to effortlessly create dynamic and interactive Telegram bots.
 
-**Built-in Customizable Local Database:** With aoitelegram, you have a robust customizable local database right out of the box.
+- **Built-in Customizable Local Database:** With aoitelegram, you have a robust customizable local database right out of the box.
 
-**Built-in Custom Function System:** aoitelegram offers an easy way to create your custom functions if something is missing. Additionally, it includes the `PluginManager` class out of the box, aiding you in interacting with other `npm` packages containing custom functions for `aoitelegram`.
+- **Built-in Custom Function System:** aoitelegram offers an easy way to create your custom functions if something is missing. Additionally, it includes the `PluginManager` class out of the box, aiding you in interacting with other `npm` packages containing custom functions for `aoitelegram`.
 
-**User-Friendly Design:** aoitelegram is perfect for beginners with its straightforward function interface. The `$` prefix simplifies command writing, ensuring a swift launch for your bot. 🚀
+- **User-Friendly Design:** aoitelegram is perfect for beginners with its straightforward function interface. The `$` prefix simplifies command writing, ensuring a swift launch for your bot. 🚀
 
 ## Installation
 

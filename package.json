@@ -3,7 +3,7 @@
   "description": "A powerful package to create Telegram Bots with built-in string functions",
   "main": "./lib/src/index.js",
   "typing": "./lib/typing/index.d.ts",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "scripts": {
     "clean:lib": "rm -rf lib/",
     "build:release": "npm run clean:lib && npm run build:tsc:main && npm run build:tsc:function",
@@ -43,7 +43,7 @@
     "aoi.js"
   ],
   "dependencies": {
-    "@aoitelegram/database": "^0.0.2",
+    "@aoitelegram/database": "^0.0.3",
     "chalk": "^4.1.2",
     "database-sempai": "^2.7.0",
     "figlet": "^1.7.0",
