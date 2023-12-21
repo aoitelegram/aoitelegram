@@ -8,7 +8,7 @@ export default {
     const defaultTable = args[2] || database.tables[0];
     ctx.checkArgumentTypes(args, error, [
       "string",
-      "string | number",
+      "string | number | undefined",
       "string | undefined",
     ]);
 

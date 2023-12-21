@@ -12,7 +12,9 @@ export default {
       "string | undefined",
       "string | number | undefined",
     ]);
-    const getPerms = await event.getChatMember(userId);
+    const getPerms =
+      (await event.getChatMember(userId).catch((err) => console.log(err))) ||
+      {};
     const hasAdministrator = getPerms.status === "administrator";
     const hasCreator = getPerms.status === "creator";
     const result = hasCreator || hasAdministrator || getPerms[perms] || false;

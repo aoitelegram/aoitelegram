@@ -3,13 +3,8 @@ export default {
   callback: async (ctx, event, database, error) => {
     ctx.argsCheck(1, error, "$resetChatVar");
     const args = await ctx.getEvaluateArgs();
-    const chatId = event.chat?.id || event.message?.chat.id;
-    const defaultTable = args[2] || database.tables[0];
-    ctx.checkArgumentTypes(args, error, [
-      "string",
-      "string | number | undefined",
-      "string | undefined",
-    ]);
+    const defaultTable = args[1] || database.tables[0];
+    ctx.checkArgumentTypes(args, error, ["string", "string | undefined"]);
 
     const variableName = args[0];
 

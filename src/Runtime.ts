@@ -352,7 +352,6 @@ function readFunctionsInDirectory(
             );
           }
         }
-
         if (getStopping(dataFunction.name) && response) {
           throw new AoiStopping(dataFunction.name);
         }

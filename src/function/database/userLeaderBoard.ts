@@ -71,7 +71,9 @@ export default {
     for (let index = 0; index < users.length; index++) {
       if (index + 1 === Number(args[4] || 10)) break;
       const [, user] = users[index].user.split("_");
-      const chatUserData = await event.getChatMember(user);
+      const chatUserData =
+        (await event.getChatMember(user).catch((err) => console.log(err))) ||
+        {};
       leaderboardText += replaceText(args[3], {
         ...chatUserData.user,
         value: users[index].entry,
