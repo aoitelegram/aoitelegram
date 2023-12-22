@@ -1,8 +1,11 @@
+import fs from "node:fs";
+import path from "node:path";
 import { Runtime } from "../Runtime";
 import { AoiClient } from "./AoiClient";
 import { Update } from "@telegram.ts/types";
 import { getObjectKey } from "../function/parser";
 import { TelegramBot, Context } from "telegramsjs";
+import { LibDataFunction, DataFunction } from "./AoiTyping";
 import { setInterval, clearInterval } from "node:timers";
 import { CombinedEventFunctions } from "./AoiTyping";
 import { AoiManager, DatabaseOptions } from "./AoiManager";
@@ -10,28 +13,6 @@ import { AoijsError, AoiStopping, MessageError } from "./AoiError";
 import { version } from "../../package.json";
 
 type AllowedUpdates = ReadonlyArray<Exclude<keyof Update, "update_id">>;
-
-type DataFunction =
-  | {
-      name: string;
-      type: "aoitelegram";
-      version?: string;
-      params?: string[];
-      code: string;
-    }
-  | {
-      name: string;
-      type?: "js";
-      version?: string;
-      callback:
-        | string
-        | ((
-            ctx: Context,
-            event: TelegramBot & Context,
-            database: AoiManager,
-            error: MessageError,
-          ) => unknown);
-    };
 
 /**
  * Configuration options for interacting with the Telegram API.
@@ -68,8 +49,8 @@ interface TelegramOptions {
  */
 class AoiBase extends TelegramBot {
   #database: AoiManager;
-  customFunction: DataFunction[];
-  disableFunctions: string[];
+  customFunction: DataFunction[] = [];
+  functionsArray: LibDataFunction[] = [];
   varReplaceOption: boolean;
   /**
    * Creates a new instance of AoiBase.
@@ -91,8 +72,12 @@ class AoiBase extends TelegramBot {
     super(token, telegram);
     this.#database = new AoiManager(database);
     this.customFunction = customFunction || [];
-    this.disableFunctions = disableFunctions || [];
     this.varReplaceOption = varReplaceOption || false;
+    this.functionsArray = readFunctionsInDirectory(
+      path.join(__dirname, "..", "/function/"),
+      this.functionsArray,
+      disableFunctions || [],
+    );
   }
 
   /**
@@ -136,8 +121,8 @@ class AoiBase extends TelegramBot {
         eventData,
         this.#database,
         this.customFunction,
-        this.disableFunctions,
         this.varReplaceOption,
+        this.functionsArray,
       );
       return await runtime.runInput(command, code);
     } catch (err) {
@@ -535,7 +520,7 @@ class AoiBase extends TelegramBot {
         callback: async (context, eventData, database, error) => {
           const [path = "value"] = await context.getEvaluateArgs();
           context.checkArgumentTypes([path], error, ["string"]);
-          const result = getObjectKey(newVariable, path);
+          const result = getObjectKey(newVariable, `${path}`);
           return result;
         },
       });
@@ -567,7 +552,7 @@ class AoiBase extends TelegramBot {
           callback: async (context, eventData, database, error) => {
             const [path = "value"] = await context.getEvaluateArgs();
             context.checkArgumentTypes([path], error, ["string"]);
-            const result = getObjectKey(newVariable, path);
+            const result = getObjectKey(newVariable, `${path}`);
             return result;
           },
         },
@@ -576,7 +561,7 @@ class AoiBase extends TelegramBot {
           callback: async (context, eventData, database, error) => {
             const [path = "value"] = await context.getEvaluateArgs();
             context.checkArgumentTypes([path], error, ["string"]);
-            const result = getObjectKey(oldVariable, path);
+            const result = getObjectKey(oldVariable, `${path}`);
             return result;
           },
         },
@@ -609,7 +594,7 @@ class AoiBase extends TelegramBot {
         callback: async (context, eventData, database, error) => {
           const [path = "value"] = await context.getEvaluateArgs();
           context.checkArgumentTypes([path], error, ["string"]);
-          const result = getObjectKey(oldVariable, path);
+          const result = getObjectKey(oldVariable, `${path}`);
           return result;
         },
       });
@@ -635,4 +620,49 @@ class AoiBase extends TelegramBot {
   }
 }
 
-export { AoiBase, DataFunction, TelegramOptions };
+/**
+ * Reads and processes JavaScript files containing functions from a specified directory.
+ *
+ * @param {string} dirPath - The path to the directory containing JavaScript files.
+ * @param {LibDataFunction[]} functionsArray - An array to store processed data functions.
+ * @param {string[]} disableFunctions - An array of function names to be disabled.
+ */
+function readFunctionsInDirectory(
+  dirPath: string,
+  functionsArray: LibDataFunction[],
+  disableFunctions: string[],
+) {
+  const disableFunctionsSet = new Set(
+    disableFunctions.map((func) => func.toLowerCase()),
+  );
+
+  const processFile = (itemPath: string) => {
+    const dataFunction = require(itemPath).default;
+    if (!dataFunction?.name) return;
+    const dataFunctionName = dataFunction.name.toLowerCase();
+    if (disableFunctionsSet.has(dataFunctionName)) return;
+
+    if (!dataFunction && typeof dataFunction.callback !== "function") {
+      throw new AoijsError("library", `Failed load ${dataFunction.name}`);
+    }
+
+    functionsArray.push(dataFunction);
+  };
+
+  const processItem = (item: string) => {
+    const itemPath = path.join(dirPath, item);
+    const stats = fs.statSync(itemPath);
+
+    if (stats.isDirectory()) {
+      readFunctionsInDirectory(itemPath, functionsArray, disableFunctions);
+    } else if (itemPath.endsWith(".js")) {
+      processFile(itemPath);
+    }
+  };
+
+  const items = fs.readdirSync(dirPath);
+  items.forEach(processItem);
+  return functionsArray;
+}
+
+export { AoiBase, TelegramOptions };

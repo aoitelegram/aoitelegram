@@ -3,7 +3,7 @@ import fsx from "fs-extra";
 import path from "node:path";
 import { AoiClient } from "./AoiClient";
 import { AoijsError } from "./AoiError";
-import { DataFunction } from "./AoiBase";
+import { DataFunction } from "./AoiTyping";
 import { version } from "../../package.json";
 /**
  * Class representing a plugin manager for loading and managing plugins in a Node.js application.

@@ -69,7 +69,7 @@ class Awaited {
               name: "$awaitedData",
               callback: async (ctx) => {
                 const args = await ctx.getEvaluateArgs();
-                return getObjectKey(awaitedData, args[0] ?? "") ?? awaitedData;
+                return getObjectKey(awaitedData, `${args[0]}`) || awaitedData;
               },
             },
             {

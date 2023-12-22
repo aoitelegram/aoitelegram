@@ -1,12 +1,13 @@
 import chalk from "chalk";
-import { Collection } from "telegramsjs";
 import { AoijsError } from "./AoiError";
+import { Collection } from "telegramsjs";
 import { AoiWarning } from "./AoiWarning";
+import { DataFunction } from "./AoiTyping";
 import { LoadCommands } from "./LoadCommands";
 import { DatabaseOptions } from "./AoiManager";
+import { AoiBase, TelegramOptions } from "./AoiBase";
 import { TimeoutManager } from "../helpers/manager/TimeoutManager";
 import { AwaitedManager } from "../helpers/manager/AwaitedManager";
-import { AoiBase, DataFunction, TelegramOptions } from "./AoiBase";
 import { Command, CommandDescription } from "../helpers/Command";
 import { Action, ActionDescription } from "../helpers/Action";
 import { Timeout, TimeoutDescription } from "../helpers/Timeout";

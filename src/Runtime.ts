@@ -6,11 +6,11 @@ import { Context } from "./Context";
 import { Evaluator } from "./Evaluator";
 import { Environment } from "./Environment";
 import { Lexer, TokenArgument } from "./Lexer";
-import { AoijsError, AoiStopping, MessageError } from "./classes/AoiError";
 import { AoiManager } from "./classes/AoiManager";
-import { DataFunction } from "./classes/AoiBase";
-import { TelegramBot, type Context as EventContext } from "telegramsjs";
-import { UserFromGetMe } from "@telegram.ts/types";
+import { DataFunction } from "./classes/AoiTyping";
+import { LibDataFunction } from "./classes/AoiTyping";
+import { type Context as EventContext } from "telegramsjs";
+import { AoijsError, AoiStopping, MessageError } from "./classes/AoiError";
 
 function getStopping(name: string) {
   switch (name) {
@@ -37,30 +37,30 @@ class Runtime {
   private contexts = new Map<string, Context>();
   private evaluator = new Evaluator();
   database: AoiManager;
-  customFunction: DataFunction[];
-  disableFunctions: string[];
-  varReplaceOption: boolean;
+  customFunction: DataFunction[] = [];
+  functionsArray: LibDataFunction[] = [];
+  varReplaceOption: boolean = false;
 
   /**
    * Constructs a new Runtime instance with a Telegram context.
    * @param eventData - The Telegram context for the runtime.
    * @param database - The local database.
    * @param customFunction - An array of customFunction functions.
-   * @param options.disableFunctions - Functions that will be removed from the library's loading functions.
    * @param options.varReplaceOption - Compilation of &localVar& variables.
+   * @param options.functionsArray - An array to store processed data functions.
    */
   constructor(
     eventData: EventContext["telegram"],
     database: AoiManager,
-    customFunction?: DataFunction[],
-    disableFunctions?: string[],
-    varReplaceOption?: boolean,
+    customFunction: DataFunction[],
+    varReplaceOption: boolean,
+    functionsArray: LibDataFunction[],
   ) {
     this.database = database;
-    this.customFunction = customFunction || [];
-    this.disableFunctions = disableFunctions || [];
-    this.varReplaceOption = varReplaceOption || false;
-    this.prepareGlobal(eventData, database, customFunction, disableFunctions);
+    this.customFunction = customFunction;
+    this.varReplaceOption = varReplaceOption;
+    this.functionsArray = functionsArray;
+    this.prepareGlobal(eventData, database, customFunction, functionsArray);
   }
 
   /**
@@ -112,20 +112,19 @@ class Runtime {
    * @param eventData - The Telegram context.
    * @param database - The local database.
    * @param customFunction - An array of custom function definitions.
-   * @param disableFunctions - Functions that will be removed from the library's loading functions.
+   * @param functionsArray - An array to store processed data functions.
    */
   private prepareGlobal(
     eventData: EventContext["telegram"],
     database: AoiManager,
-    customFunction?: DataFunction[],
-    disableFunctions?: string[],
+    customFunction: DataFunction[],
+    functionsArray: LibDataFunction[],
   ) {
-    readFunctionsInDirectory(
-      path.join(__dirname, "/function/"),
+    readFunctionsInLib(
+      functionsArray,
       this.globalEnvironment,
       eventData,
       database,
-      disableFunctions || [],
     );
     if (Array.isArray(customFunction)) {
       readFunctions(
@@ -149,15 +148,16 @@ class Runtime {
 async function evaluateAoiCommand(
   command: string | { event: string },
   code: string,
-  eventData: (TelegramBot & EventContext) | UserFromGetMe,
+  eventData: EventContext,
   runtime: Runtime,
 ) {
   try {
     const aoiRuntime = new Runtime(
       eventData,
       runtime.database,
-      runtime?.customFunction,
-      runtime?.disableFunctions,
+      runtime.customFunction,
+      runtime.varReplaceOption,
+      runtime.functionsArray,
     );
     return await aoiRuntime.runInput(command, code);
   } catch (error) {
@@ -199,7 +199,7 @@ function updateParamsFromArray(
 function readFunctions(
   customFunction: DataFunction[],
   parent: Runtime["globalEnvironment"],
-  eventData: EventContext["telegram"],
+  eventData: EventContext,
   database: AoiManager,
   runtime: Runtime,
 ) {
@@ -278,108 +278,80 @@ function readFunctions(
 }
 
 /**
- * Recursively reads and initializes functions in a directory and adds them to the parent global environment.
- * @param dirPath - The directory path to search for functions.
- * @param parent - The global environment where functions will be added.
- * @param eventData - The Telegram context.
- * @param database - The local database.
- * @param disableFunctions - Functions that will be removed from the library's loading functions.
+ * Reads and processes functions in a library, setting them up as commands in a specified parent.
+ *
+ * @param {DataFunction[]} functionsArray - An array of functions to be processed.
+ * @param {Runtime["globalEnvironment"]} parent - The object where processed functions will be added as commands.
+ * @param {EventContext} eventData - Data related to the event triggering the functions.
+ * @param {AoiManager} database - The database object for function interactions.
  */
-function readFunctionsInDirectory(
-  dirPath: string,
+function readFunctionsInLib(
+  functionsArray: LibDataFunction[],
   parent: Runtime["globalEnvironment"],
-  eventData: EventContext["telegram"],
+  eventData: EventContext,
   database: AoiManager,
-  disableFunctions: string[],
 ) {
-  const disableFunctionsSet = new Set(
-    disableFunctions.map((func) => func.toLowerCase()),
-  );
+  const processRutime = (libFunction: LibDataFunction) => {
+    if (!libFunction?.name) return;
+    const dataFunctionName = libFunction.name.toLowerCase();
 
-  const processFile = (itemPath: string) => {
-    delete require.cache[itemPath];
-    const dataFunction = require(itemPath).default;
-    if (!dataFunction?.name) return;
-    const dataFunctionName = dataFunction.name.toLowerCase();
-    if (disableFunctionsSet.has(dataFunctionName)) return;
+    parent.set(dataFunctionName, async (context) => {
+      const error = new MessageError(eventData);
+      let response;
 
-    if (dataFunction && typeof dataFunction.callback === "function") {
-      parent.set(dataFunctionName, async (context) => {
-        const error = new MessageError(eventData);
-        let response;
+      try {
+        response = await libFunction.callback(
+          context,
+          eventData,
+          database,
+          error,
+        );
+      } catch (err) {
+        if (err instanceof AoiStopping) return;
 
-        try {
-          response = await dataFunction.callback(
-            context,
-            eventData,
-            database,
-            error,
+        const errorMessage = `${err}`.split(":")?.[1].trimStart() || err;
+
+        if (eventData.telegram?.functionError) {
+          eventData.telegram.addFunction({
+            name: "$handleError",
+            callback: async (
+              ctx: Context,
+              event: EventContext["telegram"],
+              database: AoiManager,
+              error: MessageError,
+            ) => {
+              const [property = "error"] = await ctx.getEvaluateArgs();
+              ctx.checkArgumentTypes([property as string], error, ["string"]);
+
+              const dataError = {
+                error: errorMessage,
+                function: dataFunctionName,
+                command: context.fileName,
+              } as { [key: string]: unknown };
+
+              return dataError[property as string] ?? dataError;
+            },
+          });
+          eventData.telegram.emit("functionError", context, eventData);
+          eventData.telegram.removeFunction("$handleError");
+        }
+
+        if (eventData.telegram?.sendMessageError) {
+          error.customError(
+            `Failed to usage ${dataFunctionName}: ${errorMessage}`,
+            dataFunctionName,
           );
-        } catch (err) {
-          if (err instanceof AoiStopping) return;
-
-          const errorMessage = `${err}`.split(":")?.[1].trimStart() || err;
-
-          if (eventData.telegram?.functionError) {
-            eventData.telegram.addFunction({
-              name: "$handleError",
-              callback: async (
-                ctx: Context,
-                event: EventContext["telegram"],
-                database: AoiManager,
-                error: MessageError,
-              ) => {
-                const [property = "error"] = await ctx.getEvaluateArgs();
-                ctx.checkArgumentTypes([property as string], error, ["string"]);
-
-                const dataError = {
-                  error: errorMessage,
-                  function: dataFunctionName,
-                  command: context.fileName,
-                } as { [key: string]: unknown };
-
-                return dataError[property as string] ?? dataError;
-              },
-            });
-            eventData.telegram.emit("functionError", context, eventData);
-            eventData.telegram.removeFunction("$handleError");
-          }
-
-          if (eventData.telegram?.sendMessageError) {
-            error.customError(
-              `Failed to usage ${dataFunctionName}: ${errorMessage}`,
-              dataFunctionName,
-            );
-          }
         }
-        if (getStopping(dataFunction.name) && response) {
-          throw new AoiStopping(dataFunction.name);
-        }
+      }
+      if (getStopping(libFunction.name) && response) {
+        throw new AoiStopping(libFunction.name);
+      }
 
-        return response;
-      });
-    }
+      return response;
+    });
   };
 
-  const processItem = (item: string) => {
-    const itemPath = path.join(dirPath, item);
-    const stats = fs.statSync(itemPath);
-
-    if (stats.isDirectory()) {
-      readFunctionsInDirectory(
-        itemPath,
-        parent,
-        eventData,
-        database,
-        disableFunctions,
-      );
-    } else if (itemPath.endsWith(".js")) {
-      processFile(itemPath);
-    }
-  };
-
-  const items = fs.readdirSync(dirPath);
-  items.forEach(processItem);
+  functionsArray.forEach(processRutime);
 }
 
 export { Runtime };

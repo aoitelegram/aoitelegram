@@ -166,7 +166,7 @@ class Context {
    * @param errorMessage Object to handle error messages.
    * @param expectedArgumentTypes Array of expected argument types.
    */
-  checkArgumentTypes<T extends string>(
+  checkArgumentTypes<T extends unknown>(
     argument: T[],
     errorMessage: MessageError,
     expectedArgumentTypes: string[],
