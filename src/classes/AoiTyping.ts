@@ -89,6 +89,13 @@ type DataFunction =
           ) => unknown);
     };
 
+type DataEvent = {
+  listen: string;
+  type: string;
+  code?: string;
+  callback?: () => void;
+};
+
 type CombinedEventFunctions = EventHandlers & EventDataMap<Buffer>;
 
-export { CombinedEventFunctions, LibDataFunction, DataFunction };
+export { CombinedEventFunctions, LibDataFunction, DataFunction, DataEvent };

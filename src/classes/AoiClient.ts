@@ -3,6 +3,7 @@ import { AoijsError } from "./AoiError";
 import { Collection } from "telegramsjs";
 import { AoiWarning } from "./AoiWarning";
 import { DataFunction } from "./AoiTyping";
+import { CustomEvent } from "./CustomEvent";
 import { LoadCommands } from "./LoadCommands";
 import { DatabaseOptions } from "./AoiManager";
 import { AoiBase, TelegramOptions } from "./AoiBase";
@@ -34,6 +35,7 @@ class AoiClient extends AoiBase {
   timeoutManager: TimeoutManager;
   awaitedManager: AwaitedManager;
   loadCommands?: LoadCommands;
+  customEvent?: CustomEvent;
   private commands: Collection<CommandInfoSet, unknown> = new Collection();
   private globalVars: Collection<string, unknown> = new Collection();
   /**

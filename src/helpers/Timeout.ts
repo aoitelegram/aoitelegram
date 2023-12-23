@@ -66,7 +66,8 @@ class Timeout {
           callback: async (ctx) => {
             const args = await ctx.getEvaluateArgs();
             return (
-              getObjectKey(timeoutDataParsed, `${args[0]}`) || timeoutDataParsed
+              getObjectKey(timeoutDataParsed, args[0] as string) ||
+              timeoutDataParsed
             );
           },
         });

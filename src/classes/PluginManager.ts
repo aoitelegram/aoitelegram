@@ -34,20 +34,9 @@ class PluginManager {
   /**
    * Load plugins from a directory.
    * @param {string} plugins - The path to the directory containing plugins.
-   * @param {"dir" | "node_modules"} [type="node_modules"] - The type of directory containing plugins.
    * @returns {DataFunction[]} An array of plugin functions.
-   * @throws {AoijsError} Throws an error if the 'type' parameter is not specified.
    */
-  loadDirPlugins(
-    plugins: string,
-    type: "dir" | "node_modules" = "node_modules",
-  ) {
-    if (type !== "dir" && type !== "node_modules") {
-      throw new AoijsError(
-        "parameter",
-        "you did not specify the 'type' parameter",
-      );
-    }
+  loadDirPlugins(plugins: string) {
     let collectionFunction: DataFunction[] = [];
     return readFunctionsInDirectory(
       path.join(process.cwd(), plugins),
@@ -60,7 +49,6 @@ class PluginManager {
    * Load plugins from the specified list.
    * @param {...string} plugins - List of plugin names to load.
    * @returns {DataFunction[]} An array of plugin functions.
-   * @throws {AoijsError} Throws an error if the specified plugin or its main file is not found.
    */
   loadPlugins(...plugins: string[]) {
     let collectionFunction: DataFunction[] = [];
