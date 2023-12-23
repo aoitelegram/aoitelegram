@@ -12,21 +12,6 @@ class Evaluator {
   constructor() {}
 
   /**
-   * Evaluates an AST and returns the result.
-   * @param ast - The Abstract Syntax Tree to evaluate.
-   * @param ctx - The context in which to evaluate the AST.
-   * @returns The result of the evaluation.
-   */
-  async evaluate(ast: TokenProgram, ctx: Context) {
-    const response = await this.visitArgument(ast, ctx);
-    if (typeof response === "string") {
-      return response.trim();
-    }
-
-    return response;
-  }
-
-  /**
    * Visits a node in the AST and returns the result.
    * @param node - The node to visit.
    * @param ctx - The context in which to visit the node.

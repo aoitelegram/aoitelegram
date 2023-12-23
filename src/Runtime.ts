@@ -74,7 +74,7 @@ class Runtime {
       this,
     );
     const context = this.prepareContext(fileName);
-    return this.evaluator.evaluate(abstractSyntaxTree, context);
+    return this.evaluator.visitArgument(abstractSyntaxTree, context);
   }
 
   /**
@@ -213,7 +213,7 @@ function readFunctions(
     }
     if (dataFunction.type === "js" || !dataFunction.type) {
       parent.set(dataFunctionName, async (context) => {
-        const error = new MessageError(eventData);
+        const error = new MessageError(eventData, context);
         if (!dataFunction.callback) {
           throw new AoijsError(
             "customFunction",
@@ -295,7 +295,7 @@ function readFunctionsInLib(
     const dataFunctionName = libFunction.name.toLowerCase();
 
     parent.set(dataFunctionName, async (context) => {
-      const error = new MessageError(eventData);
+      const error = new MessageError(eventData, context);
       let response;
 
       try {
@@ -326,9 +326,13 @@ function readFunctionsInLib(
                 error: errorMessage,
                 function: dataFunctionName,
                 command: context.fileName,
-              } as { [key: string]: unknown };
+                event:
+                  typeof context.fileName === "object"
+                    ? context.fileName.event
+                    : undefined,
+              } as { [key: string]: string | undefined };
 
-              return dataError[property as string] ?? dataError;
+              return dataError[property as string] || dataError;
             },
           });
           eventData.telegram.emit("functionError", context, eventData);

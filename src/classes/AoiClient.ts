@@ -26,7 +26,7 @@ class AoiClient extends AoiBase {
   #aoiWarning: boolean | undefined;
   #warningmanager: AoiWarning;
   functionError: boolean | undefined;
-  sendMessageErrror: boolean | undefined;
+  sendMessageError: boolean | undefined;
   registerCommand: Command = new Command(this);
   registerAction: Action = new Action(this);
   registerTimeout: Timeout = new Timeout(this);
@@ -58,7 +58,7 @@ class AoiClient extends AoiBase {
     disableFunctions?: string[];
     customFunction?: DataFunction[];
     functionError?: boolean;
-    sendMessageErrror?: boolean;
+    sendMessageError?: boolean;
     varReplaceOption?: boolean;
     console?: boolean;
     aoiWarning?: boolean;
@@ -80,7 +80,7 @@ class AoiClient extends AoiBase {
       options.autoUpdate === undefined ? false : options.autoUpdate,
     );
     this.functionError = options.functionError;
-    this.sendMessageErrror = options.sendMessageErrror;
+    this.sendMessageError = options.sendMessageError;
     this.timeoutManager = new TimeoutManager(this, options.database);
     this.awaitedManager = new AwaitedManager(this);
   }

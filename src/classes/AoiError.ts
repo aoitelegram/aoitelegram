@@ -1,4 +1,6 @@
-import { type Context } from "telegramsjs";
+import { Context } from "../Context";
+import { AoiManager } from "./AoiManager";
+import { Context as EventContext } from "telegramsjs";
 
 /**
  * A custom error class for Aoijs with additional properties for error details.
@@ -54,13 +56,16 @@ class AoijsError extends Error {
  * Represents a class for handling message errors.
  */
 class MessageError {
-  telegram: Context["telegram"];
+  telegramInstance: EventContext;
+  botContext: Context;
   /**
    * Initializes a new instance of the MessageError class.
    * @param telegram - The Telegram instance used for sending error messages.
+   * @param context - The context function
    */
-  constructor(telegram: Context["telegram"]) {
-    this.telegram = telegram;
+  constructor(telegram: EventContext["telegram"], context: Context) {
+    this.telegramInstance = telegram;
+    this.botContext = context;
   }
 
   /**
@@ -81,7 +86,7 @@ class MessageError {
       `Expected ${amount} arguments but got ${parameterCount}`,
       line,
     );
-    this.telegram.send(text, { parse_mode: "HTML" });
+    this.telegramInstance.send(text, { parse_mode: "HTML" });
     throw new AoiStopping("errorArgs");
   }
 
@@ -95,7 +100,7 @@ class MessageError {
       func,
       `Invalid variable ${nameVar} not found`,
     );
-    this.telegram.send(text, { parse_mode: "HTML" });
+    this.telegramInstance.send(text, { parse_mode: "HTML" });
     throw new AoiStopping("errorVar");
   }
 
@@ -109,7 +114,7 @@ class MessageError {
       func,
       `Invalid table ${table} not found`,
     );
-    this.telegram.send(text, { parse_mode: "HTML" });
+    this.telegramInstance.send(text, { parse_mode: "HTML" });
     throw new AoiStopping("errorTable");
   }
 
@@ -123,7 +128,7 @@ class MessageError {
       func,
       `The specified variable ${name} does not exist for the array`,
     );
-    this.telegram.send(text, { parse_mode: "HTML" });
+    this.telegramInstance.send(text, { parse_mode: "HTML" });
     throw new AoiStopping("errorArray");
   }
 
@@ -135,7 +140,7 @@ class MessageError {
    */
   customError(description: string, func: string, line?: number) {
     const text = this.createMessageError(func, description, line);
-    this.telegram.send(text, { parse_mode: "HTML" });
+    this.telegramInstance.send(text, { parse_mode: "HTML" });
     throw new AoiStopping("customError");
   }
 
@@ -146,7 +151,39 @@ class MessageError {
    * @param line - Line number of the error.
    */
   createMessageError(func: string, details: string, line?: number) {
-    if (!this.telegram.send) {
+    if (
+      !this.telegramInstance?.telegram.sendMessageError &&
+      this.telegramInstance?.telegram.functionError
+    ) {
+      this.telegramInstance.telegram.addFunction({
+        name: "$handleError",
+        callback: async (
+          ctx: Context,
+          event: EventContext["telegram"],
+          database: AoiManager,
+          error: MessageError,
+        ) => {
+          const [property = "error"] = await ctx.getEvaluateArgs();
+          ctx.checkArgumentTypes([property as string], error, ["string"]);
+
+          const dataError = {
+            error: details,
+            function: func,
+            command: this.telegramInstance.fileName,
+            event: this.telegramInstance.event,
+          } as { [key: string]: string | undefined };
+
+          return dataError[property as string] || dataError;
+        },
+      });
+      this.telegramInstance.telegram.emit(
+        "functionError",
+        this.botContext,
+        this.telegramInstance,
+      );
+      this.telegramInstance.telegram.removeFunction("$handleError");
+      throw new AoiStopping("emit functionError");
+    } else if (!this.telegramInstance.send) {
       throw new ConsoleError(func, details, line);
     } else {
       return `Error[${func}]: <code>${details}\n{ \nline : ${line}, \ncommand : ${func} \n}</code>`;
