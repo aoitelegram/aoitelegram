@@ -292,7 +292,6 @@ function readFunctionsInLib(
   database: AoiManager,
 ) {
   const processRutime = (libFunction: LibDataFunction) => {
-    if (!libFunction?.name) return;
     const dataFunctionName = libFunction.name.toLowerCase();
 
     parent.set(dataFunctionName, async (context) => {

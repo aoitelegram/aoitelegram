@@ -73,7 +73,7 @@ class AoiBase extends TelegramBot {
     this.#database = new AoiManager(database);
     this.customFunction = customFunction || [];
     this.varReplaceOption = varReplaceOption || false;
-    this.functionsArray = readFunctionsInDirectory(
+    this.functionsArray = loadFunctionsLib(
       path.join(__dirname, "..", "/function/"),
       this.functionsArray,
       disableFunctions || [],
@@ -627,7 +627,7 @@ class AoiBase extends TelegramBot {
  * @param {LibDataFunction[]} functionsArray - An array to store processed data functions.
  * @param {string[]} disableFunctions - An array of function names to be disabled.
  */
-function readFunctionsInDirectory(
+function loadFunctionsLib(
   dirPath: string,
   functionsArray: LibDataFunction[],
   disableFunctions: string[],
@@ -638,13 +638,10 @@ function readFunctionsInDirectory(
 
   const processFile = (itemPath: string) => {
     const dataFunction = require(itemPath).default;
-    if (!dataFunction?.name) return;
+    if (!dataFunction?.name && typeof !dataFunction?.callback !== "function")
+      return;
     const dataFunctionName = dataFunction.name.toLowerCase();
     if (disableFunctionsSet.has(dataFunctionName)) return;
-
-    if (!dataFunction && typeof dataFunction.callback !== "function") {
-      throw new AoijsError("library", `Failed load ${dataFunction.name}`);
-    }
 
     functionsArray.push(dataFunction);
   };
@@ -654,7 +651,7 @@ function readFunctionsInDirectory(
     const stats = fs.statSync(itemPath);
 
     if (stats.isDirectory()) {
-      readFunctionsInDirectory(itemPath, functionsArray, disableFunctions);
+      loadFunctionsLib(itemPath, functionsArray, disableFunctions);
     } else if (itemPath.endsWith(".js")) {
       processFile(itemPath);
     }
