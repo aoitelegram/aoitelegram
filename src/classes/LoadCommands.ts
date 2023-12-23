@@ -277,6 +277,9 @@ class LoadCommands {
       case "variableDelete" === eventType.hasEvent:
         aoitelegram.variableDeleteCommand(data);
         break;
+      case "functionError" === eventType.hasEvent:
+        aoitelegram.functionErrorCommand(data);
+        break;
       default:
         throw new AoijsError(
           "loader",
@@ -310,6 +313,7 @@ class LoadCommands {
       variableCreate: "variableCreate",
       variableUpdate: "variableUpdate",
       variableDelete: "variableDelete",
+      functionError: "functionError",
     };
     return { hasEvent: events[type] ?? null, parameter: type };
   }
