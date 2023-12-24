@@ -33,14 +33,11 @@ class CustomEvent extends EventEmitter {
    * @throws {AoijsError} Throws an error if required parameters are not specified.
    * @returns {CustomEvent} Returns the CustomEvent instance for method chaining.
    */
-  // @ts-ignore
-  on(options: DataEvent) {
-    if (!options?.listen || !options.type) {
+  command(options: DataEvent) {
+    if (!options?.listen) {
       throw new AoijsError(
         "CustomEvent",
-        `you did not specify the '${
-          !options.listen ? "listen" : "type"
-        }' parameter`,
+        `you did not specify the 'listen' parameter`,
       );
     }
 
@@ -59,7 +56,7 @@ class CustomEvent extends EventEmitter {
       );
     }
 
-    if (options.type === "aoitelegram" && options.code) {
+    if ((options.type === "aoitelegram" || !options.type) && options.code) {
       const eventHandler = async (...args: string[]) => {
         this.aoitelegram.addFunction({
           name: "$eventData",
@@ -86,6 +83,11 @@ class CustomEvent extends EventEmitter {
         super.once(options.listen, eventHandler);
       } else if (options.once === false || options.once === undefined) {
         super.on(options.listen, eventHandler);
+      } else {
+        throw new AoijsError(
+          "CustomEvent",
+          "the type specified for 'once' is invalid. Only 'false' and 'true' are allowed",
+        );
       }
     } else if (options.type === "js" && options.callback) {
       if (options.once === true) {
@@ -93,7 +95,10 @@ class CustomEvent extends EventEmitter {
       } else if (options.once === false || options.once === undefined) {
         super.on(options.listen, options.callback);
       } else {
-        throw new AoijsError("CustomEvent", "invalid type for 'on'");
+        throw new AoijsError(
+          "CustomEvent",
+          "the type specified for 'once' is invalid. Only 'false' and 'true' are allowed",
+        );
       }
     }
 
@@ -147,7 +152,7 @@ class CustomEvent extends EventEmitter {
                 `| Loading in ${itemPath} | Loaded '${dataEvent.listen}' | type ${dataEvent.type} | custom-event |`,
               );
             }
-            this.on(dataEvent);
+            this.command(dataEvent);
           });
         } else {
           if (log) {
@@ -156,7 +161,7 @@ class CustomEvent extends EventEmitter {
               `| Loading in ${itemPath} | Loaded '${dataEvent.listen}' | type ${dataEvent.type} | custom-event |`,
             );
           }
-          this.on(dataEvent);
+          this.command(dataEvent);
         }
       }
       return this;
