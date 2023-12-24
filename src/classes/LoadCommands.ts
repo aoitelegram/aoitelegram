@@ -9,7 +9,8 @@ import { AoijsError } from "./AoiError";
  */
 class LoadCommands {
   #aoitelegram: AoiClient;
-  #count: number = 1;
+  #countLoadCmd: number = 1;
+  #countLoadVar: number = 1;
   path?: string;
   /**
    * Constructor for LoadCommands.
@@ -26,24 +27,20 @@ class LoadCommands {
    * @param {boolean} [log=true] - The console load commands.
    * @param {boolean} [updated=false] - The updated commands
    */
-  async loadCommands(
-    dirPath: string,
-    log: boolean = true,
-    updated: boolean = false,
-  ) {
+  loadCommands(dirPath: string, log: boolean = true, updated: boolean = false) {
     if (!dirPath) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'dirPath' parameter",
       );
     }
-    if (this.#count === 1) {
+    if (this.#countLoadCmd === 1) {
       dirPath = path.join(process.cwd(), dirPath);
       if (log) {
         const bigText = figlet.textSync("AoiTelegram");
         console.log(bigText);
       }
-      this.#count = 0;
+      this.#countLoadCmd = 0;
       this.path = dirPath;
     }
 
@@ -55,7 +52,7 @@ class LoadCommands {
       );
     }
 
-    const items = await fs.readdirSync(dirPath);
+    const items = fs.readdirSync(dirPath);
 
     for (const item of items) {
       const itemPath = path.join(dirPath, item);
@@ -129,7 +126,7 @@ class LoadCommands {
               const eventType = LoadCommands.loaderEventType(
                 dataArrayFunc.type,
               );
-              await this.runEvent(this.#aoitelegram, eventType, dataArrayFunc);
+              this.runEvent(this.#aoitelegram, eventType, dataArrayFunc);
               if (log) {
                 console.log(
                   `|---------------------------------------------------------------------|\n`,
@@ -196,7 +193,7 @@ class LoadCommands {
 
           if (dataFunc.type && !updated) {
             const eventType = LoadCommands.loaderEventType(dataFunc.type);
-            await this.runEvent(this.#aoitelegram, eventType, dataFunc);
+            this.runEvent(this.#aoitelegram, eventType, dataFunc);
             if (log) {
               console.log(
                 `|---------------------------------------------------------------------|\n`,
@@ -208,6 +205,103 @@ class LoadCommands {
       }
     }
     return this;
+  }
+
+  /**
+   * Asynchronously loads variables from the specified directory path.
+   * @param {string} dirPath - The directory path from which to load variables.
+   * @param {boolean} [log=true] - The console load variables.
+   */
+  loadVariables(dirPath: string, log: boolean = true) {
+    if (!dirPath) {
+      throw new AoijsError(
+        "parameter",
+        "you did not specify the 'dirPath' parameter",
+      );
+    }
+    if (this.#countLoadVar == 1) {
+      dirPath = path.join(process.cwd(), dirPath);
+      if (log) {
+        const bigText = figlet.textSync("Variables");
+        console.log(bigText);
+      }
+      this.#countLoadVar = 0;
+      this.path = dirPath;
+    }
+
+    if (!fs.existsSync(dirPath)) {
+      throw new AoijsError(
+        "file",
+        "the specified file path was not found",
+        dirPath,
+      );
+    }
+
+    const items = fs.readdirSync(dirPath);
+
+    for (const item of items) {
+      const itemPath = path.join(dirPath, item);
+      const stats = fs.statSync(itemPath);
+
+      if (stats.isDirectory()) {
+        this.loadVariables(itemPath, log);
+      } else if (itemPath.endsWith(".js")) {
+        delete require.cache[itemPath];
+        const requireVariables = require(itemPath);
+        const dataVariables = requireVariables.default || requireVariables;
+        if (
+          (!Array.isArray(dataVariables) &&
+            typeof dataVariables !== "object") ||
+          dataVariables?.length === 0 ||
+          Object.keys(dataVariables)?.length === 0
+        ) {
+          throw new AoijsError(
+            "parameter",
+            "to store variables from the loader, specify an array or an object of parameters",
+            itemPath,
+          );
+        }
+        if (Array.isArray(dataVariables)) {
+          for (const dataVariablesArray of dataVariables) {
+            if (!dataVariablesArray?.variables) {
+              throw new AoijsError(
+                "parameter",
+                "you did not specify the 'variables' parameter",
+                itemPath,
+              );
+            }
+            if (log) {
+              console.log(
+                `|---------------------------------------------------------------------|\n`,
+                `| Loading in ${itemPath} | Loaded | variables |`,
+              );
+            }
+            this.#aoitelegram.variables(
+              dataVariablesArray.variables,
+              dataVariablesArray.tables,
+            );
+          }
+        } else {
+          if (!dataVariables?.variables) {
+            throw new AoijsError(
+              "parameter",
+              "you did not specify the 'variables' parameter",
+              itemPath,
+            );
+          }
+          if (log) {
+            console.log(
+              `|---------------------------------------------------------------------|\n`,
+              `| Loading in ${itemPath} | Loaded | variables |`,
+            );
+          }
+          this.#aoitelegram.variables(
+            dataVariables.variables,
+            dataVariables.tables,
+          );
+        }
+      }
+    }
   }
 
   /**

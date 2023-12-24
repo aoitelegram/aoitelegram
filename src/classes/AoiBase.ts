@@ -612,11 +612,8 @@ class AoiBase extends TelegramBot {
    * @param {Object} options - Key-value pairs of variables to set.
    * @param {string | string[]} table - The database table to use (optional).
    */
-  async variables(
-    options: { [key: string]: unknown },
-    table?: string | string[],
-  ) {
-    await this.#database.variables(options, table);
+  variables(options: { [key: string]: unknown }, table?: string | string[]) {
+    this.#database.variables(options, table);
   }
 }
 

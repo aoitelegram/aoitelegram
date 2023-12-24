@@ -67,26 +67,26 @@ class AoiManager extends KeyValue<string, unknown> {
    * @param {Object} options - Key-value pairs of variables to set.
    * @param {string | string[]} table - The database table to use (optional).
    */
-  async variables(
+  variables(
     options: { [key: string]: unknown },
-    tables: string | string[] = "main",
+    tables: string | string[] = this.tables[0],
   ) {
     if (Array.isArray(tables)) {
-      for await (const table of tables) {
+      for (const table of tables) {
         for (const varName in options) {
-          const hasVar = await this.has(table, varName);
+          const hasVar = this.has(table, varName);
           this.collection.set(`${varName}_${table}`, options[varName]);
           if (!hasVar) {
-            await this.set(table, varName, options[varName]);
+            this.set(table, varName, options[varName]);
           }
         }
       }
     } else if (typeof tables === "string") {
       for (const varName in options) {
-        const hasVar = await this.has(tables, varName);
+        const hasVar = this.has(tables, varName);
         this.collection.set(`${varName}_${tables}`, options[varName]);
         if (!hasVar) {
-          await this.set(tables, varName, options[varName]);
+          this.set(tables, varName, options[varName]);
         }
       }
     } else {
