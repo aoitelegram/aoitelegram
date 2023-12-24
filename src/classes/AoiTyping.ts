@@ -92,6 +92,7 @@ type DataFunction =
 type DataEvent = {
   listen: string;
   type: string;
+  once?: boolean;
   code?: string;
   callback?: () => void;
 };

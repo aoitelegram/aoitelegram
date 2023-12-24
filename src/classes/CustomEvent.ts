@@ -10,9 +10,8 @@ import { getObjectKey } from "../function/parser";
 /**
  * CustomEvent class extends EventEmitter for handling custom events.
  */
-class CustomEvent {
+class CustomEvent extends EventEmitter {
   #count: number = 1;
-  eventEmitter: EventEmitter = new EventEmitter();
   /**
    * AoiClient instance for handling Telegram-specific functionality.
    */
@@ -23,6 +22,7 @@ class CustomEvent {
    * @param {AoiClient} aoitelegram - The AoiClient instance for Telegram functionality.
    */
   constructor(aoitelegram: AoiClient) {
+    super();
     this.aoitelegram = aoitelegram;
     aoitelegram.customEvent = this;
   }
@@ -33,19 +33,17 @@ class CustomEvent {
    * @throws {AoijsError} Throws an error if required parameters are not specified.
    * @returns {CustomEvent} Returns the CustomEvent instance for method chaining.
    */
+  // @ts-ignore
   on(options: DataEvent) {
-    if (!options?.listen) {
+    if (!options?.listen || !options.type) {
       throw new AoijsError(
         "CustomEvent",
-        "you did not specify the 'listen' parameter",
+        `you did not specify the '${
+          !options.listen ? "listen" : "type"
+        }' parameter`,
       );
     }
-    if (!options.type) {
-      throw new AoijsError(
-        "CustomEvent",
-        "you did not specify the 'type' parameter",
-      );
-    }
+
     if (options.type === "js" && typeof options.callback !== "function") {
       throw new AoijsError(
         "CustomEvent",
@@ -60,29 +58,45 @@ class CustomEvent {
         "you did not specify the 'code' parameter",
       );
     }
+
     if (options.type === "aoitelegram" && options.code) {
-      this.eventEmitter.on(options.listen, async (...args) => {
+      const eventHandler = async (...args: string[]) => {
         this.aoitelegram.addFunction({
           name: "$eventData",
           callback: async (ctx) => {
             const [path] = await ctx.getEvaluateArgs();
-            if (!path) return { ...args };
-            return path ? { ...args }[path as string] : { ...args };
+            return !path
+              ? { ...args }
+              : path
+                ? { ...args }[path as string]
+                : { ...args };
           },
         });
+
         await this.aoitelegram.evaluateCommand(
-          {
-            event: options.listen,
-          },
+          { event: options.listen },
           options.code as string,
           { ...args, telegram: this.aoitelegram },
         );
+
         this.aoitelegram.removeFunction("$eventData");
-      });
+      };
+
+      if (options.once === true) {
+        super.once(options.listen, eventHandler);
+      } else if (options.once === false || options.once === undefined) {
+        super.on(options.listen, eventHandler);
+      }
+    } else if (options.type === "js" && options.callback) {
+      if (options.once === true) {
+        super.once(options.listen, options.callback);
+      } else if (options.once === false || options.once === undefined) {
+        super.on(options.listen, options.callback);
+      } else {
+        throw new AoijsError("CustomEvent", "invalid type for 'on'");
+      }
     }
-    if (options.type === "js" && options.callback) {
-      this.eventEmitter.on(options.listen, options.callback);
-    }
+
     return this;
   }
 
@@ -155,8 +169,9 @@ class CustomEvent {
    * @param {...any} args - Additional arguments to pass to the event listeners.
    * @returns {CustomEvent} Returns the CustomEvent instance for method chaining.
    */
+  // @ts-ignore
   emit(name: string, ...args: any) {
-    this.eventEmitter.emit(name, ...args);
+    super.emit(name, ...args);
     return this;
   }
 }
