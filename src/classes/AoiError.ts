@@ -183,10 +183,7 @@ class MessageError {
       );
       this.telegramInstance.telegram.removeFunction("$handleError");
       throw new AoiStopping("emit functionError");
-    } else if (
-      !this.telegramInstance.send ||
-      !this.telegramInstance?.telegram.sendMessageError
-    ) {
+    } else if (!this.telegramInstance.send) {
       throw new ConsoleError(func, details, line);
     } else {
       return `Error[${func}]: <code>${details}\n{ \nline : ${line}, \ncommand : ${func} \n}</code>`;
