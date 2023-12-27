@@ -124,7 +124,7 @@ class Context {
     }
     const getArgs = await this.getEvaluateArgs();
     return {
-      inside: getArgs.join(","),
+      inside: getArgs.join(" "),
       total: `[${getArgs.join(";")}]`,
       splits: getArgs,
       addBrackets() {
