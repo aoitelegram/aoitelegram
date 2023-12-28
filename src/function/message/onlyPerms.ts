@@ -12,12 +12,16 @@ export default {
       "string | undefined",
       "string | number | undefined",
     ]);
-    const getPerms =
-      (await event.getChatMember(userId).catch((err) => console.log(err))) ||
-      {};
-    const hasAdministrator = getPerms.status === "administrator";
-    const hasCreator = getPerms.status === "creator";
-    const result = hasCreator || hasAdministrator || getPerms[perms] || false;
+    const getPerms = await event.getChatMember(userId).catch(() => null);
+
+    if (!getPerms) {
+      error.customError("Invalid User Id", "$onlyPerms");
+      return;
+    }
+
+    const hasCreator =
+      getPerms.status === "creator" || getPerms.status === "left";
+    const result = hasCreator || getPerms[perms] || false;
     if (!result) {
       if (!!messageError) {
         if (ctx.replyMessage) event.reply(messageError);

@@ -12,15 +12,20 @@ export default {
   name: "$loop",
   callback: async (ctx, event, database, error) => {
     ctx.argsCheck(2, error, "$loop");
-    const args = await ctx.getEvaluateArgs();
-    if (args[2]) {
-      if (!hasObject(args[2])) {
-        error.customError("Error object", "$setTimeout");
-      }
+    const [name, milliseconds, data = {}] = await ctx.getEvaluateArgs();
+    ctx.checkArgumentTypes([name, milliseconds, data], error, [
+      "string",
+      "string",
+      "object",
+    ]);
+
+    if (!hasObject(data)) {
+      error.customError("Error object", "$setTimeout");
     }
-    await event.telegram?.awaitedManager.addAwaited(args[0], {
-      milliseconds: +ms(args[1]),
-      data: args[2],
+
+    await event.telegram?.awaitedManager.addAwaited(name, {
+      milliseconds: +ms(milliseconds),
+      data: data,
       context: event,
     });
   },

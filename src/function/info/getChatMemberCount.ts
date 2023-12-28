@@ -1,13 +1,18 @@
 export default {
   name: "$getChatMemberCount",
   callback: async (ctx, event, database, error) => {
-    const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["string | number | undefined"]);
-    const chatId = args[0] ?? event.chat?.id ?? event.message?.chat.id;
-    return (
-      (await event.telegram
-        .getChatMemberCount(chatId)
-        .catch((err) => console.log(err))) || 0
-    );
+    const [chatId = event.chat?.id || event.message?.chat.id] =
+      await ctx.getEvaluateArgs();
+    ctx.checkArgumentTypes([chatId], error, ["string | number | undefined"]);
+    const result = await event.telegram
+      .getChatMemberCount(chatId)
+      .catch((err) => null);
+
+    if (!result) {
+      error.customError("Invalid Chat Id", "$getChatMemberCount");
+      return;
+    }
+
+    return result;
   },
 };

@@ -1,3 +1,5 @@
+import { isValidChat } from "../helpers";
+
 export default {
   name: "$sendChatAction",
   callback: async (ctx, event, database, error) => {
@@ -7,6 +9,12 @@ export default {
       "string",
       "number | string",
     ]);
+
+    if (!(await isValidChat(event, chatId))) {
+      error.customError("Invalid Chat Id", "$sendChatAction");
+      return;
+    }
+
     event.telegram.sendChatAction({
       chat_id: chatId,
       action,

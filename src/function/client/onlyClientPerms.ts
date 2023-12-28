@@ -8,10 +8,9 @@ export default {
       "string | undefined",
     ]);
     const getMe = await event.telegram.getMe();
-    const getPerms = await event
-      .getChatMember(getMe.id)
-      .catch((err) => console.log(err));
-    const result = !getPerms[perms];
+    const getPerms = await event.getChatMember(getMe.id).catch((err) => null);
+
+    const result = !getPerms?.[perms];
     if (result) {
       if (!!messageError) {
         if (ctx.replyMessage) event.reply(messageError);

@@ -8,11 +8,15 @@ export default {
       "string",
       "string | number | undefined",
     ]);
-    const getPerms =
-      (await event.getChatMember(userId).catch((err) => console.log(err))) ||
-      {};
-    const hasAdministrator = getPerms.status === "administrator";
-    const hasCreator = getPerms.status === "creator";
-    return hasCreator || hasAdministrator || getPerms[perms] || false;
+    const getPerms = await event.getChatMember(userId).catch(() => null);
+
+    if (!getPerms) {
+      error.customError("Invalid User Id", "$hasPerms");
+      return;
+    }
+
+    const hasCreator =
+      getPerms.status === "creator" || getPerms.status === "left";
+    return hasCreator || getPerms[perms] || false;
   },
 };

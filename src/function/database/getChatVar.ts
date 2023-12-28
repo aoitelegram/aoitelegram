@@ -1,3 +1,5 @@
+import { hasValidChat } from "../helpers";
+
 export default {
   name: "$getChatVar",
   callback: async (ctx, event, database, error) => {
@@ -13,6 +15,11 @@ export default {
 
     if (!database.has(defaultTable, args[0])) {
       error.errorVar(args[0], "$getChatVar");
+      return;
+    }
+
+    if (!(await hasValidChat(event, chatId))) {
+      error.customError("Invalid Chat Id", "$getChatVar");
       return;
     }
 

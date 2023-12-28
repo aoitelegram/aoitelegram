@@ -12,15 +12,20 @@ export default {
   name: "$setTimeout",
   callback: async (ctx, event, database, error) => {
     ctx.argsCheck(2, error, "$setTimeout");
-    const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, [
+    const [name, milliseconds, data = {}] = await ctx.getEvaluateArgs();
+    ctx.checkArgumentTypes([name, milliseconds, data], error, [
       "string",
       "string",
-      "object | undefined",
+      "object",
     ]);
-    await event.telegram?.timeoutManager.addTimeout(args[0], {
-      milliseconds: +ms(args[1]),
-      data: args[2],
+
+    if (!hasObject(data)) {
+      error.customError("Error object", "$setTimeout");
+    }
+
+    await event.telegram?.timeoutManager.addTimeout(name, {
+      milliseconds: +ms(milliseconds),
+      data: data,
     });
   },
 };

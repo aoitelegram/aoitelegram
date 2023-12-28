@@ -1,3 +1,5 @@
+import { hasValidChat } from "../helpers";
+
 interface ChatData {
   top: number;
   id: number;
@@ -47,6 +49,11 @@ export default {
       "number | undefined",
       "string | undefined",
     ]);
+
+    if (!(await hasValidChat(event, chatId))) {
+      error.customError("Invalid Chat Id", "$userLeaderBoard");
+      return;
+    }
 
     let leaderboardText = "";
     let users: UsersData[] = [];
