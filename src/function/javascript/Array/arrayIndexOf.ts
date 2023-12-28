@@ -2,13 +2,13 @@ export default {
   name: "$arrayIndexOf",
   callback: async (ctx, event, database, error) => {
     ctx.argsCheck(2, error, "$arrayIndexOf");
-    const args = await ctx.getEvaluateArgs();
+    const [arrayName, search] = await ctx.getEvaluateArgs();
 
-    if (!ctx.array.has(args[0])) {
-      error.errorArray(args[0], "$arrayIndexOf");
+    if (!ctx.array.has(arrayName)) {
+      error.errorArray(arrayName, "$arrayIndexOf");
     }
 
-    const array = ctx.array.get(args[0]);
-    return array.indexOf(args[1]);
+    const array = ctx.array.get(arrayName);
+    return array.indexOf(search);
   },
 };

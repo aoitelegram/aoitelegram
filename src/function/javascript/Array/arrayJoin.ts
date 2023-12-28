@@ -1,14 +1,14 @@
 export default {
   name: "$arrayJoin",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$arrayJoin");
-    const args = await ctx.getEvaluateArgs();
+    ctx.argsCheck(1, error, "$arrayJoin");
+    const [arrayName, sep = ", "] = await ctx.getEvaluateArgs();
 
-    if (!ctx.array.has(args[0])) {
-      error.errorArray(args[0], "$arrayJoin");
+    if (!ctx.array.has(arrayName)) {
+      error.errorArray(arrayName, "$arrayJoin");
     }
 
-    const array = ctx.array.get(args[0]);
-    return array.join(args[1]);
+    const array = ctx.array.get(arrayName);
+    return array.join(sep);
   },
 };

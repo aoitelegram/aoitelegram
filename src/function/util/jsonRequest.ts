@@ -4,7 +4,7 @@ import { getObjectKey, parseJSON } from "../parser";
 
 function buildJSONConfig(data) {
   const apiConfig = {
-    method: "POST",
+    method: "GET",
     compress: true,
     headers: {
       "content-type": "application/json",

@@ -68,7 +68,6 @@ class Context {
         amount,
         argsTarget.child.length ?? 0,
         func ?? argsTarget.value,
-        argsTarget.line,
       );
     }
   }
@@ -93,8 +92,8 @@ class Context {
    */
   async evaluateArgs(args: TokenArgument[]): Promise<TokenValue[]> {
     return Promise.all(
-      args.map(async (value) =>
-        parse(`${await this.evaluator.visitArgument(value, this)}`),
+      args.map(
+        async (value) => await this.evaluator.visitArgument(value, this),
       ),
     );
   }

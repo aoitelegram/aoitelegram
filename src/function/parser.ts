@@ -191,6 +191,39 @@ function getObjectKey<T extends Data, K extends keyof T>(
 }
 
 /**
+ * Retrieves a set value to property key from an object based on the provided path.
+ * @template T - The type of the input data object.
+ * @template K - The key type of the property to retrieve from the object.
+ * @param {T} data - The input data object.
+ * @param {string} path - The dot-separated path of the property to retrieve.
+ * @param {unknown} newValue - The to set value.
+ * @returns {T[K] | undefined} - The value of the nested property or undefined if not found.
+ */
+function setObjectKey<T extends Data, K extends keyof T>(
+  data: T,
+  path: string,
+  newValue: T[K],
+): T {
+  if (!path) return newValue as T;
+
+  const properties = path.split(".");
+
+  function setProperty(obj: Data, props: string[], value: any): any {
+    const [currentProp, ...rest] = props;
+    if (obj && obj[currentProp]) {
+      if (rest.length > 0) {
+        obj[currentProp] = setProperty(obj[currentProp], rest, value);
+      } else {
+        obj[currentProp] = value;
+      }
+    }
+    return obj;
+  }
+
+  return setProperty({ ...data }, properties, newValue);
+}
+
+/**
  * Formats the given time duration in milliseconds into a structured time object.
  *
  * @param {number} milliseconds - The time duration in milliseconds.
@@ -295,6 +328,7 @@ export {
   toParse,
   parseJSON,
   getObjectKey,
+  setObjectKey,
   formatTime,
   replaceData,
   arrayAt,

@@ -73,18 +73,11 @@ class MessageError {
    * @param amount - The expected number of arguments.
    * @param parameterCount - The actual number of arguments provided.
    * @param func - The name of the function generating the error.
-   * @param line - Line number of the error.
    */
-  errorArgs(
-    amount: number,
-    parameterCount: number,
-    func: string,
-    line?: number,
-  ) {
+  errorArgs(amount: number, parameterCount: number, func: string) {
     const text = this.createMessageError(
       func,
       `Expected ${amount} arguments but got ${parameterCount}`,
-      line,
     );
     this.telegramInstance.send(text, { parse_mode: "HTML" });
     throw new AoiStopping("errorArgs");
@@ -136,10 +129,9 @@ class MessageError {
    * Creates a custom error with a specific description and function name.
    * @param {string} description - A custom description of the error.
    * @param {string} func - The name of the function where the error occurred.
-   * @param line - Line number of the error.
    */
   customError(description: string, func: string, line?: number) {
-    const text = this.createMessageError(func, description, line);
+    const text = this.createMessageError(func, description);
     this.telegramInstance.send(text, { parse_mode: "HTML" });
     throw new AoiStopping("customError");
   }
@@ -148,9 +140,8 @@ class MessageError {
    * Create an MessageError message.
    * @param func - The name of the function.
    * @param details - Details of the error.
-   * @param line - Line number of the error.
    */
-  createMessageError(func: string, details: string, line?: number) {
+  createMessageError(func: string, details: string) {
     if (
       !this.telegramInstance?.telegram.sendMessageError &&
       this.telegramInstance?.telegram.functionError
@@ -184,7 +175,9 @@ class MessageError {
       this.telegramInstance.telegram.removeFunction("$handleError");
       throw new AoiStopping("emit functionError");
     } else if (!this.telegramInstance.send) {
-      throw new ConsoleError(func, details, line);
+      const error = new ConsoleError(func, details);
+      console.log(error);
+      throw error;
     } else {
       return `❌️ <b>${func}:</b> <code>${details}</code>`;
     }
@@ -197,19 +190,16 @@ class MessageError {
 class ConsoleError extends Error {
   name: string;
   details: string;
-  line?: number;
 
   /**
    * Creates an instance of ConsoleError.
    * @param {string} func - The name of the function where the error occurred.
    * @param {string} details - Details or additional information about the error.
-   * @param {number | undefined} line - The line number where the error occurred (optional).
    */
-  constructor(func: string, details: string, line?: number) {
+  constructor(func: string, details: string) {
     super(details);
     this.name = `ConsoleError[${func}]`;
     this.details = details;
-    this.line = line;
   }
 }
 

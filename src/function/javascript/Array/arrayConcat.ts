@@ -2,13 +2,13 @@ export default {
   name: "$arrayConcat",
   callback: async (ctx, event, database, error) => {
     ctx.argsCheck(2, error, "$arrayConcat");
-    const args = await ctx.getEvaluateArgs();
+    const [arrayName, arrayConcat] = await ctx.getEvaluateArgs();
 
-    if (!ctx.array.has(args[0])) {
-      error.errorArray(args[0], "$arrayConcat");
+    if (!ctx.array.has(arrayName[0])) {
+      error.errorArray(arrayName[0], "$arrayConcat");
     }
-    const array = ctx.array.get(args[0]);
-    const text = args.shift();
-    return array.concat(...args);
+
+    const array = ctx.array.get(arrayName[0]);
+    return array.concat(...arrayConcat);
   },
 };

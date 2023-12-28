@@ -2,13 +2,13 @@ export default {
   name: "$arrayIncludes",
   callback: async (ctx, event, database, error) => {
     ctx.argsCheck(2, error, "$arrayIncludes");
-    const args = await ctx.getEvaluateArgs();
+    const [arrayName, search] = await ctx.getEvaluateArgs();
 
-    if (!ctx.array.has(args[0])) {
-      error.errorArray(args[0], "$arrayIncludes");
+    if (!ctx.array.has(arrayName)) {
+      error.errorArray(arrayName, "$arrayIncludes");
     }
 
-    const array = ctx.array.get(args[0]);
-    return array.includes(args[1]);
+    const array = ctx.array.get(arrayName);
+    return array.includes(search);
   },
 };

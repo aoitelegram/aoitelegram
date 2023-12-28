@@ -1,14 +1,14 @@
 export default {
   name: "$arraySlice",
   callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$arraySlice");
-    const args = await ctx.getEvaluateArgs();
+    ctx.argsCheck(1, error, "$arraySlice");
+    const [arrayName, index = 1] = await ctx.getEvaluateArgs();
 
-    if (!ctx.array.has(args[0])) {
-      error.errorArray(args[0], "$arraySlice");
+    if (!ctx.array.has(arrayName)) {
+      error.errorArray(arrayName, "$arraySlice");
     }
 
-    const array = ctx.array.get(args[0]);
-    return array.slice(args[1] >= 1 ? args[1] - 1 : args[1] + 1);
+    const array = ctx.array.get(arrayName);
+    return array.slice(index >= 1 ? index - 1 : index + 1);
   },
 };

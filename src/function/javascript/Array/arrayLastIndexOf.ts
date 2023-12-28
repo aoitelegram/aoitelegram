@@ -2,13 +2,13 @@ export default {
   name: "$arraLastIndexOf",
   callback: async (ctx, event, database, error) => {
     ctx.argsCheck(2, error, "$arraLastIndexOf");
-    const args = await ctx.getEvaluateArgs();
+    const [arrayName, search] = await ctx.getEvaluateArgs();
 
-    if (!ctx.array.has(args[0])) {
-      error.errorArray(args[0], "$arraLastIndexOf");
+    if (!ctx.array.has(arrayName)) {
+      error.errorArray(arrayName, "$arraLastIndexOf");
     }
 
-    const array = ctx.array.get(args[0]);
-    return array.lastIndexOf(args[1]);
+    const array = ctx.array.get(arrayName);
+    return array.lastIndexOf(search);
   },
 };
