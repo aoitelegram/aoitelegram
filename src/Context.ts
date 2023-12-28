@@ -217,9 +217,11 @@ class Context {
           if (variadicTypesName.includes("...unknown")) break;
           if (!variadicTypes.has(nextExpectedType)) {
             errorMessage.customError(
-              `The ${argumentIndex + 1}-th argument of the function ${
+              `The ${
+                argumentIndex + 1
+              }-th argument following the variadic parameter in the function ${
                 target.value
-              } is expected to have the type ${variadicTypesName} after the variadic parameter, but the actual value passed to the argument has the type ${actualArgumentType}`,
+              } should be of type ${variadicTypesName}, but the received value is of type ${actualArgumentType}`,
               target.value,
               target.line,
             );
@@ -228,11 +230,11 @@ class Context {
         break;
       } else if (!expectedArgumentTypeSet.has(actualArgumentType)) {
         errorMessage.customError(
-          `The ${argumentIndex + 1}-th argument of the function ${
+          `The ${argumentIndex + 1}-th argument in the function ${
             target.value
-          } is expected to have one of the types ${
+          } should be one of the types ${
             expectedArgumentTypes[argumentIndex]
-          }, but the actual value passed to the argument has the type ${actualArgumentType}`,
+          }, but the provided value is of type ${actualArgumentType}`,
           target.value,
           target.line,
         );

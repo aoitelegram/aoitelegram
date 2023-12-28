@@ -186,7 +186,7 @@ class MessageError {
     } else if (!this.telegramInstance.send) {
       throw new ConsoleError(func, details, line);
     } else {
-      return `Error[${func}]: <code>${details}\n{ \nline : ${line}, \ncommand : ${func} \n}</code>`;
+      return `❌️ <b>${func}:</b> <code>${details}</code>`;
     }
   }
 }
