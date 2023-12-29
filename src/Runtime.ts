@@ -9,8 +9,8 @@ import { Lexer, TokenArgument } from "./Lexer";
 import { AoiManager } from "./classes/AoiManager";
 import { DataFunction } from "./classes/AoiTyping";
 import { LibDataFunction } from "./classes/AoiTyping";
-import { Context as EventContext } from "telegramsjs";
-import { AoijsError, AoiStop, MessageError } from "./classes/AoiError";
+import { type Context as EventContext } from "telegramsjs";
+import { AoijsError, AoiStopping, MessageError } from "./classes/AoiError";
 
 function getStopping(name: string) {
   switch (name) {
@@ -145,7 +145,7 @@ class Runtime {
  * @param eventData - The Telegram context.
  * @param runtime - The Runtime instance.
  */
-function evaluateAoiCommand(
+async function evaluateAoiCommand(
   command: string | { event: string },
   code: string,
   eventData: EventContext,
@@ -159,9 +159,9 @@ function evaluateAoiCommand(
       runtime.varReplaceOption,
       runtime.functionsArray,
     );
-    return aoiRuntime.runInput(command, code);
+    return await aoiRuntime.runInput(command, code);
   } catch (error) {
-    throw error;
+    if (!(error instanceof AoiStopping)) throw error;
   }
 }
 
@@ -230,7 +230,7 @@ function readFunctions(
             error,
           );
           if (context.stopping) {
-            throw new AoiStop();
+            throw new AoiStopping(dataFunction.name);
           }
           return response;
         } else if (typeof dataFunction.callback === "string") {
@@ -297,6 +297,7 @@ function readFunctionsInLib(
     parent.set(dataFunctionName, async (context) => {
       const error = new MessageError(eventData, context);
       let response;
+
       try {
         response = await libFunction.callback(
           context,
@@ -305,10 +306,13 @@ function readFunctionsInLib(
           error,
         );
       } catch (err) {
-        if (err instanceof AoiStop) return;
-        const errorMessage = `${err}`.split(":")?.[1].trimStart() || err;
+        if (err instanceof AoiStopping) return;
 
-        if (eventData.telegram?.functionError) {
+        const errorMessage = `${err}`.split(":")?.[1].trimStart() || err;
+        const suppressErrors = context.suppressErrors;
+        if (`${suppressErrors}` !== "undefined" && eventData?.send) {
+          eventData.send(suppressErrors, { parse_mode: "HTML" });
+        } else if (eventData.telegram?.functionError) {
           eventData.telegram.addFunction({
             name: "$handleError",
             callback: async (
@@ -335,22 +339,15 @@ function readFunctionsInLib(
           });
           eventData.telegram.emit("functionError", context, eventData);
           eventData.telegram.removeFunction("$handleError");
-        }
-
-        if (eventData.telegram?.sendMessageError) {
+        } else if (eventData.telegram?.sendMessageError) {
           error.customError(
             `Failed to usage ${dataFunctionName}: ${errorMessage}`,
             dataFunctionName,
           );
-        } else if (
-          !eventData.telegram?.sendMessageError &&
-          !eventData.telegram?.functionError
-        ) {
-          console.log(err);
         }
       }
       if (getStopping(libFunction.name) && response) {
-        throw new AoiStop();
+        throw new AoiStopping(libFunction.name);
       }
 
       return response;

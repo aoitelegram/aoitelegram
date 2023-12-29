@@ -52,7 +52,7 @@ class Action {
    * Starts handling incoming callback queries.
    */
   handler() {
-    this.telegram.on("callback_query:data", (query) => {
+    this.telegram.on("callback_query:data", async (query) => {
       const data = query.data;
 
       if (!this.actions.length) return;
@@ -61,10 +61,10 @@ class Action {
 
       if (action) {
         if (action.answer) {
-          query.answerCallbackQuery().catch(() => console.log);
+          await query.answerCallbackQuery().catch(() => console.log);
         }
 
-        this.telegram.evaluateCommand(
+        await this.telegram.evaluateCommand(
           { event: "callback_query" },
           action.code,
           query,

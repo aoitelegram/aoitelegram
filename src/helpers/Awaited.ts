@@ -58,11 +58,11 @@ class Awaited {
    * Sets up a handler for awaited events.
    */
   handler(): void {
-    this.telegram.on("awaited", (awaited, context) => {
+    this.telegram.on("awaited", async (awaited, context) => {
       for (const awaitedDescription of this.awaiteds) {
         if (awaitedDescription.awaited !== awaited.awaited) continue;
 
-        const intervalId = setInterval(() => {
+        const intervalId = setInterval(async () => {
           const awaitedData = awaited.data;
           this.telegram.addFunction([
             {
@@ -80,7 +80,7 @@ class Awaited {
             },
           ]);
 
-          this.telegram.evaluateCommand(
+          await this.telegram.evaluateCommand(
             { event: "awaited" },
             awaitedDescription.code,
             context,

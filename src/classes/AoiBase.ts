@@ -8,8 +8,8 @@ import { TelegramBot, Context } from "telegramsjs";
 import { LibDataFunction, DataFunction } from "./AoiTyping";
 import { setInterval, clearInterval } from "node:timers";
 import { CombinedEventFunctions } from "./AoiTyping";
-import { AoijsError, AoiStop, MessageError } from "./AoiError";
 import { AoiManager, DatabaseOptions } from "./AoiManager";
+import { AoijsError, AoiStopping, MessageError } from "./AoiError";
 import { version } from "../../package.json";
 
 type AllowedUpdates = ReadonlyArray<Exclude<keyof Update, "update_id">>;
@@ -111,7 +111,7 @@ class AoiBase extends TelegramBot {
    * @param {string} code - The code to be executed.
    * @param {unknown} eventData - The context or user for executing the code.
    */
-  evaluateCommand(
+  async evaluateCommand(
     command: string | { event: string },
     code: string,
     eventData: unknown,
@@ -124,10 +124,9 @@ class AoiBase extends TelegramBot {
         this.varReplaceOption,
         this.functionsArray,
       );
-      return runtime.runInput(command, code);
+      return await runtime.runInput(command, code);
     } catch (err) {
-      if (err instanceof AoiStop) return;
-      throw err;
+      if (!(err instanceof AoiStopping)) throw err;
     }
   }
 
@@ -209,12 +208,12 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    const intervalId = setInterval(() => {
+    const intervalId = setInterval(async () => {
       this.addFunction({
         name: "$break",
         callback: () => clearInterval(intervalId),
       });
-      this.evaluateCommand({ event: "loop" }, options.code, this);
+      await this.evaluateCommand({ event: "loop" }, options.code, this);
       this.removeFunction("$break");
     }, options.every ?? 60000);
     return this;
@@ -232,8 +231,8 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    this.on("ready", (ctx) => {
-      this.evaluateCommand({ event: "ready" }, options.code, {
+    this.on("ready", async (ctx) => {
+      await this.evaluateCommand({ event: "ready" }, options.code, {
         ...ctx,
         telegram: this,
       });
@@ -253,8 +252,8 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    this.on("message", (ctx) => {
-      this.evaluateCommand({ event: "message" }, options.code, ctx);
+    this.on("message", async (ctx) => {
+      await this.evaluateCommand({ event: "message" }, options.code, ctx);
     });
     return this;
   }
@@ -271,8 +270,12 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    this.on("callback_query", (ctx) => {
-      this.evaluateCommand({ event: "callback_query" }, options.code, ctx);
+    this.on("callback_query", async (ctx) => {
+      await this.evaluateCommand(
+        { event: "callback_query" },
+        options.code,
+        ctx,
+      );
     });
     return this;
   }
@@ -289,8 +292,12 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    this.on("edited_message", (ctx) => {
-      this.evaluateCommand({ event: "edited_message" }, options.code, ctx);
+    this.on("edited_message", async (ctx) => {
+      await this.evaluateCommand(
+        { event: "edited_message" },
+        options.code,
+        ctx,
+      );
     });
     return this;
   }
@@ -307,8 +314,8 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    this.on("channel_post", (ctx) => {
-      this.evaluateCommand({ event: "channel_post" }, options.code, ctx);
+    this.on("channel_post", async (ctx) => {
+      await this.evaluateCommand({ event: "channel_post" }, options.code, ctx);
     });
     return this;
   }
@@ -325,8 +332,12 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    this.on("edited_channel_post", (ctx) => {
-      this.evaluateCommand({ event: "edited_channel_post" }, options.code, ctx);
+    this.on("edited_channel_post", async (ctx) => {
+      await this.evaluateCommand(
+        { event: "edited_channel_post" },
+        options.code,
+        ctx,
+      );
     });
     return this;
   }
@@ -343,8 +354,8 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    this.on("inline_query", (ctx) => {
-      this.evaluateCommand({ event: "inline_query" }, options.code, ctx);
+    this.on("inline_query", async (ctx) => {
+      await this.evaluateCommand({ event: "inline_query" }, options.code, ctx);
     });
     return this;
   }
@@ -361,8 +372,12 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    this.on("shipping_query", (ctx) => {
-      this.evaluateCommand({ event: "shipping_query" }, options.code, ctx);
+    this.on("shipping_query", async (ctx) => {
+      await this.evaluateCommand(
+        { event: "shipping_query" },
+        options.code,
+        ctx,
+      );
     });
     return this;
   }
@@ -379,8 +394,12 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    this.on("pre_checkout_query", (ctx) => {
-      this.evaluateCommand({ event: "pre_checkout_query" }, options.code, ctx);
+    this.on("pre_checkout_query", async (ctx) => {
+      await this.evaluateCommand(
+        { event: "pre_checkout_query" },
+        options.code,
+        ctx,
+      );
     });
     return this;
   }
@@ -397,8 +416,8 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    this.on("poll", (ctx) => {
-      this.evaluateCommand({ event: "poll" }, options.code, ctx);
+    this.on("poll", async (ctx) => {
+      await this.evaluateCommand({ event: "poll" }, options.code, ctx);
     });
     return this;
   }
@@ -415,8 +434,8 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    this.on("poll_answer", (ctx) => {
-      this.evaluateCommand({ event: "poll_answer" }, options.code, ctx);
+    this.on("poll_answer", async (ctx) => {
+      await this.evaluateCommand({ event: "poll_answer" }, options.code, ctx);
     });
     return this;
   }
@@ -433,8 +452,8 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    this.on("chat_member", (ctx) => {
-      this.evaluateCommand({ event: "chat_member" }, options.code, ctx);
+    this.on("chat_member", async (ctx) => {
+      await this.evaluateCommand({ event: "chat_member" }, options.code, ctx);
     });
     return this;
   }
@@ -451,8 +470,12 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    this.on("my_chat_member", (ctx) => {
-      this.evaluateCommand({ event: "my_chat_member" }, options.code, ctx);
+    this.on("my_chat_member", async (ctx) => {
+      await this.evaluateCommand(
+        { event: "my_chat_member" },
+        options.code,
+        ctx,
+      );
     });
     return this;
   }
@@ -469,8 +492,12 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    this.on("chat_join_request", (ctx) => {
-      this.evaluateCommand({ event: "chat_join_request" }, options.code, ctx);
+    this.on("chat_join_request", async (ctx) => {
+      await this.evaluateCommand(
+        { event: "chat_join_request" },
+        options.code,
+        ctx,
+      );
     });
     return this;
   }
@@ -487,17 +514,17 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    this.#database.on("create", (newVariable) => {
+    this.#database.on("create", async (newVariable) => {
       this.addFunction({
         name: "$newVariable",
         callback: async (context, eventData, database, error) => {
           const [path = "value"] = await context.getEvaluateArgs();
           context.checkArgumentTypes([path], error, ["string"]);
-          const result = getObjectKey(newVariable, path as string);
+          const result = getObjectKey(newVariable, `${path}`);
           return result;
         },
       });
-      this.evaluateCommand({ event: "variableCreate" }, options.code, {
+      await this.evaluateCommand({ event: "variableCreate" }, options.code, {
         newVariable,
         telegram: this,
       });
@@ -518,14 +545,14 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    this.#database.on("update", (newVariable, oldVariable) => {
+    this.#database.on("update", async (newVariable, oldVariable) => {
       this.addFunction([
         {
           name: "$newVariable",
           callback: async (context, eventData, database, error) => {
             const [path = "value"] = await context.getEvaluateArgs();
             context.checkArgumentTypes([path], error, ["string"]);
-            const result = getObjectKey(newVariable, path as string);
+            const result = getObjectKey(newVariable, `${path}`);
             return result;
           },
         },
@@ -534,12 +561,12 @@ class AoiBase extends TelegramBot {
           callback: async (context, eventData, database, error) => {
             const [path = "value"] = await context.getEvaluateArgs();
             context.checkArgumentTypes([path], error, ["string"]);
-            const result = getObjectKey(oldVariable, path as string);
+            const result = getObjectKey(oldVariable, `${path}`);
             return result;
           },
         },
       ]);
-      this.evaluateCommand({ event: "variableUpdate" }, options.code, {
+      await this.evaluateCommand({ event: "variableUpdate" }, options.code, {
         newVariable,
         oldVariable,
         telegram: this,
@@ -561,17 +588,17 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    this.#database.on("delete", (oldVariable) => {
+    this.#database.on("delete", async (oldVariable) => {
       this.addFunction({
         name: "$oldVariable",
         callback: async (context, eventData, database, error) => {
           const [path = "value"] = await context.getEvaluateArgs();
           context.checkArgumentTypes([path], error, ["string"]);
-          const result = getObjectKey(oldVariable, path as string);
+          const result = getObjectKey(oldVariable, `${path}`);
           return result;
         },
       });
-      this.evaluateCommand({ event: "variableDelete" }, options.code, {
+      await this.evaluateCommand({ event: "variableDelete" }, options.code, {
         oldVariable,
         telegram: this,
       });

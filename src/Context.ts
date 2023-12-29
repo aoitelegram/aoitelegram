@@ -16,6 +16,7 @@ class Context {
   array: Collection<string, unknown> = new Collection();
   random: Collection<string, unknown> = new Collection();
   evaluator: Evaluator = new Evaluator();
+  suppressErrors?: string;
   stopping?: boolean;
   /**
    * Creates a new instance of the Context class.

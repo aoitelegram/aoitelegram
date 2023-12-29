@@ -80,7 +80,7 @@ class MessageError {
       `Expected ${amount} arguments but got ${parameterCount}`,
     );
     this.telegramInstance.send(text, { parse_mode: "HTML" });
-    throw new AoiStop();
+    throw new AoiStopping("errorArgs");
   }
 
   /**
@@ -94,7 +94,7 @@ class MessageError {
       `Invalid variable ${nameVar} not found`,
     );
     this.telegramInstance.send(text, { parse_mode: "HTML" });
-    throw new AoiStop();
+    throw new AoiStopping("errorVar");
   }
 
   /**
@@ -108,7 +108,7 @@ class MessageError {
       `Invalid table ${table} not found`,
     );
     this.telegramInstance.send(text, { parse_mode: "HTML" });
-    throw new AoiStop();
+    throw new AoiStopping("errorTable");
   }
 
   /**
@@ -122,7 +122,7 @@ class MessageError {
       `The specified variable ${name} does not exist for the array`,
     );
     this.telegramInstance.send(text, { parse_mode: "HTML" });
-    throw new AoiStop();
+    throw new AoiStopping("errorArray");
   }
 
   /**
@@ -133,7 +133,7 @@ class MessageError {
   customError(description: string, func: string, line?: number) {
     const text = this.createMessageError(func, description);
     this.telegramInstance.send(text, { parse_mode: "HTML" });
-    throw new AoiStop();
+    throw new AoiStopping("customError");
   }
 
   /**
@@ -142,7 +142,11 @@ class MessageError {
    * @param details - Details of the error.
    */
   createMessageError(func: string, details: string) {
-    if (
+    const suppressErrors = `${this.botContext?.suppressErrors}`;
+    if (suppressErrors !== "undefined" && this.telegramInstance?.send) {
+      this.telegramInstance.send(suppressErrors, { parse_mode: "HTML" });
+      throw new AoiStopping("suppressErrors");
+    } else if (
       !this.telegramInstance?.telegram.sendMessageError &&
       this.telegramInstance?.telegram.functionError
     ) {
@@ -173,12 +177,14 @@ class MessageError {
         this.telegramInstance,
       );
       this.telegramInstance.telegram.removeFunction("$handleError");
-      throw new AoiStop();
+      throw new AoiStopping("emit functionError");
     } else if (
       !this.telegramInstance?.telegram.sendMessageError ||
       !this.telegramInstance.send
     ) {
-      throw new ConsoleError(func, details);
+      const error = new ConsoleError(func, details);
+      console.log(error);
+      throw error;
     } else {
       return `❌️ <b>${func}:</b> <code>${details}</code>`;
     }
@@ -204,10 +210,24 @@ class ConsoleError extends Error {
   }
 }
 
-class AoiStop extends Error {
-  constructor() {
-    super();
+/**
+ * Custom error class for Aoi framework to represent a stopping condition.
+ * This error is thrown when a specific condition indicates the need to stop further execution.
+ */
+class AoiStopping extends Error {
+  /**
+   * Name of the error class.
+   */
+  name: string;
+
+  /**
+   * Creates a new AoiStopping instance with the provided func.
+   * @param func - A fun or message associated with the error.
+   */
+  constructor(func: string) {
+    super(`the team is paused due to an error in the ${func} method.`);
+    this.name = "AoiStopping";
   }
 }
 
-export { AoijsError, MessageError, AoiStop };
+export { AoijsError, MessageError, AoiStopping };

@@ -221,25 +221,29 @@ class AoiClient extends AoiBase {
     await this.registerAwaited.handler();
     if (this.#optionConsole) {
       this.on("ready", async (ctx) => {
-        setTimeout(() => {
-          const ctxUsername = `@${ctx.username}`;
+        new Promise((res) => {
+          setTimeout(() => {
+            const ctxUsername = `@${ctx.username}`;
 
-          console.log(
-            `${chalk.red("[ AoiClient ]: ")}${chalk.yellow(
-              `Initialized on ${chalk.cyan("aoitelegram")} ${chalk.blue(
-                `v${version}`,
+            console.log(
+              `${chalk.red("[ AoiClient ]: ")}${chalk.yellow(
+                `Initialized on ${chalk.cyan("aoitelegram")} ${chalk.blue(
+                  `v${version}`,
+                )}`,
+              )} | ${chalk.green(ctxUsername)} |${chalk.cyan(
+                " Sempai Development",
               )}`,
-            )} | ${chalk.green(ctxUsername)} |${chalk.cyan(
-              " Sempai Development",
-            )}`,
-          );
+            );
 
-          console.log(
-            `${chalk.yellow("Official GitHub: ")}${chalk.blue(
-              "https://github.com/Sempai-07/aoitelegram/issues",
-            )}`,
-          );
-        }, 4000);
+            console.log(
+              `${chalk.yellow("Official GitHub: ")}${chalk.blue(
+                "https://github.com/Sempai-07/aoitelegram/issues",
+              )}`,
+            );
+
+            res("");
+          }, 4 * 1000);
+        });
       });
     }
     super.login();
