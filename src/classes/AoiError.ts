@@ -80,7 +80,7 @@ class MessageError {
       `Expected ${amount} arguments but got ${parameterCount}`,
     );
     this.telegramInstance.send(text, { parse_mode: "HTML" });
-    throw new AoiStopping("errorArgs");
+    throw new AoiStop();
   }
 
   /**
@@ -94,7 +94,7 @@ class MessageError {
       `Invalid variable ${nameVar} not found`,
     );
     this.telegramInstance.send(text, { parse_mode: "HTML" });
-    throw new AoiStopping("errorVar");
+    throw new AoiStop();
   }
 
   /**
@@ -108,7 +108,7 @@ class MessageError {
       `Invalid table ${table} not found`,
     );
     this.telegramInstance.send(text, { parse_mode: "HTML" });
-    throw new AoiStopping("errorTable");
+    throw new AoiStop();
   }
 
   /**
@@ -122,7 +122,7 @@ class MessageError {
       `The specified variable ${name} does not exist for the array`,
     );
     this.telegramInstance.send(text, { parse_mode: "HTML" });
-    throw new AoiStopping("errorArray");
+    throw new AoiStop();
   }
 
   /**
@@ -133,7 +133,7 @@ class MessageError {
   customError(description: string, func: string, line?: number) {
     const text = this.createMessageError(func, description);
     this.telegramInstance.send(text, { parse_mode: "HTML" });
-    throw new AoiStopping("customError");
+    throw new AoiStop();
   }
 
   /**
@@ -173,11 +173,12 @@ class MessageError {
         this.telegramInstance,
       );
       this.telegramInstance.telegram.removeFunction("$handleError");
-      throw new AoiStopping("emit functionError");
-    } else if (!this.telegramInstance.send) {
-      const error = new ConsoleError(func, details);
-      console.log(error);
-      throw error;
+      throw new AoiStop();
+    } else if (
+      !this.telegramInstance?.telegram.sendMessageError ||
+      !this.telegramInstance.send
+    ) {
+      throw new ConsoleError(func, details);
     } else {
       return `❌️ <b>${func}:</b> <code>${details}</code>`;
     }
@@ -203,24 +204,10 @@ class ConsoleError extends Error {
   }
 }
 
-/**
- * Custom error class for Aoi framework to represent a stopping condition.
- * This error is thrown when a specific condition indicates the need to stop further execution.
- */
-class AoiStopping extends Error {
-  /**
-   * Name of the error class.
-   */
-  name: string;
-
-  /**
-   * Creates a new AoiStopping instance with the provided func.
-   * @param func - A fun or message associated with the error.
-   */
-  constructor(func: string) {
-    super(`the team is paused due to an error in the ${func} method.`);
-    this.name = "AoiStopping";
+class AoiStop extends Error {
+  constructor() {
+    super();
   }
 }
 
-export { AoijsError, MessageError, AoiStopping };
+export { AoijsError, MessageError, AoiStop };

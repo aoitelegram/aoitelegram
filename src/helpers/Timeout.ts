@@ -55,7 +55,7 @@ class Timeout {
    * Sets up the event handler for timeouts.
    */
   handler() {
-    this.telegram.on("timeout", async (timeoutData, context) => {
+    this.telegram.on("timeout", (timeoutData, context) => {
       for (const timeout of this.timeouts) {
         if (timeout.id !== context.id) continue;
 
@@ -72,7 +72,7 @@ class Timeout {
           },
         });
 
-        await this.telegram.evaluateCommand(
+        this.telegram.evaluateCommand(
           { event: "timeout" },
           timeout.code,
           timeoutData,

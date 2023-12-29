@@ -57,7 +57,7 @@ class Command {
    * Starts handling incoming messages.
    */
   handler() {
-    this.telegram.on("message:text", async (message) => {
+    this.telegram.on("message:text", (message) => {
       const messageArgs = message.text.split(/\s+/);
       const commandIdentifier = messageArgs[0];
 
@@ -78,11 +78,7 @@ class Command {
         )
           continue;
 
-        await this.telegram.evaluateCommand(
-          commandIdentifier,
-          command.code,
-          message,
-        );
+        this.telegram.evaluateCommand(commandIdentifier, command.code, message);
         break;
       }
     });

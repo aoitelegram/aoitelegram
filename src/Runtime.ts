@@ -9,8 +9,8 @@ import { Lexer, TokenArgument } from "./Lexer";
 import { AoiManager } from "./classes/AoiManager";
 import { DataFunction } from "./classes/AoiTyping";
 import { LibDataFunction } from "./classes/AoiTyping";
-import { type Context as EventContext } from "telegramsjs";
-import { AoijsError, AoiStopping, MessageError } from "./classes/AoiError";
+import { Context as EventContext } from "telegramsjs";
+import { AoijsError, AoiStop, MessageError } from "./classes/AoiError";
 
 function getStopping(name: string) {
   switch (name) {
@@ -145,7 +145,7 @@ class Runtime {
  * @param eventData - The Telegram context.
  * @param runtime - The Runtime instance.
  */
-async function evaluateAoiCommand(
+function evaluateAoiCommand(
   command: string | { event: string },
   code: string,
   eventData: EventContext,
@@ -159,9 +159,9 @@ async function evaluateAoiCommand(
       runtime.varReplaceOption,
       runtime.functionsArray,
     );
-    return await aoiRuntime.runInput(command, code);
+    return aoiRuntime.runInput(command, code);
   } catch (error) {
-    if (!(error instanceof AoiStopping)) throw error;
+    throw error;
   }
 }
 
@@ -230,7 +230,7 @@ function readFunctions(
             error,
           );
           if (context.stopping) {
-            throw new AoiStopping(dataFunction.name);
+            throw new AoiStop();
           }
           return response;
         } else if (typeof dataFunction.callback === "string") {
@@ -297,7 +297,6 @@ function readFunctionsInLib(
     parent.set(dataFunctionName, async (context) => {
       const error = new MessageError(eventData, context);
       let response;
-
       try {
         response = await libFunction.callback(
           context,
@@ -306,8 +305,7 @@ function readFunctionsInLib(
           error,
         );
       } catch (err) {
-        if (err instanceof AoiStopping) return;
-
+        if (err instanceof AoiStop) return;
         const errorMessage = `${err}`.split(":")?.[1].trimStart() || err;
 
         if (eventData.telegram?.functionError) {
@@ -344,10 +342,15 @@ function readFunctionsInLib(
             `Failed to usage ${dataFunctionName}: ${errorMessage}`,
             dataFunctionName,
           );
+        } else if (
+          !eventData.telegram?.sendMessageError &&
+          !eventData.telegram?.functionError
+        ) {
+          console.log(err);
         }
       }
       if (getStopping(libFunction.name) && response) {
-        throw new AoiStopping(libFunction.name);
+        throw new AoiStop();
       }
 
       return response;
