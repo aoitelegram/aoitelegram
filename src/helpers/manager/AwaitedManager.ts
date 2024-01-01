@@ -20,11 +20,11 @@ class AwaitedManager {
 
   /**
    * Adds a new awaited event with specified options.
-   * @param {string} awaited - The name or identifier of the awaited event.
-   * @param {object} options - Options for the awaited event.
-   * @param {number} options.milliseconds - The time to wait for the awaited event in milliseconds.
-   * @param {object} options.data - Additional data associated with the awaited event.
-   * @param {unknown} options.context - The context or additional information for the awaited event.
+   * @param awaited - The name or identifier of the awaited event.
+   * @param options - Options for the awaited event.
+   * @param options.milliseconds - The time to wait for the awaited event in milliseconds.
+   * @param options.data - Additional data associated with the awaited event.
+   * @param options.context - The context or additional information for the awaited event.
    */
   addAwaited(
     awaited: string,

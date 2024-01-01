@@ -29,9 +29,9 @@ class CustomEvent extends EventEmitter {
 
   /**
    * Registers a custom event listener.
-   * @param {DataEvent} options - The options for the custom event.
+   * @param options - The options for the custom event.
    * @throws {AoijsError} Throws an error if required parameters are not specified.
-   * @returns {CustomEvent} Returns the CustomEvent instance for method chaining.
+   * @returns Returns the CustomEvent instance for method chaining.
    */
   command(options: DataEvent) {
     if (!options?.listen) {
@@ -107,8 +107,8 @@ class CustomEvent extends EventEmitter {
 
   /**
    * Loads and registers events from a specified directory path.
-   * @param {string} dirPath - The path to the directory containing event files.
-   * @param {boolean} [log=true] - A flag indicating whether to log loading events (default: true).
+   * @param dirPath - The path to the directory containing event files.
+   * @param log - A flag indicating whether to log loading events (default: true).
    */
   loadEvents(dirPath: string, log: boolean = true) {
     if (!dirPath) {
@@ -170,14 +170,12 @@ class CustomEvent extends EventEmitter {
 
   /**
    * Emits a custom event with the specified name and arguments.
-   * @param {string} name - The name of the custom event to emit.
-   * @param {...any} args - Additional arguments to pass to the event listeners.
-   * @returns {CustomEvent} Returns the CustomEvent instance for method chaining.
+   * @param name - The name of the custom event to emit.
+   * @param args - Additional arguments to pass to the event listeners.
+   * @returns Returns the CustomEvent instance for method chaining.
    */
-  // @ts-ignore
-  emit(name: string, ...args: any) {
-    super.emit(name, ...args);
-    return this;
+  override emit(name: string, ...args: unknown[]) {
+    return super.emit(name, ...args);
   }
 }
 

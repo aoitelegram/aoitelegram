@@ -23,7 +23,7 @@ export default {
       error.customError("Error object", "$setTimeout");
     }
 
-    await event.telegram?.timeoutManager.addTimeout(name, {
+    event.telegram?.timeoutManager.addTimeout(name, {
       milliseconds: +ms(milliseconds),
       data: data,
     });

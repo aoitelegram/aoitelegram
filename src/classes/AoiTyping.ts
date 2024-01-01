@@ -9,6 +9,8 @@ import {
   Update,
   UserFromGetMe,
   Message,
+  MessageReactionUpdated,
+  MessageReactionCountUpdated,
   CallbackQuery,
   InlineQuery,
   ShippingQuery,
@@ -18,6 +20,8 @@ import {
   ChatMemberUpdated,
   ChatJoinRequest,
   MessageEntity,
+  ChatBoostUpdated,
+  ChatBoostRemoved,
 } from "@telegram.ts/types";
 
 interface CaptionableMessage {
@@ -30,6 +34,10 @@ interface EventDataMap<F> {
   ready: (data: UserFromGetMe) => void;
   message: (data: Message & EventContext<F>) => void;
   "message:text": (data: Message.TextMessage & EventContext<F>) => void;
+  message_reaction: (data: MessageReactionUpdated & EventContext<F>) => void;
+  message_reaction_count: (
+    data: MessageReactionCountUpdated & EventContext<F>,
+  ) => void;
   edited_message: (data: Message & Update.Edited & EventContext<F>) => void;
   channel_post: (data: Message & Update.Channel & EventContext<F>) => void;
   edited_channel_post: (data: Message & Update.Edited & Update.Channel) => void;
@@ -45,6 +53,8 @@ interface EventDataMap<F> {
   chat_member: (data: ChatMemberUpdated & EventContext<F>) => void;
   my_chat_member: (data: ChatMemberUpdated & EventContext<F>) => void;
   chat_join_request: (data: ChatJoinRequest & EventContext<F>) => void;
+  chat_boost: (data: ChatBoostUpdated & EventContext<F>) => void;
+  removed_chat_boost: (data: ChatBoostRemoved & EventContext<F>) => void;
 }
 
 interface EventHandlers {
@@ -52,16 +62,16 @@ interface EventHandlers {
   awaited: (event: AwaitedEvent, data: unknown) => void;
   functionError: (
     client: AoiClient,
-    EventContext: EventContext & AoiClient,
+    eventContext: EventContext & { telegram: AoiClient },
   ) => void;
-  addTimeout: (EventContext: ValueDatabase) => void;
+  addTimeout: (eventContext: ValueDatabase) => void;
 }
 
 interface LibDataFunction {
   name: string;
   callback: (
     ctx: Context,
-    event: EventContext,
+    event: EventContext & { telegram: AoiClient },
     database: AoiManager,
     error: MessageError,
   ) => unknown;
@@ -83,7 +93,7 @@ type DataFunction =
         | string
         | ((
             ctx: Context,
-            event: EventContext,
+            event: EventContext & { telegram: AoiClient },
             database: AoiManager,
             error: MessageError,
           ) => unknown);
@@ -94,7 +104,7 @@ type DataEvent = {
   type: string;
   once?: boolean;
   code?: string;
-  callback?: () => void;
+  callback?: (...args: unknown[]) => void;
 };
 
 type CombinedEventFunctions = EventHandlers & EventDataMap<Buffer>;

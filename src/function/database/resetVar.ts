@@ -13,7 +13,7 @@ export default {
       return;
     }
 
-    const all = await database.all(defaultTable);
+    const all = database.all(defaultTable);
     let affectedIds: string[] = [];
 
     for (const variableKey in all) {
@@ -23,7 +23,7 @@ export default {
       affectedIds.push(key);
 
       const defaultValue = await database.defaultValue(key, defaultTable);
-      await database.set(defaultTable, key, defaultValue);
+      database.set(defaultTable, key, defaultValue);
     }
 
     return affectedIds.length;

@@ -55,8 +55,8 @@ class AoiManager extends KeyValue<string, unknown> {
 
   /**
    * Retrieves the default value for a specific variable from a given table.
-   * @param {string} vars - The variable name.
-   * @param {string} table - The table name where the variable is stored.
+   * @param vars - The variable name.
+   * @param table - The table name where the variable is stored.
    */
   defaultValue(vars: string, table: string) {
     return this.collection.get(`${vars}_${table}`);
@@ -64,8 +64,8 @@ class AoiManager extends KeyValue<string, unknown> {
 
   /**
    * Set variables in the database.
-   * @param {Object} options - Key-value pairs of variables to set.
-   * @param {string | string[]} table - The database table to use (optional).
+   * @param options - Key-value pairs of variables to set.
+   * @param table - The database table to use (optional).
    */
   variables(
     options: { [key: string]: unknown },

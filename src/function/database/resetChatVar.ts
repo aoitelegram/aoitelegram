@@ -13,11 +13,11 @@ export default {
       return;
     }
 
-    const allChats = await database.all(defaultTable);
+    const allChats = database.all(defaultTable);
     let affectedChatIds: string[] = [];
 
     for (const variableKey in allChats) {
-      const variableValue = await database.get(defaultTable, variableKey);
+      const variableValue = database.get(defaultTable, variableKey);
       const [, chatId] = variableKey.split("_");
 
       if (`chat_${chatId}_${variableName}` !== variableKey) continue;
@@ -31,7 +31,7 @@ export default {
         defaultTable,
       );
       const chatVariableKey = `chat_${chatId}_${variableName}`;
-      await database.set(defaultTable, chatVariableKey, defaultValue);
+      database.set(defaultTable, chatVariableKey, defaultValue);
     }
 
     return affectedChatIds.length;

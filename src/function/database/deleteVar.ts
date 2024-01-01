@@ -9,6 +9,6 @@ export default {
       error.errorTable(defaultTable, "$deleteVar");
       return;
     }
-    return await database.delete(defaultTable, args[0], args[1]);
+    return database.delete(defaultTable, args[0], args[1]);
   },
 };

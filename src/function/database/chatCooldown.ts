@@ -11,7 +11,7 @@ export default {
     ctx.checkArgumentTypes(args, error, ["string", "string | undefined"]);
 
     const cooldownKey = `${chatId}_${ms(args[0])}`;
-    const userCooldown = (await database.get(defaultTable, cooldownKey)) || 0;
+    const userCooldown = database.get(defaultTable, cooldownKey) || 0;
     const cooldown = userCooldown + +ms(args[0]) - Date.now();
     if (cooldown > 0) {
       if (!!args[1]) {
@@ -21,7 +21,7 @@ export default {
       }
       return true;
     } else {
-      await database.set(defaultTable, cooldownKey, Date.now());
+      database.set(defaultTable, cooldownKey, Date.now());
     }
   },
 };

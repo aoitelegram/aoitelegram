@@ -18,7 +18,7 @@ export default {
       return;
     }
 
-    await database.set(
+    database.set(
       defaultTable,
       `message_${args[2] || messageId}_${chatId}_${args[0]}`,
       args[1],

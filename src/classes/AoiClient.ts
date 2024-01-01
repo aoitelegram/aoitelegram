@@ -89,10 +89,10 @@ class AoiClient extends AoiBase {
 
   /**
    * Define a command for the client.
-   * @param {CommandDescription} options - Command options.
-   * @param {string} options.name - The name of the command.
-   * @param {string | boolean} [options.typeChannel=false] - In what type of channels to watch command
-   * @param {string} options.code - The code to be executed when the command is invoked.
+   * @param options - Command options.
+   * @param options.name - The name of the command.
+   * @param options.typeChannel- In what type of channels to watch command
+   * @param options.code - The code to be executed when the command is invoked.
    */
   // @ts-ignore
   command(options: CommandDescription) {
@@ -115,10 +115,10 @@ class AoiClient extends AoiBase {
 
   /**
    * Defines an action handler.
-   * @param {ActionDescription} options - Command options.
-   * @param {string} options.data - The action data string or an array of action data strings.
-   * @param {boolean} [options.answer=false] - Whether to answer the action.
-   * @param {string} options.code - The code to be executed when the command is invoked.
+   * @param options - Command options.
+   * @param options.data - The action data string or an array of action data strings.
+   * @param options.answer - Whether to answer the action.
+   * @param options.code - The code to be executed when the command is invoked.
    */
   // @ts-ignore
   action(options: ActionDescription) {
@@ -141,9 +141,9 @@ class AoiClient extends AoiBase {
 
   /**
    * Defines an timeout handler.
-   * @param {TimeoutDescription} options - Command options.
-   * @param {string} options.id - The unique identifier for the timeout command.
-   * @param {string} options.code - The code or content associated with the timeout command.
+   * @param options - Command options.
+   * @param options.id - The unique identifier for the timeout command.
+   * @param options.code - The code or content associated with the timeout command.
    */
   timeoutCommand(options: TimeoutDescription) {
     if (!options?.id) {
@@ -165,9 +165,9 @@ class AoiClient extends AoiBase {
 
   /**
    * Adds an awaited command with the specified options.
-   * @param {AwaitedDescription} options - Options for the awaited command.
-   * @param {string} options.awaited - The name or identifier of the awaited event.
-   * @param {string} options.code - The code or content associated with the awaited command.
+   * @param options - Options for the awaited command.
+   * @param options.awaited - The name or identifier of the awaited event.
+   * @param options.code - The code or content associated with the awaited command.
    */
   awaitedCommand(options: AwaitedDescription) {
     if (!options?.awaited) {
@@ -190,8 +190,8 @@ class AoiClient extends AoiBase {
 
   /**
    * Adds a function error command to handle errors.
-   * @param {Object} options - Options for the function error command.
-   * @param {string} options.code - The code to be executed on function error.
+   * @param options - Options for the function error command.
+   * @param options.code - The code to be executed on function error.
    */
   functionErrorCommand(options: { code: string }) {
     if (!options?.code) {
@@ -251,8 +251,8 @@ class AoiClient extends AoiBase {
 
   /**
    * Updates information about a command set with the provided name.
-   * @param {CommandInfoSet} name - The name of the command set to update.
-   * @param {unknown} commands - The new information to set for the command set.
+   * @param name - The name of the command set to update.
+   * @param commands - The new information to set for the command set.
    */
   #commandInfo(name: CommandInfoSet, commands: unknown) {
     this.commands.set(name, commands);

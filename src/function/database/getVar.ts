@@ -10,6 +10,6 @@ export default {
       return;
     }
 
-    return await database.get(defaultTable, args[0]);
+    return database.get(defaultTable, args[0]);
   },
 };

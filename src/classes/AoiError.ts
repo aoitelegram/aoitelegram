@@ -1,4 +1,5 @@
 import { Context } from "../Context";
+import { AoiClient } from "./AoiClient";
 import { AoiManager } from "./AoiManager";
 import { Context as EventContext } from "telegramsjs";
 
@@ -56,14 +57,17 @@ class AoijsError extends Error {
  * Represents a class for handling message errors.
  */
 class MessageError {
-  telegramInstance: EventContext;
+  telegramInstance: EventContext & { telegram: AoiClient };
   botContext: Context;
   /**
    * Initializes a new instance of the MessageError class.
    * @param telegram - The Telegram instance used for sending error messages.
    * @param context - The context function
    */
-  constructor(telegram: EventContext["telegram"], context: Context) {
+  constructor(
+    telegram: EventContext & { telegram: AoiClient },
+    context: Context,
+  ) {
     this.telegramInstance = telegram;
     this.botContext = context;
   }
@@ -113,8 +117,8 @@ class MessageError {
 
   /**
    * Create and send an error message for an array-related error.
-   * @param {string} name - The name of the variable that does not exist.
-   * @param {string} func - The name of the function causing the error.
+   * @param name - The name of the variable that does not exist.
+   * @param func - The name of the function causing the error.
    */
   errorArray(name: string, func: string) {
     const text = this.createMessageError(
@@ -127,8 +131,8 @@ class MessageError {
 
   /**
    * Creates a custom error with a specific description and function name.
-   * @param {string} description - A custom description of the error.
-   * @param {string} func - The name of the function where the error occurred.
+   * @param description - A custom description of the error.
+   * @param func - The name of the function where the error occurred.
    */
   customError(description: string, func: string, line?: number) {
     const text = this.createMessageError(func, description);
@@ -154,7 +158,7 @@ class MessageError {
         name: "$handleError",
         callback: async (
           ctx: Context,
-          event: EventContext["telegram"],
+          event: EventContext & { telegram: AoiClient },
           database: AoiManager,
           error: MessageError,
         ) => {
@@ -164,8 +168,14 @@ class MessageError {
           const dataError = {
             error: details,
             function: func,
-            command: this.telegramInstance.fileName,
-            event: this.telegramInstance.event,
+            command:
+              typeof this.botContext.fileName === "object"
+                ? undefined
+                : this.botContext.fileName,
+            event:
+              typeof this.botContext.fileName === "object"
+                ? this.botContext.fileName.event
+                : undefined,
           } as { [key: string]: string | undefined };
 
           return dataError[property as string] || dataError;

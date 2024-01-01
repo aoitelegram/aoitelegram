@@ -9,6 +9,6 @@ export default {
       error.errorTable(defaultTable, "$hasVar");
       return;
     }
-    return await database.has(defaultTable, args[0]);
+    return database.has(defaultTable, args[0]);
   },
 };

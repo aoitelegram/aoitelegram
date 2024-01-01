@@ -33,8 +33,8 @@ class PluginManager {
 
   /**
    * Load plugins from a directory.
-   * @param {string} plugins - The path to the directory containing plugins.
-   * @returns {DataFunction[]} An array of plugin functions.
+   * @param plugins - The path to the directory containing plugins.
+   * @returns An array of plugin functions.
    */
   loadDirPlugins(plugins: string) {
     let collectionFunction: DataFunction[] = [];
@@ -47,8 +47,8 @@ class PluginManager {
 
   /**
    * Load plugins from the specified list.
-   * @param {...string} plugins - List of plugin names to load.
-   * @returns {DataFunction[]} An array of plugin functions.
+   * @param plugins - List of plugin names to load.
+   * @returns An array of plugin functions.
    */
   loadPlugins(...plugins: string[]) {
     let collectionFunction: DataFunction[] = [];
@@ -178,7 +178,7 @@ function readFunctionsInDirectory(
     }
     if (aoitelegram) {
       aoitelegram.addFunction(collectionFunction);
-      return;
+      return collectionFunction;
     }
     return collectionFunction;
   }
@@ -215,6 +215,7 @@ function readFunctionsInDirectory(
         );
       if (aoitelegram) {
         aoitelegram.addFunction(collectionFunction);
+        return collectionFunction;
       }
     }
   }

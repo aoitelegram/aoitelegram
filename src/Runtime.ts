@@ -6,6 +6,7 @@ import { Context } from "./Context";
 import { Evaluator } from "./Evaluator";
 import { Environment } from "./Environment";
 import { Lexer, TokenArgument } from "./Lexer";
+import { AoiClient } from "./classes/AoiClient";
 import { AoiManager } from "./classes/AoiManager";
 import { DataFunction } from "./classes/AoiTyping";
 import { LibDataFunction } from "./classes/AoiTyping";
@@ -50,7 +51,7 @@ class Runtime {
    * @param options.functionsArray - An array to store processed data functions.
    */
   constructor(
-    eventData: EventContext["telegram"],
+    eventData: EventContext & { telegram: AoiClient },
     database: AoiManager,
     customFunction: DataFunction[],
     varReplaceOption: boolean,
@@ -115,7 +116,7 @@ class Runtime {
    * @param functionsArray - An array to store processed data functions.
    */
   private prepareGlobal(
-    eventData: EventContext["telegram"],
+    eventData: EventContext & { telegram: AoiClient },
     database: AoiManager,
     customFunction: DataFunction[],
     functionsArray: LibDataFunction[],
@@ -148,7 +149,7 @@ class Runtime {
 async function evaluateAoiCommand(
   command: string | { event: string },
   code: string,
-  eventData: EventContext,
+  eventData: EventContext & { telegram: AoiClient },
   runtime: Runtime,
 ) {
   try {
@@ -167,10 +168,10 @@ async function evaluateAoiCommand(
 
 /**
  * Replaces placeholders in an input string with values from arrays.
- * @param {string} inputString - The input string containing placeholders.
- * @param {string[]} array - The array of placeholders to be replaced.
- * @param {string[]} arrayParams - The array of values to replace placeholders with.
- * @returns {string} - The updated string with replaced values.
+ * @param inputString - The input string containing placeholders.
+ * @param array - The array of placeholders to be replaced.
+ * @param arrayParams - The array of values to replace placeholders with.
+ * @returns - The updated string with replaced values.
  */
 function updateParamsFromArray(
   inputString: string,
@@ -199,7 +200,7 @@ function updateParamsFromArray(
 function readFunctions(
   customFunction: DataFunction[],
   parent: Runtime["globalEnvironment"],
-  eventData: EventContext,
+  eventData: EventContext & { telegram: AoiClient },
   database: AoiManager,
   runtime: Runtime,
 ) {
@@ -280,15 +281,15 @@ function readFunctions(
 /**
  * Reads and processes functions in a library, setting them up as commands in a specified parent.
  *
- * @param {DataFunction[]} functionsArray - An array of functions to be processed.
- * @param {Runtime["globalEnvironment"]} parent - The object where processed functions will be added as commands.
- * @param {EventContext} eventData - Data related to the event triggering the functions.
- * @param {AoiManager} database - The database object for function interactions.
+ * @param functionsArray - An array of functions to be processed.
+ * @param parent - The object where processed functions will be added as commands.
+ * @param eventData - Data related to the event triggering the functions.
+ * @param database - The database object for function interactions.
  */
 function readFunctionsInLib(
   functionsArray: LibDataFunction[],
   parent: Runtime["globalEnvironment"],
-  eventData: EventContext,
+  eventData: EventContext & { telegram: AoiClient },
   database: AoiManager,
 ) {
   const processRutime = (libFunction: LibDataFunction) => {
@@ -311,13 +312,13 @@ function readFunctionsInLib(
         const errorMessage = `${err}`.split(":")?.[1].trimStart() || err;
         const suppressErrors = context.suppressErrors;
         if (`${suppressErrors}` !== "undefined" && eventData?.send) {
-          eventData.send(suppressErrors, { parse_mode: "HTML" });
+          eventData.send(`${suppressErrors}`, { parse_mode: "HTML" });
         } else if (eventData.telegram?.functionError) {
           eventData.telegram.addFunction({
             name: "$handleError",
             callback: async (
               ctx: Context,
-              event: EventContext["telegram"],
+              event: EventContext & { telegram: AoiClient },
               database: AoiManager,
               error: MessageError,
             ) => {

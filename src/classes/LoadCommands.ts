@@ -23,9 +23,9 @@ class LoadCommands {
 
   /**
    * Asynchronously loads commands from the specified directory path.
-   * @param {string} dirPath - The directory path from which to load commands.
-   * @param {boolean} [log=true] - The console load commands.
-   * @param {boolean} [updated=false] - The updated commands
+   * @param dirPath - The directory path from which to load commands.
+   * @param log - The console load commands.
+   * @param updated - The updated commands
    */
   loadCommands(dirPath: string, log: boolean = true, updated: boolean = false) {
     if (!dirPath) {
@@ -209,8 +209,8 @@ class LoadCommands {
 
   /**
    * Asynchronously loads variables from the specified directory path.
-   * @param {string} dirPath - The directory path from which to load variables.
-   * @param {boolean} [log=true] - The console load variables.
+   * @param dirPath - The directory path from which to load variables.
+   * @param log - The console load variables.
    */
   loadVariables(dirPath: string, log: boolean = true) {
     if (!dirPath) {
@@ -307,71 +307,83 @@ class LoadCommands {
   /**
    * Run an event based on its type.
    *
-   * @param {AoiClient} aoitelegram - The AoiClient instance to handle the event.
-   * @param {{ hasEvent: string | null; parameter: string }} eventType - The event type to be processed, including 'hasEvent' and 'parameter' properties.
-   * @param {{ code: string }} data - The data associated with the event, containing a 'code' property.
+   * @param aoitelegram - The AoiClient instance to handle the event.
+   * @param eventType - The event type to be processed, including 'hasEvent' and 'parameter' properties.
+   * @param data - The data associated with the event, containing a 'code' property.
    */
   runEvent(
     aoitelegram: AoiClient,
     eventType: { hasEvent: string | null; parameter: string },
     data: { every?: number; code: string },
   ) {
-    switch (true) {
-      case "ready" === eventType.hasEvent:
+    switch (eventType.hasEvent) {
+      case "ready":
         aoitelegram.readyCommand(data);
         break;
-      case "message" === eventType.hasEvent:
+      case "message":
         aoitelegram.messageCommand(data);
         break;
-      case "callback_query" === eventType.hasEvent:
+      case "callback_query":
         aoitelegram.callbackQueryCommand(data);
         break;
-      case "edited_message" === eventType.hasEvent:
+      case "edited_message":
         aoitelegram.editedMessageCommand(data);
         break;
-      case "channel_post" === eventType.hasEvent:
+      case "message_reaction":
+        aoitelegram.messageReactionCommand(data);
+        break;
+      case "message_reaction_count":
+        aoitelegram.messageReactionCountCommand(data);
+        break;
+      case "channel_post":
         aoitelegram.channelPostCommand(data);
         break;
-      case "edited_channel_post" === eventType.hasEvent:
+      case "edited_channel_post":
         aoitelegram.editedChannelPostCommand(data);
         break;
-      case "inline_query" === eventType.hasEvent:
+      case "inline_query":
         aoitelegram.inlineQueryCommand(data);
         break;
-      case "shipping_query" === eventType.hasEvent:
+      case "shipping_query":
         aoitelegram.shippingQueryCommand(data);
         break;
-      case "pre_checkout_query" === eventType.hasEvent:
+      case "pre_checkout_query":
         aoitelegram.preCheckoutQueryCommand(data);
         break;
-      case "poll" === eventType.hasEvent:
+      case "poll":
         aoitelegram.pollCommand(data);
         break;
-      case "poll_answer" === eventType.hasEvent:
+      case "poll_answer":
         aoitelegram.pollAnswerCommand(data);
         break;
-      case "chat_member" === eventType.hasEvent:
+      case "chat_member":
         aoitelegram.chatMemberCommand(data);
         break;
-      case "my_chat_member" === eventType.hasEvent:
+      case "my_chat_member":
         aoitelegram.myChatMemberCommand(data);
         break;
-      case "chat_join_request" === eventType.hasEvent:
+      case "chat_join_request":
         aoitelegram.chatJoinRequestCommand(data);
         break;
-      case "loop" === eventType.hasEvent:
+      case "chat_boost":
+        aoitelegram.chatBoostCommand(data);
+        break;
+      case "removed_chat_boost":
+        aoitelegram.removedChatBoostCommand(data);
+        break;
+      case "loop":
         aoitelegram.loopCommand(data);
         break;
-      case "variableCreate" === eventType.hasEvent:
+      case "variableCreate":
         aoitelegram.variableCreateCommand(data);
         break;
-      case "variableUpdate" === eventType.hasEvent:
+      case "variableUpdate":
         aoitelegram.variableUpdateCommand(data);
         break;
-      case "variableDelete" === eventType.hasEvent:
+      case "variableDelete":
         aoitelegram.variableDeleteCommand(data);
         break;
-      case "functionError" === eventType.hasEvent:
+      case "functionError":
         aoitelegram.functionErrorCommand(data);
         break;
       default:
@@ -384,8 +396,8 @@ class LoadCommands {
 
   /**
    * Get the loader event type based on a given type string.
-   * @param {string} type - The type of the event.
-   * @returns {{ hasEvent: string | null; parameter: string }} - An object with 'hasEvent' and 'parameter' properties representing the event type.
+   * @param type - The type of the event.
+   * @returns An object with 'hasEvent' and 'parameter' properties representing the event type.
    */
   static loaderEventType(type: string) {
     const events: { [key: string]: string } = {

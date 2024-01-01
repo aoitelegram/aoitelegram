@@ -15,7 +15,6 @@ export default {
       return;
     }
 
-    await database.set(defaultTable, args[0], args[1]);
-    return undefined;
+    return database.set(defaultTable, args[0], args[1]);
   },
 };

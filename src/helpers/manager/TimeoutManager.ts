@@ -1,6 +1,6 @@
 import { setTimeout } from "node:timers";
 import { EventEmitter } from "node:events";
-import { CreateStorage } from "database-sempai";
+import { KeyValue } from "@aoitelegram/database";
 import { AoijsError } from "../../classes/AoiError";
 import { AoiClient } from "../../classes/AoiClient";
 import { DatabaseOptions } from "../../classes/AoiManager";
@@ -15,7 +15,7 @@ interface ValueDatabase {
 /**
  * A class responsible for managing timeouts and associated actions.
  */
-class TimeoutManager extends CreateStorage<string, ValueDatabase> {
+class TimeoutManager extends KeyValue<string, ValueDatabase> {
   /**
    * A reference to the AoiClient instance.
    */
@@ -26,16 +26,16 @@ class TimeoutManager extends CreateStorage<string, ValueDatabase> {
    * @param telegram The AoiClient instance.
    * @param options Configuration options for the database connection.
    */
-  constructor(telegram: AoiClient, options?: DatabaseOptions) {
-    super({ ...options, table: ["timeout"] });
+  constructor(telegram: AoiClient, options: DatabaseOptions = {}) {
+    super({ ...options, tables: ["timeout"] });
     this.telegram = telegram;
 
     /**
      * Handles the 'ready' event, which is emitted when the database connection is established.
      */
-    this.on("ready", async () => {
-      this.forEach("timeout", async (value, key) => {
-        const timeoutData = await this.get("timeout", key);
+    this.on("ready", () => {
+      this.forEach("timeout", (value, key) => {
+        const timeoutData = this.get("timeout", key);
 
         if (!timeoutData) return;
 
@@ -43,13 +43,13 @@ class TimeoutManager extends CreateStorage<string, ValueDatabase> {
           timeoutData.date + timeoutData.milliseconds - Date.now();
 
         if (remainingTime > 0) {
-          setTimeout(async () => {
+          setTimeout(() => {
             this.telegram.emit("timeout", this.telegram, timeoutData);
-            await this.delete("timeout", timeoutData.id);
+            this.delete("timeout", timeoutData.id);
           }, timeoutData.milliseconds);
         } else {
           this.telegram.emit("timeout", this.telegram, timeoutData);
-          await this.delete("timeout", timeoutData.id);
+          this.delete("timeout", timeoutData.id);
         }
       });
     });
@@ -67,9 +67,9 @@ class TimeoutManager extends CreateStorage<string, ValueDatabase> {
         );
       }
 
-      setTimeout(async () => {
+      setTimeout(() => {
         this.telegram.emit("timeout", this.telegram, context);
-        await this.delete("timeout", context.id);
+        this.delete("timeout", context.id);
       }, context.milliseconds);
     });
 
@@ -81,7 +81,7 @@ class TimeoutManager extends CreateStorage<string, ValueDatabase> {
    * @param id The unique identifier of the timeout.
    * @param options The options for the timeout, including milliseconds and data.
    */
-  async addTimeout(
+  addTimeout(
     id: string,
     options: {
       milliseconds: number;
@@ -94,7 +94,7 @@ class TimeoutManager extends CreateStorage<string, ValueDatabase> {
       date: Date.now(),
     };
     this.telegram.emit("addTimeout", data);
-    await this.set("timeout", id, data);
+    this.set("timeout", id, data);
   }
 }
 

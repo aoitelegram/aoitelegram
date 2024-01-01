@@ -25,10 +25,6 @@ export default {
       return;
     }
 
-    await database.set(
-      defaultTable,
-      `user_${userId}_${chatId}_${args[0]}`,
-      args[1],
-    );
+    database.set(defaultTable, `user_${userId}_${chatId}_${args[0]}`, args[1]);
   },
 };

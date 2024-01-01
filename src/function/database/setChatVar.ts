@@ -1,11 +1,9 @@
-import { hasValidChat } from "../helpers";
-
 export default {
   name: "$setChatVar",
   callback: async (ctx, event, database, error) => {
     ctx.argsCheck(2, error, "$setChatVar");
     const args = await ctx.getEvaluateArgs();
-    const chatId = event.chat?.id || event.message?.chat.id;
+    const chatId = args[2] || event.chat?.id || event.message?.chat.id;
     const defaultTable = args[3] || database.tables[0];
     ctx.checkArgumentTypes(args, error, [
       "string",
@@ -19,15 +17,6 @@ export default {
       return;
     }
 
-    if (!(await hasValidChat(event, chatId))) {
-      error.customError("Invalid Chat Id", "$getChatVar");
-      return;
-    }
-
-    await database.set(
-      defaultTable,
-      `chat_${args[2] || chatId}_${args[0]}`,
-      args[1],
-    );
+    database.set(defaultTable, `chat_${chatId}_${args[0]}`, args[1]);
   },
 };

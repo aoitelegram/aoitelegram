@@ -1,5 +1,3 @@
-import { hasValidChat } from "../helpers";
-
 interface ChatData {
   top: number;
   id: number;
@@ -50,17 +48,12 @@ export default {
       "string | undefined",
     ]);
 
-    if (!(await hasValidChat(event, chatId))) {
-      error.customError("Invalid Chat Id", "$userLeaderBoard");
-      return;
-    }
-
     let leaderboardText = "";
     let users: UsersData[] = [];
-    const allEntries = await database.all(defaultTable);
+    const allEntries = database.all(defaultTable);
 
     for (const entryKey in allEntries) {
-      const entryValue = await database.get(defaultTable, entryKey);
+      const entryValue = database.get(defaultTable, entryKey);
       const [, userId] = entryKey.split("_");
       if (`user_${userId}_${chatId}_${args[1]}` !== entryKey) continue;
 

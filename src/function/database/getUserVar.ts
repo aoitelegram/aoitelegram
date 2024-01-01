@@ -24,9 +24,6 @@ export default {
       return;
     }
 
-    return await database.get(
-      defaultTable,
-      `user_${userId}_${chatId}_${args[0]}`,
-    );
+    return database.get(defaultTable, `user_${userId}_${chatId}_${args[0]}`);
   },
 };

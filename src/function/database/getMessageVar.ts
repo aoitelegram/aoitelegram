@@ -17,7 +17,7 @@ export default {
       return;
     }
 
-    return await database.get(
+    return database.get(
       defaultTable,
       `message_${args[1] || messageId}_${chatId}_${args[0]}`,
     );
