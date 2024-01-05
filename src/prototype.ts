@@ -226,4 +226,30 @@ function findAndTransform(str: string, array: string[]) {
   return str;
 }
 
-export { unpack, findAndTransform };
+/**
+ * Replaces placeholders in an input string with values from arrays.
+ * @param inputString - The input string containing placeholders.
+ * @param array - The array of placeholders to be replaced.
+ * @param arrayParams - The array of values to replace placeholders with.
+ * @returns - The updated string with replaced values.
+ */
+function updateParamsFromArray(
+  inputString: string,
+  array: string[],
+  arrayParams: (undefined | string)[],
+) {
+  if (array.length > arrayParams.length) {
+    arrayParams = [
+      ...arrayParams,
+      ...Array(array.length - arrayParams.length).fill(undefined),
+    ];
+  }
+
+  for (let i = 0; i < array.length; i++) {
+    const regex = new RegExp(`{${array[i]}}`, "g");
+    inputString = inputString.replace(regex, `${arrayParams[i]}`);
+  }
+  return inputString;
+}
+
+export { unpack, findAndTransform, updateParamsFromArray };

@@ -15,7 +15,7 @@ export default {
     if (context.isError) return;
 
     pushIndexArray(
-      +index - 1,
+      index - 1,
       {
         text,
         callback_data,

@@ -5,7 +5,7 @@ import { AoiManager } from "./classes/AoiManager";
 import { DataFunction } from "./classes/AoiTyping";
 import { getObjectKey, toParse } from "./function/parser";
 import { ConditionChecker } from "./function/condition";
-import { unpack, findAndTransform } from "./prototype";
+import { unpack, findAndTransform, updateParamsFromArray } from "./prototype";
 
 interface ContextFunction {
   data: { name: string; inside: string; splits: string[] }[];
@@ -14,6 +14,7 @@ interface ContextFunction {
   localVars: Collection<string, unknown>;
   random: Collection<string, unknown>;
   array: Collection<string, unknown>;
+  callback_query: unknown[];
   event: Context & { telegram: AoiClient };
   telegram: AoiClient;
   code: string;
@@ -37,6 +38,7 @@ class TaskCompleter {
   private code: string;
   private eventData: Context & { telegram: AoiClient };
   private telegram: AoiClient;
+  private callback_query: unknown[] = [];
   private command: { name: string; command?: boolean; event?: boolean };
   private database: AoiManager;
   private functionArray: DataFunction[];
@@ -255,14 +257,21 @@ class TaskCompleter {
   async completeTaskCallback(
     func: string,
     context: ContextFunction,
-    callback: string | ((context: ContextFunction) => unknown),
+    callback:
+      | { code: string; params?: string[] }
+      | ((context: ContextFunction) => unknown),
   ) {
     if (typeof callback === "function") {
       return await callback(context);
-    } else if (typeof callback === "string") {
+    } else if (typeof callback.code === "string") {
       try {
+        const code = updateParamsFromArray(
+          callback.code,
+          callback.params || [],
+          context.splits,
+        );
         const taskCompleter = new TaskCompleter(
-          callback,
+          code,
           this.eventData,
           this.telegram,
           this.command,
@@ -287,7 +296,7 @@ class TaskCompleter {
   /**
    * Completes the task by processing found functions in reverse.
    */
-  async completeTask() {
+  async completeTask(params?: string[]) {
     this.code = await this.completesV4If(this.code);
     this.foundFunctions = await this.searchFunctions();
     for (const func of this.foundFunctions.reverse()) {
@@ -310,6 +319,7 @@ class TaskCompleter {
         localVars: this.localVars,
         random: this.random,
         array: this.array,
+        callback_query: this.callback_query,
         event: this.eventData,
         telegram: this.telegram,
         code: this.code,
@@ -415,7 +425,7 @@ class TaskCompleter {
       let resultFunction = await this.completeTaskCallback(
         functionName,
         dataContext,
-        "code" in functionRun ? functionRun.code : functionRun.callback,
+        "code" in functionRun ? functionRun : functionRun.callback,
       );
 
       this.code = this.code.replaceLast(
