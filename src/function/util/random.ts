@@ -11,12 +11,13 @@ export default {
       return context.random.get(cacheKey);
     }
 
-    const randomValue = Math.floor(Math.random() * (max - min + 1)) + min;
+    const randomValue =
+      Math.floor(Math.random() * (Number(max) - Number(min) + 1)) + Number(min);
 
     if (useCache) {
       context.random.set(cacheKey, randomValue);
     }
 
-    return randomValue;
+    return `${randomValue}`;
   },
 };

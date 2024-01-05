@@ -8,7 +8,7 @@ import { ConditionChecker } from "./function/condition";
 import { unpack, findAndTransform, updateParamsFromArray } from "./prototype";
 
 interface ContextFunction {
-  data: { name: string; inside: string; splits: string[] }[];
+  data: { name: string; inside?: string; splits: string[] }[];
   inside: string | undefined;
   splits: (string | undefined)[];
   localVars: Collection<string, unknown>;
@@ -28,7 +28,7 @@ interface ContextFunction {
 }
 
 class TaskCompleter {
-  private data: { name: string; inside: string; splits: string[] }[];
+  private data: { name: string; inside?: string; splits: string[] }[];
   private suppressError?: string;
   private localVars: Collection<string, unknown> = new Collection();
   private array: Collection<string, unknown> = new Collection();
@@ -145,13 +145,21 @@ class TaskCompleter {
 
         ifBlock = code.split(/\$if\[/gi)[ifOccurrences].split(/\$endif/gi)[0];
 
-        let condition = ifBlock.split("\n")[0].trim();
-
-        condition = condition.slice(0, condition.length - 1);
+        const condition = unpack(code, "$if").inside;
 
         let pass = false;
         try {
-          pass = eval(ConditionChecker.solve(condition));
+          const taskCompleter = new TaskCompleter(
+            `$checkCondition[${condition}]`,
+            this.eventData,
+            this.telegram,
+            this.command,
+            this.database,
+            this.functionArray,
+            this.parser,
+          );
+          const response = await taskCompleter.completeTask();
+          pass = response.trim() == "true";
         } catch (err) {
           pass = false;
         }
@@ -221,7 +229,17 @@ class TaskCompleter {
             if (!passes) {
               let response = false;
               try {
-                response = eval(ConditionChecker.solve(elseIfEntry[0]));
+                const taskCompleter = new TaskCompleter(
+                  `$checkCondition[${elseIfEntry[0]}]`,
+                  this.eventData,
+                  this.telegram,
+                  this.command,
+                  this.database,
+                  this.functionArray,
+                  this.parser,
+                );
+                const result = await taskCompleter.completeTask();
+                response = result.trim() == "true";
               } catch (err) {
                 response = false;
               }
@@ -296,7 +314,7 @@ class TaskCompleter {
   /**
    * Completes the task by processing found functions in reverse.
    */
-  async completeTask(params?: string[]) {
+  async completeTask() {
     this.code = await this.completesV4If(this.code);
     this.foundFunctions = await this.searchFunctions();
     for (const func of this.foundFunctions.reverse()) {
@@ -304,7 +322,7 @@ class TaskCompleter {
 
       this.data.push({
         name: func,
-        inside: codeSegment.inside as string,
+        inside: codeSegment.inside,
         splits: codeSegment.splits,
       });
 
