@@ -1,21 +1,23 @@
 export default {
   name: "$onlyChatPerms",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$onlyChatPerms");
-    const [perms, messageError] = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes([perms, messageError], error, ["string", "string"]);
-    const getPerms = await event.getChat().catch(() => null);
+  callback: async (context) => {
+    context.argsCheck(1);
+    const [perms, messageError] = context.splits;
+    context.checkArgumentTypes(["string", "string | undefined"]);
+    if (context.isError) return;
+
+    const getPerms = await context.event.getChat().catch(() => null);
 
     if (!getPerms || !getPerms.permissions) {
-      error.customError("Invalid Chat Id", "$onlyChatPerms");
+      context.sendError("Invalid Chat Id");
       return;
     }
 
     const result = !getPerms.permissions?.[perms];
     if (result) {
-      if (ctx.replyMessage) event.reply(messageError);
-      else event.send(messageError);
-      return true;
-    } else return false;
+      if (messageError) {
+        context.sendError(messageError, true);
+      } else context.isError = true;
+    }
   },
 };

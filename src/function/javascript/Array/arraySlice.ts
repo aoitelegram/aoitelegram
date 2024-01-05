@@ -1,14 +1,18 @@
 export default {
   name: "$arraySlice",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$arraySlice");
-    const [arrayName, index = 1] = await ctx.getEvaluateArgs();
+  callback: (context) => {
+    context.argsCheck(1);
+    const [arrayName, index = 1] = context.splits;
+    if (context.isError) return;
 
-    if (!ctx.array.has(arrayName)) {
-      error.errorArray(arrayName, "$arraySlice");
+    if (!context.array.has(arrayName)) {
+      context.sendError(
+        `The specified variable ${arrayName} does not exist for the array`,
+      );
+      return;
     }
 
-    const array = ctx.array.get(arrayName);
+    const array = context.array.get(arrayName);
     return array.slice(index >= 1 ? index - 1 : index + 1);
   },
 };

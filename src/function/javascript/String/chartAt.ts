@@ -1,9 +1,11 @@
 export default {
   name: "$chartAt",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$chartAt");
-    const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["unknown", "number"]);
-    return `${args[0]}`.charAt(args[1] - 1);
+  callback: (context) => {
+    context.argsCheck(2);
+    const [text, index] = context.splits;
+    context.checkArgumentTypes(["unknown", "number"]);
+    if (context.isError) return;
+
+    return `${text}`.charAt(index - 1);
   },
 };

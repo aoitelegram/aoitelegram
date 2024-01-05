@@ -1,14 +1,19 @@
 export default {
   name: "$arrayIncludes",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$arrayIncludes");
-    const [arrayName, search] = await ctx.getEvaluateArgs();
+  callback: (context) => {
+    context.argsCheck(2);
+    const [arrayName, search] = context.splits;
 
-    if (!ctx.array.has(arrayName)) {
-      error.errorArray(arrayName, "$arrayIncludes");
+    if (context.isError) return;
+
+    if (!context.array.has(arrayName)) {
+      context.sendError(
+        `The specified variable ${arrayName} does not exist for the array`,
+      );
+      return;
     }
 
-    const array = ctx.array.get(arrayName);
+    const array = context.array.get(arrayName);
     return array.includes(search);
   },
 };

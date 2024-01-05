@@ -63,12 +63,8 @@ class Timeout {
 
         this.telegram.addFunction({
           name: "$timeoutData",
-          callback: async (ctx) => {
-            const args = await ctx.getEvaluateArgs();
-            return (
-              getObjectKey(timeoutDataParsed, args[0] as string) ||
-              timeoutDataParsed
-            );
+          callback: (context) => {
+            return getObjectKey(timeoutDataParsed, context.inside as string);
           },
         });
 

@@ -2,27 +2,30 @@ import { isValidChat } from "../helpers";
 
 export default {
   name: "$addCustomReaction",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$addCustomReaction");
+  callback: async (context) => {
+    context.argsCheck(1);
     const [
       custom_emoji,
       is_big = true,
-      message_id = event.message_id || event.message?.message_id,
-      chatId = event.chat?.id || event.message?.chat.id,
-    ] = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes([custom_emoji, is_big, message_id, chatId], error, [
+      message_id = context.event.message_id ||
+        context.event.message?.message_id,
+      chatId = context.event.chat?.id || context.event.message?.chat.id,
+    ] = context.splits;
+    context.checkArgumentTypes([
       "string",
-      "boolean",
-      "number",
-      "number | string",
+      "boolean | undefined",
+      "number | undefined",
+      "number | string | undefined",
     ]);
 
-    if (!(await isValidChat(event, chatId))) {
-      error.customError("Invalid Chat Id", "$addCustomReaction");
+    if (context.isError) return;
+
+    if (!(await isValidChat(context.event, chatId))) {
+      context.sendError("Invalid Chat Id");
       return;
     }
 
-    const result = await event.telegram
+    const result = await context.telegram
       .setMessageReaction({
         chat_id: chatId,
         message_id,
@@ -31,7 +34,8 @@ export default {
       .catch(() => null);
 
     if (!result) {
-      error.customError("Invalid customEmoji/messageId", "$addCustomReaction");
+      context.sendError("Invalid customEmoji/messageId");
+      return;
     }
 
     return true;

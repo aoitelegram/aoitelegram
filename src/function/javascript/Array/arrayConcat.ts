@@ -1,14 +1,18 @@
 export default {
   name: "$arrayConcat",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$arrayConcat");
-    const [arrayName, arrayConcat] = await ctx.getEvaluateArgs();
+  callback: (context) => {
+    context.argsCheck(2);
+    const [arrayName, arrayConcat, sep = ","] = context.splits;
+    if (context.isError) return;
 
-    if (!ctx.array.has(arrayName[0])) {
-      error.errorArray(arrayName[0], "$arrayConcat");
+    if (!context.array.has(arrayName)) {
+      context.sendError(
+        `The specified variable ${arrayName} does not exist for the array`,
+      );
+      return;
     }
 
-    const array = ctx.array.get(arrayName[0]);
-    return array.concat(...arrayConcat);
+    const array = context.array.get(arrayName);
+    return array.concat(...arrayConcat.split(","));
   },
 };

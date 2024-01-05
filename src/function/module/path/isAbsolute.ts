@@ -2,11 +2,11 @@ import path from "node:path";
 
 export default {
   name: "$isAbsolute",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$isAbsolute");
-    const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["string"]);
+  callback: (context) => {
+    context.argsCheck(1);
+    const paths = context.inside;
+    if (context.isError) return;
 
-    return path.isAbsolute(args[0]);
+    return path.isAbsolute(paths);
   },
 };

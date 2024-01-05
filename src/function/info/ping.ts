@@ -1,6 +1,6 @@
 export default {
   name: "$ping",
-  callback: async (ctx, event) => {
-    return await event.telegram?.ping();
+  callback: async (context) => {
+    return await context.telegram.ping();
   },
 };

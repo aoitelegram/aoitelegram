@@ -2,19 +2,18 @@ import { isValidChat } from "../helpers";
 
 export default {
   name: "$chatSendMessage",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$chatSendMessage");
-    const [chatId, content] = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes([chatId, content], error, [
-      "number | string",
-      "unknown",
-    ]);
+  callback: async (context) => {
+    context.argsCheck(2);
+    const [chatId, content] = context.splits;
+    context.checkArgumentTypes(["number | string", "unknown"]);
 
-    if (!(await isValidChat(event, chatId))) {
-      error.customError("Invalid Chat Id", "$chatSendMessage");
+    if (context.isError) return;
+
+    if (!(await isValidChat(context.event, chatId))) {
+      context.sendError("Invalid Chat Id");
       return;
     }
 
-    return await event.telegram.sendMessage(chatId, content);
+    return await context.telegram.sendMessage(chatId, content);
   },
 };

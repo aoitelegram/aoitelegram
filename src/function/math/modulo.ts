@@ -1,9 +1,10 @@
 export default {
   name: "$modulo",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$modulo");
-    const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["number", "number"]);
+  callback: (context) => {
+    context.argsCheck(2);
+    const args = context.splits;
+    context.checkArgumentTypes(["number", "number"]);
+    if (context.isError) return;
 
     return args[0] % args[1];
   },

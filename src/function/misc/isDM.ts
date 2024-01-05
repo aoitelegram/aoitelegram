@@ -1,9 +1,11 @@
 export default {
   name: "$isDM",
-  callback: async (ctx, event, database, error) => {
-    const [chatId = event.chat?.id || event.message?.chat.id] =
-      await ctx.getEvaluateArgs();
-    const getChat = await event.telegram.getChat(chatId).catch(() => null);
+  callback: async (context) => {
+    const [chatId = context.event.chat?.id || context.event.message?.chat.id] =
+      context.splits;
+    const getChat = await context.event.telegram
+      .getChat(chatId)
+      .catch(() => null);
     return getChat ? getChat.type === "private" : false;
   },
 };

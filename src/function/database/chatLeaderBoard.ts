@@ -26,13 +26,18 @@ function replaceText(text: string, chatData: ChatData) {
 
 export default {
   name: "$chatLeaderBoard",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$chatLeaderBoard");
+  callback: async (context) => {
+    context.argsCheck(1);
 
-    const args = await ctx.getEvaluateArgs();
-    const defaultTable = args[4] || database.tables[0];
+    const [
+      variable,
+      type = "asc",
+      text = "{top}. {title} - {value}",
+      maxUser = 10,
+      defaultTable = context.database.tables[0],
+    ] = context.splits;
 
-    ctx.checkArgumentTypes(args, error, [
+    context.checkArgumentTypes([
       "string",
       "string | undefined",
       "string | undefined",
@@ -41,32 +46,35 @@ export default {
       "string | undefined",
     ]);
 
+    if (context.isError) return;
+
     let leaderboardText = "";
     let chats: ChatsData[] = [];
-    const allEntries = await database.all(defaultTable);
+    const allEntries = context.database.all(defaultTable);
 
     for (const entryKey in allEntries) {
-      const entryValue = await database.get(defaultTable, entryKey);
+      const entryValue = context.database.get(defaultTable, entryKey);
       const [, chatId] = entryKey.split("_");
-      if (`chat_${chatId}_${args[0]}` !== entryKey) continue;
+      if (`chat_${chatId}_${variable}` !== entryKey) continue;
 
       if (!isNaN(Number(entryValue))) {
         chats.push({ entry: Number(entryValue), chat: entryKey });
       } else continue;
     }
 
-    if (args[1] === "asc" || !args[1]) {
+    if (type === "asc") {
       chats.sort((a, b) => Number(b.entry) - Number(a.entry));
-    } else if (args[1] === "dsc") {
+    } else if (type === "dsc") {
       chats.sort((a, b) => Number(a.entry) - Number(b.entry));
     }
 
     for (let index = 0; index < chats.length; index++) {
-      if (index + 1 === Number(args[3] || 10)) break;
+      if (index + 1 === Number(maxUser)) break;
       const [, chat] = chats[index].chat.split("_");
       const chatUserData =
-        (await event.getChat(chat).catch((err) => console.log(err))) ?? {};
-      leaderboardText += replaceText(args[2], {
+        (await context.event.getChat(chat).catch((err) => console.log(err))) ??
+        {};
+      leaderboardText += replaceText(text, {
         ...chatUserData,
         value: chats[index].entry,
         top: index + 1,

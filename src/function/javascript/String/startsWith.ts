@@ -1,8 +1,10 @@
 export default {
   name: "$startsWith",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$startsWith");
-    const args = await ctx.getEvaluateArgs();
-    return `${args[0]}`.startsWith(args[1]);
+  callback: (context) => {
+    context.argsCheck(2);
+    const [text, search] = context.splits;
+    if (context.isError) return;
+
+    return `${text}`.startsWith(search);
   },
 };

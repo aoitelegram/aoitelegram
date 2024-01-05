@@ -1,8 +1,9 @@
 export default {
   name: "$textTrim",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$textTrim");
-    const args = await ctx.getEvaluateArgs();
-    return `${args[0]}`.trim();
+  callback: (context) => {
+    context.argsCheck(1);
+    if (context.isError) return;
+
+    return `${context.inside}`.trim();
   },
 };

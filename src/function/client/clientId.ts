@@ -1,7 +1,7 @@
 export default {
   name: "$clientId",
-  callback: async (ctx, event, database, error) => {
-    const getMe = await event.telegram?.getMe();
+  callback: async (context) => {
+    const getMe = await context.telegram.getMe();
     return getMe.id;
   },
 };

@@ -2,11 +2,11 @@ import fs from "node:fs/promises";
 
 export default {
   name: "$deleteFile",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$deleteFile");
-    const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["string"]);
+  callback: async (context) => {
+    context.argsCheck(1);
+    const path = context.inside;
 
-    return await fs.unlink(args[0]);
+    await fs.unlink(path);
+    return "";
   },
 };

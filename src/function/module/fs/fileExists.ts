@@ -2,12 +2,13 @@ import fs from "node:fs";
 
 export default {
   name: "$fileExists",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$fileExists");
-    const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["string"]);
+  callback: (context) => {
+    context.argsCheck(1);
+    const path = context.inside;
+    if (context.isError) return;
+
     try {
-      fs.existsSync(args[0]);
+      fs.existsSync(path);
       return true;
     } catch (err) {
       return false;

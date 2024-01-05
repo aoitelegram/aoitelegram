@@ -2,15 +2,13 @@ import { setObjectKey } from "../../parser";
 
 export default {
   name: "$setObjectValue",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$setObjectValue");
-    const [object, key, newValue] = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes([object, newValue, key], error, [
-      "object",
-      "unknown",
-      "unknown",
-    ]);
+  callback: (context) => {
+    context.argsCheck(2);
+    const [object, key, newValue] = context.splits;
+    context.checkArgumentTypes(["object", "unknown", "unknown"]);
+    if (context.isError) return;
 
-    return setObjectKey(object, key, newValue);
+    const dataObject = JSON.parse(JSON.stringify(object));
+    return setObjectKey(dataObject, key, newValue);
   },
 };

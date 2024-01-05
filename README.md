@@ -17,6 +17,10 @@
 
 - **User-Friendly Design:** aoitelegram is perfect for beginners with its straightforward function interface. The `$` prefix simplifies command writing, ensuring a swift launch for your bot. 🚀
 
+:::warn
+The syntax of `aoitelegram` and versions above `0.5.0` has been completely changed. Now the code is read from bottom to top, and the standard `$if` is used as `if: "old"` in `aoi.js` (there is no need to specify the `if: "old"` option, it is set by default).
+:::
+
 ## Installation
 
 To use `aoitelegram` in your project, you can install it via npm:
@@ -95,7 +99,7 @@ bot.command({
 // Define a command to check the bot's ping.
 bot.command({
   name: "ping",
-  code: `$replyMessage[Bot ping: $ping ms]`,
+  code: `$replyMessage[Bot ping: $pingms]`,
 });
 
 // Define a command to display bot information.
@@ -106,7 +110,7 @@ $replyMessage[
 Bot ID: $clientId
 Name: $clientFirstName
 Username: $clientUsername
-Ping: $ping ms
+Ping: $pingms
 ]`,
 });
 

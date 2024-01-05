@@ -2,35 +2,32 @@ import { ConditionChecker } from "../condition";
 
 export default {
   name: "$onlyIf",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$onlyIf");
+  callback: (context) => {
+    context.argsCheck(2);
+    const [condition, errorText] = context.splits;
+    if (context.isError) return;
 
-    let [condition, ifTrue, ifFalse] = ctx.getArgs(0, 3);
-    condition = await ctx.evaluateArgs([condition]);
     if (
-      !["==", "!=", "<=", ">=", "||", "&&", "<", ">"].some(
-        (search) => condition[0]?.includes(search),
+      !["==", "!=", "<=", ">=", "||", "&&", "<", ">"].some((search) =>
+        condition.includes(search),
       )
     ) {
-      error.customError("Invalid operators", "$onlyIf");
+      context.sendError("Invalid operators");
     }
 
     try {
-      const result = eval(ConditionChecker.solve(condition[0]));
+      const result = eval(ConditionChecker.solve(condition));
       if (result !== true && result !== false) {
-        error.customError("Invalid condition", "$onlyIf");
+        context.sendError("Invalid condition");
       }
 
       if (!result) {
-        const response = (await ctx.evaluateArgs([ifTrue]))[0];
-        if (!!response) {
-          if (ctx.replyMessage) event.reply(response);
-          else event.send(response);
-        }
-        return true;
+        if (!result) {
+          context.event.send(errorText);
+        } else context.isError = true;
       }
     } catch (err) {
-      error.customError("Invalid condition", "$onlyIf");
+      context.sendError("Invalid condition");
     }
   },
 };

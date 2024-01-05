@@ -2,20 +2,20 @@ import { isValidChat } from "../helpers";
 
 export default {
   name: "$sendChatAction",
-  callback: async (ctx, event, database, error) => {
-    const chat = event.chat?.id || event.message?.chat.id;
-    const [action = "typing", chatId = chat] = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes([action, chatId], error, [
-      "string",
-      "number | string",
-    ]);
+  callback: async (context) => {
+    const [
+      action = "typing",
+      chatId = context.event.chat?.id || context.event.message?.chat.id,
+    ] = context.splits;
+    context.checkArgumentTypes(["string", "number | string"]);
+    if (context.isError) return;
 
-    if (!(await isValidChat(event, chatId))) {
-      error.customError("Invalid Chat Id", "$sendChatAction");
+    if (!(await isValidChat(context.event, chatId))) {
+      context.sendError("Invalid Chat Id");
       return;
     }
 
-    event.telegram.sendChatAction({
+    context.telegram.sendChatAction({
       chat_id: chatId,
       action,
     });

@@ -8,18 +8,20 @@ function pushIndexArray(index, value, array) {
 
 export default {
   name: "$addCallbackQuery",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(3, error, "$addCallbackQuery");
-    const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["number", "string", "string"]);
+  callback: (context) => {
+    context.argsCheck(3);
+    const [index, text, callback_data] = context.splits;
+    context.checkArgumentTypes(["number", "string", "string"]);
+    if (context.isError) return;
+
     pushIndexArray(
-      +args[0] - 1,
+      +index - 1,
       {
-        text: args[1],
-        callback_data: args[2],
+        text,
+        callback_data,
       },
-      ctx.callback_query,
+      context.callback_query,
     );
-    return undefined;
+    return "";
   },
 };

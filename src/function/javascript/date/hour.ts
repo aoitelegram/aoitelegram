@@ -1,6 +1,6 @@
 export default {
   name: "$hour",
-  callback: async (ctx, event, database, error) => {
+  callback: (context) => {
     return new Date().getHours();
   },
 };

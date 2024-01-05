@@ -2,10 +2,11 @@ import { toParse } from "../parser";
 
 export default {
   name: "$isNaN",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$isNaN");
-    const args = await ctx.getEvaluateArgs();
+  callback: (context) => {
+    context.argsCheck(1);
+    const check = context.inside;
+    if (context.isError) return;
 
-    return toParse(`${args[0]}`) === "nan";
+    return toParse(`${check}`) === "nan";
   },
 };

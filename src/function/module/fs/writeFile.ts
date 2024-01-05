@@ -2,11 +2,11 @@ import fs from "node:fs/promises";
 
 export default {
   name: "$writeFile",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$writeFile");
-    const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["string"]);
+  callback: async (context) => {
+    context.argsCheck(2);
+    const [path, content] = context.splits;
+    if (context.isError) return;
 
-    return await fs.writeFile(args[0], args[1], "utf-8");
+    return await fs.writeFile(path, context, "utf-8");
   },
 };

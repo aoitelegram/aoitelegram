@@ -1,10 +1,10 @@
 export default {
   name: "$isPremium",
-  callback: async (ctx, event, database, error) => {
+  callback: (context) => {
     const isPremium =
-      event.from?.is_premium ||
-      event.message?.from.is_premium ||
-      event.user?.is_premium;
+      context.event.from?.is_premium ||
+      context.event.message?.from.is_premium ||
+      context.event.user?.is_premium;
     return isPremium;
   },
 };

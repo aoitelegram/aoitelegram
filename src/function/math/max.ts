@@ -1,9 +1,10 @@
 export default {
   name: "$max",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$max");
-    const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["...number"]);
+  callback: (context) => {
+    context.argsCheck(2);
+    const args = context.splits;
+    context.checkArgumentTypes(["...number"]);
+    if (context.isError) return;
 
     return Math.max(...args);
   },

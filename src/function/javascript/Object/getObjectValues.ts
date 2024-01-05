@@ -1,13 +1,15 @@
 export default {
   name: "$getObjectValues",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$getObjectValues");
-    const [object, sep = ", "] = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes([object, sep], error, ["object", "unknown"]);
+  callback: (context) => {
+    context.argsCheck(1);
+    const [object, sep = ", "] = context.splits;
+    context.checkArgumentTypes(["object", "unknown"]);
+
+    if (context.isError) return;
 
     let values: unknown[] = [];
 
-    const stack = [object];
+    const stack = [JSON.parse(JSON.stringify(object))];
 
     while (stack.length > 0) {
       const current = stack.pop();
@@ -23,6 +25,6 @@ export default {
       }
     }
 
-    return values.length > 0 ? values.join(sep) : undefined;
+    return values.length > 0 ? values.join(sep) : "";
   },
 };

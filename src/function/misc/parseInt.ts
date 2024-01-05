@@ -1,8 +1,9 @@
 export default {
   name: "$parseInt",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$parseInt");
-    const args = await ctx.getEvaluateArgs();
-    return parseInt(args.join(" "));
+  callback: (context) => {
+    context.argsCheck(1);
+    if (context.isError) return;
+
+    return parseInt(context.inside);
   },
 };

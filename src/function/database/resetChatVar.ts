@@ -1,37 +1,38 @@
 export default {
   name: "$resetChatVar",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$resetChatVar");
-    const args = await ctx.getEvaluateArgs();
-    const defaultTable = args[1] || database.tables[0];
-    ctx.checkArgumentTypes(args, error, ["string", "string | undefined"]);
+  callback: (context) => {
+    context.argsCheck(1);
+    const [variable, defaultTable = context.database.tables[0]] =
+      context.splits;
 
-    const variableName = args[0];
+    context.checkArgumentTypes(["string", "string | undefined"]);
 
-    if (!database.has(defaultTable, variableName)) {
-      error.errorVar(variableName, "$resetChatVar");
+    if (context.isError) return;
+
+    if (!context.database.has(defaultTable, variable)) {
+      context.sendError(`Invalid variable ${variable} not found`);
       return;
     }
 
-    const allChats = database.all(defaultTable);
+    const allChats = context.database.all(defaultTable);
     let affectedChatIds: string[] = [];
 
     for (const variableKey in allChats) {
-      const variableValue = database.get(defaultTable, variableKey);
+      const variableValue = context.database.get(defaultTable, variableKey);
       const [, chatId] = variableKey.split("_");
 
-      if (`chat_${chatId}_${variableName}` !== variableKey) continue;
+      if (`chat_${chatId}_${variable}` !== variableKey) continue;
 
       affectedChatIds.push(chatId);
     }
 
     for (const chatId of affectedChatIds) {
-      const defaultValue = await database.defaultValue(
-        variableName,
+      const defaultValue = context.database.defaultValue(
+        variable,
         defaultTable,
       );
-      const chatVariableKey = `chat_${chatId}_${variableName}`;
-      database.set(defaultTable, chatVariableKey, defaultValue);
+      const chatVariableKey = `chat_${chatId}_${variable}`;
+      context.database.set(defaultTable, chatVariableKey, defaultValue);
     }
 
     return affectedChatIds.length;

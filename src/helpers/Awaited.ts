@@ -67,11 +67,8 @@ class Awaited {
           this.telegram.addFunction([
             {
               name: "$awaitedData",
-              callback: async (ctx) => {
-                const args = await ctx.getEvaluateArgs();
-                return (
-                  getObjectKey(awaitedData, args[0] as string) || awaitedData
-                );
+              callback: (context) => {
+                return getObjectKey(awaitedData, context.inside as string);
               },
             },
             {

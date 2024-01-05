@@ -22,47 +22,35 @@ function buildJSONConfig(data) {
 
 export default {
   name: "$jsonRequest",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$jsonRequest");
-    const [apiUrl, requestData = {}, property, errorMessage] =
-      await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(
-      [apiUrl, requestData, property, errorMessage],
-      error,
-      [
-        "string",
-        "object | undefined",
-        "string | undefined",
-        "string | undefined",
-      ],
-    );
+  callback: async (context) => {
+    context.argsCheck(1);
+    let [apiUrl, requestData = {}, property, errorMessage] = context.splits;
+    context.checkArgumentTypes([
+      "string",
+      "object | undefined",
+      "string | undefined",
+      "string | undefined",
+    ]);
+    if (context.isError) return;
+    requestData = JSON.parse(JSON.stringify(requestData));
 
     const sanitizedData = Object.keys(requestData)
       .filter(
         (key) => requestData[key] !== undefined && requestData[key] !== null,
       )
       .reduce((acc, key) => ({ ...acc, [key]: requestData[key] }), {});
-    const config = buildJSONConfig(sanitizedData);
+    const config = await buildJSONConfig(sanitizedData);
     try {
       const response = await fetch(apiUrl, config as RequestInit);
       if (response.status === 404) {
-        if (ctx.replyMessage)
-          event.reply(
-            errorMessage || `Failed To Request To API: ${response.statusText}`,
-          );
-        else
-          event.send(
-            errorMessage || `Failed To Request To API: ${response.statusText}`,
-          );
-        return undefined;
+        context.sendError(`Failed To Request To API: ${response.statusText}`);
+        return "";
       }
       const text = await response.json();
       return getObjectKey(text, property);
     } catch (err) {
-      if (ctx.replyMessage)
-        event.reply(errorMessage || `Failed To Request To API: ${err}`);
-      else event.send(errorMessage || `Failed To Request To API: ${err}`);
-      return undefined;
+      context.sendError(`Failed To Request To API: ${err}`);
+      return "";
     }
   },
 };

@@ -2,7 +2,7 @@ import process from "node:process";
 
 export default {
   name: "$exitProcess",
-  callback: async (ctx, event, database, error) => {
+  callback: (context) => {
     return process.exit();
   },
 };

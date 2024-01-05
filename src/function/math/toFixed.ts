@@ -1,10 +1,11 @@
 export default {
   name: "$toFixed",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$toFixed");
-    const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["number", "number | undefined"]);
+  callback: (context) => {
+    context.argsCheck(1);
+    const [number, fixed = 0] = context.splits;
+    context.checkArgumentTypes(["number", "number | undefined"]);
+    if (context.isError) return;
 
-    return args[0].toFixed(args[1] || 0);
+    return number.toFixed(fixed);
   },
 };

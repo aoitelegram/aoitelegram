@@ -1,14 +1,25 @@
 export default {
   name: "$deleteVar",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$deleteVar");
-    const args = await ctx.getEvaluateArgs();
-    const defaultTable = args[2] || database.tables[0];
+  callback: (context) => {
+    context.argsCheck(1);
+    context.checkArgumentTypes([
+      "unknown",
+      "boolean | undefined",
+      "string | undefined",
+    ]);
+    if (context.isError) return;
 
-    if (!database.hasTable(defaultTable)) {
-      error.errorTable(defaultTable, "$deleteVar");
+    const [
+      variable,
+      returnValue = false,
+      defaultTable = context.database.tables[0],
+    ] = context.splits;
+
+    if (!context.database.hasTable(defaultTable)) {
+      context.sendError(`Invalid table ${defaultTable} not found`);
       return;
     }
-    return database.delete(defaultTable, args[0], args[1]);
+
+    return context.database.delete(defaultTable, variable, returnValue);
   },
 };

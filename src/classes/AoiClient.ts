@@ -25,7 +25,7 @@ interface CommandInfoSet {
 class AoiClient extends AoiBase {
   #optionConsole: boolean | undefined;
   #aoiWarning: boolean | undefined;
-  #warningmanager: AoiWarning;
+  #warningManager: AoiWarning;
   functionError: boolean | undefined;
   sendMessageError: boolean | undefined;
   registerCommand: Command = new Command(this);
@@ -48,7 +48,6 @@ class AoiClient extends AoiBase {
    * @param {DataFunction[]} options.customFunction - An array of customFunction functions.
    * @param {boolean} options.functionError - For the error handler of functions.
    * @param {boolean} options.sendMessageError - To disable text errors.
-   * @param {boolean} options.varReplaceOption - Compilation of &localVar& variables.
    * @param {boolean} [options.console] - Outputting system messages to the console.
    * @param {boolean} [options.aoiWarning] - Displaying messages about new versions.
    * @param {boolean} [options.autoUpdate] - Checks for available package updates and performs an update if enabled
@@ -61,7 +60,6 @@ class AoiClient extends AoiBase {
     customFunction?: DataFunction[];
     functionError?: boolean;
     sendMessageError?: boolean;
-    varReplaceOption?: boolean;
     console?: boolean;
     aoiWarning?: boolean;
     autoUpdate?: boolean;
@@ -72,13 +70,12 @@ class AoiClient extends AoiBase {
       options.database,
       options.customFunction,
       options.disableFunctions,
-      options.varReplaceOption,
     );
     this.#optionConsole =
       options.console === undefined ? true : options.console;
     this.#aoiWarning =
       options.aoiWarning === undefined ? true : options.aoiWarning;
-    this.#warningmanager = new AoiWarning(
+    this.#warningManager = new AoiWarning(
       options.autoUpdate === undefined ? false : options.autoUpdate,
     );
     this.functionError = options.functionError;
@@ -213,7 +210,7 @@ class AoiClient extends AoiBase {
    */
   async connect() {
     if (this.#aoiWarning) {
-      await this.#warningmanager.checkUpdates();
+      await this.#warningManager.checkUpdates();
     }
     await this.registerCommand.handler();
     await this.registerAction.handler();

@@ -1,7 +1,10 @@
 export default {
   name: "$fromID",
-  callback: async (ctx, event, database, error) => {
-    const fromID = event.from?.id || event.message?.from.id || event.user?.id;
+  callback: (context) => {
+    const fromID =
+      context.event.from?.id ||
+      context.event.message?.from.id ||
+      context.event.user?.id;
     return fromID;
   },
 };

@@ -1,9 +1,10 @@
 export default {
   name: "$var",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$var");
-    const args = await ctx.getEvaluateArgs();
+  callback: (context) => {
+    context.argsCheck(2);
+    const [variable, value] = context.splits;
+    if (context.isError) return;
 
-    return event.telegram?.globalVars.set(args[0], args[1]);
+    return context.telegram.globalVars.set(variable, value);
   },
 };

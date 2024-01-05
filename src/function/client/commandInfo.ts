@@ -1,9 +1,11 @@
 export default {
   name: "$commandInfo",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$commandInfo");
-    const args = await ctx.getEvaluateArgs();
-    const commands = event.telegram?.commands.get({ name: args[0] });
-    return commands?.[args[1] ?? "code"];
+  callback: (context) => {
+    context.argsCheck(1);
+    if (context.isError) return;
+
+    const [commandName, options = "code"] = context.splits;
+    const commands = context.telegram.commands.get({ name: commandName });
+    return commands[options];
   },
 };

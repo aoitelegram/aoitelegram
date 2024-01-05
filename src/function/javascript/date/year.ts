@@ -1,6 +1,6 @@
 export default {
   name: "$year",
-  callback: async (ctx, event, database, error) => {
+  callback: (context) => {
     return new Date().getFullYear();
   },
 };

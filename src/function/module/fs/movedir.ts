@@ -2,11 +2,12 @@ import fsx from "fs-extra";
 
 export default {
   name: "$movedir",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$movedir");
-    const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["string", "string"]);
+  callback: async (context) => {
+    context.argsCheck(2);
+    const [path, out] = context.splits;
+    if (context.isError) return;
 
-    return await fsx.move(args[0], args[1]);
+    await fsx.move(path, out);
+    return "";
   },
 };

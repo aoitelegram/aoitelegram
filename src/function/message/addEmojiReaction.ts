@@ -2,19 +2,22 @@ import { isValidChat } from "../helpers";
 
 export default {
   name: "$addEmojiReaction",
-  callback: async (ctx, event, database, error) => {
+  callback: async (context) => {
     const [
       emoji = "👎",
       is_big = true,
-      message_id = event.message_id || event.message?.message_id,
-      chatId = event.chat?.id || event.message?.chat.id,
-    ] = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes([emoji, is_big, message_id, chatId], error, [
+      message_id = context.event.message_id ||
+        context.event.message?.message_id,
+      chatId = context.event.chat?.id || context.event.message?.chat.id,
+    ] = context.splits;
+    context.checkArgumentTypes([
       "string",
-      "boolean",
-      "number",
-      "number | string",
+      "boolean | undefined",
+      "number | undefined",
+      "number | string | undefined",
     ]);
+    if (context.isError) return;
+
     const onlyEmiji = [
       "👍",
       "👎",
@@ -91,19 +94,17 @@ export default {
       "😡",
     ];
 
-    if (!(await isValidChat(event, chatId))) {
-      error.customError("Invalid Chat Id", "$addEmojiReaction");
+    if (!(await isValidChat(context.event, chatId))) {
+      context.sendError("Invalid Chat Id");
       return;
     }
 
     if (!onlyEmiji.includes(emoji)) {
-      error.customError(
-        `Invalid emoji. Only: ${onlyEmiji.join(", ")}`,
-        "$addEmojiReaction",
-      );
+      context.sendError(`Invalid emoji. Only: ${onlyEmiji.join(", ")}`);
+      return;
     }
 
-    const result = await event.telegram
+    const result = await context.telegram
       .setMessageReaction({
         chat_id: chatId,
         message_id,
@@ -112,7 +113,8 @@ export default {
       .catch(() => null);
 
     if (!result) {
-      error.customError("Invalid messageId", "$addEmojiReaction");
+      context.sendError("Invalid messageId");
+      return;
     }
 
     return true;

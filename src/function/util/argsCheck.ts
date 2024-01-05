@@ -1,20 +1,18 @@
 export default {
   name: "$argsCheck",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$argsCheck");
-    const [condition, errorMessage = ""] = await ctx.getEvaluateArgs();
-    const msgArgs = event.text?.split(/\s+/).length - 1 || 0;
-    ctx.checkArgumentTypes([condition, errorMessage], error, [
-      "string",
-      "unknown",
-    ]);
+  callback: (context) => {
+    context.argsCheck(2);
+    const [condition, errorMessage = ""] = context.splits;
+    const msgArgs = context.event.text?.split(/\s+/).length - 1 || 0;
+    if (context.isError) return;
 
     if (
       !["==", "!=", "<=", ">=", "||", "&&", "<", ">"].some((search) =>
         condition.includes(search),
       )
     ) {
-      return error.customError("Valid operators", "$argsCheck");
+      context.sendError("Invalid operators");
+      return;
     }
 
     const checkers = {
@@ -36,10 +34,9 @@ export default {
             : checkers["=="];
 
     if (!check && errorMessage !== "") {
-      if (ctx.replyMessage) event.reply(errorMessage);
-      else event.send(errorMessage);
-      return true;
+      context.sendError(errorMessage, true);
+      return;
     }
-    return false;
+    return "";
   },
 };

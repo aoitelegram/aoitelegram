@@ -10,20 +10,18 @@ function hasObject(arg: any): arg is object {
 
 export default {
   name: "$loop",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$loop");
-    const [name, milliseconds, data = {}] = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes([name, milliseconds, data], error, [
-      "string",
-      "string",
-      "object",
-    ]);
+  callback: (context) => {
+    context.argsCheck(2);
+    const [name, milliseconds, data = {}] = context.splits;
+    context.checkArgumentTypes(["string", "string", "object"]);
+    if (context.isError) return;
 
     if (!hasObject(data)) {
-      error.customError("Error object", "$setTimeout");
+      context.sendError("Invalid Object");
+      return;
     }
 
-    event.telegram?.awaitedManager.addAwaited(name, {
+    context.telegram.awaitedManager.addAwaited(name, {
       milliseconds: +ms(milliseconds),
       data: data,
       context: event,

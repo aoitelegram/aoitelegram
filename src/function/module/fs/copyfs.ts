@@ -2,11 +2,12 @@ import fsx from "fs-extra";
 
 export default {
   name: "$copyfs",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$copyfs");
-    const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["string", "string"]);
+  callback: async (context) => {
+    context.argsCheck(2);
+    const [path, outPath] = context.splits;
+    if (context.isError) return;
 
-    return await fsx.copy(args[0], args[1]);
+    await fsx.copy(path, outPath);
+    return "";
   },
 };

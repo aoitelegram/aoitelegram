@@ -1,10 +1,10 @@
 export default {
   name: "$username",
-  callback: async (ctx, event, database, error) => {
+  callback: (context) => {
     const username =
-      event.from?.username ||
-      event.message?.from.username ||
-      event.user?.username;
+      context.event.from?.username ||
+      context.event.message?.from.username ||
+      context.event.user?.username;
     return username;
   },
 };

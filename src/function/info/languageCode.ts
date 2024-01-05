@@ -1,10 +1,10 @@
 export default {
   name: "$languageCode",
-  callback: async (ctx, event, database, error) => {
+  callback: (context) => {
     const languageCode =
-      event.from?.language_code ||
-      event.message?.from.language_code ||
-      event.user?.language_code;
+      context.event.from?.language_code ||
+      context.event.message?.from.language_code ||
+      context.event.user?.language_code;
     return languageCode;
   },
 };

@@ -2,13 +2,17 @@ import { getObjectKey } from "../parser";
 
 export default {
   name: "$getChatMember",
-  callback: async (ctx, event, database, error) => {
-    const [userId = event.from?.id || event.message?.from.id, path] =
-      await ctx.getEvaluateArgs();
-    const result = await event.telegram.getChatMember(userId).catch(() => null);
+  callback: async (context) => {
+    const [
+      userId = context.event.from?.id || context.event.message?.from.id,
+      path,
+    ] = context.splits;
+    const result = await context.telegram
+      .getChatMember(userId)
+      .catch(() => null);
 
     if (!result) {
-      error.customError("Invalid User Id", "$getChatMember");
+      context.sendError("Invalid User Id");
       return;
     }
 

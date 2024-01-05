@@ -1,8 +1,23 @@
 export default {
   name: "$eval",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$eval");
-    const content = await ctx.getEvaluateArgs();
-    return event.telegram.evaluateCommand(ctx.fileName, ...content, event);
+  callback: async (context) => {
+    context.argsCheck(1);
+    const content = context.inside;
+    if (context.isError) return;
+
+    const command = context.command.command
+      ? context.command.name
+      : { event: context.command.name };
+    try {
+      const response = await context.telegram.evaluateCommand(
+        command,
+        content,
+        context.event,
+      );
+      return response;
+    } catch (err) {
+      context.srndError(`Invalid usage: ${err}`);
+      return "";
+    }
   },
 };

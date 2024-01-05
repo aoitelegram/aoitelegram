@@ -30,15 +30,20 @@ function replaceText(text: string, chatData: ChatData) {
 
 export default {
   name: "$userLeaderBoard",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$userLeaderBoard");
+  callback: async (context) => {
+    context.argsCheck(2);
 
-    const args = await ctx.getEvaluateArgs();
-    const userId = event.from?.id || event.message?.from?.id;
-    const chatId = args[0] || event.chat?.id || event.message?.chat.id;
-    const defaultTable = args[5] || database.tables[0];
+    const [
+      chatId = context.event.chat?.id || context.event.message?.chat.id,
+      variable,
+      text = "{top}. {username} - {value}",
+      type = "asc",
+      maxUser = 10,
+      defaultTable = context.database.tables[0],
+    ] = context.splits;
+    const userId = context.event.from?.id || context.event.message?.from?.id;
 
-    ctx.checkArgumentTypes(args, error, [
+    context.checkArgumentTypes([
       "number | string | undefined",
       "string",
       "string | undefined",
@@ -48,39 +53,42 @@ export default {
       "string | undefined",
     ]);
 
+    if (context.isError) return;
+
     let leaderboardText = "";
     let users: UsersData[] = [];
-    const allEntries = database.all(defaultTable);
+    const allEntries = context.database.all(defaultTable);
 
     for (const entryKey in allEntries) {
-      const entryValue = database.get(defaultTable, entryKey);
+      const entryValue = context.database.get(defaultTable, entryKey);
       const [, userId] = entryKey.split("_");
-      if (`user_${userId}_${chatId}_${args[1]}` !== entryKey) continue;
+      if (`user_${userId}_${chatId}_${variable}` !== entryKey) continue;
 
       if (!isNaN(Number(entryValue))) {
         users.push({ entry: Number(entryValue), user: entryKey });
       } else continue;
     }
 
-    if (args[2] === "asc" || !args[2]) {
+    if (type === "asc") {
       users.sort((a, b) => Number(b.entry) - Number(a.entry));
-    } else if (args[2] === "dsc") {
+    } else if (type === "dsc") {
       users.sort((a, b) => Number(a.entry) - Number(b.entry));
     }
 
     for (let index = 0; index < users.length; index++) {
-      if (index + 1 === Number(args[4] || 10)) break;
+      if (index + 1 === Number(maxUser)) break;
       const [, user] = users[index].user.split("_");
       const chatUserData =
-        (await event.getChatMember(user).catch((err) => console.log(err))) ||
-        {};
-      leaderboardText += replaceText(args[3], {
+        (await context.telegram
+          .getChatMember(chatId, user)
+          .catch((err) => console.log(err))) || {};
+      leaderboardText += replaceText(text, {
         ...chatUserData.user,
         value: users[index].entry,
         top: index + 1,
       });
     }
 
-    return leaderboardText || undefined;
+    return leaderboardText || "";
   },
 };

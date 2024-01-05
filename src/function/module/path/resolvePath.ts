@@ -2,11 +2,11 @@ import path from "node:path";
 
 export default {
   name: "$resolvePath",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$resolvePath");
-    const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["string"]);
+  callback: (context) => {
+    context.argsCheck(1);
+    const paths = context.inside;
+    if (context.isError) return;
 
-    return path.resolve(args[0]);
+    return path.resolve(paths);
   },
 };

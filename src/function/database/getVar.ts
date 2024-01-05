@@ -1,15 +1,17 @@
 export default {
   name: "$getVar",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$getVar");
-    const args = await ctx.getEvaluateArgs();
-    const defaultTable = args[1] || database.tables[0];
+  callback: (context) => {
+    context.argsCheck(1);
+    const [variable, defaultTable = context.database.tables[0]] =
+      context.splits;
 
-    if (!database.hasTable(defaultTable)) {
-      error.errorTable(defaultTable, "$getVar");
+    if (context.isError) return;
+
+    if (!context.database.hasTable(defaultTable)) {
+      context.sendError(`Invalid table ${defaultTable} not found`);
       return;
     }
 
-    return database.get(defaultTable, args[0]);
+    return context.database.get(defaultTable, variable);
   },
 };

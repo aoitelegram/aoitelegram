@@ -2,28 +2,37 @@ import { hasChatPrivate } from "../helpers";
 
 export default {
   name: "$getUserVar",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$getUserVar");
-    const args = await ctx.getEvaluateArgs();
-    const userId = args[1] || event.from?.id || event.message?.from.id;
-    const chatId = event.chat?.id || event.message?.chat.id;
-    const defaultTable = args[2] || database.tables[0];
-    ctx.checkArgumentTypes(args, error, [
+  callback: async (context) => {
+    context.argsCheck(1);
+    const [
+      variable,
+      userId = context.event.from?.id || context.event.message?.from.id,
+      defaultTable = context.database.tables[0],
+    ] = context.splits;
+
+    const chatId = context.event.chat?.id || context.event.message?.chat.id;
+
+    context.checkArgumentTypes([
       "string",
       "string | number | undefined",
       "string | undefined",
     ]);
 
-    if (!database.has(defaultTable, args[0])) {
-      error.errorVar(args[0], "$getUserVar");
+    if (context.isError) return;
+
+    if (!context.database.has(defaultTable, variable)) {
+      context.sendError(`Invalid variable ${variable} not found`);
       return;
     }
 
-    if (!(await hasChatPrivate(event, userId))) {
-      error.customError("Invalid User Id", "$getUserVar");
+    if (!(await hasChatPrivate(context.event, userId))) {
+      context.sendError("Invalid User Id");
       return;
     }
 
-    return database.get(defaultTable, `user_${userId}_${chatId}_${args[0]}`);
+    return context.database.get(
+      defaultTable,
+      `user_${userId}_${chatId}_${variable}`,
+    );
   },
 };

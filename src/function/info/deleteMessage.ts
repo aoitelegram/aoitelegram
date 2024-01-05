@@ -2,20 +2,20 @@ import { isValidChat } from "../helpers";
 
 export default {
   name: "$deleteMessage",
-  callback: async (ctx, event, database, error) => {
+  callback: async (context) => {
     const [
-      chatId = event.chat?.id || event.message?.chat.id,
-      messageId = event.message_id || event.message?.message_id,
-    ] = await ctx.getEvaluateArgs();
+      chatId = context.event.chat?.id || context.event.message?.chat.id,
+      messageId = context.event.message_id || context.event.message?.message_id,
+    ] = context.splits;
 
-    if (!(await isValidChat(event, chatId))) {
-      error.customError("Invalid Chat Id", "$deleteMessage");
+    if (!(await isValidChat(context.event, chatId))) {
+      context.sendError("Invalid Chat Id");
       return;
     }
 
-    const result = await event.telegram
+    const result = await context.telegram
       .deleteMessage(chatId, messageId)
-      .catch(() => undefined);
+      .catch(() => "");
 
     return result;
   },

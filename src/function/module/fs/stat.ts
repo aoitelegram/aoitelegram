@@ -2,11 +2,11 @@ import fs from "node:fs/promises";
 
 export default {
   name: "$stat",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$stat");
-    const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["string"]);
+  callback: async (context) => {
+    context.argsCheck(1);
+    const path = context.inside;
+    if (context.isError) return;
 
-    return await fs.stat(args[0]);
+    return await fs.stat(path);
   },
 };

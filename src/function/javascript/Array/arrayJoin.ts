@@ -1,14 +1,19 @@
 export default {
   name: "$arrayJoin",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$arrayJoin");
-    const [arrayName, sep = ", "] = await ctx.getEvaluateArgs();
+  callback: (context) => {
+    context.argsCheck(1);
+    const [arrayName, sep = ", "] = context.splits;
 
-    if (!ctx.array.has(arrayName)) {
-      error.errorArray(arrayName, "$arrayJoin");
+    if (context.isError) return;
+
+    if (!context.array.has(arrayName)) {
+      context.sendError(
+        `The specified variable ${arrayName} does not exist for the array`,
+      );
+      return;
     }
 
-    const array = ctx.array.get(arrayName);
+    const array = context.array.get(arrayName);
     return array.join(sep);
   },
 };

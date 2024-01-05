@@ -1,8 +1,10 @@
 export default {
   name: "$createArray",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$createArray");
-    const [arrayName, ...array] = await ctx.getEvaluateArgs();
-    return ctx.array.set(arrayName, [...array]).size;
+  callback: (context) => {
+    context.argsCheck(2);
+    const [arrayName, ...array] = context.splits;
+    if (context.isError) return;
+
+    return context.array.set(arrayName, [...array]).size;
   },
 };

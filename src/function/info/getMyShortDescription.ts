@@ -1,10 +1,10 @@
 export default {
   name: "$getMyShortDescription",
-  callback: async (ctx, event, database, error) => {
-    const [language_code] = await ctx.getEvaluateArgs();
-    const result = await event.telegram
+  callback: async (context) => {
+    const language_code = context.inside;
+    const result = await context.telegram
       .getMyShortDescription(language_code)
-      .catch(() => undefined);
+      .catch(() => "");
 
     return result;
   },

@@ -2,10 +2,10 @@ import path from "node:path";
 
 export default {
   name: "$joinPath",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$joinPath");
-    const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["...string"]);
+  callback: (context) => {
+    context.argsCheck(2);
+    const args = context.splits;
+    if (context.isError) return;
 
     return path.join(...args);
   },

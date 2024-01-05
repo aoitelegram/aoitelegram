@@ -1,6 +1,6 @@
 export default {
   name: "$pi",
-  callback: async (ctx, event, database, error) => {
+  callback: (context) => {
     return Math.PI;
   },
 };

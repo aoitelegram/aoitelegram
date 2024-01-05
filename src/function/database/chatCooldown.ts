@@ -3,25 +3,28 @@ import { formatTime, replaceData } from "../parser";
 
 export default {
   name: "$chatCooldown",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$chatCooldown");
-    const args = await ctx.getEvaluateArgs();
-    const chatId = event.chat?.id || event.message?.chat.id;
-    const defaultTable = args[5] || database.tables[0];
-    ctx.checkArgumentTypes(args, error, ["string", "string | undefined"]);
+  callback: (context) => {
+    context.argsCheck(1);
+    const [time, textError, defaultTable = context.database.tables[0]] =
+      context.splits;
+    const chatId = context.event.chat?.id || context.event.message?.chat.id;
+    context.checkArgumentTypes([
+      "string",
+      "string | undefined",
+      "string | undefined",
+    ]);
+    if (context.isError) return;
 
-    const cooldownKey = `${chatId}_${ms(args[0])}`;
-    const userCooldown = database.get(defaultTable, cooldownKey) || 0;
-    const cooldown = userCooldown + +ms(args[0]) - Date.now();
+    const cooldownKey = `${chatId}_${ms(time)}`;
+    const userCooldown = context.database.get(defaultTable, cooldownKey) || 0;
+    const cooldown = userCooldown + +ms(time) - Date.now();
     if (cooldown > 0) {
-      if (!!args[1]) {
-        if (ctx.replyMessage)
-          event.reply(replaceData(formatTime(cooldown).units, args[1]));
-        else event.send(replaceData(formatTime(cooldown).units, args[1]));
-      }
-      return true;
+      if (textError) {
+        if (context.replyMessage)
+          context.sendError(replaceData(formatTime(cooldown).units, textError));
+      } else context.isError = true;
     } else {
-      database.set(defaultTable, cooldownKey, Date.now());
+      context.database.set(defaultTable, cooldownKey, Date.now());
     }
   },
 };

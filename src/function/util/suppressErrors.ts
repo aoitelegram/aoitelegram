@@ -1,8 +1,11 @@
 export default {
   name: "$suppressErrors",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$suppressErrors");
-    const [text] = await ctx.getEvaluateArgs();
-    ctx.suppressErrors = text;
+  callback: (context) => {
+    context.argsCheck(1);
+    if (context.isError) return;
+
+    const text = context.inside;
+    context.suppressErrors = text;
+    return "";
   },
 };

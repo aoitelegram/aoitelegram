@@ -60,12 +60,11 @@ class CustomEvent extends EventEmitter {
       const eventHandler = async (...args: string[]) => {
         this.aoitelegram.addFunction({
           name: "$eventData",
-          callback: async (ctx) => {
-            const [path] = await ctx.getEvaluateArgs();
-            return !path
+          callback: (context) => {
+            return !context.inside
               ? { ...args }
-              : path
-                ? { ...args }[path as string]
+              : context.inside
+                ? { ...args }[context.inside]
                 : { ...args };
           },
         });

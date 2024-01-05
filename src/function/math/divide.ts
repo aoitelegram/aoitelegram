@@ -1,10 +1,11 @@
 export default {
   name: "$divide",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$divide");
-    const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["number", "number"]);
+  callback: (context) => {
+    context.argsCheck(2);
+    const [divide1, divide2] = context.splits;
+    context.checkArgumentTypes(["number", "number"]);
+    if (context.isError) return;
 
-    return args[0] / args[1];
+    return divide1 / divide2;
   },
 };

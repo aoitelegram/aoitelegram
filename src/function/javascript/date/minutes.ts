@@ -1,6 +1,6 @@
 export default {
   name: "$minutes",
-  callback: async (ctx, event, database, error) => {
+  callback: (context) => {
     return new Date().getMinutes();
   },
 };

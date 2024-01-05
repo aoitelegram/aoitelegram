@@ -1,12 +1,15 @@
 export default {
   name: "$math",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$math");
-    const args = await ctx.getEvaluateArgs();
+  callback: (context) => {
+    context.argsCheck(1);
+    const evaluate = context.inside;
+    if (context.isError) return;
+
     try {
-      return eval(args[0]);
+      return eval(evaluate);
     } catch (err) {
-      return error.customError("Failed to calculate in", "$math");
+      context.sendError("Failed to calculate");
+      return;
     }
   },
 };

@@ -1,12 +1,14 @@
 export default {
   name: "$replyMessage",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$replyMessage");
-    const args = await ctx.getEvaluateArgs();
-    const callback_query = ctx.callback_query;
-    ctx.callback_query = [];
-    return await event.reply(
-      args[0],
+  callback: async (context) => {
+    context.argsCheck(1);
+    if (context.isError) return;
+
+    const text = context.inside;
+    const callback_query = context.callback_query;
+    context.callback_query = [];
+    return await context.event.reply(
+      text,
       callback_query
         ? { reply_markup: { inline_keyboard: callback_query } }
         : undefined,

@@ -2,11 +2,11 @@ import fs from "node:fs/promises";
 
 export default {
   name: "$readFile",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$readFile");
-    const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["string"]);
+  callback: async (context) => {
+    context.argsCheck(1);
+    const path = context.inside;
+    if (context.isError) return;
 
-    return await fs.readFile(args[0], "utf-8");
+    return await fs.readFile(path, "utf-8");
   },
 };

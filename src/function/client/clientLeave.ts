@@ -1,13 +1,16 @@
 export default {
   name: "$clientLeave",
-  callback: async (ctx, event, database, error) => {
-    const [chatId = event.chat?.id || event.message?.chat.id] =
-      await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes([chatId], error, ["string | number | undefined"]);
-    const result = await event.telegram.leaveChat(chatId).catch(() => null);
+  callback: async (context) => {
+    const [chatId = context.event.chat?.id || context.event.message?.chat.id] =
+      context.splits;
+    context.checkArgumentTypes(["string | number | undefined"]);
+    if (context.isError) return;
+
+    const result = await context.telegram.leaveChat(chatId).catch(() => null);
 
     if (!result) {
-      error.customError("Invalid Chat Id", "$clientLeave");
+      context.sendError("Invalid Chat Id");
+      return;
     }
 
     return result;

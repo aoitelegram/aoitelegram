@@ -1,8 +1,8 @@
 export default {
   name: "$text",
-  callback: async (ctx, event, database, error) => {
-    const text = event.text || event.message?.text;
-    const [index] = await ctx.getEvaluateArgs();
+  callback: (context) => {
+    const text = context.event.text || context.event.message?.text;
+    const index = context.inside;
     let textSplit: string[] | undefined = text?.split(/\s+/);
     const argsFunc = textSplit?.[Number(index) - 1];
     const noArgsFunc = textSplit?.join?.(" ");

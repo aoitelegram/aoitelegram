@@ -1,8 +1,10 @@
 export default {
   name: "$endsWith",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$endsWith");
-    const args = await ctx.getEvaluateArgs();
-    return `${args[0]}`.endsWith(args[1]);
+  callback: (context) => {
+    context.argsCheck(2);
+    if (context.isError) return;
+
+    const [text, search] = context.splits;
+    return `${text}`.endsWith(search);
   },
 };

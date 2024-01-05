@@ -1,8 +1,9 @@
 export default {
   name: "$toUpperCase",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$toUpperCase");
-    const args = await ctx.getEvaluateArgs();
-    return `${args[0]}`.toUpperCase();
+  callback: (context) => {
+    context.argsCheck(1);
+    if (context.isError) return;
+
+    return `${context.inside}`.toUpperCase();
   },
 };

@@ -2,11 +2,11 @@ import path from "node:path";
 
 export default {
   name: "$normalizePath",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$normalizePath");
-    const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["string"]);
+  callback: (context) => {
+    context.argsCheck(1);
+    const paths = context.inside;
+    if (context.isError) return;
 
-    return path.normalize(args[0]);
+    return path.normalize(paths);
   },
 };

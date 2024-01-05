@@ -1,18 +1,17 @@
 export default {
   name: "$findObjectProperty",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$findObjectProperty");
-    const [object, property, format = false] = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes([object, property, format], error, [
-      "object",
-      "string",
-      "boolean",
-    ]);
+  callback: (context) => {
+    context.argsCheck(2);
+    const [object, property, format = false] = context.splits;
+    context.checkArgumentTypes(["object", "string", "boolean | undefined"]);
 
+    if (context.isError) return;
+
+    const findObject = JSON.parse(JSON.stringify(object));
     const properties = {};
-    for (const prop in object) {
+    for (const prop in findObject) {
       if (prop === property) {
-        properties[prop] = object[prop];
+        properties[prop] = findObject[prop];
       }
     }
 

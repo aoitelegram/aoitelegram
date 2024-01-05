@@ -1,8 +1,9 @@
 export default {
   name: "$parseFloat",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$parseFloat");
-    const args = await ctx.getEvaluateArgs();
-    return parseFloat(args.join(" "));
+  callback: (context) => {
+    context.argsCheck(1);
+    if (context.isError) return;
+
+    return parseFloat(context.inside);
   },
 };

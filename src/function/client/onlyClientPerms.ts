@@ -1,22 +1,19 @@
 export default {
   name: "$onlyClientPerms",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$onlyClientPerms");
-    const [perms, messageError] = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes([perms, messageError], error, [
-      "string",
-      "string | undefined",
-    ]);
-    const getMe = await event.telegram.getMe();
-    const getPerms = await event.getChatMember(getMe.id).catch((err) => null);
+  callback: async (context) => {
+    context.argsCheck(1);
+    const [perms, messageError] = context.splits;
+    context.checkArgumentTypes(["string", "string | undefined"]);
+    if (context.isError) return;
+
+    const getMe = await context.telegram.getMe();
+    const getPerms = await context.getChatMember(getMe.id).catch((err) => null);
 
     const result = !getPerms?.[perms];
     if (result) {
-      if (!!messageError) {
-        if (ctx.replyMessage) event.reply(messageError);
-        else event.send(messageError);
-        return true;
-      } else return true;
-    } else return false;
+      if (messageError) {
+        context.sendError(messageError, true);
+      } else context.isError = true;
+    }
   },
 };

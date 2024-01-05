@@ -1,10 +1,11 @@
 export default {
   name: "$trunc",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$trunc");
-    const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["number"]);
+  callback: (context) => {
+    context.argsCheck(1);
+    const trunc = context.inside;
+    context.checkArgumentTypes(["number"]);
+    if (context.isError) return;
 
-    return Math.trunc(args[0]);
+    return Math.trunc(trunc);
   },
 };

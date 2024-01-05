@@ -1,13 +1,20 @@
+import ms from "ms";
+
 export default {
   name: "$deleteIn",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$deleteIn");
-    const args = await ctx.getEvaluateArgs();
-    const chatId = event.chat.id ?? event.message?.chat.id;
-    const messageId = event.message_id ?? event.message?.message_id;
-    setTimeout(() => {
-      event.deleteMessage(args[1] ?? messageId).catch(() => console.log);
-    }, args[0] * 1000);
-    return undefined;
+  callback: async (context) => {
+    context.argsCheck(1);
+    const [
+      time,
+      messageId = context.event.message_id || context.event.message?.message_id,
+    ] = context.splits;
+    if (context.isError) return;
+
+    const chatId = context.event.chat.id || context.event.message?.chat.id;
+
+    setTimeout(async () => {
+      await context.event.deleteMessage(messageId).catch(() => console.log);
+    }, +ms(time));
+    return "";
   },
 };

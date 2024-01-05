@@ -1,8 +1,10 @@
 export default {
   name: "$textLastIndexOf",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$textLastIndexOf");
-    const args = await ctx.getEvaluateArgs();
-    return `${args[0]}`.lastIndexOf(args[1]);
+  callback: (context) => {
+    context.argsCheck(2);
+    const [text, search] = context.splits;
+    if (context.isError) return;
+
+    return `${text}`.lastIndexOf(search);
   },
 };

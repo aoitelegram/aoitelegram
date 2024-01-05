@@ -1,14 +1,20 @@
 export default {
   name: "$arrayAt",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$arrayAt");
-    const [arrayName, index = 1] = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes([arrayName, index], error, ["unknown", "number"]);
+  callback: (context) => {
+    context.argsCheck(1);
+    const [arrayName, index = 1] = context.splits;
+    context.checkArgumentTypes(["unknown", "number | undefined"]);
 
-    if (!ctx.array.has(arrayName)) {
-      error.errorArray(arrayName, "$arrayAt");
+    if (context.isError) return;
+
+    if (!context.array.has(arrayName)) {
+      context.sendError(
+        `The specified variable ${arrayName} does not exist for the array`,
+      );
+      return;
     }
-    const array = ctx.array.get(arrayName);
+
+    const array = context.array.get(arrayName);
     return array[index - 1 >= 1 ? index - 1 : index - 1];
   },
 };

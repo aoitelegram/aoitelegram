@@ -1,9 +1,10 @@
 export default {
   name: "$textConcat",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$textConcat");
-    const args = await ctx.getEvaluateArgs();
-    const text = args.shift();
+  callback: (context) => {
+    context.argsCheck(2);
+    const [text, ...args] = context.splits;
+    if (context.isError) return;
+
     return `${text}`.concat(...args);
   },
 };

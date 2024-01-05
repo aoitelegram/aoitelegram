@@ -1,10 +1,10 @@
 export default {
   name: "$textAt",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$textAt");
-    const args = await ctx.getEvaluateArgs();
-    return `${args[0]}`[
-      args[1] - 1 < 0 ? args[0].length + args[1] - 1 : args[1] - 1
-    ];
+  callback: (context) => {
+    context.argsCheck(2);
+    const [text, index] = context.splits;
+    if (context.isError) return;
+
+    return `${text}`[index - 1 < 0 ? text.length + index - 1 : index - 1];
   },
 };

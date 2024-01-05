@@ -1,7 +1,8 @@
 export default {
   name: "$messageId",
-  callback: async (ctx, event, database, error) => {
-    let messageId = event.message_id || event.message?.message_id;
+  callback: (context) => {
+    let messageId =
+      context.event.message_id || context.event.message?.message_id;
     return messageId;
   },
 };

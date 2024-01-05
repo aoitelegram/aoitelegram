@@ -1,13 +1,14 @@
 export default {
   name: "$getObjectKeys",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$getObjectKeys");
-    const [object, sep = ", "] = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes([object, sep], error, ["object", "unknown"]);
+  callback: (context) => {
+    context.argsCheck(1);
+    const [object, sep = ", "] = context.splits;
+    context.checkArgumentTypes(["object", "unknown"]);
+    if (context.isError) return;
 
     const keys: unknown[] = [];
 
-    const stack = [object];
+    const stack = [JSON.parse(JSON.stringify(object))];
 
     while (stack.length > 0) {
       const current = stack.pop();
@@ -19,6 +20,6 @@ export default {
       }
     }
 
-    return keys.length > 0 ? keys.join(sep) : undefined;
+    return keys.length > 0 ? keys.join(sep) : "";
   },
 };

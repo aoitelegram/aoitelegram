@@ -1,6 +1,6 @@
 export default {
   name: "$datestamp",
-  callback: async (ctx, event, database, error) => {
+  callback: (context) => {
     return Date.now();
   },
 };

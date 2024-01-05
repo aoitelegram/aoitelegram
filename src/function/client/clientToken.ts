@@ -1,6 +1,6 @@
 export default {
   name: "$clientToken",
-  callback: async (ctx, event, database, error) => {
-    return event.telegram?.token;
+  callback: (context) => {
+    return context.telegram.token;
   },
 };

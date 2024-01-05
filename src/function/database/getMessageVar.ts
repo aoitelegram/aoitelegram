@@ -1,25 +1,31 @@
 export default {
   name: "$getMessageVar",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$getMessageVar");
-    const args = await ctx.getEvaluateArgs();
-    const messageId = event.message_id || event.message?.message_id;
-    const chatId = event.chat?.id || event.message?.chat.id;
-    const defaultTable = args[2] || database.tables[0];
-    ctx.checkArgumentTypes(args, error, [
+  callback: (context) => {
+    context.argsCheck(1);
+    const [
+      variable,
+      messageId = context.event.message_id || context.event.message?.message_id,
+      defaultTable = context.database.tables[0],
+    ] = context.splits;
+
+    const chatId = context.event.chat?.id || context.event.message?.chat.id;
+
+    context.checkArgumentTypes([
       "string",
-      "string | number",
+      "string | number | undefined",
       "string | undefined",
     ]);
 
-    if (!database.has(defaultTable, args[0])) {
-      error.errorVar(args[0], "$getMessageVar");
+    if (context.isError) return;
+
+    if (!context.database.has(defaultTable, variable)) {
+      context.sendError(`Invalid variable ${variable} not found`);
       return;
     }
 
-    return database.get(
+    return context.database.get(
       defaultTable,
-      `message_${args[1] || messageId}_${chatId}_${args[0]}`,
+      `message_${messageId}_${chatId}_${variable}`,
     );
   },
 };

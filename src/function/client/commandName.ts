@@ -1,6 +1,6 @@
 export default {
   name: "$commandName",
-  callback: async (ctx, event, database, error) => {
-    return ctx.fileName && ctx.type === "command" ? ctx.fileName : undefined;
+  callback: (context) => {
+    return context.command.command ? context.command.name : undefined;
   },
 };

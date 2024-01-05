@@ -1,10 +1,11 @@
 export default {
   name: "$round",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$round");
-    const args = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes(args, error, ["number"]);
+  callback: (context) => {
+    context.argsCheck(1);
+    const [number] = context.inside;
+    context.checkArgumentTypes(["number"]);
+    if (context.isError) return;
 
-    return Math.round(args[0]);
+    return Math.round(number);
   },
 };

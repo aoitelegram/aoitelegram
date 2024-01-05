@@ -1,13 +1,15 @@
 export default {
   name: "$hasChatPerms",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(1, error, "$hasChatPerms");
-    const [perms] = await ctx.getEvaluateArgs();
-    ctx.checkArgumentTypes([perms], error, ["string"]);
-    const getPerms = await event.getChat().catch(() => null);
+  callback: async (context) => {
+    context.argsCheck(1);
+    const perms = context.inside;
+    context.checkArgumentTypes(["string"]);
+    if (context.isError) return;
+
+    const getPerms = await context.event.getChat().catch(() => null);
 
     if (!getPerms || !getPerms?.permissions) {
-      error.customError("Invalid Chat Id", "$hasChatPerms");
+      context.sendError("Invalid Chat Id");
       return;
     }
 

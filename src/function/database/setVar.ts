@@ -1,20 +1,22 @@
 export default {
   name: "$setVar",
-  callback: async (ctx, event, database, error) => {
-    ctx.argsCheck(2, error, "$setVar");
-    const args = await ctx.getEvaluateArgs();
-    const defaultTable = args[2] || database.tables[0];
+  callback: (context) => {
+    context.argsCheck(2);
+    const [variable, value, defaultTable = context.database.tables[0]] =
+      context.splits;
 
-    if (!database.has(defaultTable, args[0])) {
-      error.errorVar(args[0], "$setVar");
+    if (context.isError) return;
+
+    if (!context.database.has(defaultTable, variable)) {
+      context.sendError(`Invalid variable ${variable} not found`);
       return;
     }
 
-    if (!database.hasTable(defaultTable)) {
-      error.errorTable(defaultTable, "$setVar");
+    if (!context.database.hasTable(defaultTable)) {
+      context.sendError(`Invalid table ${defaultTable} not found`);
       return;
     }
 
-    return database.set(defaultTable, args[0], args[1]);
+    return context.database.set(defaultTable, variable, value);
   },
 };
