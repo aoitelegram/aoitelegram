@@ -125,7 +125,7 @@ String.prototype.after = function (): {
       inside = after.substring(0, leftIndexes[0]);
       total = `${before}[${inside}]`;
     } else {
-      const merged = [];
+      const merged: { index: number; isLeft: boolean }[] = [];
       let leftIndex = 0;
 
       for (let i = 0; i < rightIndexes.length; ++i) {
@@ -219,6 +219,7 @@ function unpack(
  */
 function findAndTransform(str: string, array: string[]) {
   const regex = /\$[a-zA-Z_][a-zA-Z0-9_]*(\[\.\.\.\])?/g;
+  if (!str || array.length < 1) return str;
   array.forEach((element) => {
     str = str.replace(regex, (match) => match.toLowerCase());
   });

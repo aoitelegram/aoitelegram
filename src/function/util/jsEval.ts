@@ -5,8 +5,11 @@ export default {
     const content = context.inside;
     if (context.isError) return;
 
+    const command = context.command.command
+      ? context.command.name
+      : { event: context.command.name };
     const evaluate = await context.telegram.evaluateCommand(
-      context.fileName,
+      command,
       content,
       event,
     );

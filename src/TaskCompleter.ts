@@ -39,7 +39,11 @@ class TaskCompleter {
   private eventData: Context & { telegram: AoiClient };
   private telegram: AoiClient;
   private callback_query: unknown[] = [];
-  private command: { name: string; command?: boolean; event?: boolean };
+  private command: {
+    name: string;
+    command?: boolean;
+    event?: boolean;
+  };
   private database: AoiManager;
   private functionArray: DataFunction[];
   private parser: string[];
@@ -127,140 +131,133 @@ class TaskCompleter {
   async completesV4If(inputCode: string) {
     let code = inputCode;
 
-    if (code.toLowerCase().includes("$if[")) {
-      for (let ifBlock of code
-        .split(/\$if\[/gi)
-        .slice(1)
-        .reverse()) {
-        const ifOccurrences = code.toLowerCase().split("$if[").length - 1;
+    if (!code.toLowerCase().includes("$if[")) return code;
+    for (let ifBlock of code
+      .split(/\$if\[/gi)
+      .slice(1)
+      .reverse()) {
+      const ifOccurrences = code.toLowerCase().split("$if[").length - 1;
 
-        if (!code.toLowerCase().includes("$endif")) {
-          this.#sendErrorMessage(`is missing $endif`, false, "$if");
-          return "";
-        }
-
-        const entireBlock = code
-          .split(/\$if\[/gi)
-          [ifOccurrences].split(/\$endif/gi)[0];
-
-        ifBlock = code.split(/\$if\[/gi)[ifOccurrences].split(/\$endif/gi)[0];
-
-        const condition = unpack(code, "$if").inside;
-
-        let pass = false;
-        try {
-          const taskCompleter = new TaskCompleter(
-            `$checkCondition[${condition}]`,
-            this.eventData,
-            this.telegram,
-            this.command,
-            this.database,
-            this.functionArray,
-            this.parser,
-          );
-          const response = await taskCompleter.completeTask();
-          pass = response.trim() == "true";
-        } catch (err) {
-          pass = false;
-        }
-
-        const hasElseIf = ifBlock.toLowerCase().includes("$elseif");
-
-        const elseIfBlocks: any = {};
-
-        if (hasElseIf) {
-          for (const elseIfData of ifBlock.split(/\$elseif\[/gi).slice(1)) {
-            if (!elseIfData.toLowerCase().includes("$endelseif")) {
-              this.#sendErrorMessage(
-                `is missing $endelseIf!`,
-                false,
-                "$elseIf",
-              );
-              return "";
-            }
-
-            const insideBlock = elseIfData.split(/\$endelseIf/gi)[0];
-
-            let elseIfCondition = insideBlock.split("\n")[0].trim();
-
-            elseIfCondition = elseIfCondition.slice(
-              0,
-              elseIfCondition.length - 1,
-            );
-
-            const elseIfCode = insideBlock.split("\n").slice(1).join("\n");
-
-            elseIfBlocks[elseIfCondition] = elseIfCode;
-
-            ifBlock = ifBlock.replace(
-              new RegExp(
-                `\\$elseif\\[${this.escapeRegex(insideBlock)}\\$endelseif`,
-                "mi",
-              ),
-              "",
-            );
-          }
-        }
-
-        const hasElse = ifBlock.toLowerCase().includes("$else");
-
-        const ifCodeBlock = hasElse
-          ? ifBlock
-              .split("\n")
-              .slice(1)
-              .join("\n")
-              .split(/\$else/gi)[0]
-          : ifBlock
-              .split("\n")
-              .slice(1)
-              .join("\n")
-              .split(/\$endif/gi)[0];
-
-        const elseCodeBlock = hasElse
-          ? ifBlock.split(/\$else/gi)[1].split(/\$endif/gi)[0]
-          : "";
-
-        let passes = false;
-
-        let lastCodeBlock;
-
-        if (hasElseIf) {
-          for (const elseIfEntry of Object.entries(elseIfBlocks)) {
-            if (!passes) {
-              let response = false;
-              try {
-                const taskCompleter = new TaskCompleter(
-                  `$checkCondition[${elseIfEntry[0]}]`,
-                  this.eventData,
-                  this.telegram,
-                  this.command,
-                  this.database,
-                  this.functionArray,
-                  this.parser,
-                );
-                const result = await taskCompleter.completeTask();
-                response = result.trim() == "true";
-              } catch (err) {
-                response = false;
-              }
-              if (response) {
-                passes = true;
-                lastCodeBlock = elseIfEntry[1];
-              }
-            }
-          }
-        }
-
-        code = code.replace(/\$if\[/gi, "$if[").replace(/\$endif/gi, "$endif");
-        code = code.replaceLast(
-          `$if[${entireBlock}$endif`,
-          (pass
-            ? ifCodeBlock
-            : passes
-              ? lastCodeBlock
-              : elseCodeBlock) as string,
-        );
+      if (!code.toLowerCase().includes("$endif")) {
+        this.#sendErrorMessage(`is missing $endif`, false, "$if");
+        return "";
       }
+
+      const entireBlock = code
+        .split(/\$if\[/gi)
+        [ifOccurrences].split(/\$endif/gi)[0];
+
+      ifBlock = code.split(/\$if\[/gi)[ifOccurrences].split(/\$endif/gi)[0];
+
+      let condition = ifBlock.split("\n")[0].trim();
+
+      condition = condition.slice(0, condition.length - 1);
+
+      let pass = false;
+      try {
+        const taskCompleter = new TaskCompleter(
+          `$checkCondition[${condition}]`,
+          this.eventData,
+          this.telegram,
+          this.command,
+          this.database,
+          this.functionArray,
+          this.parser,
+        );
+        const response = await taskCompleter.completeTask();
+        pass = response.trim() == "true";
+      } catch (err) {
+        pass = false;
+      }
+
+      const hasElseIf = ifBlock.toLowerCase().includes("$elseif");
+
+      const elseIfBlocks: any = {};
+
+      if (hasElseIf) {
+        for (const elseIfData of ifBlock.split(/\$elseif\[/gi).slice(1)) {
+          if (!elseIfData.toLowerCase().includes("$endelseif")) {
+            this.#sendErrorMessage(`is missing $endelseIf!`, false, "$elseIf");
+            return "";
+          }
+
+          const insideBlock = elseIfData.split(/\$endelseIf/gi)[0];
+
+          let elseIfCondition = insideBlock.split("\n")[0].trim();
+
+          elseIfCondition = elseIfCondition.slice(
+            0,
+            elseIfCondition.length - 1,
+          );
+
+          const elseIfCode = insideBlock.split("\n").slice(1).join("\n");
+
+          elseIfBlocks[elseIfCondition] = elseIfCode;
+
+          ifBlock = ifBlock.replace(
+            new RegExp(
+              `\\$elseif\\[${this.escapeRegex(insideBlock)}\\$endelseif`,
+              "mi",
+            ),
+            "",
+          );
+        }
+      }
+
+      const hasElse = ifBlock.toLowerCase().includes("$else");
+
+      const ifCodeBlock = hasElse
+        ? ifBlock
+            .split("\n")
+            .slice(1)
+            .join("\n")
+            .split(/\$else/gi)[0]
+        : ifBlock
+            .split("\n")
+            .slice(1)
+            .join("\n")
+            .split(/\$endif/gi)[0];
+
+      const elseCodeBlock = hasElse
+        ? ifBlock.split(/\$else/gi)[1].split(/\$endif/gi)[0]
+        : "";
+
+      let passes = false;
+
+      let lastCodeBlock;
+
+      if (hasElseIf) {
+        for (const elseIfEntry of Object.entries(elseIfBlocks)) {
+          if (!passes) {
+            let response = false;
+            try {
+              const taskCompleter = new TaskCompleter(
+                `$checkCondition[${elseIfEntry[0]}]`,
+                this.eventData,
+                this.telegram,
+                this.command,
+                this.database,
+                this.functionArray,
+                this.parser,
+              );
+              const result = await taskCompleter.completeTask();
+              response = result.trim() == "true";
+            } catch (err) {
+              response = false;
+            }
+            if (response) {
+              passes = true;
+              lastCodeBlock = elseIfEntry[1];
+            }
+          }
+        }
+      }
+
+      code = code.replace(/\$if\[/gi, "$if[").replace(/\$endif/gi, "$endif");
+      code = code.replaceLast(
+        `$if[${entireBlock}$endif`,
+        (pass ? ifCodeBlock : passes ? lastCodeBlock : elseCodeBlock) as string,
+      );
     }
     return code;
   }

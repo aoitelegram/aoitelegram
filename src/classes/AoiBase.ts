@@ -137,6 +137,7 @@ class AoiBase extends TelegramBot {
    * @param command - The name of the command.
    * @param code - The code to be executed.
    * @param eventData - The context or user for executing the code.
+
    */
   async evaluateCommand(
     command: string | { event: string },
@@ -169,7 +170,7 @@ class AoiBase extends TelegramBot {
         combinedFunctions,
         combinedNames,
       );
-      await taskCompleter.completeTask();
+      return await taskCompleter.completeTask();
     } catch (err) {
       console.log(err);
     }
@@ -196,6 +197,9 @@ class AoiBase extends TelegramBot {
             }`,
           );
         }
+        this.functions.functions = this.functions.functions.filter(
+          (func) => func.name !== optionVersion.name.toLowerCase(),
+        );
       }
       this.customFunction = [...(this.customFunction ?? []), ...options];
     } else {
@@ -215,6 +219,9 @@ class AoiBase extends TelegramBot {
           }`,
         );
       }
+      this.functions.functions = this.functions.functions.filter(
+        (func) => func.name !== options.name.toLowerCase(),
+      );
       this.customFunction = [...(this.customFunction ?? []), options];
     }
     return this;
@@ -245,6 +252,7 @@ class AoiBase extends TelegramBot {
    * @param options - Loop configuration options.
    * @param options.every - Interval in milliseconds for executing the code.
    * @param options.code - The command code to be executed in the loop.
+
    */
   loopCommand(options: { every?: number; code: string }) {
     if (!options?.code) {
@@ -268,6 +276,7 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed when the bot is ready.
    * @param options - Command options.
    * @param options.code - The code to be executed when the bot is ready.
+
    */
   readyCommand(options: { code: string }) {
     if (!options?.code) {
@@ -307,6 +316,7 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to a callback_query.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when a callback_query is received.
+
    */
   callbackQueryCommand(options: { code: string }) {
     if (!options?.code) {
@@ -329,6 +339,7 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to a message_reaction.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when a message_reaction is received.
+
    */
   messageReactionCommand(options: { code: string }) {
     if (!options?.code) {
@@ -351,6 +362,7 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to a message_reaction_count.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when a message_reaction_count is received.
+
    */
   messageReactionCountCommand(options: { code: string }) {
     if (!options?.code) {
@@ -373,6 +385,7 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an edited_message event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an edited_message event is received.
+
    */
   editedMessageCommand(options: { code: string }) {
     if (!options?.code) {
@@ -395,6 +408,7 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an channel_post event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an channel_post event is received.
+
    */
   channelPostCommand(options: { code: string }) {
     if (!options?.code) {
@@ -413,6 +427,7 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an edited_channel_post event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an edited_channel_post event is received.
+   * @param  - $if type for parsing
    */
   editedChannelPostCommand(options: { code: string }) {
     if (!options?.code) {
@@ -435,6 +450,7 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an inline_query event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an inline_query event is received.
+
    */
   inlineQueryCommand(options: { code: string }) {
     if (!options?.code) {
@@ -453,6 +469,7 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an shipping_query event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an shipping_query event is received.
+
    */
   shippingQueryCommand(options: { code: string }) {
     if (!options?.code) {
@@ -475,6 +492,7 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an pre_checkout_query event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an pre_checkout_query event is received.
+
    */
   preCheckoutQueryCommand(options: { code: string }) {
     if (!options?.code) {
@@ -497,6 +515,7 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an poll event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an poll event is received.
+
    */
   pollCommand(options: { code: string }) {
     if (!options?.code) {
@@ -515,6 +534,7 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an poll_answer event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an poll_answer event is received.
+
    */
   pollAnswerCommand(options: { code: string }) {
     if (!options?.code) {
@@ -533,6 +553,7 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an chat_member event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an chat_member event is received.
+   
    */
   chatMemberCommand(options: { code: string }) {
     if (!options?.code) {
@@ -551,6 +572,7 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an my_chat_member event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an my_chat_member event is received.
+   
    */
   myChatMemberCommand(options: { code: string }) {
     if (!options?.code) {
@@ -573,6 +595,7 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an chat_join_request event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an chat_join_request event is received.
+   
    */
   chatJoinRequestCommand(options: { code: string }) {
     if (!options?.code) {
@@ -595,6 +618,7 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to a chat_boost.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when a chat_boost is received.
+   
    */
   chatBoostCommand(options: { code: string }) {
     if (!options?.code) {
@@ -613,6 +637,7 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to a removed_chat_boost.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when a removed_chat_boost is received.
+   
    */
   removedChatBoostCommand(options: { code: string }) {
     if (!options?.code) {
@@ -635,6 +660,7 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an variables create event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an create event is received.
+   
    */
   variableCreateCommand(options: { code: string }) {
     if (!options?.code) {
@@ -664,6 +690,7 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an variables updated event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an updated event is received.
+   
    */
   variableUpdateCommand(options: { code: string }) {
     if (!options?.code) {
@@ -703,6 +730,7 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an variables delete event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an delete event is received.
+   
    */
   variableDeleteCommand(options: { code: string }) {
     if (!options?.code) {
