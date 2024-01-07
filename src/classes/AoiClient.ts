@@ -218,29 +218,31 @@ class AoiClient extends AoiBase {
     await this.registerAwaited.handler();
     if (this.#optionConsole) {
       this.on("ready", async (ctx) => {
-        new Promise((res) => {
-          setTimeout(() => {
-            const ctxUsername = `@${ctx.username}`;
+        setTimeout(() => {
+          const ctxUsername = `@${ctx.username}`;
 
-            console.log(
-              `${chalk.red("[ AoiClient ]: ")}${chalk.yellow(
-                `Initialized on ${chalk.cyan("aoitelegram")} ${chalk.blue(
-                  `v${version}`,
-                )}`,
-              )} | ${chalk.green(ctxUsername)} |${chalk.cyan(
-                " Sempai Development",
+          console.log(
+            `${chalk.red("[ AoiClient ]: ")}${chalk.yellow(
+              `Initialized on ${chalk.cyan("aoitelegram")} ${chalk.blue(
+                `v${version}`,
               )}`,
-            );
+            )} | ${chalk.green(ctxUsername)} |${chalk.cyan(
+              " Sempai Development",
+            )}`,
+          );
 
-            console.log(
-              `${chalk.yellow("Official GitHub: ")}${chalk.blue(
-                "https://github.com/Sempai-07/aoitelegram/issues",
-              )}`,
-            );
+          console.log(
+            `${chalk.yellow("[ Official Docs ]: ")}${chalk.blue(
+              "https://aoitelegram-dev.surge.sh",
+            )}`,
+          );
 
-            res("");
-          }, 4 * 1000);
-        });
+          console.log(
+            `${chalk.yellow("[ Official GitHub ]: ")}${chalk.blue(
+              "https://github.com/Sempai-07/aoitelegram/issues",
+            )}`,
+          );
+        }, 4000);
       });
     }
     super.login();
