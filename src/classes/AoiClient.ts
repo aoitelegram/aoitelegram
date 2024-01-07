@@ -233,7 +233,7 @@ class AoiClient extends AoiBase {
 
           console.log(
             `${chalk.yellow("[ Official Docs ]: ")}${chalk.blue(
-              "https://aoitelegram-dev.surge.sh",
+              "https://aoitelegram.vercel.app/",
             )}`,
           );
 
