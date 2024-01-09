@@ -25,6 +25,7 @@ interface ContextFunction {
   sendError: (error: string, custom?: boolean) => unknown;
   database: AoiManager;
   foundFunctions: string[];
+  suppressErrors?: string;
 }
 
 class TaskCompleter {
@@ -130,7 +131,6 @@ class TaskCompleter {
    */
   async completesV4If(inputCode: string) {
     let code = inputCode;
-
     if (!code.toLowerCase().includes("$if[")) return code;
     for (let ifBlock of code
       .split(/\$if\[/gi)
@@ -277,7 +277,24 @@ class TaskCompleter {
       | ((context: ContextFunction) => unknown),
   ) {
     if (typeof callback === "function") {
-      return await callback(context);
+      const result = await callback(context);
+      switch (true) {
+        case !!context.suppressErrors:
+          this.suppressError = context.suppressErrors;
+        case !!context.localVars:
+          this.localVars = context.localVars;
+        case !!context.array:
+          this.array = context.array;
+        case !!context.random:
+          this.random = context.random;
+        case !!context.callback_query:
+          this.callback_query = context.callback_query;
+        case !!context.telegram:
+          this.telegram = context.telegram;
+        default:
+          break;
+      }
+      return result;
     } else if (typeof callback.code === "string") {
       try {
         const code = updateParamsFromArray(
@@ -342,7 +359,7 @@ class TaskCompleter {
         isError: false,
         argsCheck: (amount) => {
           if (!dataContext.splits[0] || dataContext.splits.length < amount) {
-            return dataContext.sendError(
+            dataContext.sendError(
               `Expected ${amount} arguments but got ${
                 dataContext.splits[0] ? dataContext.splits.length : 0
               }`,
@@ -351,16 +368,13 @@ class TaskCompleter {
         },
         checkArgumentTypes(expectedArgumentTypes: string[]) {
           if (dataContext.isError) return;
-          const argument = dataContext?.splits || [];
+          const argument = dataContext.splits;
           for (
             let argumentIndex = 0;
             argumentIndex < argument.length;
             argumentIndex++
           ) {
-            const actualArgumentType =
-              typeof argument[argumentIndex] === "object"
-                ? "object"
-                : toParse(`${argument[argumentIndex]}`);
+            const actualArgumentType = toParse(argument[argumentIndex]);
             if (!expectedArgumentTypes[argumentIndex]) {
               expectedArgumentTypes[argumentIndex] = "unknown";
             }
