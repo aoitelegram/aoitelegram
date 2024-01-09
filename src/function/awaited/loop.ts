@@ -2,7 +2,7 @@ import ms from "ms";
 
 function hasObject(arg: any): arg is object {
   try {
-    return !!JSON.parse(arg);
+    return !!JSON.parse(JSON.stringify(arg));
   } catch (err) {
     return false;
   }
@@ -23,7 +23,7 @@ export default {
 
     context.telegram.awaitedManager.addAwaited(name, {
       milliseconds: +ms(milliseconds),
-      data: data,
+      data: JSON.parse(JSON.stringify(data)),
       context: event,
     });
   },

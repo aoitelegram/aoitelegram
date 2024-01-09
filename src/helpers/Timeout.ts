@@ -7,10 +7,6 @@ interface TimeoutDescription {
   code: string;
 }
 
-interface Data {
-  [key: string]: any;
-}
-
 /**
  * A class that manages timeouts and associated actions.
  */
@@ -59,12 +55,18 @@ class Timeout {
       for (const timeout of this.timeouts) {
         if (timeout.id !== context.id) continue;
 
-        const timeoutDataParsed = context.data as Data;
+        const timeoutDataParsed = JSON.parse(`${context.data}`);
 
         this.telegram.addFunction({
           name: "$timeoutData",
           callback: (context) => {
-            return getObjectKey(timeoutDataParsed, context.inside as string);
+            const response = getObjectKey(
+              timeoutDataParsed,
+              context.inside as string,
+            );
+            return typeof response === "object"
+              ? JSON.stringify(response)
+              : response;
           },
         });
 

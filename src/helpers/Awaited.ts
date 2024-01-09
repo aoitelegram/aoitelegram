@@ -10,7 +10,7 @@ interface AwaitedDescription {
 interface AwaitedEvent {
   awaited: string;
   milliseconds: number;
-  data: object;
+  data: string;
   code: string;
 }
 
@@ -63,12 +63,18 @@ class Awaited {
         if (awaitedDescription.awaited !== awaited.awaited) continue;
 
         const intervalId = setInterval(async () => {
-          const awaitedData = awaited.data;
+          const awaitedData = JSON.parse(awaited.data);
           this.telegram.addFunction([
             {
               name: "$awaitedData",
               callback: (context) => {
-                return getObjectKey(awaitedData, context.inside as string);
+                const response = getObjectKey(
+                  awaitedData,
+                  context.inside as string,
+                );
+                return typeof response === "object"
+                  ? JSON.stringify(response)
+                  : response;
               },
             },
             {

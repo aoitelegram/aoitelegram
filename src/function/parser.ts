@@ -1,9 +1,7 @@
-const parseStringJSON = require("parsejson");
-
 /**
  * Checks if a string represents a valid integer.
- * @param {string} content - The string to check.
- * @returns {boolean} True if the string is a valid integer, otherwise false.
+ * @param content - The string to check.
+ * @returns True if the string is a valid integer, otherwise false.
  */
 function isInteger(content: string) {
   let isBigInt: boolean = false;
@@ -23,8 +21,8 @@ function isInteger(content: string) {
 
 /**
  * Checks if a string represents a valid floating-point number.
- * @param {string} content - The string to check.
- * @returns {boolean} True if the string is a valid floating-point number, otherwise false.
+ * @param content - The string to check.
+ * @returns True if the string is a valid floating-point number, otherwise false.
  */
 function isFloat(content: string) {
   if (!content.includes(".")) return false;
@@ -34,8 +32,8 @@ function isFloat(content: string) {
 
 /**
  * Checks if a string represents a boolean value ("true" or "false").
- * @param {string} content - The string to check.
- * @returns {boolean} True if the string represents a boolean value, otherwise false.
+ * @param content - The string to check.
+ * @returns True if the string represents a boolean value, otherwise false.
  */
 function isBoolean(content: string) {
   if (content === "true") return true;
@@ -45,8 +43,8 @@ function isBoolean(content: string) {
 
 /**
  * Checks if a string represents the value null.
- * @param {string} content - The string to check.
- * @returns {boolean} True if the string represents the value null, otherwise false.
+ * @param content - The string to check.
+ * @returns True if the string represents the value null, otherwise false.
  */
 function isNull(content: string) {
   if (content === "null") return true;
@@ -55,16 +53,13 @@ function isNull(content: string) {
 
 /**
  * Checks if a string represents a valid JSON object.
- * @param {string} content - The string to check.
- * @returns {boolean} True if the string is a valid JSON object, otherwise false.
+ * @param content - The string to check.
+ * @returns True if the string is a valid JSON object, otherwise false.
  */
 function isObject(content: string) {
-  if (
-    (content?.startsWith("{") && content?.endsWith("}")) ||
-    typeof content === "object"
-  ) {
+  if (content.startsWith("{") && content.endsWith("}")) {
     try {
-      return !!parseJSON(content);
+      return !!JSON.parse(JSON.stringify(content));
     } catch (err) {
       return false;
     }
@@ -74,8 +69,8 @@ function isObject(content: string) {
 
 /**
  * Checks if a string represents the value "undefined".
- * @param {string} content - The string to check.
- * @returns {boolean} True if the string represents the value "undefined", otherwise false.
+ * @param content - The string to check.
+ * @returns True if the string represents the value "undefined", otherwise false.
  */
 function isUndefined(content: string) {
   if (content === "undefined") return true;
@@ -85,8 +80,8 @@ function isUndefined(content: string) {
 
 /**
  * Checks if a string represents the value "NaN".
- * @param {string} content - The string to check.
- * @returns {boolean} True if the string represents the value "NaN", otherwise false.
+ * @param content - The string to check.
+ * @returns True if the string represents the value "NaN", otherwise false.
  */
 function isNaN(content: string) {
   if (content === "NaN") return true;
@@ -95,51 +90,19 @@ function isNaN(content: string) {
 
 /**
  * Checks if a string represents the value "number".
- * @param {string} content - The string to check.
- * @returns {boolean} True if the string represents the value "number", otherwise false.
+ * @param content - The string to check.
+ * @returns True if the string represents the value "number", otherwise false.
  */
 function isNumber(content: string) {
   return isFloat(content) || isInteger(content);
 }
 
-function parseJSON(objStr: string | object) {
-  if (typeof objStr === "object") return objStr;
-  if (typeof objStr === "string") {
-    return parseStringJSON(objStr) || JSON.parse(objStr);
-  }
-}
-
 /**
  * Checks typeof value.
- * @param {string} character - The string to check.
+ * @param character - The string to check.
  */
-function parse(character: string) {
-  if (!character && character?.trim() !== "") return character;
-  switch (true) {
-    case isUndefined(character):
-      return undefined;
-    case isInteger(character):
-      return parseInt(character);
-    case isFloat(character):
-      return parseFloat(character);
-    case isNaN(character):
-      return NaN;
-    case isObject(character):
-      return parseJSON(character);
-    case isBoolean(character):
-      return character === "true";
-    case isNull(character):
-      return null;
-    default:
-      return character;
-  }
-}
-
-/**
- * Checks typeof value.
- * @param {string} character - The string to check.
- */
-function toParse(character: string) {
+function toParse(character?: string) {
+  if (!character) return "unknown";
   switch (true) {
     case isUndefined(character):
       return "undefined";
@@ -225,14 +188,13 @@ function setObjectKey<T extends Data, K extends keyof T>(
 
 /**
  * Formats the given time duration in milliseconds into a structured time object.
- *
- * @param {number} milliseconds - The time duration in milliseconds.
+ * @param milliseconds - The time duration in milliseconds.
  */
 function formatTime(milliseconds: number) {
   /**
    * Calculates the value of a specific time unit based on the given milliseconds.
-   * @param {number} unitInMilliseconds - The duration of the time unit in milliseconds.
-   * @returns {number} - The calculated value of the time unit.
+   * @param unitInMilliseconds - The duration of the time unit in milliseconds.
+   * @returns The calculated value of the time unit.
    */
   const calculateUnit = (unitInMilliseconds: number): number => {
     const result = Math.trunc(Math.abs(milliseconds) / unitInMilliseconds);
@@ -274,17 +236,8 @@ function formatTime(milliseconds: number) {
 
 /**
  * Replaces placeholders in the given text with corresponding values from the provided date object.
- * @param {{
- *   years: number,
- *   months: number,
- *   weeks: number,
- *   days: number,
- *   hours: number,
- *   minutes: number,
- *   seconds: number,
- *   ms: number
- * }} date - The date object containing unit values.
- * @param {string} text - The text containing placeholders to be replaced.
+ * @param date - The date object containing unit values.
+ * @param text - The text containing placeholders to be replaced.
  */
 function replaceData(
   date: {
@@ -313,9 +266,9 @@ function replaceData(
 /**
  * Retrieves the value at a given index in an array.
  * Supports negative indices, where -1 corresponds to the last element, -2 to the second-to-last, and so on.
- * @param {ArrayLike<T>} arr - The input array or array-like object.
- * @param {number} index - The index to retrieve the value from.
- * @returns {T | undefined} - The value at the specified index, or undefined if index is out of range.
+ * @param arr - The input array or array-like object.
+ * @param index - The index to retrieve the value from.
+ * @returns The value at the specified index, or undefined if index is out of range.
  * @template T
  */
 function arrayAt<T>(arr: ArrayLike<T>, index: number): T | undefined {
@@ -324,9 +277,7 @@ function arrayAt<T>(arr: ArrayLike<T>, index: number): T | undefined {
 }
 
 export {
-  parse,
   toParse,
-  parseJSON,
   getObjectKey,
   setObjectKey,
   formatTime,

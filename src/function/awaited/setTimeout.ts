@@ -2,7 +2,7 @@ import ms from "ms";
 
 function hasObject(arg: any): arg is object {
   try {
-    return !!JSON.parse(arg);
+    return !!JSON.parse(JSON.stringify(arg));
   } catch (err) {
     return false;
   }
