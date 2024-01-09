@@ -1,6 +1,6 @@
 import { Agent } from "node:https";
+import { getObjectKey } from "../parser";
 import fetch, { RequestInit } from "node-fetch";
-import { getObjectKey, parseJSON } from "../parser";
 
 function buildJSONConfig(data) {
   const apiConfig = {
