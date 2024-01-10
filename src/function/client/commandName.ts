@@ -1,6 +1,6 @@
 export default {
   name: "$commandName",
   callback: (context) => {
-    return context.command.command ? context.command.name : undefined;
+    return context.command.hasCommand ? context.command.name : "";
   },
 };

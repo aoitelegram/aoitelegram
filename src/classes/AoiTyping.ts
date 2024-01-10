@@ -96,4 +96,12 @@ type DataEvent = {
 
 type CombinedEventFunctions = EventHandlers & EventDataMap<Buffer>;
 
-export { CombinedEventFunctions, LibDataFunction, DataFunction, DataEvent };
+type LibWithDataFunction = DataFunction | LibDataFunction;
+
+export {
+  CombinedEventFunctions,
+  LibWithDataFunction,
+  LibDataFunction,
+  DataFunction,
+  DataEvent,
+};

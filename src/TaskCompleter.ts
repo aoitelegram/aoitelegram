@@ -2,10 +2,14 @@ import { AoiClient } from "./classes/AoiClient";
 import { AoijsError } from "./classes/AoiError";
 import { Context, Collection } from "telegramsjs";
 import { AoiManager } from "./classes/AoiManager";
-import { DataFunction } from "./classes/AoiTyping";
 import { getObjectKey, toParse } from "./function/parser";
 import { ConditionChecker } from "./function/condition";
 import { unpack, findAndTransform, updateParamsFromArray } from "./prototype";
+import {
+  DataFunction,
+  LibDataFunction,
+  LibWithDataFunction,
+} from "./classes/AoiTyping";
 
 interface ContextFunction {
   data: { name: string; inside?: string; splits: string[] }[];
@@ -18,7 +22,7 @@ interface ContextFunction {
   event: Context & { telegram: AoiClient };
   telegram: AoiClient;
   code: string;
-  command: { name: string; command?: boolean; event?: boolean };
+  command: { name: string; hasCommand?: boolean; hasEvent?: boolean };
   isError: boolean;
   argsCheck: (amount: number) => unknown;
   checkArgumentTypes: (expectedArgumentTypes: string[]) => void;
@@ -42,12 +46,12 @@ class TaskCompleter {
   private callback_query: unknown[] = [];
   private command: {
     name: string;
-    command?: boolean;
-    event?: boolean;
+    hasCommand?: boolean;
+    hasEvent?: boolean;
   };
   private database: AoiManager;
-  private functionArray: DataFunction[];
-  private parser: string[];
+  private availableFunction: Collection<string, LibWithDataFunction>;
+  private onlySearchFunction: string[];
 
   /**
    * Constructor for TaskCompleter class.
@@ -56,17 +60,17 @@ class TaskCompleter {
    * @param telegram - The AoiClient instance.
    * @param command - The command object with name, command, and event properties.
    * @param database - The AoiManager instance.
-   * @param functionArray - The run functions.
-   * @param parser - The array of strings to parse.
+   * @param availableFunction - The run functions.
+   * @param onlySearchFunction - The array of strings to parse.
    */
   constructor(
     code: string,
     eventData: Context & { telegram: AoiClient },
     telegram: AoiClient,
-    command: { name: string; command?: boolean; event?: boolean },
+    command: { name: string; hasCommand?: boolean; hasEvent?: boolean },
     database: AoiManager,
-    functionArray: DataFunction[],
-    parser: string[],
+    availableFunction: Collection<string, LibWithDataFunction>,
+    onlySearchFunction: string[],
   ) {
     this.data = [];
     this.searchedFunctions = [];
@@ -74,9 +78,9 @@ class TaskCompleter {
     this.telegram = telegram;
     this.command = command;
     this.database = database;
-    this.functionArray = functionArray;
-    this.parser = parser;
-    this.code = findAndTransform(code, parser);
+    this.availableFunction = availableFunction;
+    this.onlySearchFunction = onlySearchFunction;
+    this.code = findAndTransform(code, onlySearchFunction);
     this.foundFunctions = this.searchFunctions();
   }
 
@@ -92,20 +96,19 @@ class TaskCompleter {
   /**
    * Searches for functions in code segments based on parser functions.
    * @param codeSegments - Array of code segments to search within.
-   * @param parserFunctions - Array of parser functions.
+   * @param parserFunctions - Array of onlySearchFunction functions.
    * @returns Array of found functions.
    */
   searchFunctions() {
-    let availableFunctions = this.parser;
+    let onlySearchFunctions = this.onlySearchFunction;
     let foundFunctions = [];
-    let matchingFunctions = availableFunctions.filter((func) =>
-      this.code.includes(func.toLowerCase()),
+    let matchingFunctions = onlySearchFunctions.filter((func) =>
+      this.code.includes(func),
     );
     const functionSegments = this.code.split("$");
     for (const functionSegment of functionSegments) {
       let matchingFunction = matchingFunctions.filter(
-        (func) =>
-          func.toLowerCase() === `$${functionSegment}`.slice(0, func.length),
+        (func) => func === `$${functionSegment}`.slice(0, func.length),
       );
 
       if (!matchingFunction.length) {
@@ -161,8 +164,8 @@ class TaskCompleter {
           this.telegram,
           this.command,
           this.database,
-          this.functionArray,
-          this.parser,
+          this.availableFunction,
+          this.onlySearchFunction,
         );
         const response = await taskCompleter.completeTask();
         pass = response.trim() == "true";
@@ -237,8 +240,8 @@ class TaskCompleter {
                 this.telegram,
                 this.command,
                 this.database,
-                this.functionArray,
-                this.parser,
+                this.availableFunction,
+                this.onlySearchFunction,
               );
               const result = await taskCompleter.completeTask();
               response = result.trim() == "true";
@@ -289,8 +292,8 @@ class TaskCompleter {
           this.random = context.random;
         case !!context.callback_query:
           this.callback_query = context.callback_query;
-        case !!context.telegram:
-          this.telegram = context.telegram;
+        case !!context.telegram?.globalVars:
+          this.telegram.globalVars = context.telegram.globalVars;
         default:
           break;
       }
@@ -308,8 +311,8 @@ class TaskCompleter {
           this.telegram,
           this.command,
           this.database,
-          this.functionArray,
-          this.parser,
+          this.availableFunction,
+          this.onlySearchFunction,
         );
         return await taskCompleter.completeTask();
       } catch (err) {
@@ -443,18 +446,22 @@ class TaskCompleter {
         foundFunctions: this.foundFunctions,
       };
 
-      const functionRun =
-        this.functionArray[
-          this.functionArray.findIndex(
-            (func) =>
-              func.name.toLowerCase().replace("$", "") ===
-              functionName.toLowerCase(),
-          )
-        ];
+      const functionRun = this.availableFunction.get(
+        `$${functionName.toLowerCase()}`,
+      );
+
+      if (!functionRun) {
+        throw new AoijsError(
+          undefined,
+          `Function '$${functionName}' not found`,
+          this.command.name,
+        );
+      }
+
       let resultFunction = await this.completeTaskCallback(
         functionName,
         dataContext,
-        "code" in functionRun ? functionRun : functionRun.callback,
+        "callback" in functionRun ? functionRun.callback : functionRun,
       );
 
       this.code = this.code.replaceLast(
@@ -504,10 +511,10 @@ class TaskCompleter {
           const dataError = {
             error,
             function: functionName,
-            command: this.command.command ? this.command.name : "",
-            event: this.command.event ? this.command.name : "",
+            hasCommand: this.command.hasCommand ? this.command.name : "",
+            hasEvent: this.command.hasEvent ? this.command.name : "",
           };
-          return getObjectKey(dataError, context.inside as string) || "";
+          return getObjectKey(dataError, context.inside as string);
         },
       });
       this.telegram.emit("functionError", this.eventData, this.telegram);

@@ -36,12 +36,12 @@ class AoiClient extends AoiBase {
   awaitedManager: AwaitedManager;
   loadCommands?: LoadCommands;
   customEvent?: CustomEvent;
-  private commands: Collection<CommandInfoSet, unknown> = new Collection();
-  private globalVars: Collection<string, unknown> = new Collection();
+  commands: Collection<CommandInfoSet, unknown> = new Collection();
+  globalVars: Collection<string, unknown> = new Collection();
   /**
    * Creates a new instance of AoiClient.
    * @param {Object} options - Configuration options for the client.
-   * @param {string} token - The token for authentication.
+   * @param {string} options.token - The token for authentication.
    * @param {TelegramOptions} options.telegram - Options for the Telegram integration.
    * @param {DatabaseOptions} options.database - Options for the database.
    * @param {string[]} options.disableFunctions - Functions that will be removed from the library's loading functions.
