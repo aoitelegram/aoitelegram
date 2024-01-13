@@ -10,18 +10,11 @@ export default {
     ]);
     if (context.isError) return;
 
-    const result = await context.telegram
-      .setMyCommands({
-        language_code,
-        scope,
-        commands: commands,
-      })
-      .catch((err) => console.log(err));
-
-    if (typeof result !== "boolean") {
-      context.sendError("Failed to usage");
-      return;
-    }
+    await context.telegram.setMyCommands({
+      language_code,
+      scope,
+      commands: commands,
+    });
 
     return true;
   },

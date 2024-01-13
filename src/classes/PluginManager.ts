@@ -5,6 +5,7 @@ import { AoiClient } from "./AoiClient";
 import { AoijsError } from "./AoiError";
 import { DataFunction } from "./AoiTyping";
 import { version } from "../../package.json";
+
 /**
  * Class representing a plugin manager for loading and managing plugins in a Node.js application.
  */
@@ -12,8 +13,8 @@ class PluginManager {
   #aoitelegram?: AoiClient;
   /**
    * Create an instance of the PluginManager.
-   * @param {boolean} [searchingForPlugins=true] - Specify whether to search for plugins during initialization.
-   * @param {AoiClient} [aoitelegram] - The AoiClient instance to load commands into.
+   * @param searchingForPlugins - Specify whether to search for plugins during initialization.
+   * @param aoitelegram - The AoiClient instance to load commands into.
    */
   constructor(searchingForPlugins?: boolean, aoitelegram?: AoiClient) {
     if (searchingForPlugins === true) {

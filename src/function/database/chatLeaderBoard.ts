@@ -71,9 +71,7 @@ export default {
     for (let index = 0; index < chats.length; index++) {
       if (index + 1 === Number(maxUser)) break;
       const [, chat] = chats[index].chat.split("_");
-      const chatUserData =
-        (await context.event.getChat(chat).catch((err) => console.log(err))) ??
-        {};
+      const chatUserData = await context.event.getChat(chat);
       leaderboardText += replaceText(text, {
         ...chatUserData,
         value: chats[index].entry,

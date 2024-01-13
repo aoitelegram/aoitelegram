@@ -13,7 +13,9 @@ export default {
     const chatId = context.event.chat.id || context.event.message?.chat.id;
 
     setTimeout(async () => {
-      await context.event.deleteMessage(messageId).catch(() => console.log);
+      await context.event
+        .deleteMessage(messageId)
+        .catch((err) => console.log(err));
     }, +ms(time));
     return "";
   },

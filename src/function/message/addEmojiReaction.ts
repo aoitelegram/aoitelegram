@@ -1,5 +1,3 @@
-import { isValidChat } from "../helpers";
-
 export default {
   name: "$addEmojiReaction",
   callback: async (context) => {
@@ -94,28 +92,16 @@ export default {
       "😡",
     ];
 
-    if (!(await isValidChat(context.event, chatId))) {
-      context.sendError("Invalid Chat Id");
-      return;
-    }
-
     if (!onlyEmiji.includes(emoji)) {
       context.sendError(`Invalid emoji. Only: ${onlyEmiji.join(", ")}`);
       return;
     }
 
-    const result = await context.telegram
-      .setMessageReaction({
-        chat_id: chatId,
-        message_id,
-        reaction: [{ type: "emoji", emoji }],
-      })
-      .catch(() => null);
-
-    if (!result) {
-      context.sendError("Invalid messageId");
-      return;
-    }
+    await context.telegram.setMessageReaction({
+      chat_id: chatId,
+      message_id,
+      reaction: [{ type: "emoji", emoji }],
+    });
 
     return true;
   },

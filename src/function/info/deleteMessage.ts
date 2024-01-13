@@ -1,5 +1,3 @@
-import { isValidChat } from "../helpers";
-
 export default {
   name: "$deleteMessage",
   callback: async (context) => {
@@ -8,14 +6,7 @@ export default {
       messageId = context.event.message_id || context.event.message?.message_id,
     ] = context.splits;
 
-    if (!(await isValidChat(context.event, chatId))) {
-      context.sendError("Invalid Chat Id");
-      return;
-    }
-
-    const result = await context.telegram
-      .deleteMessage(chatId, messageId)
-      .catch(() => "");
+    const result = await context.telegram.deleteMessage(chatId, messageId);
 
     return result;
   },

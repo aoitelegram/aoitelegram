@@ -6,14 +6,7 @@ export default {
     context.checkArgumentTypes(["string", "string | undefined"]);
     if (context.isError) return;
 
-    const result = await context.telegram
-      .setMyName(name, language_code)
-      .catch((err) => err);
-
-    if (typeof result !== "boolean") {
-      context.sendError("Failed to usage");
-      return;
-    }
+    await context.telegram.setMyName(name, language_code);
 
     return true;
   },

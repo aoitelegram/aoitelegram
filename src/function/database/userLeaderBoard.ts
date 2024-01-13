@@ -78,10 +78,7 @@ export default {
     for (let index = 0; index < users.length; index++) {
       if (index + 1 === Number(maxUser)) break;
       const [, user] = users[index].user.split("_");
-      const chatUserData =
-        (await context.telegram
-          .getChatMember(chatId, user)
-          .catch((err) => console.log(err))) || {};
+      const chatUserData = await context.telegram.getChatMember(chatId, user);
       leaderboardText += replaceText(text, {
         ...chatUserData.user,
         value: users[index].entry,

@@ -7,7 +7,7 @@ export default {
     if (context.isError) return;
 
     const getMe = await context.telegram.getMe();
-    const getPerms = await context.getChatMember(getMe.id).catch((err) => null);
+    const getPerms = await context.getChatMember(getMe.id);
     return getPerms ? getPerms[perms] : false;
   },
 };

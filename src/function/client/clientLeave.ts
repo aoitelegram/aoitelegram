@@ -6,12 +6,7 @@ export default {
     context.checkArgumentTypes(["string | number | undefined"]);
     if (context.isError) return;
 
-    const result = await context.telegram.leaveChat(chatId).catch(() => null);
-
-    if (!result) {
-      context.sendError("Invalid Chat Id");
-      return;
-    }
+    const result = await context.telegram.leaveChat(chatId);
 
     return result;
   },

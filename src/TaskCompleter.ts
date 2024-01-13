@@ -42,6 +42,7 @@ class TaskCompleter {
   private foundFunctions: string[] = [];
   private code: string;
   private eventData: Context & { telegram: AoiClient };
+  private isError: boolean = false;
   private telegram: AoiClient;
   private callback_query: unknown[] = [];
   private command: {
@@ -175,7 +176,7 @@ class TaskCompleter {
 
       const hasElseIf = ifBlock.toLowerCase().includes("$elseif");
 
-      const elseIfBlocks: any = {};
+      const elseIfBlocks: { [key: string]: string } = {};
 
       if (hasElseIf) {
         for (const elseIfData of ifBlock.split(/\$elseif\[/gi).slice(1)) {
@@ -280,24 +281,35 @@ class TaskCompleter {
       | ((context: ContextFunction) => unknown),
   ) {
     if (typeof callback === "function") {
-      const result = await callback(context);
-      switch (true) {
-        case !!context.suppressErrors:
-          this.suppressError = context.suppressErrors;
-        case !!context.localVars:
-          this.localVars = context.localVars;
-        case !!context.array:
-          this.array = context.array;
-        case !!context.random:
-          this.random = context.random;
-        case !!context.callback_query:
-          this.callback_query = context.callback_query;
-        case !!context.telegram?.globalVars:
+      try {
+        const result = await callback(context);
+
+        this.suppressError = context.suppressErrors || this.suppressError;
+        this.localVars = context.localVars || this.localVars;
+        this.array = context.array || this.array;
+        this.random = context.random || this.random;
+        this.callback_query = context.callback_query || this.callback_query;
+        if (context.telegram?.globalVars) {
           this.telegram.globalVars = context.telegram.globalVars;
-        default:
-          break;
+        }
+
+        return result;
+      } catch (err) {
+        if (`${err}`.includes("TelegramApiError")) {
+          const text = `❌ <b>TelegramApiError[$${func}]:</b><code>${`${err}`
+            .split(":")
+            .slice(1)
+            .join(" ")}</code>`;
+          this.#sendErrorMessage(text, true, func);
+        } else {
+          const text = `❌ <b>Error[$${func}]:</b><code>${`${err}`
+            .split(":")
+            .slice(1)
+            .join(" ")}</code>`;
+          this.#sendErrorMessage(text, true, func);
+        }
+        this.isError = true;
       }
-      return result;
     } else if (typeof callback.code === "string") {
       try {
         const code = updateParamsFromArray(
@@ -471,7 +483,7 @@ class TaskCompleter {
         `${resultFunction}`,
       );
 
-      if (dataContext.isError) {
+      if (dataContext.isError || this.isError) {
         this.code = "";
         break;
       }

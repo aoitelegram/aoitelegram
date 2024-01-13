@@ -1,5 +1,3 @@
-import { isValidChat } from "../helpers";
-
 export default {
   name: "$addCustomReaction",
   callback: async (context) => {
@@ -20,23 +18,11 @@ export default {
 
     if (context.isError) return;
 
-    if (!(await isValidChat(context.event, chatId))) {
-      context.sendError("Invalid Chat Id");
-      return;
-    }
-
-    const result = await context.telegram
-      .setMessageReaction({
-        chat_id: chatId,
-        message_id,
-        reaction: [{ type: "custom_emoji", custom_emoji }],
-      })
-      .catch(() => null);
-
-    if (!result) {
-      context.sendError("Invalid customEmoji/messageId");
-      return;
-    }
+    await context.telegram.setMessageReaction({
+      chat_id: chatId,
+      message_id,
+      reaction: [{ type: "custom_emoji", custom_emoji }],
+    });
 
     return true;
   },

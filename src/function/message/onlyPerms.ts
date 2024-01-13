@@ -14,14 +14,7 @@ export default {
     ]);
     if (context.isError) return;
 
-    const getPerms = await context.event
-      .getChatMember(userId)
-      .catch(() => null);
-
-    if (!getPerms) {
-      context.sendError("Invalid User Id");
-      return;
-    }
+    const getPerms = await context.event.getChatMember(userId);
 
     const hasCreator =
       getPerms.status === "creator" || getPerms.status === "left";

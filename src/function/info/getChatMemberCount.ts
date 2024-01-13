@@ -7,14 +7,7 @@ export default {
 
     if (context.isError) return;
 
-    const result = await context.telegram
-      .getChatMemberCount(chatId)
-      .catch((err) => null);
-
-    if (!result) {
-      context.sendError("Invalid Chat Id");
-      return;
-    }
+    const result = await context.telegram.getChatMemberCount(chatId);
 
     return result;
   },

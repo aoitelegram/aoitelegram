@@ -7,12 +7,7 @@ export default {
       chatId = context.event.chat?.id || context.event.message?.chat.id,
       path,
     ] = context.splits;
-    const result = await context.telegram.getChat(chatId).catch(() => null);
-
-    if (!result) {
-      context.sendError("Invalid Chat Id");
-      return;
-    }
+    const result = await context.telegram.getChat(chatId);
 
     return getObjectKey(result, path);
   },
