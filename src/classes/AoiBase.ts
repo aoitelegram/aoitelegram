@@ -16,8 +16,6 @@ import {
 } from "./AoiTyping";
 import { version } from "../../package.json";
 
-type Entry<K, V> = [K, V];
-
 type AllowedUpdates = ReadonlyArray<Exclude<keyof Update, "update_id">>;
 
 const defaultAllowedUpdates = [
@@ -179,6 +177,7 @@ class AoiBase extends TelegramBot {
             "you did not specify the 'name' parameter",
           );
         }
+
         if ((optionVersion?.version ?? 0) > version) {
           throw new AoijsError(
             "customFunction",
@@ -187,6 +186,7 @@ class AoiBase extends TelegramBot {
             }`,
           );
         }
+
         this.availableFunctions.set(
           optionVersion.name.toLowerCase(),
           optionVersion,
@@ -199,6 +199,7 @@ class AoiBase extends TelegramBot {
           "you did not specify the 'name' parameter",
         );
       }
+
       if ((options?.version ?? 0) > version) {
         throw new AoijsError(
           "customFunction",
@@ -209,6 +210,7 @@ class AoiBase extends TelegramBot {
           }`,
         );
       }
+
       this.availableFunctions.set(options.name.toLowerCase(), options);
     }
     return this;
@@ -225,6 +227,7 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'name' parameter",
       );
     }
+
     if (Array.isArray(options)) {
       for (const name of options) {
         this.availableFunctions.delete(name.toLowerCase());
@@ -233,6 +236,58 @@ class AoiBase extends TelegramBot {
       this.availableFunctions.delete(options.toLowerCase());
     }
     return true;
+  }
+
+  /**
+   * Edits or adds a data function to the available functions.
+   * @param options - A single DataFunction or an array of DataFunction objects.
+   * @returns Returns true after successfully editing or adding the function(s).
+   */
+  editFunction(options: DataFunction | DataFunction[]): boolean {
+    if (!options) {
+      throw new AoijsError(
+        "parameter",
+        "you did not specify the 'name' parameter",
+      );
+    }
+
+    if (Array.isArray(options)) {
+      for (const dataFunction of options) {
+        this.availableFunctions.set(
+          dataFunction.name.toLowerCase(),
+          dataFunction,
+        );
+      }
+    } else {
+      this.availableFunctions.set(options.name.toLowerCase(), options);
+    }
+
+    return true;
+  }
+
+  /**
+   * Retrieves a function from the available functions.
+   * @param options - A single function name or an array of function names.
+   * @returns Returns the requested function(s).
+   */
+  getFunction(options: string | string[]) {
+    if (options.length < 1) {
+      throw new AoijsError(
+        "parameter",
+        "you did not specify the 'name' parameter",
+      );
+    }
+
+    if (Array.isArray(options)) {
+      const functions = [];
+      for (const func of options) {
+        const result = this.availableFunctions.get(func);
+        functions.push(result);
+      }
+      return functions;
+    } else {
+      return this.availableFunctions.get(options);
+    }
   }
 
   /**
