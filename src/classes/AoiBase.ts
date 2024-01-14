@@ -1,14 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
-import { AoiClient } from "./AoiClient";
 import { AoijsError } from "./AoiError";
 import { Update } from "@telegram.ts/types";
 import { TaskCompleter } from "../TaskCompleter";
 import { getObjectKey } from "../function/parser";
 import { CombinedEventFunctions } from "./AoiTyping";
 import { setInterval, clearInterval } from "node:timers";
+import { AoiClient, DatabaseOptions } from "./AoiClient";
 import { TelegramBot, Collection, Context } from "telegramsjs";
-import { AoiManager, DatabaseOptions } from "./AoiManager";
+import { AoiManager, KeyValueOptions } from "./AoiManager";
+import { MongoDBManager, MongoDBManagerOptions } from "./MongoDBManager";
 import {
   LibDataFunction,
   DataFunction,
@@ -73,7 +74,7 @@ interface TelegramOptions {
  * A class that provides additional functionality for handling commands and messages.
  */
 class AoiBase extends TelegramBot {
-  #database: AoiManager;
+  #database: AoiManager | MongoDBManager;
   disableFunctions: string[];
   availableFunctions: Collection<string, LibWithDataFunction> =
     new Collection();
@@ -98,13 +99,18 @@ class AoiBase extends TelegramBot {
         ? telegram
         : { ...telegram, allowed_updates: defaultAllowedUpdates },
     );
-    this.#database = new AoiManager(database);
     this.disableFunctions = disableFunctions || [];
     this.availableFunctions = loadFunctionsLib(
       path.join(__dirname, "..", "/function/"),
       new Collection<string, LibWithDataFunction>(),
       disableFunctions || [],
     );
+    if (database?.type === "KeyValue" || !database?.type) {
+      this.#database = new AoiManager(database as KeyValueOptions);
+    } else if (database?.type === "MongoDB") {
+      this.#database = new MongoDBManager(database as MongoDBManagerOptions);
+      this.#database.createFunction(this);
+    } else throw new AoijsError(undefined, "Invalid type for database");
     this.addFunction(customFunction || []);
   }
 
@@ -288,6 +294,14 @@ class AoiBase extends TelegramBot {
     } else {
       return this.availableFunctions.get(options);
     }
+  }
+
+  /**
+   * Gets the count of available functions.
+   * @returns The number of functions currently available.
+   */
+  get countFunction() {
+    return [...this.availableFunctions.keys()].length;
   }
 
   /**
@@ -742,29 +756,19 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    this.#database.on("update", async (newVariable, oldVariable) => {
-      this.addFunction([
-        {
-          name: "$newVariable",
-          callback: (context) => {
-            const result = getObjectKey(newVariable, context.inside as string);
-            return result;
-          },
+    this.#database.on("update", async (variable) => {
+      this.addFunction({
+        name: "$variable",
+        callback: (context) => {
+          const result = getObjectKey(variable, context.inside as string);
+          return result;
         },
-        {
-          name: "$oldVariable",
-          callback: (context) => {
-            const result = getObjectKey(oldVariable, context.inside as string);
-            return result;
-          },
-        },
-      ]);
+      });
       await this.evaluateCommand({ event: "variableUpdate" }, options.code, {
-        newVariable,
-        oldVariable,
+        variable,
         telegram: this,
       });
-      this.removeFunction(["$newVariable", "$oldVariable"]);
+      this.removeFunction("$variable");
     });
     return this;
   }
@@ -804,8 +808,11 @@ class AoiBase extends TelegramBot {
    * @param  options - Key-value pairs of variables to set.
    * @param {string | string[]} table - The database table to use (optional).
    */
-  variables(options: { [key: string]: unknown }, table?: string | string[]) {
-    this.#database.variables(options, table);
+  async variables(
+    options: { [key: string]: unknown },
+    table?: string | string[],
+  ) {
+    await this.#database.variables(options, table);
   }
 }
 

@@ -5,9 +5,9 @@ import { KeyValue } from "@aoitelegram/database";
 
 /**
  * Configuration options for the database connection.
- * @interface DatabaseOptions
+ * @interface KeyValueOptions
  */
-interface DatabaseOptions {
+interface KeyValueOptions {
   /**
    * The file path to the database storage.
    * @type {string}
@@ -30,7 +30,7 @@ interface DatabaseOptions {
    * Log ready database
    * @type {boolean}
    */
-  console?: boolean;
+  logging?: boolean;
 }
 
 /**
@@ -40,11 +40,11 @@ class AoiManager extends KeyValue<string, unknown> {
   collection: Collection<string, unknown> = new Collection();
   /**
    * Creates a new instance of AoiManager.
-   * @param {DatabaseOptions} options - Configuration options for the database connection.
+   * @param {KeyValueOptions} options - Configuration options for the database connection.
    */
-  constructor(options: DatabaseOptions = { console: true }) {
+  constructor(options: KeyValueOptions = { logging: true }) {
     super(options);
-    if (options.console) {
+    if (options.logging) {
       this.on("ready", async () => {
         const text = chalk.green("Database has been established");
         console.log(text);
@@ -98,4 +98,4 @@ class AoiManager extends KeyValue<string, unknown> {
   }
 }
 
-export { AoiManager, DatabaseOptions };
+export { AoiManager, KeyValueOptions };

@@ -5,12 +5,13 @@ import { AoiWarning } from "./AoiWarning";
 import { DataFunction } from "./AoiTyping";
 import { CustomEvent } from "./CustomEvent";
 import { LoadCommands } from "./LoadCommands";
-import { DatabaseOptions } from "./AoiManager";
+import { KeyValueOptions } from "./AoiManager";
 import { AoiBase, TelegramOptions } from "./AoiBase";
+import { Action, ActionDescription } from "../helpers/Action";
 import { TimeoutManager } from "../helpers/manager/TimeoutManager";
 import { AwaitedManager } from "../helpers/manager/AwaitedManager";
+import { MongoDBManagerOptions } from "./MongoDBManager";
 import { Command, CommandDescription } from "../helpers/Command";
-import { Action, ActionDescription } from "../helpers/Action";
 import { Timeout, TimeoutDescription } from "../helpers/Timeout";
 import { Awaited, AwaitedDescription } from "../helpers/Awaited";
 import { version } from "../../package.json";
@@ -19,11 +20,16 @@ interface CommandInfoSet {
   [key: string]: string;
 }
 
+type DatabaseOptions = {
+  type?: "MongoDB" | "KeyValue";
+} & MongoDBManagerOptions &
+  KeyValueOptions;
+
 /**
  * A class representing an AoiClient, which extends AoiBase.
  */
 class AoiClient extends AoiBase {
-  #optionConsole: boolean | undefined;
+  #optionLogging: boolean | undefined;
   #aoiWarning: boolean | undefined;
   #warningManager: AoiWarning;
   functionError: boolean | undefined;
@@ -48,7 +54,7 @@ class AoiClient extends AoiBase {
    * @param {DataFunction[]} options.customFunction - An array of customFunction functions.
    * @param {boolean} options.functionError - For the error handler of functions.
    * @param {boolean} options.sendMessageError - To disable text errors.
-   * @param {boolean} [options.console] - Outputting system messages to the console.
+   * @param {boolean} [options.logging] - Outputting system messages to the console.
    * @param {boolean} [options.aoiWarning] - Displaying messages about new versions.
    * @param {boolean} [options.autoUpdate] - Checks for available package updates and performs an update if enabled
    */
@@ -60,7 +66,7 @@ class AoiClient extends AoiBase {
     customFunction?: DataFunction[];
     functionError?: boolean;
     sendMessageError?: boolean;
-    console?: boolean;
+    logging?: boolean;
     aoiWarning?: boolean;
     autoUpdate?: boolean;
   }) {
@@ -71,8 +77,8 @@ class AoiClient extends AoiBase {
       options.customFunction,
       options.disableFunctions,
     );
-    this.#optionConsole =
-      options.console === undefined ? true : options.console;
+    this.#optionLogging =
+      options.logging === undefined ? true : options.logging;
     this.#aoiWarning =
       options.aoiWarning === undefined ? true : options.aoiWarning;
     this.#warningManager = new AoiWarning(
@@ -216,7 +222,7 @@ class AoiClient extends AoiBase {
     await this.registerAction.handler();
     await this.registerTimeout.handler();
     await this.registerAwaited.handler();
-    if (this.#optionConsole) {
+    if (this.#optionLogging) {
       this.on("ready", async (ctx) => {
         setTimeout(() => {
           const ctxUsername = `@${ctx.username}`;
@@ -258,4 +264,4 @@ class AoiClient extends AoiBase {
   }
 }
 
-export { AoiClient };
+export { AoiClient, DatabaseOptions };

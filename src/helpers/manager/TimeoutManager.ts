@@ -3,7 +3,7 @@ import { EventEmitter } from "node:events";
 import { KeyValue } from "@aoitelegram/database";
 import { AoijsError } from "../../classes/AoiError";
 import { AoiClient } from "../../classes/AoiClient";
-import { DatabaseOptions } from "../../classes/AoiManager";
+import { KeyValueOptions } from "../../classes/AoiManager";
 
 interface ValueDatabase {
   id: string;
@@ -26,7 +26,7 @@ class TimeoutManager extends KeyValue<string, ValueDatabase> {
    * @param telegram The AoiClient instance.
    * @param options Configuration options for the database connection.
    */
-  constructor(telegram: AoiClient, options: DatabaseOptions = {}) {
+  constructor(telegram: AoiClient, options: KeyValueOptions = {}) {
     super({ ...options, tables: ["timeout"] });
     this.telegram = telegram;
 

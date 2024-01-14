@@ -2,6 +2,7 @@ import { AoiClient } from "./classes/AoiClient";
 import { AoijsError } from "./classes/AoiError";
 import { Context, Collection } from "telegramsjs";
 import { AoiManager } from "./classes/AoiManager";
+import { MongoDBManager } from "./classes/MongoDBManager";
 import { getObjectKey, toParse } from "./function/parser";
 import { ConditionChecker } from "./function/condition";
 import { unpack, findAndTransform, updateParamsFromArray } from "./prototype";
@@ -27,7 +28,7 @@ interface ContextFunction {
   argsCheck: (amount: number) => unknown;
   checkArgumentTypes: (expectedArgumentTypes: string[]) => void;
   sendError: (error: string, custom?: boolean) => unknown;
-  database: AoiManager;
+  database: AoiManager | MongoDBManager;
   foundFunctions: string[];
   suppressErrors?: string;
 }
@@ -50,7 +51,7 @@ class TaskCompleter {
     hasCommand?: boolean;
     hasEvent?: boolean;
   };
-  private database: AoiManager;
+  private database: AoiManager | MongoDBManager;
   private availableFunction: Collection<string, LibWithDataFunction>;
   private onlySearchFunction: string[];
 
@@ -69,7 +70,7 @@ class TaskCompleter {
     eventData: Context & { telegram: AoiClient },
     telegram: AoiClient,
     command: { name: string; hasCommand?: boolean; hasEvent?: boolean },
-    database: AoiManager,
+    database: AoiManager | MongoDBManager,
     availableFunction: Collection<string, LibWithDataFunction>,
     onlySearchFunction: string[],
   ) {
