@@ -93,24 +93,39 @@ class AoiBase extends TelegramBot {
     customFunction?: DataFunction[],
     disableFunctions?: string[],
   ) {
+    if (!token) {
+      throw new AoijsError(
+        "AoiBase",
+        "You did not specify the 'token' parameter",
+      );
+    }
+
     super(
       token,
       Array.isArray(telegram?.allowed_updates)
         ? telegram
         : { ...telegram, allowed_updates: defaultAllowedUpdates },
     );
+
     this.disableFunctions = disableFunctions || [];
     this.availableFunctions = loadFunctionsLib(
       path.join(__dirname, "..", "/function/"),
       new Collection<string, LibWithDataFunction>(),
       disableFunctions || [],
     );
+
     if (database?.type === "KeyValue" || !database?.type) {
       this.#database = new AoiManager(database as KeyValueOptions);
     } else if (database?.type === "MongoDB") {
       this.#database = new MongoDBManager(database as MongoDBManagerOptions);
       this.#database.createFunction(this);
-    } else throw new AoijsError(undefined, "Invalid type for database");
+    } else {
+      throw new AoijsError(
+        undefined,
+        "The specified database type is incorrect; it should be either 'MongoDB' or 'KeyValue'",
+      );
+    }
+
     this.addFunction(customFunction || []);
   }
 
