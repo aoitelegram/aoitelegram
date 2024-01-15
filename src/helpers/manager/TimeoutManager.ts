@@ -1,9 +1,6 @@
 import { setTimeout } from "node:timers";
-import { EventEmitter } from "node:events";
-import { KeyValue } from "@aoitelegram/database";
 import { AoijsError } from "../../classes/AoiError";
 import { AoiClient } from "../../classes/AoiClient";
-import { KeyValueOptions } from "../../classes/AoiManager";
 
 interface ValueDatabase {
   id: string;
@@ -15,7 +12,8 @@ interface ValueDatabase {
 /**
  * A class responsible for managing timeouts and associated actions.
  */
-class TimeoutManager extends KeyValue<string, ValueDatabase> {
+class TimeoutManager {
+  database: AoiClient["database"];
   /**
    * A reference to the AoiClient instance.
    */
@@ -24,18 +22,19 @@ class TimeoutManager extends KeyValue<string, ValueDatabase> {
   /**
    * Constructs a new TimeoutManager instance.
    * @param telegram The AoiClient instance.
-   * @param options Configuration options for the database connection.
    */
-  constructor(telegram: AoiClient, options: KeyValueOptions = {}) {
-    super({ ...options, tables: ["timeout"] });
+  constructor(telegram: AoiClient) {
     this.telegram = telegram;
-
+    this.database = telegram.database;
     /**
      * Handles the 'ready' event, which is emitted when the database connection is established.
      */
-    this.on("ready", () => {
-      this.forEach("timeout", (value, key) => {
-        const timeoutData = this.get("timeout", key);
+    this.database.on("ready", () => {
+      this.database.forEach("timeout", async (value, key) => {
+        const timeoutData = (await this.database.get(
+          "timeout",
+          key,
+        )) as ValueDatabase;
 
         if (!timeoutData) return;
 
@@ -43,13 +42,13 @@ class TimeoutManager extends KeyValue<string, ValueDatabase> {
           timeoutData.date + timeoutData.milliseconds - Date.now();
 
         if (remainingTime > 0) {
-          setTimeout(() => {
+          setTimeout(async () => {
             this.telegram.emit("timeout", this.telegram, timeoutData);
-            this.delete("timeout", timeoutData.id);
+            await this.database.delete("timeout", timeoutData.id);
           }, timeoutData.milliseconds);
         } else {
           this.telegram.emit("timeout", this.telegram, timeoutData);
-          this.delete("timeout", timeoutData.id);
+          await this.database.delete("timeout", timeoutData.id);
         }
       });
     });
@@ -67,13 +66,11 @@ class TimeoutManager extends KeyValue<string, ValueDatabase> {
         );
       }
 
-      setTimeout(() => {
+      setTimeout(async () => {
         this.telegram.emit("timeout", this.telegram, context);
-        this.delete("timeout", context.id);
+        await this.database.delete("timeout", context.id);
       }, context.milliseconds);
     });
-
-    this.connect();
   }
 
   /**
@@ -81,7 +78,7 @@ class TimeoutManager extends KeyValue<string, ValueDatabase> {
    * @param id The unique identifier of the timeout.
    * @param options The options for the timeout, including milliseconds and data.
    */
-  addTimeout(
+  async addTimeout(
     id: string,
     options: {
       milliseconds: number;
@@ -94,7 +91,7 @@ class TimeoutManager extends KeyValue<string, ValueDatabase> {
       date: Date.now(),
     };
     this.telegram.emit("addTimeout", data);
-    this.set("timeout", id, data);
+    await this.database.set("timeout", id, data);
   }
 }
 

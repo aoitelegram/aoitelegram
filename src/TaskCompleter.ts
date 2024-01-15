@@ -8,6 +8,7 @@ import { ConditionChecker } from "./function/condition";
 import { unpack, findAndTransform, updateParamsFromArray } from "./prototype";
 import {
   DataFunction,
+  ContextEvent,
   LibDataFunction,
   LibWithDataFunction,
 } from "./classes/AoiTyping";
@@ -20,7 +21,7 @@ interface ContextFunction {
   random: Collection<string, unknown>;
   array: Collection<string, unknown>;
   callback_query: unknown[];
-  event: Context & { telegram: AoiClient };
+  event: ContextEvent;
   telegram: AoiClient;
   code: string;
   command: { name: string; hasCommand?: boolean; hasEvent?: boolean };
@@ -42,7 +43,7 @@ class TaskCompleter {
   private searchedFunctions: string[];
   private foundFunctions: string[] = [];
   private code: string;
-  private eventData: Context & { telegram: AoiClient };
+  private eventData: ContextEvent;
   private isError: boolean = false;
   private telegram: AoiClient;
   private callback_query: unknown[] = [];
@@ -67,7 +68,7 @@ class TaskCompleter {
    */
   constructor(
     code: string,
-    eventData: Context & { telegram: AoiClient },
+    eventData: ContextEvent,
     telegram: AoiClient,
     command: { name: string; hasCommand?: boolean; hasEvent?: boolean },
     database: AoiManager | MongoDBManager,

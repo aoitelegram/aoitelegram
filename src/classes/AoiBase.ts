@@ -4,9 +4,9 @@ import { AoijsError } from "./AoiError";
 import { Update } from "@telegram.ts/types";
 import { TaskCompleter } from "../TaskCompleter";
 import { getObjectKey } from "../function/parser";
-import { CombinedEventFunctions } from "./AoiTyping";
 import { setInterval, clearInterval } from "node:timers";
 import { AoiClient, DatabaseOptions } from "./AoiClient";
+import { ContextEvent, CombinedEventFunctions } from "./AoiTyping";
 import { TelegramBot, Collection, Context } from "telegramsjs";
 import { AoiManager, KeyValueOptions } from "./AoiManager";
 import { MongoDBManager, MongoDBManagerOptions } from "./MongoDBManager";
@@ -74,7 +74,7 @@ interface TelegramOptions {
  * A class that provides additional functionality for handling commands and messages.
  */
 class AoiBase extends TelegramBot {
-  #database: AoiManager | MongoDBManager;
+  database: AoiManager | MongoDBManager;
   disableFunctions: string[];
   availableFunctions: Collection<string, LibWithDataFunction> =
     new Collection();
@@ -115,10 +115,10 @@ class AoiBase extends TelegramBot {
     );
 
     if (database?.type === "KeyValue" || !database?.type) {
-      this.#database = new AoiManager(database as KeyValueOptions);
+      this.database = new AoiManager(database as KeyValueOptions);
     } else if (database?.type === "MongoDB") {
-      this.#database = new MongoDBManager(database as MongoDBManagerOptions);
-      this.#database.createFunction(this);
+      this.database = new MongoDBManager(database as MongoDBManagerOptions);
+      this.database.createFunction(this);
     } else {
       throw new AoijsError(
         undefined,
@@ -168,14 +168,14 @@ class AoiBase extends TelegramBot {
     try {
       const taskCompleter = new TaskCompleter(
         code,
-        eventData as Context & { telegram: AoiClient },
+        eventData as ContextEvent,
         this as unknown as AoiClient,
         {
           name: typeof command === "string" ? command : command.event,
           hasCommand: typeof command === "string" ? true : false,
           hasEvent: typeof command === "string" ? false : true,
         },
-        this.#database,
+        this.database,
         this.availableFunctions,
         [...this.availableFunctions.keys()],
       );
@@ -741,7 +741,7 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    this.#database.on("create", async (newVariable) => {
+    this.database.on("create", async (newVariable) => {
       this.addFunction({
         name: "$newVariable",
         callback: (context) => {
@@ -771,7 +771,7 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    this.#database.on("update", async (variable) => {
+    this.database.on("update", async (variable) => {
       this.addFunction({
         name: "$variable",
         callback: (context) => {
@@ -801,7 +801,7 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
-    this.#database.on("delete", async (oldVariable) => {
+    this.database.on("delete", async (oldVariable) => {
       this.addFunction({
         name: "$oldVariable",
         callback: (context) => {
@@ -827,7 +827,7 @@ class AoiBase extends TelegramBot {
     options: { [key: string]: unknown },
     table?: string | string[],
   ) {
-    await this.#database.variables(options, table);
+    await this.database.variables(options, table);
   }
 }
 

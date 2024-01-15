@@ -86,7 +86,7 @@ class AoiClient extends AoiBase {
     );
     this.functionError = options.functionError;
     this.sendMessageError = options.sendMessageError;
-    this.timeoutManager = new TimeoutManager(this, options.database);
+    this.timeoutManager = new TimeoutManager(this);
     this.awaitedManager = new AwaitedManager(this);
   }
 

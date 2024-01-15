@@ -86,6 +86,22 @@ type DataFunction =
       callback: (context: ContextFunction) => unknown;
     };
 
+type ContextEvent = EventContext &
+  UserFromGetMe &
+  Message &
+  MessageReactionUpdated &
+  MessageReactionCountUpdated &
+  CallbackQuery &
+  InlineQuery &
+  ShippingQuery &
+  PreCheckoutQuery &
+  Poll &
+  PollAnswer &
+  ChatMemberUpdated &
+  ChatJoinRequest &
+  ChatBoostUpdated &
+  ChatBoostRemoved & { telegram: AoiClient };
+
 type DataEvent = {
   listen: string;
   type: string;
@@ -102,6 +118,7 @@ export {
   CombinedEventFunctions,
   LibWithDataFunction,
   LibDataFunction,
+  ContextEvent,
   DataFunction,
   DataEvent,
 };

@@ -10,7 +10,7 @@ function hasObject(arg: any): arg is object {
 
 export default {
   name: "$setTimeout",
-  callback: (context) => {
+  callback: async (context) => {
     context.argsCheck(2);
     const [name, milliseconds, data = {}] = context.splits;
     context.checkArgumentTypes(["string", "string", "object"]);
@@ -21,7 +21,7 @@ export default {
       return;
     }
 
-    context.telegram.timeoutManager.addTimeout(name, {
+    await context.telegram.timeoutManager.addTimeout(name, {
       milliseconds: +ms(milliseconds),
       data: JSON.parse(JSON.stringify(data)),
     });

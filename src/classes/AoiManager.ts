@@ -43,7 +43,7 @@ class AoiManager extends KeyValue<string, unknown> {
    * @param {KeyValueOptions} options - Configuration options for the database connection.
    */
   constructor(options: KeyValueOptions = { logging: true }) {
-    super(options);
+    super({ ...options, tables: [...(options.tables || []), "timeout"] });
     if (options.logging) {
       this.on("ready", async () => {
         const text = chalk.green("Database has been established");
