@@ -74,7 +74,7 @@ interface TelegramOptions {
  * A class that provides additional functionality for handling commands and messages.
  */
 class AoiBase extends TelegramBot {
-  database: AoiManager | MongoDBManager;
+  database: AoiManager | MongoDBManager = {} as AoiManager;
   disableFunctions: string[];
   availableFunctions: Collection<string, LibWithDataFunction> =
     new Collection();
@@ -85,6 +85,7 @@ class AoiBase extends TelegramBot {
    * @param {DatabaseOptions} options.database - Options for the database.
    * @param {DataFunction[]} options.customFunction - An array of custom functions.
    * @param {string[]} options.disableFunctions - Functions that will be removed from the library's loading functions.
+   * @param {boolean} [options.disableAoiDB] - Disabled built-in database.
    */
   constructor(
     token: string,
@@ -92,6 +93,7 @@ class AoiBase extends TelegramBot {
     database: DatabaseOptions = {},
     customFunction?: DataFunction[],
     disableFunctions?: string[],
+    disableAoiDB?: boolean,
   ) {
     if (!token) {
       throw new AoijsError(
@@ -114,16 +116,18 @@ class AoiBase extends TelegramBot {
       disableFunctions || [],
     );
 
-    if (database?.type === "KeyValue" || !database?.type) {
-      this.database = new AoiManager(database as KeyValueOptions);
-    } else if (database?.type === "MongoDB") {
-      this.database = new MongoDBManager(database as MongoDBManagerOptions);
-      this.database.createFunction(this);
-    } else {
-      throw new AoijsError(
-        undefined,
-        "The specified database type is incorrect; it should be either 'MongoDB' or 'KeyValue'",
-      );
+    if (!disableAoiDB) {
+      if (database?.type === "KeyValue" || !database?.type) {
+        this.database = new AoiManager(database as KeyValueOptions);
+      } else if (database?.type === "MongoDB") {
+        this.database = new MongoDBManager(database as MongoDBManagerOptions);
+        this.database.createFunction(this);
+      } else {
+        throw new AoijsError(
+          undefined,
+          "The specified database type is incorrect; it should be either 'MongoDB' or 'KeyValue'",
+        );
+      }
     }
 
     this.addFunction(customFunction || []);

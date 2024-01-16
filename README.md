@@ -62,17 +62,19 @@ const bot = new AoiClient({
   functionError: true,
   /** To disable text errors **/
   sendMessageError: true,
-  /** Outputting system messages to the console. */
+  /** Disabled built-in database. **/
+  disableAoiDB: false,
+  /** Outputting system messages to the console. **/
   logging: true,
-  /** Checks for available package updates and performs an update if enabled (beta) */
+  /** Checks for available package updates and performs an update if enabled (beta) **/
   autoUpdate: {
-    /** Displaying messages about new versions. */
+    /** Displaying messages about new versions. **/
     aoiWarning: true,
-    /**  Whether automatic updates are enabled. */
+    /**  Whether automatic updates are enabled. **/
     autoUpdate: true,
-    /** Whether to enable development versions. */
+    /** Whether to enable development versions. **/
     enableDev: true,
-    /** Whether to enable beta versions. */
+    /** Whether to enable beta versions. **/
     enableBeta: true,
   },
 });
@@ -117,7 +119,9 @@ Ping: $pingms
 ]`,
 });
 
-const loader = new LoadCommands(bot).loadCommands("./command/");
+const loader = new LoadCommands(bot);
+loader.loadCommands("./command/");
+loader.loadVariables("./variables/");
 
 // Set user variables in a table.
 bot.variables(

@@ -54,6 +54,7 @@ class AoiClient extends AoiBase {
    * @param {DataFunction[]} options.customFunction - An array of customFunction functions.
    * @param {boolean} options.functionError - For the error handler of functions.
    * @param {boolean} options.sendMessageError - To disable text errors.
+   * @param {boolean} [options.disableAoiDB] - Disabled built-in database.
    * @param {boolean} [options.logging] - Outputting system messages to the console.
    * @param {boolean} [options.autoUpdate] - Checks for available package updates and performs an update if enabled
    */
@@ -65,6 +66,7 @@ class AoiClient extends AoiBase {
     customFunction?: DataFunction[];
     functionError?: boolean;
     sendMessageError?: boolean;
+    disableAoiDB?: boolean;
     logging?: boolean;
     autoUpdate?: AoiWarningOptions;
   }) {
@@ -74,6 +76,7 @@ class AoiClient extends AoiBase {
       options.database,
       options.customFunction,
       options.disableFunctions,
+      options.disableAoiDB,
     );
     this.#optionLogging =
       options.logging === undefined ? true : options.logging;
