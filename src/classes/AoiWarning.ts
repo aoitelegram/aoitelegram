@@ -1,23 +1,48 @@
-import fetch from "node-fetch";
 import chalk from "chalk";
+import fetch from "node-fetch";
 import { version } from "../../package.json";
 import { execSync, spawn } from "node:child_process";
+
+interface AoiWarningOptions {
+  enableWarn?: boolean;
+  autoUpdate?: boolean;
+  enableDev?: boolean;
+  enableBeta?: boolean;
+}
+
+function versionToArray(versionString: string) {
+  return versionString.split(".").map(Number);
+}
 
 /**
  * A class to manage package updates and project restarts.
  */
 class AoiWarning {
-  /**
-   * Whether automatic updates are enabled.
-   */
   autoUpdate: boolean;
+  enableDev: boolean;
+  enableBeta: boolean;
 
   /**
    * Constructs an instance of AoiWarning.
-   * @param autoUpdate - Whether automatic updates are enabled. Default is false.
+   * @param options - Configuration options for AoiWarning.
    */
-  constructor(autoUpdate = false) {
-    this.autoUpdate = autoUpdate;
+  constructor(options: AoiWarningOptions = {}) {
+    this.autoUpdate = options.autoUpdate || false;
+    this.enableDev = options.enableDev || false;
+    this.enableBeta = options.enableBeta || false;
+    this.setupExitHandlers();
+  }
+
+  /**
+   * Set up exit handlers for graceful process exit.
+   */
+  private setupExitHandlers() {
+    if (!this.autoUpdate) return;
+
+    process.on("SIGINT", () => {
+      console.log(chalk.yellow("Received SIGINT. Exiting gracefully..."));
+      process.exit(0);
+    });
   }
 
   /**
@@ -29,14 +54,8 @@ class AoiWarning {
       const responseData = await response.json();
       const latestVersion = responseData["dist-tags"].latest;
 
-      if (latestVersion !== version) {
-        console.warn(
-          chalk.red("[ AoiWarning ]: ") +
-            chalk.yellow(`v${latestVersion} is available to install.`) +
-            " (" +
-            chalk.red(`npm i aoitelegram@${latestVersion}`) +
-            ")",
-        );
+      if (this.shouldCheckForUpdate(latestVersion)) {
+        this.displayUpdateMessage(latestVersion);
 
         if (this.autoUpdate) {
           await this.updateToLatestVersion(latestVersion);
@@ -47,6 +66,43 @@ class AoiWarning {
         chalk.red("[ AoiWarning ]: failed to check for updates: ") +
           chalk.yellow(error),
       );
+    }
+  }
+
+  /**
+   * Determines if an update should be checked based on current configuration and version.
+   * @param latestVersion - The latest version available on npm.
+   * @returns True if an update should be checked, otherwise false.
+   */
+  private shouldCheckForUpdate(latestVersion: string) {
+    const isBetaEnabled = this.enableBeta;
+    const isDevEnabled = this.enableDev;
+    const isLatestVersionBeta = latestVersion.includes("beta");
+    const isLatestVersionDev = latestVersion.includes("dev");
+
+    return (
+      (isBetaEnabled === true && isLatestVersionBeta === true) ||
+      (isDevEnabled === true && isLatestVersionDev === true) ||
+      (!isLatestVersionDev && !isLatestVersionBeta && latestVersion !== version)
+    );
+  }
+
+  /**
+   * Displays a colored update message based on version differences.
+   * @param latestVersion - The latest version available on npm.
+   */
+  private displayUpdateMessage(latestVersion: string) {
+    const currentVersionParts = versionToArray(version);
+    const latestVersionParts = versionToArray(latestVersion);
+
+    const warningLabel = chalk.green("[ AoiWarning ]:");
+
+    if (latestVersionParts[0] < currentVersionParts[0]) {
+      console.warn(`${warningLabel} Major update available!`);
+    } else if (latestVersionParts[1] < currentVersionParts[1]) {
+      console.warn(`${warningLabel} Minor update available.`);
+    } else if (latestVersionParts[2] < currentVersionParts[2]) {
+      console.warn(`${warningLabel} Patch update available.`);
     }
   }
 
@@ -62,17 +118,7 @@ class AoiWarning {
         stdio: "inherit",
       });
 
-      console.log(chalk.green("Restarting the project..."));
-
-      process.once("exit", async () => {
-        spawn(process.argv.shift() as string, process.argv, {
-          cwd: process.cwd(),
-          detached: true,
-          stdio: "inherit",
-        });
-        console.log(chalk.green("Project successfully updated and restarted."));
-      });
-
+      console.log(chalk.green("Exit the project..."));
       process.exit();
     } catch (error) {
       console.error(
@@ -83,4 +129,4 @@ class AoiWarning {
   }
 }
 
-export { AoiWarning };
+export { AoiWarning, AoiWarningOptions };

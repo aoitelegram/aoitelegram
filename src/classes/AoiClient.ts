@@ -1,12 +1,12 @@
 import chalk from "chalk";
 import { AoijsError } from "./AoiError";
 import { Collection } from "telegramsjs";
-import { AoiWarning } from "./AoiWarning";
 import { DataFunction } from "./AoiTyping";
 import { CustomEvent } from "./CustomEvent";
 import { LoadCommands } from "./LoadCommands";
 import { KeyValueOptions } from "./AoiManager";
 import { AoiBase, TelegramOptions } from "./AoiBase";
+import { AoiWarning, AoiWarningOptions } from "./AoiWarning";
 import { Action, ActionDescription } from "../helpers/Action";
 import { TimeoutManager } from "../helpers/manager/TimeoutManager";
 import { AwaitedManager } from "../helpers/manager/AwaitedManager";
@@ -55,7 +55,6 @@ class AoiClient extends AoiBase {
    * @param {boolean} options.functionError - For the error handler of functions.
    * @param {boolean} options.sendMessageError - To disable text errors.
    * @param {boolean} [options.logging] - Outputting system messages to the console.
-   * @param {boolean} [options.aoiWarning] - Displaying messages about new versions.
    * @param {boolean} [options.autoUpdate] - Checks for available package updates and performs an update if enabled
    */
   constructor(options: {
@@ -67,8 +66,7 @@ class AoiClient extends AoiBase {
     functionError?: boolean;
     sendMessageError?: boolean;
     logging?: boolean;
-    aoiWarning?: boolean;
-    autoUpdate?: boolean;
+    autoUpdate?: AoiWarningOptions;
   }) {
     super(
       options.token,
@@ -79,11 +77,8 @@ class AoiClient extends AoiBase {
     );
     this.#optionLogging =
       options.logging === undefined ? true : options.logging;
-    this.#aoiWarning =
-      options.aoiWarning === undefined ? true : options.aoiWarning;
-    this.#warningManager = new AoiWarning(
-      options.autoUpdate === undefined ? false : options.autoUpdate,
-    );
+    this.#aoiWarning = options.autoUpdate?.enableWarn;
+    this.#warningManager = new AoiWarning(options.autoUpdate || {});
     this.functionError = options.functionError;
     this.sendMessageError = options.sendMessageError;
     this.timeoutManager = new TimeoutManager(this);
