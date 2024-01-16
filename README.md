@@ -63,11 +63,18 @@ const bot = new AoiClient({
   /** To disable text errors **/
   sendMessageError: true,
   /** Outputting system messages to the console. */
-  console: true,
-  /** Displaying messages about new versions. */
-  aoiWarning: true,
+  logging: true,
   /** Checks for available package updates and performs an update if enabled (beta) */
-  autoUpdate: true,
+  autoUpdate: {
+    /** Displaying messages about new versions. */
+    aoiWarning: true,
+    /**  Whether automatic updates are enabled. */
+    autoUpdate: true,
+    /** Whether to enable development versions. */
+    enableDev: true,
+    /** Whether to enable beta versions. */
+    enableBeta: true,
+  },
 });
 
 client.functionErrorCommand({
