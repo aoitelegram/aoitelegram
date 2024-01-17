@@ -47,6 +47,10 @@ const bot = new AoiClient({
     session: {},
   },
   database: {
+    /** The available database type to be used is MongoDB, with KeyValue as the default **/
+    type: "KeyValue",
+    /** The link for connecting to MongoDB **/
+    url: "mongodb+srv:...",
     /** The file path to the database storage. */
     path: "./database/",
     /** An array of table names within the database.*/
@@ -149,7 +153,3 @@ This project is licensed under the MIT License - see the [LICENSE](https://githu
 ## Contributing
 
 Contributions are welcome! If you find any issues or have suggestions for improvements, please create a GitHub issue or submit a pull request.
-
-## Important
-
-`aoitelegram` utilizes the source code of the [aoi.js](https://www.npmjs.com/package/aoi.js) library.

@@ -421,7 +421,7 @@ class LoadCommands {
       variableDelete: "variableDelete",
       functionError: "functionError",
     };
-    return { hasEvent: events[type] ?? null, parameter: type };
+    return { hasEvent: events[type] || null, parameter: type };
   }
 }
 

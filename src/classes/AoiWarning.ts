@@ -4,7 +4,7 @@ import { version } from "../../package.json";
 import { execSync, spawn } from "node:child_process";
 
 interface AoiWarningOptions {
-  enableWarn?: boolean;
+  aoiWarning?: boolean;
   autoUpdate?: boolean;
   enableDev?: boolean;
   enableBeta?: boolean;

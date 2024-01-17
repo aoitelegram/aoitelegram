@@ -80,7 +80,7 @@ class AoiClient extends AoiBase {
     );
     this.#optionLogging =
       options.logging === undefined ? true : options.logging;
-    this.#aoiWarning = options.autoUpdate?.enableWarn;
+    this.#aoiWarning = options.autoUpdate?.aoiWarning;
     this.#warningManager = new AoiWarning(options.autoUpdate || {});
     this.functionError = options.functionError;
     this.sendMessageError = options.sendMessageError;
@@ -249,7 +249,7 @@ class AoiClient extends AoiBase {
         }, 4000);
       });
     }
-    super.login();
+    await super.login();
   }
 
   /**
