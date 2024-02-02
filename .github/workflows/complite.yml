@@ -23,7 +23,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install dependencies
-        run: npm install && npm install typescript@5.3.2
+        run: npm install && npm install typescript@5.3.3 && npm install uglifyjs
 
       - name: Build TypeScript
         run: npm run build:release
