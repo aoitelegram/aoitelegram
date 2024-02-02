@@ -19,7 +19,7 @@ class CustomEvent extends EventEmitter {
 
   /**
    * Constructs a new CustomEvent instance.
-   * @param {AoiClient} aoitelegram - The AoiClient instance for Telegram functionality.
+   * @param aoitelegram - The AoiClient instance for Telegram functionality.
    */
   constructor(aoitelegram: AoiClient) {
     super();
@@ -30,7 +30,6 @@ class CustomEvent extends EventEmitter {
   /**
    * Registers a custom event listener.
    * @param options - The options for the custom event.
-   * @throws {AoijsError} Throws an error if required parameters are not specified.
    * @returns Returns the CustomEvent instance for method chaining.
    */
   command(options: DataEvent) {

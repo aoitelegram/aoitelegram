@@ -12,7 +12,7 @@ class AwaitedManager {
 
   /**
    * Constructs the AwaitedManager instance.
-   * @param {AoiClient} telegram - The AoiClient instance.
+   * @param telegram - The AoiClient instance.
    */
   constructor(telegram: AoiClient) {
     this.telegram = telegram;

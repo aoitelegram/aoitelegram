@@ -5,30 +5,25 @@ import { KeyValue } from "@aoitelegram/database";
 
 /**
  * Configuration options for the database connection.
- * @interface KeyValueOptions
  */
 interface KeyValueOptions {
   /**
    * The file path to the database storage.
-   * @type {string}
    */
   path?: string;
 
   /**
    * An array of table names within the database.
-   * @type {string[]}
    */
   tables?: string[];
 
   /**
    * The file extension name used for the database file.
-   * @type {string}
    */
   extname?: string;
 
   /**
    * Log ready database
-   * @type {boolean}
    */
   logging?: boolean;
 }
@@ -40,7 +35,7 @@ class AoiManager extends KeyValue<string, unknown> {
   collection: Collection<string, unknown> = new Collection();
   /**
    * Creates a new instance of AoiManager.
-   * @param {KeyValueOptions} options - Configuration options for the database connection.
+   * @param options - Configuration options for the database connection.
    */
   constructor(options: KeyValueOptions = { logging: true }) {
     super({ ...options, tables: [...(options.tables || []), "timeout"] });
@@ -65,7 +60,7 @@ class AoiManager extends KeyValue<string, unknown> {
   /**
    * Set variables in the database.
    * @param options - Key-value pairs of variables to set.
-   * @param table - The database table to use (optional).
+   * @param tables - The database table to use.
    */
   variables(
     options: { [key: string]: unknown },

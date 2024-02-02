@@ -65,24 +65,20 @@ function replaceTextUsers(text: string, chatData: ChatDataUsers) {
 
 /**
  * Configuration options for the database connection.
- * @interface MongoDBManagerOptions
  */
 interface MongoDBManagerOptions {
   /**
    * MongoDB connection URL.
-   * @type {string}
    */
   url?: string;
 
   /**
    * An array of table names within the database.
-   * @type {string[]}
    */
   tables?: string[];
 
   /**
    * Log ready database
-   * @type {boolean}
    */
   logging?: boolean;
 }
@@ -95,7 +91,7 @@ class MongoDBManager extends MongoDB<string, unknown> {
   tables: string[] = ["main"];
   /**
    * Creates a new instance of AoiManager.
-   * @param {DatabaseOptions} options - Configuration options for the database connection.
+   * @param options - Configuration options for the database connection.
    */
   constructor(options: MongoDBManagerOptions) {
     if (!options?.url) {
@@ -770,8 +766,8 @@ class MongoDBManager extends MongoDB<string, unknown> {
 
   /**
    * Checks if a table exists.
-   * @param {string} tableName - Name of the table to check.
-   * @returns {boolean} - True if the table exists, otherwise false.
+   * @param tableName - Name of the table to check.
+   * @returns True if the table exists, otherwise false.
    */
   hasTable(tableName: string) {
     return this.tables.includes(tableName);
@@ -789,7 +785,7 @@ class MongoDBManager extends MongoDB<string, unknown> {
   /**
    * Set variables in the database.
    * @param options - Key-value pairs of variables to set.
-   * @param table - The database table to use (optional).
+   * @param tables - The database table to use.
    */
   async variables(
     options: { [key: string]: unknown },

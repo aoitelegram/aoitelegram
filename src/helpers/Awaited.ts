@@ -25,7 +25,7 @@ class Awaited {
 
   /**
    * Constructs the Awaited instance.
-   * @param {AoiClient} telegram - The AoiClient instance.
+   * @param telegram - The AoiClient instance.
    */
   constructor(telegram: AoiClient) {
     this.telegram = telegram;
@@ -33,8 +33,8 @@ class Awaited {
 
   /**
    * Registers a new awaited description.
-   * @param {AwaitedDescription} awaited - The awaited description to register.
-   * @returns {Awaited} The Awaited instance.
+   * @param awaited - The awaited description to register.
+   * @returns The Awaited instance.
    */
   register(awaited: AwaitedDescription) {
     const existingIndex = this.awaiteds.has(awaited.awaited);

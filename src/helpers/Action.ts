@@ -22,13 +22,12 @@ function filterToParams(array: ActionDescription[], search: string) {
  */
 class Action {
   /**
-   * Collection of registered actions.
+   * Array of registered actions.
    */
   private actions: ActionDescription[] = [];
 
   /**
    * Instance of AoiClient used for communication with the Telegram API.
-   * @private
    */
   private telegram: AoiClient;
 

@@ -42,30 +42,25 @@ const defaultAllowedUpdates = [
 
 /**
  * Configuration options for interacting with the Telegram API.
- * @interface TelegramOptions
  */
 interface TelegramOptions {
   /**
    * The maximum number of updates to fetch at once. Defaults to 100.
-   * @type {number}
    */
   limit?: number;
 
   /**
    * The timeout for long polling in seconds. Defaults to 60 seconds.
-   * @type {number}
    */
   timeout?: number;
 
   /**
    * An array of allowed update types to receive. Defaults to all updates.
-   * @type {AllowedUpdates}
    */
   allowed_updates?: AllowedUpdates;
 
   /**
    * An optional session object for managing user sessions.
-   * @type {unknown}
    */
   session?: unknown;
 }
@@ -843,13 +838,13 @@ class AoiBase extends TelegramBot {
   /**
    * Set variables in the database.
    * @param  options - Key-value pairs of variables to set.
-   * @param {string | string[]} table - The database table to use (optional).
+   * @param  options.tables - The database table to use.
    */
   async variables(
     options: { [key: string]: unknown },
-    table?: string | string[],
+    tables?: string | string[],
   ) {
-    await this.database.variables(options, table);
+    await this.database.variables(options, tables);
   }
 }
 

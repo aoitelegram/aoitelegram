@@ -35,7 +35,6 @@ class AoijsError extends Error {
 
     /**
      * The name or category of the error.
-     * @type {string}
      */
     this.name = name ? `AoijsError[${name}]` : `AoijsError`;
 

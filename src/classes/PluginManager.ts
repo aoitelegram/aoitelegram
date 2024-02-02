@@ -93,7 +93,6 @@ class PluginManager {
 
   /**
    * Search for plugins in the 'node_modules' directory and copy them to the '.aoiplugins' directory.
-   * @private
    */
   #searchingForPlugins() {
     const nodeModulesPath = path.join(process.cwd(), "node_modules");

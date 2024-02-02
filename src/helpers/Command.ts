@@ -13,12 +13,11 @@ interface CommandDescription {
  */
 class Command {
   /**
-   * collection of registered commands.
+   * Array of registered commands.
    */
   private commands: CommandDescription[] = [];
   /**
    * Instance of AoiClient used for communication with the Telegram API.
-   * @private
    */
   private telegram: AoiClient;
 

@@ -14,7 +14,7 @@ class LoadCommands {
   path?: string;
   /**
    * Constructor for LoadCommands.
-   * @param {AoiClient} aoitelegram - The AoiClient instance to load commands into.
+   * @param aoitelegram - The AoiClient instance to load commands into.
    */
   constructor(aoitelegram: AoiClient) {
     this.#aoitelegram = aoitelegram;
