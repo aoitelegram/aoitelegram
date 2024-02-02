@@ -74,7 +74,7 @@ interface TelegramOptions {
  * A class that provides additional functionality for handling commands and messages.
  */
 class AoiBase extends TelegramBot {
-  database: AoiManager | MongoDBManager = {} as AoiManager;
+  database: AoiManager | MongoDBManager = {} as AoiManager | MongoDBManager;
   disableFunctions: string[];
   availableFunctions: Collection<string, LibWithDataFunction> =
     new Collection();
@@ -190,101 +190,120 @@ class AoiBase extends TelegramBot {
   }
 
   /**
-   * Add a data function or an array of data functions to the customFunction options.
-   * @param options - The data function(s) to add.
+   * Adds a data function or an array of data functions to the available functions.
+   * @param dataFunction - The data function(s) to add.
    */
-  addFunction(options: DataFunction | DataFunction[]) {
-    if (Array.isArray(options)) {
-      for (const optionVersion of options) {
-        if (!optionVersion?.name) {
+  addFunction(dataFunction: DataFunction | DataFunction[]) {
+    if (Array.isArray(dataFunction)) {
+      for (const func of dataFunction) {
+        const functionName = func?.name?.toLowerCase();
+        if (!functionName) {
           throw new AoijsError(
             "customFunction",
             "you did not specify the 'name' parameter",
           );
         }
 
-        if ((optionVersion?.version ?? 0) > version) {
+        if (this.availableFunctions.has(functionName)) {
           throw new AoijsError(
             "customFunction",
-            `to load this function ${optionVersion?.name}, the library version must be equal to or greater than ${
-              optionVersion?.version ?? 0
-            }`,
+            `the function "${functionName}" already exists; to overwrite it, use the <AoiClient>.editFunction method!`,
           );
         }
 
-        this.availableFunctions.set(
-          optionVersion.name.toLowerCase(),
-          optionVersion,
-        );
+        if ((func?.version ?? 0) > version) {
+          throw new AoijsError(
+            "customFunction",
+            `to load this function ${functionName}, the library version must be equal to or greater than ${func?.version ?? 0}`,
+          );
+        }
+
+        this.availableFunctions.set(functionName, func);
       }
     } else {
-      if (!options?.name) {
+      const functionName = dataFunction?.name?.toLowerCase();
+      if (!functionName) {
         throw new AoijsError(
           "customFunction",
           "you did not specify the 'name' parameter",
         );
       }
 
-      if ((options?.version ?? 0) > version) {
+      if (this.availableFunctions.has(functionName)) {
         throw new AoijsError(
           "customFunction",
-          `to load this function ${
-            options.name
-          }, the library version must be equal to or greater than ${
-            options?.version ?? 0
-          }`,
+          `the function "${functionName}" already exists; to overwrite it, use the <AoiClient>.editFunction method!`,
         );
       }
 
-      this.availableFunctions.set(options.name.toLowerCase(), options);
+      if ((dataFunction?.version ?? 0) > version) {
+        throw new AoijsError(
+          "customFunction",
+          `to load this function ${functionName}, the library version must be equal to or greater than ${dataFunction?.version ?? 0}`,
+        );
+      }
+
+      this.availableFunctions.set(functionName, dataFunction);
     }
     return this;
   }
 
   /**
-   * Removes function(s) from the customFunction array based on provided options.
-   * @param options - The name of the function to remove or an array of function names.
+   * Removes function(s) from the available functions based on provided options.
+   * @param functionName - The name of the function to remove or an array of function names.
    */
-  removeFunction(options: string | string[]) {
-    if (options.length < 0) {
+  removeFunction(functionName: string | string[]) {
+    const functionNames = Array.isArray(functionName)
+      ? functionName
+      : [functionName];
+
+    if (functionNames.length < 1) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'name' parameter",
       );
     }
 
-    if (Array.isArray(options)) {
-      for (const name of options) {
-        this.availableFunctions.delete(name.toLowerCase());
+    for (const name of functionNames) {
+      const lowerCaseName = name.toLowerCase();
+      const hasDeleted = this.availableFunctions.delete(lowerCaseName);
+      if (!hasDeleted) {
+        throw new AoijsError(
+          "customFunction",
+          `the function "${lowerCaseName}" does not exist or has already been deleted`,
+        );
       }
-    } else {
-      this.availableFunctions.delete(options.toLowerCase());
     }
     return true;
   }
 
   /**
    * Edits or adds a data function to the available functions.
-   * @param options - A single DataFunction or an array of DataFunction objects.
+   * @param dataFunction - A single DataFunction or an array of DataFunction objects.
    * @returns Returns true after successfully editing or adding the function(s).
    */
-  editFunction(options: DataFunction | DataFunction[]): boolean {
-    if (!options) {
+  editFunction(dataFunction: DataFunction | DataFunction[]) {
+    const functionsToEdit = Array.isArray(dataFunction)
+      ? dataFunction
+      : [dataFunction];
+
+    if (!functionsToEdit.length) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'name' parameter",
       );
     }
 
-    if (Array.isArray(options)) {
-      for (const dataFunction of options) {
-        this.availableFunctions.set(
-          dataFunction.name.toLowerCase(),
-          dataFunction,
+    for (const func of functionsToEdit) {
+      const lowerCaseName = func?.name?.toLowerCase();
+      if (!this.availableFunctions.has(lowerCaseName)) {
+        throw new AoijsError(
+          "customFunction",
+          `the function "${lowerCaseName}" does not exist; you can only modify functions that have been added recently`,
         );
       }
-    } else {
-      this.availableFunctions.set(options.name.toLowerCase(), options);
+
+      this.availableFunctions.set(lowerCaseName, func);
     }
 
     return true;
@@ -292,26 +311,46 @@ class AoiBase extends TelegramBot {
 
   /**
    * Retrieves a function from the available functions.
-   * @param options - A single function name or an array of function names.
+   * @param functionName - A single function name or an array of function names.
    * @returns Returns the requested function(s).
    */
-  getFunction(options: string | string[]) {
-    if (options.length < 1) {
+  getFunction(functionName: string | string[]) {
+    const functionNames = Array.isArray(functionName)
+      ? functionName
+      : [functionName];
+
+    if (functionNames.length < 1) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'name' parameter",
       );
     }
 
-    if (Array.isArray(options)) {
-      const functions = [];
-      for (const func of options) {
-        const result = this.availableFunctions.get(func);
-        functions.push(result);
-      }
-      return functions;
+    if (functionNames.length > 1) {
+      return functionNames.map((name) => this.availableFunctions.get(name));
     } else {
-      return this.availableFunctions.get(options);
+      return this.availableFunctions.get(functionNames[0]);
+    }
+  }
+
+  /**
+   * Checks if the specified function(s) exist(s).
+   * @param functionName - The name of the function or an array of function names.
+   * @returns True if the function(s) exist(s), otherwise throws an AoijsError.
+   */
+  hasFunction(functionName: string | string[]) {
+    if (Array.isArray(functionName)) {
+      return functionName.map((fun) => ({
+        name: fun,
+        result: this.availableFunctions.has(fun),
+      }));
+    } else if (typeof functionName === "string") {
+      return this.availableFunctions.has(functionName);
+    } else {
+      throw new AoijsError(
+        "customFunction",
+        `the specified type should be "string | string[]`,
+      );
     }
   }
 
@@ -320,7 +359,7 @@ class AoiBase extends TelegramBot {
    * @returns The number of functions currently available.
    */
   get countFunction() {
-    return [...this.availableFunctions.keys()].length;
+    return this.availableFunctions.size;
   }
 
   /**
@@ -328,7 +367,6 @@ class AoiBase extends TelegramBot {
    * @param options - Loop configuration options.
    * @param options.every - Interval in milliseconds for executing the code.
    * @param options.code - The command code to be executed in the loop.
-
    */
   loopCommand(options: { every?: number; code: string }) {
     if (!options?.code) {
@@ -352,7 +390,6 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed when the bot is ready.
    * @param options - Command options.
    * @param options.code - The code to be executed when the bot is ready.
-
    */
   readyCommand(options: { code: string }) {
     if (!options?.code) {
@@ -392,7 +429,6 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to a callback_query.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when a callback_query is received.
-
    */
   callbackQueryCommand(options: { code: string }) {
     if (!options?.code) {
@@ -415,7 +451,6 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to a message_reaction.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when a message_reaction is received.
-
    */
   messageReactionCommand(options: { code: string }) {
     if (!options?.code) {
@@ -438,7 +473,6 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to a message_reaction_count.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when a message_reaction_count is received.
-
    */
   messageReactionCountCommand(options: { code: string }) {
     if (!options?.code) {
@@ -461,7 +495,6 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an edited_message event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an edited_message event is received.
-
    */
   editedMessageCommand(options: { code: string }) {
     if (!options?.code) {
@@ -484,7 +517,6 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an channel_post event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an channel_post event is received.
-
    */
   channelPostCommand(options: { code: string }) {
     if (!options?.code) {
@@ -503,7 +535,6 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an edited_channel_post event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an edited_channel_post event is received.
-   * @param  - $if type for parsing
    */
   editedChannelPostCommand(options: { code: string }) {
     if (!options?.code) {
@@ -526,7 +557,6 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an inline_query event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an inline_query event is received.
-
    */
   inlineQueryCommand(options: { code: string }) {
     if (!options?.code) {
@@ -545,7 +575,6 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an shipping_query event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an shipping_query event is received.
-
    */
   shippingQueryCommand(options: { code: string }) {
     if (!options?.code) {
@@ -568,7 +597,6 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an pre_checkout_query event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an pre_checkout_query event is received.
-
    */
   preCheckoutQueryCommand(options: { code: string }) {
     if (!options?.code) {
@@ -591,7 +619,6 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an poll event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an poll event is received.
-
    */
   pollCommand(options: { code: string }) {
     if (!options?.code) {
@@ -610,7 +637,6 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an poll_answer event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an poll_answer event is received.
-
    */
   pollAnswerCommand(options: { code: string }) {
     if (!options?.code) {
@@ -629,7 +655,6 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an chat_member event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an chat_member event is received.
-   
    */
   chatMemberCommand(options: { code: string }) {
     if (!options?.code) {
@@ -648,7 +673,6 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an my_chat_member event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an my_chat_member event is received.
-   
    */
   myChatMemberCommand(options: { code: string }) {
     if (!options?.code) {
@@ -671,7 +695,6 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an chat_join_request event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an chat_join_request event is received.
-   
    */
   chatJoinRequestCommand(options: { code: string }) {
     if (!options?.code) {
@@ -694,7 +717,6 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to a chat_boost.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when a chat_boost is received.
-   
    */
   chatBoostCommand(options: { code: string }) {
     if (!options?.code) {
@@ -713,7 +735,6 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to a removed_chat_boost.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when a removed_chat_boost is received.
-   
    */
   removedChatBoostCommand(options: { code: string }) {
     if (!options?.code) {
@@ -736,7 +757,6 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an variables create event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an create event is received.
-   
    */
   variableCreateCommand(options: { code: string }) {
     if (!options?.code) {
@@ -766,7 +786,6 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an variables updated event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an updated event is received.
-   
    */
   variableUpdateCommand(options: { code: string }) {
     if (!options?.code) {
@@ -796,7 +815,6 @@ class AoiBase extends TelegramBot {
    * Registers a code block to be executed in response to an variables delete event.
    * @param  options - Command options.
    * @param  options.code - The code to be executed when an delete event is received.
-   
    */
   variableDeleteCommand(options: { code: string }) {
     if (!options?.code) {
