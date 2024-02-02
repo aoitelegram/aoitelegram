@@ -1,4 +1,6 @@
+import { Collection } from "telegramsjs";
 import { setInterval, clearInterval } from "node:timers";
+import { AoijsError } from "../classes/AoiError";
 import { AoiClient } from "../classes/AoiClient";
 import { getObjectKey } from "../function/parser";
 
@@ -7,21 +9,14 @@ interface AwaitedDescription {
   code: string;
 }
 
-interface AwaitedEvent {
-  awaited: string;
-  milliseconds: number;
-  data: string;
-  code: string;
-}
-
 /**
  * Represents a manager for handling awaited events.
  */
 class Awaited {
   /**
-   * Array to store awaited descriptions.
+   * Collection to store awaited descriptions.
    */
-  private awaiteds: AwaitedDescription[] = [];
+  private awaiteds: Collection<string, AwaitedDescription> = new Collection();
 
   /**
    * A reference to the AoiClient instance.
@@ -41,14 +36,16 @@ class Awaited {
    * @param {AwaitedDescription} awaited - The awaited description to register.
    * @returns {Awaited} The Awaited instance.
    */
-  register(awaited: AwaitedDescription): Awaited {
-    const existingIndex = this.awaiteds.findIndex(
-      (map) => map.awaited === awaited.awaited,
-    );
-    if (existingIndex !== -1) {
-      this.awaiteds[existingIndex] = awaited;
+  register(awaited: AwaitedDescription) {
+    const existingIndex = this.awaiteds.has(awaited.awaited);
+
+    if (!existingIndex) {
+      this.awaiteds.set(awaited.awaited, awaited);
     } else {
-      this.awaiteds.push(awaited);
+      throw new AoijsError(
+        "awaited",
+        `the awaited "${awaited.awaited}" already exists`,
+      );
     }
 
     return this;
@@ -57,19 +54,19 @@ class Awaited {
   /**
    * Sets up a handler for awaited events.
    */
-  handler(): void {
+  handler() {
     this.telegram.on("awaited", async (awaited, context) => {
-      for (const awaitedDescription of this.awaiteds) {
-        if (awaitedDescription.awaited !== awaited.awaited) continue;
+      for (const [awaitedId, awaitedDescription] of this.awaiteds) {
+        if (awaitedId !== awaited.awaited) continue;
 
         const intervalId = setInterval(async () => {
-          const awaitedData = JSON.parse(awaited.data);
+          const parsedAwaitedData = JSON.parse(awaited.data);
           this.telegram.addFunction([
             {
               name: "$awaitedData",
               callback: (context) => {
                 const response = getObjectKey(
-                  awaitedData,
+                  parsedAwaitedData,
                   context.inside as string,
                 );
                 return typeof response === "object"
@@ -96,4 +93,4 @@ class Awaited {
   }
 }
 
-export { Awaited, AwaitedDescription, AwaitedEvent };
+export { Awaited, AwaitedDescription };
