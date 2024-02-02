@@ -1,6 +1,5 @@
 import { AoiClient } from "./AoiClient";
 import { AoiManager } from "./AoiManager";
-import { AwaitedEvent } from "../helpers/Awaited";
 import { ContextFunction } from "../TaskCompleter";
 import { Context as EventContext } from "telegramsjs";
 import { ValueDatabase } from "../helpers/manager/TimeoutManager";
@@ -26,6 +25,13 @@ import {
 interface CaptionableMessage {
   caption: string;
   caption_entities?: MessageEntity[];
+}
+
+interface AwaitedEvent {
+  awaited: string;
+  milliseconds: number;
+  data: string;
+  code: string;
 }
 
 interface EventDataMap<F> {
@@ -107,7 +113,7 @@ type DataEvent = {
   type: string;
   once?: boolean;
   code?: string;
-  callback?: (...args: unknown[]) => void;
+  callback?: (...args: any[]) => void;
 };
 
 type CombinedEventFunctions = EventHandlers & EventDataMap<Buffer>;

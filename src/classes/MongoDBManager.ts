@@ -116,7 +116,7 @@ class MongoDBManager extends MongoDB<string, unknown> {
   }
 
   createFunction(aoitelegram: AoiBase) {
-    aoitelegram.addFunction([
+    aoitelegram.editFunction([
       {
         name: "$chatCooldown",
         callback: async (context: any) => {
