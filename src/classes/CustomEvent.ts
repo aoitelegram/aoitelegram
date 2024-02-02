@@ -58,7 +58,7 @@ class CustomEvent extends EventEmitter {
 
     if ((options.type === "aoitelegram" || !options.type) && options.code) {
       const eventHandler = async (...args: string[]) => {
-        this.aoitelegram.addFunction({
+        this.aoitelegram.editFunction({
           name: "$eventData",
           callback: (context) => {
             return !context.inside
@@ -173,7 +173,7 @@ class CustomEvent extends EventEmitter {
    * @param args - Additional arguments to pass to the event listeners.
    * @returns Returns the CustomEvent instance for method chaining.
    */
-  override emit(name: string, ...args: unknown[]) {
+  override emit(name: string, ...args: any[]) {
     return super.emit(name, ...args);
   }
 }
