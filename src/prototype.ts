@@ -16,10 +16,7 @@ declare global {
  * @param replacement - The string to replace the last occurrence with.
  * @returns The modified string.
  */
-String.prototype.replaceLast = function (
-  search: string,
-  replacement: string,
-): string {
+String.prototype.replaceLast = function (search: string, replacement: string) {
   const lastIndex = this.lastIndexOf(search);
 
   if (lastIndex === -1) {
@@ -38,7 +35,7 @@ String.prototype.replaceLast = function (
  * @param txt - The text to search within.
  * @returns An array of indexes where the pattern is found.
  */
-function searchIndexes(pat: string, txt: string): number[] {
+function searchIndexes(pat: string, txt: string) {
   const patLength = pat.length;
   const txtLength = txt.length;
 
@@ -78,7 +75,7 @@ function searchIndexes(pat: string, txt: string): number[] {
  * @param patLength - The length of the pattern.
  * @param lps - The Longest Prefix Suffix array.
  */
-function processPattern(pat: string, patLength: number, lps: Int32Array): void {
+function processPattern(pat: string, patLength: number, lps: Int32Array) {
   let len = 0;
   let index = 1;
 
