@@ -68,7 +68,7 @@ class LoadCommands {
         if (Array.isArray(dataFunc)) {
           for (const dataArrayFunc of dataFunc) {
             if (dataArrayFunc.name) {
-              this.#aoitelegram.command({
+              this.#aoitelegram.addCommand({
                 name: dataArrayFunc.name,
                 aliases: dataArrayFunc.aliases,
                 typeChannel: dataArrayFunc.typeChannel,
@@ -83,7 +83,7 @@ class LoadCommands {
             }
 
             if (dataArrayFunc.data) {
-              this.#aoitelegram.action({
+              this.#aoitelegram.addAction({
                 data: dataArrayFunc.data,
                 answer: dataArrayFunc.answer,
                 code: dataArrayFunc.code,
@@ -137,7 +137,7 @@ class LoadCommands {
           }
         } else {
           if (dataFunc.name) {
-            this.#aoitelegram.command({
+            this.#aoitelegram.addCommand({
               name: dataFunc.name,
               aliases: dataFunc.aliases,
               typeChannel: dataFunc.typeChannel,
@@ -152,7 +152,7 @@ class LoadCommands {
           }
 
           if (dataFunc.data) {
-            this.#aoitelegram.action({
+            this.#aoitelegram.addAction({
               data: dataFunc.data,
               answer: dataFunc.answer,
               code: dataFunc.code,

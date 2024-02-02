@@ -95,8 +95,7 @@ class AoiClient extends AoiBase {
    * @param options.typeChannel- In what type of channels to watch command
    * @param options.code - The code to be executed when the command is invoked.
    */
-  // @ts-ignore
-  command(options: CommandDescription) {
+  addCommand(options: CommandDescription) {
     if (!options?.name) {
       throw new AoijsError(
         "parameter",
@@ -121,8 +120,7 @@ class AoiClient extends AoiBase {
    * @param options.answer - Whether to answer the action.
    * @param options.code - The code to be executed when the command is invoked.
    */
-  // @ts-ignore
-  action(options: ActionDescription) {
+  addAction(options: ActionDescription) {
     if (!options?.data) {
       throw new AoijsError(
         "parameter",
