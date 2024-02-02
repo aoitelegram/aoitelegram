@@ -1,14 +1,9 @@
 import { AoiClient } from "../classes/AoiClient";
+import { AoijsError } from "../classes/AoiError";
 
 interface CommandDescription {
   name: string;
-  typeChannel?:
-    | false
-    | "private"
-    | "group"
-    | "supergroup"
-    | "channel"
-    | undefined;
+  typeChannel?: false | "private" | "group" | "supergroup" | "channel";
   aliases?: string[];
   code: string;
 }
@@ -18,8 +13,7 @@ interface CommandDescription {
  */
 class Command {
   /**
-   * Array of registered commands.
-   * @private
+   * collection of registered commands.
    */
   private commands: CommandDescription[] = [];
   /**
@@ -42,14 +36,7 @@ class Command {
    * @returns This CommandHandler instance for method chaining.
    */
   register(command: CommandDescription) {
-    const existingIndex = this.commands.findIndex(
-      (map) => map.name === command.name,
-    );
-    if (existingIndex !== -1) {
-      this.commands[existingIndex] = command;
-    } else {
-      this.commands.push(command);
-    }
+    this.commands.push(command);
     return this;
   }
 
@@ -68,19 +55,19 @@ class Command {
           !command.typeChannel || command.typeChannel === message.chat.type,
       );
 
-      for (const command of filteredCommands) {
+      for (const commandDescription of filteredCommands) {
         const aliasesRegex = new RegExp(
-          `^/(?:${(command.aliases || []).join("|")})$`,
+          `^/(?:${(commandDescription.aliases || []).join("|")})$`,
         );
         if (
           !aliasesRegex.test(commandIdentifier) &&
-          `/${command.name}` !== commandIdentifier
+          `/${commandDescription.name}` !== commandIdentifier
         )
           continue;
 
         await this.telegram.evaluateCommand(
           commandIdentifier,
-          command.code,
+          commandDescription.code,
           message,
         );
         break;
