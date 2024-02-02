@@ -1,4 +1,6 @@
+import { Collection } from "telegramsjs";
 import { AoiClient } from "../classes/AoiClient";
+import { AoijsError } from "../classes/AoiError";
 import { getObjectKey } from "../function/parser";
 import { ValueDatabase } from "./manager/TimeoutManager";
 
@@ -12,9 +14,9 @@ interface TimeoutDescription {
  */
 class Timeout {
   /**
-   * The array of registered timeouts.
+   * The collection of registered timeouts.
    */
-  private timeouts: TimeoutDescription[] = [];
+  private timeouts: Collection<string, TimeoutDescription> = new Collection();
 
   /**
    * The AoiClient instance.
@@ -34,14 +36,16 @@ class Timeout {
    * @param timeout The timeout description.
    * @returns The Timeout instance for chaining.
    */
-  register(timeout: TimeoutDescription): Timeout {
-    const existingIndex = this.timeouts.findIndex(
-      (map) => map.id === timeout.id,
-    );
-    if (existingIndex !== -1) {
-      this.timeouts[existingIndex] = timeout;
+  register(timeout: TimeoutDescription) {
+    const existingIndex = this.timeouts.has(timeout.id);
+
+    if (!existingIndex) {
+      this.timeouts.set(timeout.id, timeout);
     } else {
-      this.timeouts.push(timeout);
+      throw new AoijsError(
+        "timeout",
+        `the current timeout "${timeout.id}" already exists`,
+      );
     }
 
     return this;
@@ -52,16 +56,17 @@ class Timeout {
    */
   handler() {
     this.telegram.on("timeout", async (timeoutData, context) => {
-      for (const timeout of this.timeouts) {
-        if (timeout.id !== context.id) continue;
+      for (const [timeoutId, timeoutDescription] of this.timeouts) {
+        if (timeoutId !== context.id) continue;
+        if (!this.telegram.timeoutManager.timeouts.has(context.id)) break;
 
-        const timeoutDataParsed = JSON.parse(`${context.data}`);
+        const parsedTimeoutData = JSON.parse(`${context.data}`);
 
         this.telegram.addFunction({
           name: "$timeoutData",
           callback: (context) => {
             const response = getObjectKey(
-              timeoutDataParsed,
+              parsedTimeoutData,
               context.inside as string,
             );
             return typeof response === "object"
@@ -72,11 +77,12 @@ class Timeout {
 
         await this.telegram.evaluateCommand(
           { event: "timeout" },
-          timeout.code,
+          timeoutDescription.code,
           timeoutData,
         );
 
         this.telegram.removeFunction("$timeoutData");
+        this.telegram.timeoutManager.timeouts.delete(context.id);
         break;
       }
     });

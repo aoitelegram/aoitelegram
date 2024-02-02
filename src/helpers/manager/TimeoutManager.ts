@@ -1,4 +1,5 @@
 import { setTimeout } from "node:timers";
+import { Collection } from "telegramsjs";
 import { AoijsError } from "../../classes/AoiError";
 import { AoiClient } from "../../classes/AoiClient";
 
@@ -14,6 +15,10 @@ interface ValueDatabase {
  */
 class TimeoutManager {
   database: AoiClient["database"];
+  /**
+   * The collection of registered timeouts.
+   */
+  timeouts: Collection<string, NodeJS.Timeout> = new Collection();
   /**
    * A reference to the AoiClient instance.
    */
@@ -42,13 +47,14 @@ class TimeoutManager {
           timeoutData.date + timeoutData.milliseconds - Date.now();
 
         if (remainingTime > 0) {
-          setTimeout(async () => {
+          const timeoutId = setTimeout(async () => {
             this.telegram.emit("timeout", this.telegram, timeoutData);
-            await this.database.delete("timeout", timeoutData.id);
+            await this.removeTimeout(timeoutData.id);
           }, timeoutData.milliseconds);
+          this.timeouts.set(timeoutData.id, timeoutId);
         } else {
           this.telegram.emit("timeout", this.telegram, timeoutData);
-          await this.database.delete("timeout", timeoutData.id);
+          await this.removeTimeout(timeoutData.id);
         }
       });
     });
@@ -66,10 +72,12 @@ class TimeoutManager {
         );
       }
 
-      setTimeout(async () => {
+      const timeoutId = setTimeout(async () => {
         this.telegram.emit("timeout", this.telegram, context);
         await this.database.delete("timeout", context.id);
       }, context.milliseconds);
+
+      this.timeouts.set(context.id, timeoutId);
     });
   }
 
@@ -92,6 +100,21 @@ class TimeoutManager {
     };
     this.telegram.emit("addTimeout", data);
     await this.database.set("timeout", id, data);
+  }
+
+  /**
+   * Asynchronously removes a timeout by its identifier.
+   * @param timeout - The identifier of the timeout to be removed.
+   * @returns A promise that resolves to true if the timeout was successfully removed, otherwise false.
+   */
+  async removeTimeout(timeout: string) {
+    const timeoutId = this.timeouts.get(timeout);
+    if (!timeoutId) return false;
+
+    clearTimeout(timeoutId);
+    this.timeouts.delete(timeout);
+    await this.database.delete("timeout", timeout);
+    return true;
   }
 }
 
