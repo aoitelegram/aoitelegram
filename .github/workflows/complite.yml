@@ -26,7 +26,7 @@ jobs:
         run: npm install && npm install typescript@5.3.3 && npm install uglifyjs
 
       - name: Build TypeScript
-        run: npm run build:release
+        run: rm -rf lib/ && tsc --project tsconfig.json && tsc --project ./src/function/tsconfig.json
 
       - name: Run build
         run: node lib/src/index.js
