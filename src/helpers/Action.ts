@@ -1,3 +1,4 @@
+import { AoijsError } from "../classes/AoiError";
 import { AoiClient } from "../classes/AoiClient";
 
 interface ActionDescription {
@@ -7,12 +8,21 @@ interface ActionDescription {
 }
 
 /**
+ * Filters an array of `ActionDescription` objects based on a specified search parameter.
+ * @param array - The array of `ActionDescription` objects to filter.
+ * @param search - The value to search for within the `data` property of each object.
+ * @returns An array containing only the `ActionDescription` objects whose `data` property matches the specified search value.
+ */
+function filterToParams(array: ActionDescription[], search: string) {
+  return array.filter((action) => action.data === search);
+}
+
+/**
  * Class representing an action handler for AoiClient.
  */
 class Action {
   /**
-   * Array of registered actions.
-   * @private
+   * Collection of registered actions.
    */
   private actions: ActionDescription[] = [];
 
@@ -36,15 +46,7 @@ class Action {
    * @returns This ActionHandler instance for method chaining.
    */
   register(action: ActionDescription) {
-    const existingIndex = this.actions.findIndex(
-      (map) => map.data === action.data,
-    );
-    if (existingIndex !== -1) {
-      this.actions[existingIndex] = action;
-    } else {
-      this.actions.push(action);
-    }
-
+    this.actions.push(action);
     return this;
   }
 
@@ -53,13 +55,13 @@ class Action {
    */
   handler() {
     this.telegram.on("callback_query:data", async (query) => {
-      const data = query.data;
-
+      const queryData = query.data;
       if (!this.actions.length) return;
+      const actions = filterToParams(this.actions, queryData);
 
-      const action = this.actions.find((action) => action.data === data);
+      if (!actions.length) return;
 
-      if (action) {
+      for (const action of actions) {
         if (action.answer) {
           await query.answerCallbackQuery().catch(() => console.log);
         }
