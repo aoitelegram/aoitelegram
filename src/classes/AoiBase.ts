@@ -244,6 +244,52 @@ class AoiBase extends TelegramBot {
   }
 
   /**
+   * Ensures the registration of a data function or an array of data functions.
+   * @param dataFunction - A single data function or an array of data functions.
+   * @returns The AoiClient instance for method chaining.
+   */
+  ensureFunction(dataFunction: DataFunction | DataFunction[]) {
+    if (Array.isArray(dataFunction)) {
+      for (const func of dataFunction) {
+        const functionName = func?.name?.toLowerCase();
+        if (!functionName) {
+          throw new AoijsError(
+            "customFunction",
+            "you did not specify the 'name' parameter",
+          );
+        }
+
+        if ((func?.version ?? 0) > version) {
+          throw new AoijsError(
+            "customFunction",
+            `to load this function ${functionName}, the library version must be equal to or greater than ${func?.version ?? 0}`,
+          );
+        }
+
+        this.availableFunctions.set(functionName, func);
+      }
+    } else {
+      const functionName = dataFunction?.name?.toLowerCase();
+      if (!functionName) {
+        throw new AoijsError(
+          "customFunction",
+          "you did not specify the 'name' parameter",
+        );
+      }
+
+      if ((dataFunction?.version ?? 0) > version) {
+        throw new AoijsError(
+          "customFunction",
+          `to load this function ${functionName}, the library version must be equal to or greater than ${dataFunction?.version ?? 0}`,
+        );
+      }
+
+      this.availableFunctions.set(functionName, dataFunction);
+    }
+    return this;
+  }
+
+  /**
    * Removes function(s) from the available functions based on provided options.
    * @param functionName - The name of the function to remove or an array of function names.
    */
@@ -761,7 +807,7 @@ class AoiBase extends TelegramBot {
       );
     }
     this.database.on("create", async (newVariable) => {
-      this.addFunction({
+      this.ensureFunction({
         name: "$newVariable",
         callback: (context) => {
           const result = getObjectKey(newVariable, context.inside as string);
@@ -772,7 +818,6 @@ class AoiBase extends TelegramBot {
         newVariable,
         telegram: this,
       });
-      this.removeFunction(["$newVariable"]);
     });
     return this;
   }
@@ -790,7 +835,7 @@ class AoiBase extends TelegramBot {
       );
     }
     this.database.on("update", async (variable) => {
-      this.addFunction({
+      this.ensureFunction({
         name: "$variable",
         callback: (context) => {
           const result = getObjectKey(variable, context.inside as string);
@@ -801,7 +846,6 @@ class AoiBase extends TelegramBot {
         variable,
         telegram: this,
       });
-      this.removeFunction("$variable");
     });
     return this;
   }
@@ -819,7 +863,7 @@ class AoiBase extends TelegramBot {
       );
     }
     this.database.on("delete", async (oldVariable) => {
-      this.addFunction({
+      this.ensureFunction({
         name: "$oldVariable",
         callback: (context) => {
           const result = getObjectKey(oldVariable, context.inside as string);
@@ -830,7 +874,6 @@ class AoiBase extends TelegramBot {
         oldVariable,
         telegram: this,
       });
-      this.removeFunction("$oldVariable");
     });
     return this;
   }
