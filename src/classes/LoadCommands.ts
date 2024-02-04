@@ -10,6 +10,7 @@ import { AoijsError } from "./AoiError";
 class LoadCommands {
   #aoitelegram: AoiClient;
   #countLoadCmd: number = 1;
+  #countLoadCallback: number = 1;
   #countLoadVar: number = 1;
   path?: string;
   /**
@@ -34,6 +35,7 @@ class LoadCommands {
         "you did not specify the 'dirPath' parameter",
       );
     }
+
     if (this.#countLoadCmd === 1) {
       dirPath = path.join(process.cwd(), dirPath);
       if (log) {
@@ -208,6 +210,84 @@ class LoadCommands {
   }
 
   /**
+   * Asynchronously loads callbacks from the specified directory path.
+   * @param dirPath - The directory path from which to load callbacks.
+   * @param log - The console load callbacks.
+   */
+  loadCallbacks(dirPath: string, log: boolean = true) {
+    if (!dirPath) {
+      throw new AoijsError(
+        "parameter",
+        "you did not specify the 'dirPath' parameter",
+      );
+    }
+
+    if (this.#countLoadCallback == 1) {
+      dirPath = path.join(process.cwd(), dirPath);
+      if (log) {
+        const bigText = figlet.textSync("Callbacks");
+        console.log(bigText);
+      }
+      this.#countLoadCallback = 0;
+      this.path = dirPath;
+    }
+
+    if (!fs.existsSync(dirPath)) {
+      throw new AoijsError(
+        "file",
+        "the specified file path was not found",
+        dirPath,
+      );
+    }
+
+    const items = fs.readdirSync(dirPath);
+
+    for (const item of items) {
+      const itemPath = path.join(dirPath, item);
+      const stats = fs.statSync(itemPath);
+
+      if (stats.isDirectory()) {
+        this.loadCallbacks(itemPath, log);
+      } else if (itemPath.endsWith(".js")) {
+        delete require.cache[itemPath];
+        const requireCallbacks = require(itemPath);
+        const dataCallbacks = requireCallbacks.default || requireCallbacks;
+
+        if (Array.isArray(dataCallbacks)) {
+          for (const dataCallbacksArray of dataCallbacks) {
+            if (log) {
+              console.log(
+                `|---------------------------------------------------------------------|\n`,
+                `| Loading in ${itemPath} | Loaded | callback |`,
+              );
+            }
+            this.#aoitelegram.addCallback({
+              name: dataCallbacksArray.name,
+              type: dataCallbacksArray.type,
+              callback: dataCallbacksArray.callback,
+              code: dataCallbacksArray.code,
+            });
+          }
+        } else {
+          if (log) {
+            console.log(
+              `|---------------------------------------------------------------------|\n`,
+              `| Loading in ${itemPath} | Loaded | callback |`,
+            );
+          }
+          this.#aoitelegram.addCallback({
+            name: dataCallbacks.name,
+            type: dataCallbacks.type,
+            callback: dataCallbacks.callback,
+            code: dataCallbacks.code,
+          });
+        }
+      }
+    }
+    return this;
+  }
+
+  /**
    * Asynchronously loads variables from the specified directory path.
    * @param dirPath - The directory path from which to load variables.
    * @param log - The console load variables.
@@ -219,6 +299,7 @@ class LoadCommands {
         "you did not specify the 'dirPath' parameter",
       );
     }
+
     if (this.#countLoadVar == 1) {
       dirPath = path.join(process.cwd(), dirPath);
       if (log) {
@@ -302,6 +383,7 @@ class LoadCommands {
         }
       }
     }
+    return this;
   }
 
   /**

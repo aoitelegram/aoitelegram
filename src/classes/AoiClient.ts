@@ -8,6 +8,7 @@ import { KeyValueOptions } from "./AoiManager";
 import { AoiBase, TelegramOptions } from "./AoiBase";
 import { AoiWarning, AoiWarningOptions } from "./AoiWarning";
 import { Action, ActionDescription } from "../helpers/Action";
+import { Callback, CallbackDescription } from "../helpers/Callback";
 import { TimeoutManager } from "../helpers/manager/TimeoutManager";
 import { AwaitedManager } from "../helpers/manager/AwaitedManager";
 import { MongoDBManagerOptions } from "./MongoDBManager";
@@ -34,6 +35,7 @@ class AoiClient extends AoiBase {
   #warningManager: AoiWarning;
   functionError: boolean | undefined;
   sendMessageError: boolean | undefined;
+  registerCallback: Callback = new Callback(this);
   registerCommand: Command = new Command(this);
   registerAction: Action = new Action(this);
   registerTimeout: Timeout = new Timeout(this);
@@ -183,6 +185,39 @@ class AoiClient extends AoiBase {
     }
     this.registerAwaited.register(options);
     this.#commandInfo({ awaited: options.awaited }, { ...options });
+
+    return this;
+  }
+
+  /**
+   * Adds a callback with specified options to the AoiClient.
+   * @param options - The callback description containing 'name', 'type', and additional parameters based on the type.
+   * @returns The AoiClient instance for method chaining.
+   */
+  addCallback(options: CallbackDescription) {
+    if (!options?.name) {
+      throw new AoijsError(
+        "parameter",
+        "You did not specify the 'name' parameter.",
+      );
+    }
+
+    if (options.type === "aoitelegram" && !options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "You did not specify the 'code' parameter.",
+      );
+    }
+
+    if (options.type === "js" && !options?.callback) {
+      throw new AoijsError(
+        "parameter",
+        "You did not specify the 'callback' parameter.",
+      );
+    }
+
+    this.registerCallback.register(options);
+    this.#commandInfo({ callback: options.name }, { ...options });
 
     return this;
   }
