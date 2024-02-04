@@ -7,6 +7,7 @@ import { getObjectKey } from "../function/parser";
 interface AwaitedDescription {
   awaited: string;
   code: string;
+  [key: string]: unknown;
 }
 
 /**
@@ -61,7 +62,7 @@ class Awaited {
 
         const intervalId = setInterval(async () => {
           const parsedAwaitedData = JSON.parse(awaited.data);
-          this.telegram.addFunction([
+          this.telegram.ensureFunction([
             {
               name: "$awaitedData",
               callback: (context) => {
@@ -85,8 +86,6 @@ class Awaited {
             awaitedDescription.code,
             context,
           );
-
-          this.telegram.removeFunction(["$awaitedData", "$break"]);
         }, awaited.milliseconds);
       }
     });

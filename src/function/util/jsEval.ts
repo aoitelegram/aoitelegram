@@ -11,7 +11,7 @@ export default {
     const evaluate = await context.telegram.evaluateCommand(
       command,
       content,
-      event,
+      context.event,
     );
     return eval(evaluate);
   },

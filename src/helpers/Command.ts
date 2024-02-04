@@ -6,6 +6,7 @@ interface CommandDescription {
   typeChannel?: false | "private" | "group" | "supergroup" | "channel";
   aliases?: string[];
   code: string;
+  [key: string]: unknown;
 }
 
 /**

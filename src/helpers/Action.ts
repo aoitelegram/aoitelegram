@@ -5,6 +5,7 @@ interface ActionDescription {
   data: string;
   answer?: boolean;
   code: string;
+  [key: string]: unknown;
 }
 
 /**

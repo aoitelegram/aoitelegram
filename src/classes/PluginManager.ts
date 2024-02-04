@@ -107,27 +107,27 @@ class PluginManager {
     for (const folder of items) {
       const folderPath = path.join(nodeModulesPath, folder);
 
-      if (fs.lstatSync(folderPath).isDirectory()) {
-        const aoiPluginJsonPath = path.join(folderPath, ".aoiplugin.json");
+      if (!fs.lstatSync(folderPath).isDirectory()) continue;
+      const aoiPluginJsonPath = path.join(folderPath, ".aoiplugin.json");
 
-        if (fs.existsSync(aoiPluginJsonPath)) {
-          const pluginInfo = require(aoiPluginJsonPath);
-          if (pluginInfo.main) {
-            if (pluginInfo.version > version) {
-              throw new AoijsError(
-                "aoiplugins",
-                `to download the library "${folder}", the library version "aoitelegram" should be equal to or higher than ${pluginInfo.version}`,
-              );
-            }
-            const mainFilePath = path.join(folderPath, pluginInfo.main);
-            const destPath = path.join(aoiPluginsPath, folder);
-            if (!fs.existsSync(destPath)) {
-              fs.mkdirSync(destPath);
-            }
-            fsx.copySync(folderPath, destPath);
-          }
-        }
+      if (!fs.existsSync(aoiPluginJsonPath)) continue;
+      const pluginInfo = require(aoiPluginJsonPath);
+      if (!pluginInfo.main) continue;
+
+      if (pluginInfo.version > version) {
+        throw new AoijsError(
+          "aoiplugins",
+          `to download the library "${folder}", the library version "aoitelegram" should be equal to or higher than ${pluginInfo.version}`,
+        );
       }
+
+      const mainFilePath = path.join(folderPath, pluginInfo.main);
+      const destPath = path.join(aoiPluginsPath, folder);
+
+      if (!fs.existsSync(destPath)) {
+        fs.mkdirSync(destPath);
+      }
+      fsx.copySync(folderPath, destPath);
     }
   }
 }

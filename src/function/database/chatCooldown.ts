@@ -15,7 +15,7 @@ export default {
     ]);
     if (context.isError) return;
 
-    const cooldownKey = `${chatId}_${ms(time)}`;
+    const cooldownKey = `cooldown_${chatId}_${ms(time)}`;
     const userCooldown = context.database.get(defaultTable, cooldownKey) || 0;
     const cooldown = userCooldown + +ms(time) - Date.now();
     if (cooldown > 0) {

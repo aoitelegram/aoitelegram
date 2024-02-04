@@ -7,6 +7,7 @@ import { ValueDatabase } from "./manager/TimeoutManager";
 interface TimeoutDescription {
   id: string;
   code: string;
+  [key: string]: unknown;
 }
 
 /**
@@ -62,7 +63,7 @@ class Timeout {
 
         const parsedTimeoutData = JSON.parse(`${context.data}`);
 
-        this.telegram.addFunction({
+        this.telegram.ensureFunction({
           name: "$timeoutData",
           callback: (context) => {
             const response = getObjectKey(
@@ -81,7 +82,6 @@ class Timeout {
           timeoutData,
         );
 
-        this.telegram.removeFunction("$timeoutData");
         this.telegram.timeoutManager.timeouts.delete(context.id);
         break;
       }

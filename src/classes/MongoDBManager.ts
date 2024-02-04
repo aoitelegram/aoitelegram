@@ -93,7 +93,7 @@ class MongoDBManager extends MongoDB<string, unknown> {
    * Creates a new instance of AoiManager.
    * @param options - Configuration options for the database connection.
    */
-  constructor(options: MongoDBManagerOptions) {
+  constructor(options: MongoDBManagerOptions = {}) {
     if (!options?.url) {
       throw new AoijsError(
         "parameter",
@@ -128,7 +128,7 @@ class MongoDBManager extends MongoDB<string, unknown> {
           ]);
           if (context.isError) return;
 
-          const cooldownKey = `${chatId}_${ms(time)}`;
+          const cooldownKey = `cooldown_${chatId}_${ms(time)}`;
           const userCooldown =
             (await context.database.get(defaultTable, cooldownKey)) || 0;
           const cooldown = userCooldown + +ms(time) - Date.now();
@@ -223,7 +223,7 @@ class MongoDBManager extends MongoDB<string, unknown> {
 
           if (context.isError) return;
 
-          const cooldownKey = `${userId}_${chatId}_${ms(time)}`;
+          const cooldownKey = `cooldown_${userId}_${chatId}_${ms(time)}`;
           const userCooldown =
             (await context.database.get(defaultTable, cooldownKey)) || 0;
           const cooldown = userCooldown + +ms(time) - Date.now();
@@ -397,7 +397,7 @@ class MongoDBManager extends MongoDB<string, unknown> {
 
           if (context.isError) return;
 
-          const cooldownKey = `${userId}_${commandName}_${ms(time)}`;
+          const cooldownKey = `cooldown_${userId}_${commandName}_${ms(time)}`;
           const userCooldown =
             (await context.database.get(defaultTable, cooldownKey)) || 0;
           const cooldown = userCooldown + +ms(time) - Date.now();
@@ -784,29 +784,29 @@ class MongoDBManager extends MongoDB<string, unknown> {
 
   /**
    * Set variables in the database.
-   * @param options - Key-value pairs of variables to set.
+   * @param variables - Key-value pairs of variables to set.
    * @param tables - The database table to use.
    */
   async variables(
-    options: { [key: string]: unknown },
+    variables: { [key: string]: unknown },
     tables: string | string[] = this.tables[0],
   ) {
     if (Array.isArray(tables)) {
       for (const table of tables) {
-        for (const varName in options) {
+        for (const varName in variables) {
           const hasVar = await this.has(table, varName);
-          this.collection.set(`${varName}_${table}`, options[varName]);
+          this.collection.set(`${varName}_${table}`, variables[varName]);
           if (!hasVar) {
-            await this.set(table, varName, options[varName]);
+            await this.set(table, varName, variables[varName]);
           }
         }
       }
     } else if (typeof tables === "string") {
-      for (const varName in options) {
+      for (const varName in variables) {
         const hasVar = await this.has(tables, varName);
-        this.collection.set(`${varName}_${tables}`, options[varName]);
+        this.collection.set(`${varName}_${tables}`, variables[varName]);
         if (!hasVar) {
-          await this.set(tables, varName, options[varName]);
+          await this.set(tables, varName, variables[varName]);
         }
       }
     } else {

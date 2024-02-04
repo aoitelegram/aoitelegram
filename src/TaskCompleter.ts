@@ -19,6 +19,7 @@ interface ContextFunction {
   splits: (string | undefined)[];
   localVars: Collection<string, unknown>;
   random: Collection<string, unknown>;
+  buffer: Collection<string, Buffer>;
   array: Collection<string, unknown>;
   callback_query: unknown[];
   event: ContextEvent;
@@ -39,6 +40,7 @@ class TaskCompleter {
   private suppressError?: string;
   private localVars: Collection<string, unknown> = new Collection();
   private array: Collection<string, unknown> = new Collection();
+  private buffer: Collection<string, Buffer> = new Collection();
   private random: Collection<string, unknown> = new Collection();
   private searchedFunctions: string[];
   private foundFunctions: string[] = [];
@@ -289,6 +291,7 @@ class TaskCompleter {
         this.suppressError = context.suppressErrors || this.suppressError;
         this.localVars = context.localVars || this.localVars;
         this.array = context.array || this.array;
+        this.buffer = context.buffer || this.buffer;
         this.random = context.random || this.random;
         this.callback_query = context.callback_query || this.callback_query;
         if (context.telegram?.globalVars) {
@@ -367,6 +370,7 @@ class TaskCompleter {
         ),
         localVars: this.localVars,
         random: this.random,
+        buffer: this.buffer,
         array: this.array,
         callback_query: this.callback_query,
         event: this.eventData,
