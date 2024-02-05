@@ -5,6 +5,11 @@ export default {
     const [name, ...args] = context.splits;
     if (context.isError) return;
 
+    if (!context.telegram.registerCallback.callbacks.has(name)) {
+      context.sendError(`this callback '${name}' function does not exist`);
+      return;
+    }
+
     return await context.telegram.registerCallback.runCallback(
       name,
       args,
