@@ -25,12 +25,12 @@ class Action {
   /**
    * Array of registered actions.
    */
-  private actions: ActionDescription[] = [];
+  actions: ActionDescription[] = [];
 
   /**
    * Instance of AoiClient used for communication with the Telegram API.
    */
-  private telegram: AoiClient;
+  telegram: AoiClient;
 
   /**
    * Creates a new instance of ActionHandler.

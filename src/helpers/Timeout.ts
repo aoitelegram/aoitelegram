@@ -17,12 +17,12 @@ class Timeout {
   /**
    * The collection of registered timeouts.
    */
-  private timeouts: Collection<string, TimeoutDescription> = new Collection();
+  timeouts: Collection<string, TimeoutDescription> = new Collection();
 
   /**
    * The AoiClient instance.
    */
-  private telegram: AoiClient;
+  telegram: AoiClient;
 
   /**
    * Constructs a new Timeout instance.

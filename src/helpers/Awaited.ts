@@ -17,12 +17,12 @@ class Awaited {
   /**
    * Collection to store awaited descriptions.
    */
-  private awaiteds: Collection<string, AwaitedDescription> = new Collection();
+  awaiteds: Collection<string, AwaitedDescription> = new Collection();
 
   /**
    * A reference to the AoiClient instance.
    */
-  private telegram: AoiClient;
+  telegram: AoiClient;
 
   /**
    * Constructs the Awaited instance.

@@ -8,7 +8,7 @@ class AwaitedManager {
   /**
    * A reference to the AoiClient instance.
    */
-  private telegram: AoiClient;
+  telegram: AoiClient;
 
   /**
    * Constructs the AwaitedManager instance.

@@ -27,12 +27,12 @@ class Callback {
   /**
    * Collection of registered callbacks.
    */
-  private callbacks: Collection<string, CallbackDescription> = new Collection();
+  callbacks: Collection<string, CallbackDescription> = new Collection();
 
   /**
    * AoiClient instance associated with the Callback class.
    */
-  private telegram: AoiClient;
+  telegram: AoiClient;
 
   /**
    * Creates an instance of Callback with a reference to the associated AoiClient.

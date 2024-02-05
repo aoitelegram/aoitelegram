@@ -16,11 +16,11 @@ class Command {
   /**
    * Array of registered commands.
    */
-  private commands: CommandDescription[] = [];
+  commands: CommandDescription[] = [];
   /**
    * Instance of AoiClient used for communication with the Telegram API.
    */
-  private telegram: AoiClient;
+  telegram: AoiClient;
 
   /**
    * Creates a new instance of CommandHandler.

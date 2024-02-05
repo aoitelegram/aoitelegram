@@ -22,7 +22,7 @@ class TimeoutManager {
   /**
    * A reference to the AoiClient instance.
    */
-  private telegram: AoiClient;
+  telegram: AoiClient;
 
   /**
    * Constructs a new TimeoutManager instance.
