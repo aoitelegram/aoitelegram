@@ -36,27 +36,28 @@ interface ContextFunction {
 }
 
 class TaskCompleter {
-  private data: { name: string; inside?: string; splits: string[] }[];
-  private suppressError?: string;
-  private localVars: Collection<string, unknown> = new Collection();
-  private array: Collection<string, unknown> = new Collection();
-  private buffer: Collection<string, Buffer> = new Collection();
-  private random: Collection<string, unknown> = new Collection();
-  private searchedFunctions: string[];
-  private foundFunctions: string[] = [];
-  private code: string;
-  private eventData: ContextEvent;
-  private isError: boolean = false;
-  private telegram: AoiClient;
-  private callback_query: unknown[] = [];
-  private command: {
+  data: { name: string; inside?: string; splits: string[] }[];
+  suppressError?: string;
+  localVars: Collection<string, unknown> = new Collection();
+  array: Collection<string, unknown> = new Collection();
+  buffer: Collection<string, Buffer> = new Collection();
+  random: Collection<string, unknown> = new Collection();
+  searchedFunctions: string[];
+  foundFunctions: string[] = [];
+  code: string;
+  eventData: ContextEvent;
+  isError: boolean = false;
+  telegram: AoiClient;
+  callback_query: unknown[] = [];
+  command: {
     name: string;
     hasCommand?: boolean;
     hasEvent?: boolean;
   };
-  private database: AoiManager | MongoDBManager;
-  private availableFunction: Collection<string, LibWithDataFunction>;
-  private onlySearchFunction: string[];
+  database: AoiManager | MongoDBManager;
+  availableFunction: Collection<string, LibWithDataFunction>;
+  onlySearchFunction: string[];
+  executionTime: number = performance.now();
 
   /**
    * Constructor for TaskCompleter class.
@@ -322,14 +323,21 @@ class TaskCompleter {
           callback.params || [],
           context.splits,
         );
+        const availableFunction = this.availableFunction;
+
+        availableFunction.set("$argumentscount", {
+          name: "$argumentscount",
+          callback: () => context.splits.length,
+        });
+
         const taskCompleter = new TaskCompleter(
           code,
           this.eventData,
           this.telegram,
           this.command,
           this.database,
-          this.availableFunction,
-          this.onlySearchFunction,
+          availableFunction,
+          [...this.onlySearchFunction, "$argumentscount"],
         );
         return await taskCompleter.completeTask();
       } catch (err) {
@@ -351,6 +359,10 @@ class TaskCompleter {
   async completeTask() {
     this.code = await this.completesV4If(this.code);
     this.foundFunctions = await this.searchFunctions();
+    this.code = this.code.replace(
+      /\$executiontime/gi,
+      (performance.now() - this.executionTime).toFixed(3),
+    );
     for (const func of this.foundFunctions.reverse()) {
       const codeSegment = unpack(this.code, func.toLowerCase());
 
