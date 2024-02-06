@@ -31,7 +31,7 @@ interface ContextFunction {
   checkArgumentTypes: (expectedArgumentTypes: string[]) => void;
   sendError: (error: string, custom?: boolean) => unknown;
   database: AoiManager | MongoDBManager;
-  foundFunctions: string[];
+  foundFunctions: { func: string; negative: boolean }[];
   suppressErrors?: string;
 }
 
@@ -43,7 +43,7 @@ class TaskCompleter {
   buffer: Collection<string, Buffer> = new Collection();
   random: Collection<string, unknown> = new Collection();
   searchedFunctions: string[];
-  foundFunctions: string[] = [];
+  foundFunctions: { func: string; negative: boolean }[] = [];
   code: string;
   eventData: ContextEvent;
   isError: boolean = false;
@@ -57,6 +57,7 @@ class TaskCompleter {
   database: AoiManager | MongoDBManager;
   availableFunction: Collection<string, LibWithDataFunction>;
   onlySearchFunction: string[];
+  searchNegationFunction: string[];
   executionTime: number = performance.now();
 
   /**
@@ -86,7 +87,13 @@ class TaskCompleter {
     this.database = database;
     this.availableFunction = availableFunction;
     this.onlySearchFunction = onlySearchFunction;
-    this.code = findAndTransform(code, onlySearchFunction);
+    this.searchNegationFunction = onlySearchFunction.map((func) =>
+      func.replace("$", "$!"),
+    );
+    this.code = findAndTransform(code, [
+      ...onlySearchFunction,
+      ...this.searchNegationFunction,
+    ]);
     this.foundFunctions = this.searchFunctions();
   }
 
@@ -106,27 +113,43 @@ class TaskCompleter {
    * @returns Array of found functions.
    */
   searchFunctions() {
-    let onlySearchFunctions = this.onlySearchFunction;
+    let onlySearchFunctions = this.onlySearchFunction.concat(
+      ...this.searchNegationFunction,
+    );
     let foundFunctions = [];
+
     let matchingFunctions = onlySearchFunctions.filter((func) =>
       this.code.includes(func),
     );
+
     const functionSegments = this.code.split("$");
     for (const functionSegment of functionSegments) {
-      let matchingFunction = matchingFunctions.filter(
-        (func) => func === `$${functionSegment}`.slice(0, func.length),
-      );
-
-      if (!matchingFunction.length) {
-        continue;
-      }
-
-      if (matchingFunction.length === 1) {
-        foundFunctions.push(matchingFunction[0]);
-      } else if (matchingFunction.length > 1) {
-        foundFunctions.push(
-          matchingFunction.sort((a, b) => b.length - a.length)[0],
+      if (functionSegment.startsWith("!")) {
+        let matchingFunction = matchingFunctions.filter(
+          (func) => func === `$${functionSegment}`.slice(0, func.length),
         );
+
+        if (matchingFunction.length === 1) {
+          foundFunctions.push({ func: matchingFunction[0], negative: true });
+        } else if (matchingFunction.length > 1) {
+          foundFunctions.push({
+            func: matchingFunction.sort((a, b) => b.length - a.length)[0],
+            negative: true,
+          });
+        }
+      } else {
+        let matchingFunction = matchingFunctions.filter(
+          (func) => func === `$${functionSegment}`.slice(0, func.length),
+        );
+
+        if (matchingFunction.length === 1) {
+          foundFunctions.push({ func: matchingFunction[0], negative: false });
+        } else if (matchingFunction.length > 1) {
+          foundFunctions.push({
+            func: matchingFunction.sort((a, b) => b.length - a.length)[0],
+            negative: false,
+          });
+        }
       }
     }
 
@@ -274,12 +297,14 @@ class TaskCompleter {
   /**
    * Asynchronously completes a task using Aoi.
    * @param func - The name of the function.
+   * @param negative - Whether the function is negated or not.
    * @param context - The context function containing necessary contextual callback.
    * @param callback - Either a string of code or a function to be executed.
    * @returns A promise that resolves once the task is completed.
    */
   async completeTaskCallback(
     func: string,
+    negative: boolean,
     context: ContextFunction,
     callback:
       | { code: string; params?: string[] }
@@ -301,7 +326,9 @@ class TaskCompleter {
 
         return result;
       } catch (err) {
-        if (`${err}`.includes("TelegramApiError")) {
+        if (negative) {
+          return undefined;
+        } else if (`${err}`.includes("TelegramApiError")) {
           const text = `❌ <b>TelegramApiError[$${func}]:</b><code>${`${err}`
             .split(":")
             .slice(1)
@@ -341,6 +368,7 @@ class TaskCompleter {
         );
         return await taskCompleter.completeTask();
       } catch (err) {
+        if (negative) return undefined;
         console.log(err);
       }
     } else {
@@ -363,7 +391,8 @@ class TaskCompleter {
       /\$executiontime/gi,
       (performance.now() - this.executionTime).toFixed(3),
     );
-    for (const func of this.foundFunctions.reverse()) {
+
+    for (const { func, negative } of this.foundFunctions.reverse()) {
       const codeSegment = unpack(this.code, func.toLowerCase());
 
       this.data.push({
@@ -372,7 +401,7 @@ class TaskCompleter {
         splits: codeSegment.splits,
       });
 
-      const functionName = func.replace("$", "").replace("[", "");
+      const functionName = func.replace(/[$![]/g, "");
 
       const dataContext: ContextFunction = {
         data: this.data,
@@ -469,8 +498,10 @@ class TaskCompleter {
         },
         sendError: (error, custom) => {
           if (!error) return;
-          dataContext.isError = true;
-          this.#sendErrorMessage(error, custom, func);
+          if (!negative) {
+            dataContext.isError = true;
+            this.#sendErrorMessage(error, custom, func);
+          }
         },
         database: this.database,
         foundFunctions: this.foundFunctions,
@@ -490,6 +521,7 @@ class TaskCompleter {
 
       let resultFunction = await this.completeTaskCallback(
         functionName,
+        negative,
         dataContext,
         "callback" in functionRun ? functionRun.callback : functionRun,
       );
