@@ -2,7 +2,7 @@ export default {
   name: "$bufferAlloc",
   callback: (context) => {
     context.argsCheck(2);
-    const [name, size, fill = 0, encoding = "utf8"] = context.splits;
+    const [name, bytes] = context.splits;
     if (context.isError) return;
 
     if (!context.buffer.has(name)) {
@@ -12,7 +12,7 @@ export default {
       return;
     }
 
-    const buffer = Buffer.alloc(size, fill, encoding);
+    const buffer = Buffer.allocUnsafe(bytes);
     return context.buffer.set(name, buffer);
   },
 };
