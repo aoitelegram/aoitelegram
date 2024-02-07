@@ -206,10 +206,10 @@ class AoiBase extends TelegramBot {
           );
         }
 
-        if ((func?.version ?? 0) > version) {
+        if ((func?.version || 0) > version) {
           throw new AoijsError(
             "customFunction",
-            `to load this function ${functionName}, the library version must be equal to or greater than ${func?.version ?? 0}`,
+            `to load this function ${functionName}, the library version must be equal to or greater than ${func?.version || 0}`,
           );
         }
 
@@ -231,10 +231,10 @@ class AoiBase extends TelegramBot {
         );
       }
 
-      if ((dataFunction?.version ?? 0) > version) {
+      if ((dataFunction?.version || 0) > version) {
         throw new AoijsError(
           "customFunction",
-          `to load this function ${functionName}, the library version must be equal to or greater than ${dataFunction?.version ?? 0}`,
+          `to load this function ${functionName}, the library version must be equal to or greater than ${dataFunction?.version || 0}`,
         );
       }
 
@@ -259,10 +259,10 @@ class AoiBase extends TelegramBot {
           );
         }
 
-        if ((func?.version ?? 0) > version) {
+        if ((func?.version || 0) > version) {
           throw new AoijsError(
             "customFunction",
-            `to load this function ${functionName}, the library version must be equal to or greater than ${func?.version ?? 0}`,
+            `to load this function ${functionName}, the library version must be equal to or greater than ${func?.version || 0}`,
           );
         }
 
@@ -277,10 +277,10 @@ class AoiBase extends TelegramBot {
         );
       }
 
-      if ((dataFunction?.version ?? 0) > version) {
+      if ((dataFunction?.version || 0) > version) {
         throw new AoijsError(
           "customFunction",
-          `to load this function ${functionName}, the library version must be equal to or greater than ${dataFunction?.version ?? 0}`,
+          `to load this function ${functionName}, the library version must be equal to or greater than ${dataFunction?.version || 0}`,
         );
       }
 
@@ -416,14 +416,27 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'code' parameter",
       );
     }
+
+    let currentIndex = 1;
     const intervalId = setInterval(async () => {
-      this.addFunction({
-        name: "$break",
-        callback: () => clearInterval(intervalId),
-      });
+      this.ensureFunction([
+        {
+          name: "$break",
+          callback: () => clearInterval(intervalId),
+        },
+        {
+          name: "$continue",
+          callback: (context) => (context.isError = true),
+        },
+        {
+          name: "$index",
+          callback: () => currentIndex,
+        },
+      ]);
+
       await this.evaluateCommand({ event: "loop" }, options.code, this);
-      this.removeFunction("$break");
-    }, options.every ?? 60000);
+      currentIndex++;
+    }, options.every || 60000);
     return this;
   }
 
