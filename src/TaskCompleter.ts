@@ -5,7 +5,7 @@ import { AoiManager } from "./classes/AoiManager";
 import { MongoDBManager } from "./classes/MongoDBManager";
 import { getObjectKey, toParse } from "./function/parser";
 import { ConditionChecker } from "./function/condition";
-import { unpack, findAndTransform, updateParamsFromArray } from "./prototype";
+import { unpack, replaceLast, findAndTransform, updateParamsFromArray } from "./prototype";
 import {
   DataFunction,
   ContextEvent,
@@ -286,7 +286,8 @@ class TaskCompleter {
       }
 
       code = code.replace(/\$if\[/gi, "$if[").replace(/\$endif/gi, "$endif");
-      code = code.replaceLast(
+      code = replaceLast(
+        code,
         `$if[${entireBlock}$endif`,
         (pass ? ifCodeBlock : passes ? lastCodeBlock : elseCodeBlock) as string,
       );
@@ -526,7 +527,8 @@ class TaskCompleter {
         "callback" in functionRun ? functionRun.callback : functionRun,
       );
 
-      this.code = this.code.replaceLast(
+      this.code = replaceLast(
+        this.code,
         codeSegment.splits.length > 0
           ? `${func.toLowerCase()}[${codeSegment.inside}]`
           : `${func.toLowerCase()}`,
@@ -567,7 +569,7 @@ class TaskCompleter {
         { parse_mode: "HTML" },
       );
     } else if (this.eventData?.telegram?.functionError) {
-      this.telegram.addFunction({
+      this.telegram.ensureFunction({
         name: "$handleError",
         callback: (context) => {
           const dataError = {
@@ -580,7 +582,6 @@ class TaskCompleter {
         },
       });
       this.telegram.emit("functionError", this.eventData, this.telegram);
-      this.telegram.removeFunction("$handleError");
     } else {
       throw new AoijsError(undefined, error, this.command.name, functionName);
     }

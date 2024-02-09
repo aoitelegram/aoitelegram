@@ -1,30 +1,18 @@
-declare global {
-  interface String {
-    replaceLast(search: string, replacement: string): string;
-    after(): {
-      inside?: string;
-      total: string;
-      splits: string[];
-      toString(): string;
-    };
-  }
-}
-
 /**
  * Replaces the last occurrence of a substring in a string.
  * @param search - The substring to search for.
  * @param replacement - The string to replace the last occurrence with.
  * @returns The modified string.
  */
-String.prototype.replaceLast = function (search: string, replacement: string) {
-  const lastIndex = this.lastIndexOf(search);
+function replaceLast(text: string, search: string, replacement: string) {
+  const lastIndex = text.lastIndexOf(search);
 
   if (lastIndex === -1) {
-    return this.toString();
+    return text.toString();
   }
 
-  const before = this.substring(0, lastIndex);
-  const after = this.substring(lastIndex + search.length);
+  const before = text.substring(0, lastIndex);
+  const after = text.substring(lastIndex + search.length);
 
   return `${before}${replacement}${after}`;
 };
@@ -95,15 +83,15 @@ function processPattern(pat: string, patLength: number, lps: Int32Array) {
  * Extracts information from the string after the first occurrence of "[".
  * @returns An object with information about the extracted part.
  */
-String.prototype.after = function (): {
+function after(text: string): {
   inside?: string;
   total: string;
   splits: string[];
   toString(): string;
 } {
-  const afterIndex = this.indexOf("[");
-  const after = this.replace(/(\s|\n)/gim, "").startsWith("[")
-    ? this.split("[").slice(1).join("[")
+  const afterIndex = text.indexOf("[");
+  const after = text.replace(/(\s|\n)/gim, "").startsWith("[")
+    ? text.split("[").slice(1).join("[")
     : undefined;
 
   let inside;
@@ -111,7 +99,7 @@ String.prototype.after = function (): {
   let splits: string[] = [];
 
   if (after) {
-    const before = this.substring(0, afterIndex);
+    const before = text.substring(0, afterIndex);
     const rightIndexes = searchIndexes("[", after);
     const leftIndexes = searchIndexes("]", after);
 
@@ -205,7 +193,7 @@ function unpack(
 
   const sliced = code.split(func.replace("[", ""))[last];
 
-  return sliced.after();
+  return after(sliced);
 }
 
 /**
@@ -250,4 +238,4 @@ function updateParamsFromArray(
   return inputString;
 }
 
-export { unpack, findAndTransform, updateParamsFromArray };
+export { unpack, after, replaceLast, findAndTransform, updateParamsFromArray };

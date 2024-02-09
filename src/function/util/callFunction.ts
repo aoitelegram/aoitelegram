@@ -7,8 +7,8 @@ export default {
 
     const func = context.telegram.availableFunctions.get(name);
 
-    if (!func) {
-      context.sendError(`The specified function ${name} does not exist`);
+    if (!func || !func.callback) {
+      context.sendError(`The specified function "${name}" does not exist (only js)`);
       return;
     }
 

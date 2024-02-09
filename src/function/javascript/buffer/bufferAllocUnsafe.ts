@@ -1,5 +1,5 @@
 export default {
-  name: "$bufferAlloc",
+  name: "$bufferAllocUnsafe",
   callback: (context) => {
     context.argsCheck(2);
     const [name, bytes] = context.splits;
