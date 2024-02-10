@@ -73,8 +73,6 @@ class CustomEvent extends EventEmitter {
           options.code as string,
           { ...args, telegram: this.aoitelegram },
         );
-
-        this.aoitelegram.removeFunction("$eventData");
       };
 
       if (options.once === true) {
@@ -172,7 +170,7 @@ class CustomEvent extends EventEmitter {
    * @param args - Additional arguments to pass to the event listeners.
    * @returns Returns the CustomEvent instance for method chaining.
    */
-  override emit(name: string, ...args: any[]) {
+  override emit<T>(name: string, ...args: T[]) {
     return super.emit(name, ...args);
   }
 }

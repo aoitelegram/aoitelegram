@@ -5,7 +5,12 @@ import { AoiManager } from "./classes/AoiManager";
 import { MongoDBManager } from "./classes/MongoDBManager";
 import { getObjectKey, toParse } from "./function/parser";
 import { ConditionChecker } from "./function/condition";
-import { unpack, replaceLast, findAndTransform, updateParamsFromArray } from "./prototype";
+import {
+  unpack,
+  replaceLast,
+  findAndTransform,
+  updateParamsFromArray,
+} from "./prototype";
 import {
   DataFunction,
   ContextEvent,

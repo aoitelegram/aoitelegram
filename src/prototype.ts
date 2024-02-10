@@ -15,7 +15,7 @@ function replaceLast(text: string, search: string, replacement: string) {
   const after = text.substring(lastIndex + search.length);
 
   return `${before}${replacement}${after}`;
-};
+}
 
 /**
  * Searches for all occurrences of a pattern in a text.
@@ -172,7 +172,7 @@ function after(text: string): {
       return total;
     },
   };
-};
+}
 
 /**
  * Unpacks a portion of code based on a specified function signature.

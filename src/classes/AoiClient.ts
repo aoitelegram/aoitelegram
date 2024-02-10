@@ -48,17 +48,17 @@ class AoiClient extends AoiBase {
   globalVars: Collection<string, unknown> = new Collection();
   /**
    * Creates a new instance of AoiClient.
-   * @param {Object} options - Configuration options for the client.
-   * @param {string} options.token - The token for authentication.
-   * @param {TelegramOptions} options.telegram - Options for the Telegram integration.
-   * @param {DatabaseOptions} options.database - Options for the database.
-   * @param {string[]} options.disableFunctions - Functions that will be removed from the library's loading functions.
-   * @param {DataFunction[]} options.customFunction - An array of customFunction functions.
-   * @param {boolean} options.functionError - For the error handler of functions.
-   * @param {boolean} options.sendMessageError - To disable text errors.
-   * @param {boolean} [options.disableAoiDB] - Disabled built-in database.
-   * @param {boolean} [options.logging] - Outputting system messages to the console.
-   * @param {boolean} [options.autoUpdate] - Checks for available package updates and performs an update if enabled
+   * @param options - Configuration options for the client.
+   * @param options.token - The token for authentication.
+   * @param options.telegram - Options for the Telegram integration.
+   * @param options.database - Options for the database.
+   * @param options.disableFunctions - Functions that will be removed from the library's loading functions.
+   * @param options.customFunction - An array of customFunction functions.
+   * @param options.functionError - For the error handler of functions.
+   * @param options.sendMessageError - To disable text errors.
+   * @param options.disableAoiDB - Disabled built-in database.
+   * @param options.logging - Outputting system messages to the console.
+   * @param options.autoUpdate - Checks for available package updates and performs an update if enabled
    */
   constructor(options: {
     token: string;

@@ -60,6 +60,7 @@ class Awaited {
       for (const [awaitedId, awaitedDescription] of this.awaiteds) {
         if (awaitedId !== awaited.awaited) continue;
 
+        let currentIndex = 1;
         const intervalId = setInterval(async () => {
           const parsedAwaitedData = JSON.parse(awaited.data);
           this.telegram.ensureFunction([
@@ -79,6 +80,14 @@ class Awaited {
               name: "$break",
               callback: () => clearInterval(intervalId),
             },
+            {
+              name: "$continue",
+              callback: (context) => (context.isError = true),
+            },
+            {
+              name: "$index",
+              callback: () => currentIndex,
+            },
           ]);
 
           await this.telegram.evaluateCommand(
@@ -86,6 +95,7 @@ class Awaited {
             awaitedDescription.code,
             context,
           );
+          currentIndex++;
         }, awaited.milliseconds);
       }
     });

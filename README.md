@@ -100,19 +100,19 @@ bot.callbackQueryCommand({
 });
 
 // Define a command to print a message.
-bot.command({
+bot.addCommand({
   name: "say",
   code: `$sendMessage[$message]`,
 });
 
 // Define a command to check the bot's ping.
-bot.command({
+bot.addCommand({
   name: "ping",
   code: `$replyMessage[Bot ping: $pingms]`,
 });
 
 // Define a command to display bot information.
-bot.command({
+bot.addCommand({
   name: "botinfo",
   code: `
 $replyMessage[
