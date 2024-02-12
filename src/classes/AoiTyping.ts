@@ -1,6 +1,6 @@
+import { Context } from "../Context";
 import { AoiClient } from "./AoiClient";
 import { AoiManager } from "./AoiManager";
-import { ContextFunction } from "../TaskCompleter";
 import { Context as EventContext } from "telegramsjs";
 import { ValueDatabase } from "../helpers/manager/TimeoutManager";
 import {
@@ -74,7 +74,7 @@ interface EventHandlers {
 
 interface LibDataFunction {
   name: string;
-  callback: (context: ContextFunction) => unknown;
+  callback: (context: Context) => unknown;
 }
 
 type DataFunction =
@@ -89,7 +89,7 @@ type DataFunction =
       name: string;
       type?: "js";
       version?: string;
-      callback: (context: ContextFunction) => unknown;
+      callback: (context: Context) => unknown;
     };
 
 type ContextEvent = EventContext &

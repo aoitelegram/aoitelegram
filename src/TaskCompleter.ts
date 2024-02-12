@@ -1,10 +1,10 @@
+import { Context } from "./Context";
+import { Collection } from "telegramsjs";
 import { AoiClient } from "./classes/AoiClient";
 import { AoijsError } from "./classes/AoiError";
-import { Context, Collection } from "telegramsjs";
 import { AoiManager } from "./classes/AoiManager";
 import { MongoDBManager } from "./classes/MongoDBManager";
-import { getObjectKey, toParse } from "./function/parser";
-import { ConditionChecker } from "./function/condition";
+import { getObjectKey } from "./function/parser";
 import {
   unpack,
   replaceLast,
@@ -12,46 +12,17 @@ import {
   updateParamsFromArray,
 } from "./prototype";
 import {
-  DataFunction,
   ContextEvent,
   LibDataFunction,
   LibWithDataFunction,
 } from "./classes/AoiTyping";
 
-interface ContextFunction {
-  data: { name: string; inside?: string; splits: string[] }[];
-  inside: string | undefined;
-  splits: (string | undefined)[];
-  localVars: Collection<string, unknown>;
-  random: Collection<string, unknown>;
-  buffer: Collection<string, Buffer>;
-  array: Collection<string, unknown>;
-  callback_query: unknown[];
-  event: ContextEvent;
-  telegram: AoiClient;
-  code: string;
-  command: { name: string; hasCommand?: boolean; hasEvent?: boolean };
-  isError: boolean;
-  argsCheck: (amount: number) => unknown;
-  checkArgumentTypes: (expectedArgumentTypes: string[]) => void;
-  sendError: (error: string, custom?: boolean) => unknown;
-  database: AoiManager | MongoDBManager;
-  foundFunctions: { func: string; negative: boolean }[];
-  suppressErrors?: string;
-}
-
 class TaskCompleter {
-  data: { name: string; inside?: string; splits: string[] }[];
-  suppressError?: string;
-  localVars: Collection<string, unknown> = new Collection();
-  array: Collection<string, unknown> = new Collection();
-  buffer: Collection<string, Buffer> = new Collection();
-  random: Collection<string, unknown> = new Collection();
+  context?: Context;
   searchedFunctions: string[];
   foundFunctions: { func: string; negative: boolean }[] = [];
-  code: string;
   eventData: ContextEvent;
-  isError: boolean = false;
+  code: string;
   telegram: AoiClient;
   callback_query: unknown[] = [];
   command: {
@@ -61,8 +32,10 @@ class TaskCompleter {
   };
   database: AoiManager | MongoDBManager;
   availableFunction: Collection<string, LibWithDataFunction>;
+  isError: boolean = false;
   onlySearchFunction: string[];
   searchNegationFunction: string[];
+  suppressErrors?: string;
   executionTime: number = performance.now();
 
   /**
@@ -84,7 +57,6 @@ class TaskCompleter {
     availableFunction: Collection<string, LibWithDataFunction>,
     onlySearchFunction: string[],
   ) {
-    this.data = [];
     this.searchedFunctions = [];
     this.eventData = eventData;
     this.telegram = telegram;
@@ -311,21 +283,16 @@ class TaskCompleter {
   async completeTaskCallback(
     func: string,
     negative: boolean,
-    context: ContextFunction,
+    context: Context,
     callback:
       | { code: string; params?: string[] }
-      | ((context: ContextFunction) => unknown),
+      | ((context: Context) => unknown),
   ) {
     if (typeof callback === "function") {
       try {
         const result = await callback(context);
 
-        this.suppressError = context.suppressErrors || this.suppressError;
-        this.localVars = context.localVars || this.localVars;
-        this.array = context.array || this.array;
-        this.buffer = context.buffer || this.buffer;
-        this.random = context.random || this.random;
-        this.callback_query = context.callback_query || this.callback_query;
+        this.context = context;
         if (context.telegram?.globalVars) {
           this.telegram.globalVars = context.telegram.globalVars;
         }
@@ -401,117 +368,28 @@ class TaskCompleter {
     for (const { func, negative } of this.foundFunctions.reverse()) {
       const codeSegment = unpack(this.code, func.toLowerCase());
 
-      this.data.push({
-        name: func,
-        inside: codeSegment.inside,
-        splits: codeSegment.splits,
-      });
-
       const functionName = func.replace(/[$![]/g, "");
 
-      const dataContext: ContextFunction = {
-        data: this.data,
+      const dataContext = new Context({
         inside: codeSegment.inside,
         splits: codeSegment.splits.map((inside) =>
           inside.trim() === "" ? undefined : inside,
         ),
-        localVars: this.localVars,
-        random: this.random,
-        buffer: this.buffer,
-        array: this.array,
-        callback_query: this.callback_query,
         event: this.eventData,
         telegram: this.telegram,
-        code: this.code,
-        command: this.command,
-        isError: false,
-        argsCheck: (amount) => {
-          if (!dataContext.splits[0] || dataContext.splits.length < amount) {
-            dataContext.sendError(
-              `Expected ${amount} arguments but got ${
-                dataContext.splits[0] ? dataContext.splits.length : 0
-              }`,
-            );
-          }
-        },
-        checkArgumentTypes(expectedArgumentTypes: string[]) {
-          if (dataContext.isError) return;
-          const argument = dataContext.splits;
-          for (
-            let argumentIndex = 0;
-            argumentIndex < argument.length;
-            argumentIndex++
-          ) {
-            const actualArgumentType = toParse(argument[argumentIndex]);
-            if (!expectedArgumentTypes[argumentIndex]) {
-              expectedArgumentTypes[argumentIndex] = "unknown";
-            }
-            const expectedArgumentTypeSet = new Set(
-              expectedArgumentTypes[argumentIndex]
-                .split("|")
-                .map((arg) => arg.trim()),
-            );
-
-            if (expectedArgumentTypeSet.has("unknown")) continue;
-
-            const isVariadic = new Set(
-              expectedArgumentTypes[argumentIndex]
-                .split("|")
-                .map((arg) => arg.trim().includes("...")),
-            ).has(true);
-            if (isVariadic) {
-              const variadicTypes = new Set(
-                expectedArgumentTypes[argumentIndex]
-                  .split("|")
-                  .map((arg) => arg.trim())
-                  .join(" ")
-                  .split("...")
-                  .map((arg) => (arg ? arg.trim() : undefined)),
-              );
-              const variadicTypesName = expectedArgumentTypes[argumentIndex];
-              const sliceTypes = argument.slice(argumentIndex);
-              for (
-                let argumentIndex = 0;
-                argumentIndex < sliceTypes.length;
-                argumentIndex++
-              ) {
-                const nextExpectedType = toParse(
-                  `${sliceTypes[argumentIndex]}`,
-                );
-                const actualArgumentType = toParse(
-                  `${sliceTypes[argumentIndex]}`,
-                );
-                if (variadicTypesName.includes("...unknown")) break;
-                if (!variadicTypes.has(nextExpectedType)) {
-                  dataContext.sendError(
-                    `The ${
-                      argumentIndex + 1
-                    }-th argument following the variadic parameter in the function ${functionName} should be of type ${variadicTypesName}, but the received value is of type ${actualArgumentType}`,
-                  );
-                }
-              }
-              break;
-            } else if (!expectedArgumentTypeSet.has(actualArgumentType)) {
-              dataContext.sendError(
-                `The ${
-                  argumentIndex + 1
-                }-th argument in the function ${functionName} should be one of the types ${
-                  expectedArgumentTypes[argumentIndex]
-                }, but the provided value is of type ${actualArgumentType}`,
-              );
-            }
-          }
-        },
-        sendError: (error, custom) => {
-          if (!error) return;
-          if (!negative) {
-            dataContext.isError = true;
-            this.#sendErrorMessage(error, custom, func);
-          }
-        },
         database: this.database,
-        foundFunctions: this.foundFunctions,
-      };
+        command: this.command,
+        negative,
+        currentFunction: func,
+        data: {
+          localVars: this.context?.localVars,
+          random: this.context?.random,
+          buffer: this.context?.buffer,
+          array: this.context?.array,
+          callback_query: this.context?.callback_query,
+          suppressErrors: this.context?.suppressErrors,
+        },
+      });
 
       const functionRun = this.availableFunction.get(
         `$${functionName.toLowerCase()}`,
@@ -532,17 +410,19 @@ class TaskCompleter {
         "callback" in functionRun ? functionRun.callback : functionRun,
       );
 
-      this.code = replaceLast(
-        this.code,
+      const funcLowerCase = func.toLowerCase();
+      const segment =
         codeSegment.splits.length > 0
-          ? `${func.toLowerCase()}[${codeSegment.inside}]`
-          : `${func.toLowerCase()}`,
-        `${resultFunction}`,
-      );
+          ? `${funcLowerCase}[${codeSegment.inside}]`
+          : `${funcLowerCase}`;
+      this.code = replaceLast(this.code, segment, `${resultFunction}`);
 
-      if (dataContext.isError || this.isError) {
+      const isError = dataContext.isError || this.isError;
+      if (isError && !negative) {
         this.code = "";
         break;
+      } else if (dataContext.isError && negative) {
+        dataContext.isError = false;
       }
     }
     return this.code;
@@ -560,8 +440,8 @@ class TaskCompleter {
     custom: boolean = false,
     functionName: string,
   ) {
-    if (this.suppressError && this.eventData?.send) {
-      return this.eventData.send(this.suppressError, {
+    if (this.context?.suppressErrors && this.eventData?.send) {
+      return this.eventData.send(this.context.suppressErrors, {
         parse_mode: "HTML",
       });
     } else if (
@@ -593,4 +473,4 @@ class TaskCompleter {
   }
 }
 
-export { TaskCompleter, ContextFunction };
+export { TaskCompleter };

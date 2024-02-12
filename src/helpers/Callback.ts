@@ -1,7 +1,7 @@
+import { Context } from "../Context";
 import { Collection } from "telegramsjs";
 import { AoiClient } from "../classes/AoiClient";
 import { AoijsError } from "../classes/AoiError";
-import { ContextFunction } from "../TaskCompleter";
 
 interface AoiCallbackDescription {
   name: string;
@@ -14,7 +14,7 @@ interface JsCallbackDescription {
   type?: "js";
   callback: (
     args: (string | undefined)[],
-    context: ContextFunction["event"],
+    context: Context["event"],
   ) => unknown;
 }
 
@@ -69,11 +69,7 @@ class Callback {
    * @param context - The context function's event object.
    * @returns The result of the executed callback.
    */
-  async runCallback(
-    name: string,
-    args: string[],
-    context: ContextFunction["event"],
-  ) {
+  async runCallback(name: string, args: string[], context: Context["event"]) {
     if (!name) {
       throw new AoijsError(
         "callback",
