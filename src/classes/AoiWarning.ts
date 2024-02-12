@@ -1,5 +1,7 @@
 import chalk from "chalk";
 import fetch from "node-fetch";
+import process from "node:process";
+import { setTimeout } from "node:timers";
 import { version } from "../../package.json";
 import { execSync, spawn } from "node:child_process";
 
@@ -40,8 +42,10 @@ class AoiWarning {
     if (!this.autoUpdate) return;
 
     process.on("SIGINT", () => {
-      console.log(chalk.yellow("Received SIGINT. Exiting gracefully..."));
-      process.exit(0);
+      setTimeout(() => {
+        console.log(chalk.yellow("Received SIGINT. Exiting gracefully..."));
+        process.exit(0);
+      }, 500);
     });
   }
 
