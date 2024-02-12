@@ -25,6 +25,32 @@ class CustomEvent extends EventEmitter {
     super();
     this.aoitelegram = aoitelegram;
     aoitelegram.customEvent = this;
+
+    process.on("beforeExit", (code) => this.emit("process:beforeExit", code));
+    process.on("disconnect", () => this.emit("process:disconnect"));
+    process.on("exit", (code) => this.emit("process:exit", code));
+    process.on("message", (message, sendHandle) =>
+      this.emit("process:message", message, sendHandle),
+    );
+    process.on("multipleResolves", async (type, promise, value) =>
+      this.emit("process:multipleResolves", type, await promise, value),
+    );
+    process.on("rejectionHandled", async (promise) =>
+      this.emit("process:rejectionHandled", await promise),
+    );
+    process.on("uncaughtException", (err) =>
+      this.emit("process:uncaughtException", err),
+    );
+    process.on("uncaughtExceptionMonitor", (err) =>
+      this.emit("process:uncaughtExceptionMonitor", err),
+    );
+    process.on("unhandledRejection", async (reason, promise) =>
+      this.emit("process:unhandledRejection", reason, await promise),
+    );
+    process.on("warning", (warning) => this.emit("process:warning", warning));
+    process.on("worker", (worker) => this.emit("process:worker", worker));
+    process.on("SIGINT", () => this.emit("process:SIGINT"));
+    process.on("SIGTERM", () => this.emit("process:SIGTERM"));
   }
 
   /**
@@ -61,10 +87,10 @@ class CustomEvent extends EventEmitter {
           name: "$eventData",
           callback: (context) => {
             return !context.inside
-              ? { ...args }
+              ? JSON.stringify({ ...args })
               : context.inside
-                ? { ...args }[context.inside]
-                : { ...args };
+                ? getObjectKey({ ...args }, context.inside)
+                : JSON.stringify({ ...args });
           },
         });
 
