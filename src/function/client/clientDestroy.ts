@@ -1,8 +1,7 @@
 export default {
-  name: "$comment",
+  name: "$clientDestroy",
   callback: (context) => {
-    context.argsCheck(1);
     if (context.isError) return;
-    return "";
+    context.telegram.disconnect();
   },
 };
