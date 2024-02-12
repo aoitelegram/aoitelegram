@@ -824,7 +824,7 @@ class AoiBase extends TelegramBot {
         name: "$newVariable",
         callback: (context) => {
           const result = getObjectKey(newVariable, context.inside as string);
-          return result;
+          return typeof result === "object" ? JSON.stringify(result) : result;
         },
       });
       await this.evaluateCommand({ event: "variableCreate" }, options.code, {
@@ -852,7 +852,7 @@ class AoiBase extends TelegramBot {
         name: "$variable",
         callback: (context) => {
           const result = getObjectKey(variable, context.inside as string);
-          return result;
+          return typeof result === "object" ? JSON.stringify(result) : result;
         },
       });
       await this.evaluateCommand({ event: "variableUpdate" }, options.code, {
@@ -880,7 +880,7 @@ class AoiBase extends TelegramBot {
         name: "$oldVariable",
         callback: (context) => {
           const result = getObjectKey(oldVariable, context.inside as string);
-          return result;
+          return typeof result === "object" ? JSON.stringify(result) : result;
         },
       });
       await this.evaluateCommand({ event: "variableDelete" }, options.code, {
