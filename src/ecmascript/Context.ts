@@ -1,12 +1,12 @@
-import importSync from "import-sync";
+import { packageJSON } from "./index.js";
 import { Collection } from "telegramsjs";
-import type PackageJSON from "../package.json";
-import { AoiClient } from "./classes/AoiClient";
-import { AoijsError } from "./classes/AoiError";
-import { AoiManager } from "./classes/AoiManager";
-import { ContextEvent } from "./classes/AoiTyping";
-import { MongoDBManager } from "./classes/MongoDBManager";
-import { getObjectKey, toParse } from "./function/parser";
+import type PackageJSON from "./package.json";
+import { AoiClient } from "./classes/AoiClient.js";
+import { AoijsError } from "./classes/AoiError.js";
+import { AoiManager } from "./classes/AoiManager.js";
+import { ContextEvent } from "./classes/AoiTyping.js";
+import { MongoDBManager } from "./classes/MongoDBManager.js";
+import { getObjectKey, toParse } from "./function/parser.js";
 
 class Context {
   inside: string | undefined;
@@ -24,7 +24,7 @@ class Context {
   negative: boolean;
   currentFunction: string;
   suppressErrors?: string;
-  packageJSON: typeof PackageJSON = importSync("../package.json");
+  packageJSON: typeof packageJSON = packageJSON;
 
   constructor(options: {
     inside: string | undefined;

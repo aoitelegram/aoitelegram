@@ -1,8 +1,8 @@
 import { Collection } from "telegramsjs";
-import { AoiClient } from "../classes/AoiClient";
-import { AoijsError } from "../classes/AoiError";
-import { getObjectKey } from "../function/parser";
-import { ValueDatabase } from "./manager/TimeoutManager";
+import { AoiClient } from "../classes/AoiClient.js";
+import { AoijsError } from "../classes/AoiError.js";
+import { getObjectKey } from "../function/parser.js";
+import { ValueDatabase } from "./manager/TimeoutManager.js";
 
 interface TimeoutDescription {
   id: string;

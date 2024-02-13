@@ -2,10 +2,10 @@ import fs from "node:fs";
 import fsx from "fs-extra";
 import path from "node:path";
 import importSync from "import-sync";
-import { AoiClient } from "./AoiClient";
-import { AoijsError } from "./AoiError";
-import { DataFunction } from "./AoiTyping";
-import { version } from "../index";
+import { AoiClient } from "./AoiClient.js";
+import { AoijsError } from "./AoiError.js";
+import { DataFunction } from "./AoiTyping.js";
+import { version } from "../index.js";
 
 /**
  * Class representing a plugin manager for loading and managing plugins in a Node.js application.

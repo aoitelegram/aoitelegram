@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import fetch from "node-fetch";
 import process from "node:process";
-import { version } from "../index";
+import { version } from "../index.js";
 import { setTimeout } from "node:timers";
 import { execSync, spawn } from "node:child_process";
 

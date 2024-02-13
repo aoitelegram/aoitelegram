@@ -1,22 +1,25 @@
 import fs from "node:fs";
 import path from "node:path";
 import importSync from "import-sync";
-import { AoijsError } from "./AoiError";
+import { fileURLToPath } from "node:url";
+import { AoijsError } from "./AoiError.js";
 import { Update } from "@telegram.ts/types";
-import { TaskCompleter } from "../TaskCompleter";
-import { getObjectKey } from "../function/parser";
+import { TaskCompleter } from "../TaskCompleter.js";
+import { getObjectKey } from "../function/parser.js";
 import { setInterval, clearInterval } from "node:timers";
-import { AoiClient, DatabaseOptions } from "./AoiClient";
-import { ContextEvent, CombinedEventFunctions } from "./AoiTyping";
+import { AoiClient, DatabaseOptions } from "./AoiClient.js";
+import { ContextEvent, CombinedEventFunctions } from "./AoiTyping.js";
 import { TelegramBot, Collection, Context } from "telegramsjs";
-import { AoiManager, KeyValueOptions } from "./AoiManager";
-import { MongoDBManager, MongoDBManagerOptions } from "./MongoDBManager";
+import { AoiManager, KeyValueOptions } from "./AoiManager.js";
+import { MongoDBManager, MongoDBManagerOptions } from "./MongoDBManager.js";
 import {
   LibDataFunction,
   DataFunction,
   LibWithDataFunction,
-} from "./AoiTyping";
-import { version } from "../index";
+} from "./AoiTyping.js";
+import { version } from "../index.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 type AllowedUpdates = ReadonlyArray<Exclude<keyof Update, "update_id">>;
 
@@ -107,7 +110,7 @@ class AoiBase extends TelegramBot {
 
     this.disableFunctions = disableFunctions || [];
     this.availableFunctions = loadFunctionsLib(
-      path.join(__dirname, "../../../function/"),
+      path.join(__dirname, "../../../lib/function/"),
       new Collection<string, LibWithDataFunction>(),
       disableFunctions || [],
     );

@@ -1,10 +1,10 @@
 import ms from "ms";
 import chalk from "chalk";
-import { AoiBase } from "./AoiBase";
+import { AoiBase } from "./AoiBase.js";
 import { Collection } from "telegramsjs";
-import { AoijsError } from "./AoiError";
-import { hasChatPrivate } from "../function/helpers";
-import { formatTime, replaceData } from "../function/parser";
+import { AoijsError } from "./AoiError.js";
+import { hasChatPrivate } from "../function/helpers.js";
+import { formatTime, replaceData } from "../function/parser.js";
 import { MongoDBManager as MongoDB } from "@aoitelegram/database";
 
 interface ChatData {

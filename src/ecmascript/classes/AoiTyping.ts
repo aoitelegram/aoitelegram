@@ -1,8 +1,8 @@
-import { Context } from "../Context";
-import { AoiClient } from "./AoiClient";
-import { AoiManager } from "./AoiManager";
+import { Context } from "../Context.js";
+import { AoiClient } from "./AoiClient.js";
+import { AoiManager } from "./AoiManager.js";
 import { Context as EventContext } from "telegramsjs";
-import { ValueDatabase } from "../helpers/manager/TimeoutManager";
+import { ValueDatabase } from "../helpers/manager/TimeoutManager.js";
 import {
   Update,
   UserFromGetMe,

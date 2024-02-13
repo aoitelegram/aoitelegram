@@ -11,6 +11,6 @@ export default {
       return;
     }
 
-    return entities[Number(index)-1][path];
+    return entities[Number(index) - 1][path];
   },
 };

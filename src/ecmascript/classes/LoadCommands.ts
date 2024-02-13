@@ -2,8 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import figlet from "figlet";
 import importSync from "import-sync";
-import { AoiClient } from "./AoiClient";
-import { AoijsError } from "./AoiError";
+import { AoiClient } from "./AoiClient.js";
+import { AoijsError } from "./AoiError.js";
 
 /**
  * Class to load and process commands for AoiTelegram.
@@ -64,8 +64,11 @@ class LoadCommands {
       if (stats.isDirectory()) {
         this.loadCommands(itemPath, log, updated);
       } else if (itemPath.endsWith(".js")) {
-        delete require.cache[itemPath];
-        const requireFun = importSync(itemPath);
+        const requireFun = importSync(itemPath, {
+          esmOptions: {
+            cache: false,
+          },
+        });
         const dataFunc = requireFun.default || requireFun;
 
         if (Array.isArray(dataFunc)) {

@@ -1,5 +1,5 @@
-import { AoijsError } from "../classes/AoiError";
-import { AoiClient } from "../classes/AoiClient";
+import { AoijsError } from "../classes/AoiError.js";
+import { AoiClient } from "../classes/AoiClient.js";
 
 interface ActionDescription {
   data: string;

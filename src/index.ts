@@ -1,3 +1,4 @@
+import importSync from "import-sync";
 import { AoiBase } from "./classes/AoiBase";
 import { AoiClient } from "./classes/AoiClient";
 import { AoijsError } from "./classes/AoiError";
@@ -7,7 +8,7 @@ import { DataFunction } from "./classes/AoiTyping";
 import { CustomEvent } from "./classes/CustomEvent";
 import { LoadCommands } from "./classes/LoadCommands";
 import { PluginManager } from "./classes/PluginManager";
-import { version } from "../package.json";
+const { version } = importSync("../package.json");
 
 export {
   AoiClient,

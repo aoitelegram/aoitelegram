@@ -2,7 +2,7 @@
   "name": "aoitelegram",
   "description": "A powerful package to create Telegram Bots with built-in string functions",
   "main": "./lib/cjs/src/index.js",
-  "type": "commonjs",
+  "type": "module",
   "typing": "./lib/cjs/src/index.d.ts",
   "version": "0.7.0",
   "scripts": {
@@ -15,7 +15,7 @@
   },
   "exports": {
     "require": "./lib/cjs/src/index.js",
-    "import": "./lib/esm/index.js"
+    "import": "./lib/esm/src/index.js"
   },
   "engines": {
     "node": ">=16"

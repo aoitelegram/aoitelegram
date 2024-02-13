@@ -1,8 +1,8 @@
 import { Collection } from "telegramsjs";
 import { setInterval, clearInterval } from "node:timers";
-import { AoijsError } from "../classes/AoiError";
-import { AoiClient } from "../classes/AoiClient";
-import { getObjectKey } from "../function/parser";
+import { AoijsError } from "../classes/AoiError.js";
+import { AoiClient } from "../classes/AoiClient.js";
+import { getObjectKey } from "../function/parser.js";
 
 interface AwaitedDescription {
   awaited: string;

@@ -1,5 +1,5 @@
-import { AoiClient } from "../classes/AoiClient";
-import { AoijsError } from "../classes/AoiError";
+import { AoiClient } from "../classes/AoiClient.js";
+import { AoijsError } from "../classes/AoiError.js";
 
 interface CommandDescription {
   name: string;

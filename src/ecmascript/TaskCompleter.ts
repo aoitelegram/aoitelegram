@@ -1,21 +1,21 @@
-import { Context } from "./Context";
+import { Context } from "./Context.js";
 import { Collection } from "telegramsjs";
-import { AoiClient } from "./classes/AoiClient";
-import { AoijsError } from "./classes/AoiError";
-import { AoiManager } from "./classes/AoiManager";
-import { MongoDBManager } from "./classes/MongoDBManager";
-import { getObjectKey, toConvertParse } from "./function/parser";
+import { AoiClient } from "./classes/AoiClient.js";
+import { AoijsError } from "./classes/AoiError.js";
+import { AoiManager } from "./classes/AoiManager.js";
+import { MongoDBManager } from "./classes/MongoDBManager.js";
+import { getObjectKey, toConvertParse } from "./function/parser.js";
 import {
   unpack,
   replaceLast,
   findAndTransform,
   updateParamsFromArray,
-} from "./prototype";
+} from "./prototype.js";
 import {
   ContextEvent,
   LibDataFunction,
   LibWithDataFunction,
-} from "./classes/AoiTyping";
+} from "./classes/AoiTyping.js";
 
 class TaskCompleter {
   context?: Context;

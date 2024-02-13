@@ -2,11 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 import figlet from "figlet";
 import importSync from "import-sync";
-import { AoiClient } from "./AoiClient";
-import { DataEvent } from "./AoiTyping";
-import { AoijsError } from "./AoiError";
+import { AoiClient } from "./AoiClient.js";
+import { DataEvent } from "./AoiTyping.js";
+import { AoijsError } from "./AoiError.js";
 import { EventEmitter } from "node:events";
-import { getObjectKey } from "../function/parser";
+import { getObjectKey } from "../function/parser.js";
 
 /**
  * CustomEvent class extends EventEmitter for handling custom events.
