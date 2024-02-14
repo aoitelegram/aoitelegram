@@ -4,33 +4,38 @@ import path from "node:path";
 import importSync from "import-sync";
 import { AoiClient } from "./AoiClient";
 import { AoijsError } from "./AoiError";
-import { DataFunction } from "./AoiTyping";
 import { version } from "../index";
 
 /**
  * Class representing a plugin manager for loading and managing plugins in a Node.js application.
  */
 class PluginManager {
-  #aoitelegram?: AoiClient;
+  aoitelegram: AoiClient;
+
   /**
    * Create an instance of the PluginManager.
-   * @param searchingForPlugins - Specify whether to search for plugins during initialization.
-   * @param aoitelegram - The AoiClient instance to load commands into.
+   * @param options.searchingForPlugins - Specify whether to search for plugins during initialization.
+   * @param options.aoitelegram - The AoiClient instance to load commands into.
    */
-  constructor(searchingForPlugins?: boolean, aoitelegram?: AoiClient) {
-    if (searchingForPlugins === true) {
+  constructor(options: {
+    aoitelegram: AoiClient;
+    searchingForPlugins?: boolean;
+  }) {
+    this.aoitelegram = options.aoitelegram;
+    if (options.searchingForPlugins === true) {
       const pathAoiPlugins = path.join(
         process.cwd(),
         "node_modules",
         ".aoiplugins",
       );
+
       const existsAoiPlugins = fs.existsSync(pathAoiPlugins);
       if (!existsAoiPlugins) {
         fs.mkdirSync(pathAoiPlugins);
       }
-      this.#searchingForPlugins();
+
+      this.searchingForPlugins();
     }
-    this.#aoitelegram = aoitelegram;
   }
 
   /**
@@ -39,12 +44,7 @@ class PluginManager {
    * @returns An array of plugin functions.
    */
   loadDirPlugins(plugins: string) {
-    let collectionFunction: DataFunction[] = [];
-    return readFunctionsInDirectory(
-      path.join(process.cwd(), plugins),
-      collectionFunction,
-      this.#aoitelegram,
-    );
+    loadPluginsFunction(path.join(process.cwd(), plugins), this.aoitelegram);
   }
 
   /**
@@ -53,7 +53,6 @@ class PluginManager {
    * @returns An array of plugin functions.
    */
   loadPlugins(...plugins: string[]) {
-    let collectionFunction: DataFunction[] = [];
     for (const dirFunc of plugins) {
       const pathPlugin = path.join(
         process.cwd(),
@@ -81,21 +80,14 @@ class PluginManager {
         );
       }
 
-      collectionFunction.push(
-        ...(readFunctionsInDirectory(
-          path.join(pathPlugin, packageJSON),
-          collectionFunction,
-          this.#aoitelegram,
-        ) ?? []),
-      );
+      loadPluginsFunction(path.join(pathPlugin, packageJSON), this.aoitelegram);
     }
-    return collectionFunction;
   }
 
   /**
    * Search for plugins in the 'node_modules' directory and copy them to the '.aoiplugins' directory.
    */
-  #searchingForPlugins() {
+  searchingForPlugins() {
     const nodeModulesPath = path.join(process.cwd(), "node_modules");
     const aoiPluginsPath = path.join(nodeModulesPath, ".aoiplugins");
 
@@ -136,93 +128,27 @@ class PluginManager {
 /**
  * Recursively reads and collects custom functions from a directory, and optionally registers them with an AoiClient.
  * @param dirPath - The directory path to search for custom functions.
- * @param collectionFunctions - An array to collect the custom functions.
- * @param aoitelegram - (Optional) An AoiClient to register custom functions.
- * @returns An array of collected custom functions or registers them with the AoiClient if provided.
- */
-function readFunctionsInDirectory(
-  dirPath: string,
-  collectionFunctions: DataFunction[],
-  aoitelegram?: AoiClient,
-) {
-  let collectionFunction: DataFunction[] = [...collectionFunctions];
-  let items: string[] = [];
+ **/
+function loadPluginsFunction(dirPath: string, aoitelegram: AoiClient) {
+  const processFile = (itemPath: string) => {
+    const dataRequire = importSync(itemPath);
+    const dataFunction = dataRequire.default || dataRequire;
+    aoitelegram.ensureFunction(dataFunction);
+  };
 
-  try {
-    items = fs.readdirSync(dirPath);
-  } catch (err) {
-    const messageError = err as { code: string };
-    if (messageError.code === "ENOTDIR") {
-      const dataFunc = importSync(dirPath).default ?? importSync(dirPath) ?? {};
-      if (dataFunc.callback && (dataFunc.type === "js" || !dataFunc.type)) {
-        collectionFunction.push({
-          name: dataFunc.name,
-          type: "js",
-          version: dataFunc.version,
-          callback: dataFunc.callback,
-        });
-      } else if (dataFunc.code && dataFunc.type === "aoitelegram") {
-        collectionFunction.push({
-          name: dataFunc.name,
-          type: "aoitelegram",
-          useNative: dataFunc.useNative,
-          version: dataFunc.version,
-          code: dataFunc.code,
-        });
-      } else
-        throw new AoijsError(
-          "plugins",
-          "the specified parameters for creating a custom function do not match the requirements",
-          undefined,
-          dataFunc.name,
-        );
-    }
-    if (aoitelegram) {
-      aoitelegram.addFunction(collectionFunction);
-      return collectionFunction;
-    }
-    return collectionFunction;
-  }
-
-  for (const item of items) {
+  const processItem = (item: string) => {
     const itemPath = path.join(dirPath, item);
     const stats = fs.statSync(itemPath);
 
     if (stats.isDirectory()) {
-      readFunctionsInDirectory(itemPath, collectionFunction, aoitelegram);
+      loadPluginsFunction(itemPath, aoitelegram);
     } else if (itemPath.endsWith(".js")) {
-      const dataFunc =
-        importSync(itemPath).default ?? importSync(itemPath) ?? {};
-      if (dataFunc.callback && (dataFunc.type === "js" || !dataFunc.type)) {
-        collectionFunction.push({
-          name: dataFunc.name,
-          type: "js",
-          version: dataFunc.version,
-          callback: dataFunc.callback,
-        });
-      } else if (dataFunc.code && dataFunc.type === "aoitelegram") {
-        collectionFunction.push({
-          name: dataFunc.name,
-          type: "aoitelegram",
-          useNative: dataFunc.useNative,
-          version: dataFunc.version,
-          code: dataFunc.code,
-        });
-      } else
-        throw new AoijsError(
-          "plugins",
-          "the specified parameters for creating a custom function do not match the requirements",
-          undefined,
-          dataFunc.name,
-        );
-      if (aoitelegram) {
-        aoitelegram.addFunction(collectionFunction);
-        return collectionFunction;
-      }
+      processFile(itemPath);
     }
-  }
+  };
 
-  return collectionFunction;
+  const items = fs.readdirSync(dirPath);
+  for (const file of items) processItem(file);
 }
 
 export { PluginManager };

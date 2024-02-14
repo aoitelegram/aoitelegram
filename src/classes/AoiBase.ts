@@ -107,7 +107,7 @@ class AoiBase extends TelegramBot {
 
     this.disableFunctions = disableFunctions || [];
     this.availableFunctions = loadFunctionsLib(
-      path.join(__dirname, "../../function/"),
+      path.join(__dirname, "../function/"),
       new Collection<string, LibWithDataFunction>(),
       disableFunctions || [],
     );
