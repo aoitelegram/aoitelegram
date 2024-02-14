@@ -3,6 +3,7 @@ import { AoijsError } from "./AoiError";
 import { Collection } from "telegramsjs";
 import { DataFunction } from "./AoiTyping";
 import { CustomEvent } from "./CustomEvent";
+import { AoiExtension } from "./AoiExtension";
 import { LoadCommands } from "./LoadCommands";
 import { KeyValueOptions } from "./AoiManager";
 import { toConvertParse } from "../function/parser";
@@ -45,6 +46,7 @@ class AoiClient extends AoiBase {
   awaitedManager: AwaitedManager;
   loadCommands?: LoadCommands;
   customEvent?: CustomEvent;
+  extensions?: AoiExtension[];
   commands: Collection<CommandInfoSet, unknown> = new Collection();
   globalVars: Collection<string, unknown> = new Collection();
   /**
@@ -54,7 +56,7 @@ class AoiClient extends AoiBase {
    * @param options.telegram - Options for the Telegram integration.
    * @param options.database - Options for the database.
    * @param options.disableFunctions - Functions that will be removed from the library's loading functions.
-   * @param options.customFunction - An array of customFunction functions.
+   * @param options.extensions - An array of AoiExtension functions.
    * @param options.functionError - For the error handler of functions.
    * @param options.sendMessageError - To disable text errors.
    * @param options.disableAoiDB - Disabled built-in database.
@@ -66,7 +68,7 @@ class AoiClient extends AoiBase {
     telegram?: TelegramOptions;
     database?: DatabaseOptions;
     disableFunctions?: string[];
-    customFunction?: DataFunction[];
+    extension?: AoiExtension[];
     functionError?: boolean;
     sendMessageError?: boolean;
     disableAoiDB?: boolean;
@@ -77,7 +79,6 @@ class AoiClient extends AoiBase {
       options.token,
       options.telegram,
       options.database,
-      options.customFunction,
       options.disableFunctions,
       options.disableAoiDB,
     );
@@ -85,6 +86,7 @@ class AoiClient extends AoiBase {
       options.logging === undefined ? true : options.logging;
     this.#aoiWarning = options.autoUpdate?.aoiWarning;
     this.#warningManager = new AoiWarning(options.autoUpdate || {});
+    this.extensions = options.extension;
     this.functionError = options.functionError;
     this.sendMessageError = options.sendMessageError;
     this.timeoutManager = new TimeoutManager(this);
@@ -298,6 +300,14 @@ class AoiClient extends AoiBase {
     await this.registerAction.handler();
     await this.registerTimeout.handler();
     await this.registerAwaited.handler();
+
+    if (this.extensions?.length) {
+      for (let i = 0; i < this.extensions.length; i++) {
+        const initPlugins = this.extensions[i];
+        await initPlugins["initPlugins"](this);
+      }
+    }
+
     if (this.#optionLogging) {
       this.on("ready", async (ctx) => {
         setTimeout(() => {

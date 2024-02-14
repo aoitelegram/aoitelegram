@@ -148,7 +148,13 @@ function loadPluginsFunction(dirPath: string, aoitelegram: AoiClient) {
   };
 
   const items = fs.readdirSync(dirPath);
-  for (const file of items) processItem(file);
+  for (const file of items) {
+    try {
+      processItem(file);
+    } catch (err) {
+      console.log(err);
+    }
+  }
 }
 
 export { PluginManager };

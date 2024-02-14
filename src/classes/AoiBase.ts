@@ -79,7 +79,6 @@ class AoiBase extends TelegramBot {
    * @param  token - The token for authentication.
    * @param {TelegramOptions} telegram - Configuration options for the Telegram integration.
    * @param {DatabaseOptions} options.database - Options for the database.
-   * @param {DataFunction[]} options.customFunction - An array of custom functions.
    * @param {string[]} options.disableFunctions - Functions that will be removed from the library's loading functions.
    * @param {boolean} [options.disableAoiDB] - Disabled built-in database.
    */
@@ -87,7 +86,6 @@ class AoiBase extends TelegramBot {
     token: string,
     telegram: TelegramOptions = {},
     database: DatabaseOptions = {},
-    customFunction?: DataFunction[],
     disableFunctions?: string[],
     disableAoiDB?: boolean,
   ) {
@@ -125,8 +123,6 @@ class AoiBase extends TelegramBot {
         );
       }
     }
-
-    this.addFunction(customFunction || []);
   }
 
   /**

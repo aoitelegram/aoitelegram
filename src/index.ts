@@ -7,6 +7,7 @@ import { AoiManager } from "./classes/AoiManager";
 import { DataFunction } from "./classes/AoiTyping";
 import { CustomEvent } from "./classes/CustomEvent";
 import { LoadCommands } from "./classes/LoadCommands";
+import { AoiExtension } from "./classes/AoiExtension";
 import { PluginManager } from "./classes/PluginManager";
 const { version } = importSync("../package.json");
 
@@ -16,6 +17,7 @@ export {
   AoiWarning,
   AoiManager,
   AoijsError,
+  AoiExtension,
   PluginManager,
   CustomEvent,
   LoadCommands,
@@ -28,6 +30,7 @@ export default {
   AoiWarning,
   AoiManager,
   AoijsError,
+  AoiExtension,
   PluginManager,
   CustomEvent,
   LoadCommands,
