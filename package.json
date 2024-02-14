@@ -3,14 +3,13 @@
   "description": "A powerful package to create Telegram Bots with built-in string functions",
   "main": "./lib/cjs/src/index.js",
   "type": "commonjs",
-  "typing": "./lib/cjs/src/index.d.ts",
+  "typing": "./lib/src/index.d.ts",
   "version": "0.7.0",
   "scripts": {
     "clean:lib": "rm -rf lib/",
     "uglifyjs": "find ./lib/function -name \"*.js\" -type f -print0 | xargs -0 uglifyjs --in-situ",
-    "build:release": "npm run clean:lib && npm run build:tsc:cjs && npm run build:tsc:esm && npm run build:tsc:function && npm run uglifyjs",
-    "build:tsc:cjs": "tsc --project tsconfig.cjs.json",
-    "build:tsc:esm": "tsc --project tsconfig.esm.json",
+    "build:release": "npm run clean:lib && npm run build:tsc:main && npm run build:tsc:function && npm run uglifyjs",
+    "build:tsc:main": "tsc --project tsconfig.json",
     "build:tsc:function": "tsc --project ./src/function/tsconfig.json"
   },
   "exports": {
