@@ -18,7 +18,7 @@ import {
 } from "./classes/AoiTyping";
 
 class TaskCompleter {
-  context?: Context;
+  dataContext: Context;
   searchedFunctions: string[];
   foundFunctions: { func: string; negative: boolean }[] = [];
   eventData: ContextEvent;
@@ -66,6 +66,13 @@ class TaskCompleter {
     this.database = database;
     this.availableFunction = availableFunctions.clone();
     this.onlySearchFunction = onlySearchFunctions;
+
+    this.dataContext = new Context({
+      event: eventData,
+      telegram: telegram,
+      database: database,
+      command: command,
+    });
 
     this.addNative(useNative || []);
 
@@ -336,12 +343,6 @@ class TaskCompleter {
     if (typeof callback === "function") {
       try {
         const result = await callback(context);
-
-        this.context = context;
-        if (context.telegram?.globalVars) {
-          this.telegram.globalVars = context.telegram.globalVars;
-        }
-
         return result;
       } catch (err) {
         if (negative) {
@@ -415,26 +416,12 @@ class TaskCompleter {
 
       const functionName = func.replace(/[$![]/g, "");
 
-      const dataContext = new Context({
-        inside: codeSegment.inside,
-        splits: codeSegment.splits.map((inside) =>
+      (this.dataContext.inside = codeSegment.inside),
+        (this.dataContext.splits = codeSegment.splits.map((inside) =>
           inside.trim() === "" ? undefined : inside,
-        ),
-        event: this.eventData,
-        telegram: this.telegram,
-        database: this.database,
-        command: this.command,
-        negative,
-        currentFunction: func,
-        data: {
-          localVars: this.context?.localVars,
-          random: this.context?.random,
-          buffer: this.context?.buffer,
-          array: this.context?.array,
-          callback_query: this.context?.callback_query,
-          suppressErrors: this.context?.suppressErrors,
-        },
-      });
+        ));
+      this.dataContext.negative = negative;
+      this.dataContext.currentFunction = func;
 
       const functionRun = this.availableFunction.get(
         `$${functionName.toLowerCase()}`,
@@ -451,7 +438,7 @@ class TaskCompleter {
       let resultFunction = await this.completeTaskCallback(
         functionName,
         negative,
-        dataContext,
+        this.dataContext,
         "callback" in functionRun ? functionRun.callback : functionRun,
       );
 
@@ -462,12 +449,12 @@ class TaskCompleter {
           : `${funcLowerCase}`;
       this.code = replaceLast(this.code, segment, `${resultFunction}`);
 
-      const isError = dataContext.isError || this.isError;
+      const isError = this.dataContext.isError || this.isError;
       if (isError && !negative) {
         this.code = "";
         break;
-      } else if (dataContext.isError && negative) {
-        dataContext.isError = false;
+      } else if (this.dataContext.isError && negative) {
+        this.dataContext.isError = false;
       }
     }
     return this.code;
@@ -485,8 +472,8 @@ class TaskCompleter {
     custom: boolean = false,
     functionName: string,
   ) {
-    if (this.context?.suppressErrors && this.eventData?.send) {
-      return this.eventData.send(this.context.suppressErrors, {
+    if (this.dataContext?.suppressErrors && this.eventData?.send) {
+      return this.eventData.send(this.dataContext.suppressErrors, {
         parse_mode: "HTML",
       });
     } else if (

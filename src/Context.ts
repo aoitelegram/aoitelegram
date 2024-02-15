@@ -21,43 +21,29 @@ class Context {
   command: { name: string; hasCommand?: boolean; hasEvent?: boolean };
   isError: boolean = false;
   database: AoiManager | MongoDBManager;
-  negative: boolean;
+  negative?: boolean;
   currentFunction: string;
   suppressErrors?: string;
   packageJSON: typeof PackageJSON = importSync("../package.json");
 
   constructor(options: {
-    inside: string | undefined;
-    splits: (string | undefined)[];
+    inside?: string | undefined;
+    splits?: (string | undefined)[];
     event: ContextEvent;
     telegram: AoiClient;
     database: AoiManager | MongoDBManager;
     command: { name: string; hasCommand?: boolean; hasEvent?: boolean };
-    negative: boolean;
-    currentFunction: string;
-    data?: {
-      localVars?: Collection<string, unknown>;
-      random?: Collection<string, unknown>;
-      buffer?: Collection<string, Buffer>;
-      array?: Collection<string, unknown[]>;
-      callback_query?: unknown[];
-      suppressErrors?: string;
-    };
+    negative?: boolean;
+    currentFunction?: string;
   }) {
-    this.inside = options.inside;
-    this.splits = options.splits;
+    this.inside = options.inside || "";
+    this.splits = options.splits || [];
     this.event = options.event;
     this.telegram = options.telegram;
     this.database = options.database;
     this.command = options.command;
     this.negative = options.negative;
-    this.currentFunction = options.currentFunction;
-    this.localVars = options.data?.localVars || this.localVars;
-    this.random = options.data?.random || this.random;
-    this.buffer = options.data?.buffer || this.buffer;
-    this.array = options.data?.array || this.array;
-    this.callback_query = options.data?.callback_query || this.callback_query;
-    this.suppressErrors = options.data?.suppressErrors || this.suppressErrors;
+    this.currentFunction = options.currentFunction || "";
   }
 
   /**

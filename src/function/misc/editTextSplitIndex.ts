@@ -1,5 +1,5 @@
 export default {
-  name: "$findTextSplitIndex",
+  name: "$editTextSplitIndex",
   callback: (context) => {
     context.argsCheck(2);
     const [index, text] = context.splits;
