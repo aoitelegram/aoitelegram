@@ -1023,7 +1023,7 @@ async function loadFunctionsLib(
   dirPath: string,
   availableFunctions: Collection<string, LibWithDataFunction>,
   disableFunctions: string[],
-): Promise<Collection<string, LibWithDataFunction>> {
+) {
   const processFile = async (itemPath: string) => {
     try {
       const dataFunction = await import(itemPath).then(

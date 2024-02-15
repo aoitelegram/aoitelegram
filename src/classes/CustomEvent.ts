@@ -1,4 +1,4 @@
-import fs from "node:fs";
+import { promises as fs } from "node:fs";
 import path from "node:path";
 import figlet from "figlet";
 import importSync from "import-sync";
@@ -134,13 +134,24 @@ class CustomEvent extends EventEmitter {
    * @param dirPath - The path to the directory containing event files.
    * @param log - A flag indicating whether to log loading events (default: true).
    */
-  loadEvents(dirPath: string, log: boolean = true) {
+  async loadEvents(dirPath: string, log: boolean = true) {
     if (!dirPath) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'dirPath' parameter",
       );
     }
+
+    try {
+      await fs.access(dirPath);
+    } catch (error) {
+      throw new AoijsError(
+        "file",
+        "the specified file path was not found",
+        dirPath,
+      );
+    }
+
     if (this.#count === 1) {
       dirPath = path.join(process.cwd(), dirPath);
       if (log) {
@@ -149,45 +160,43 @@ class CustomEvent extends EventEmitter {
       }
       this.#count = 0;
     }
-    if (!fs.existsSync(dirPath)) {
-      throw new AoijsError(
-        "file",
-        "the specified file path was not found",
-        dirPath,
-      );
-    }
 
-    const items = fs.readdirSync(dirPath);
+    try {
+      const items = await fs.readdir(dirPath);
 
-    for (const item of items) {
-      const itemPath = path.join(dirPath, item);
-      const stats = fs.statSync(itemPath);
+      for (const item of items) {
+        const itemPath = path.join(dirPath, item);
+        const stats = await fs.stat(itemPath);
 
-      if (stats.isDirectory()) {
-        this.loadEvents(itemPath, log);
-      } else if (itemPath.endsWith(".js")) {
-        const requireEvent = importSync(itemPath);
-        const dataEvent = requireEvent.default || requireEvent;
-        if (Array.isArray(dataEvent)) {
-          dataEvent.forEach((dataEvent) => {
+        if (stats.isDirectory()) {
+          await this.loadEvents(itemPath, log);
+        } else if (itemPath.endsWith(".js")) {
+          const requireEvent = importSync(itemPath);
+          const dataEvent = requireEvent.default || requireEvent;
+          if (Array.isArray(dataEvent)) {
+            dataEvent.forEach((dataEvent) => {
+              if (log) {
+                console.log(
+                  `|---------------------------------------------------------------------|\n`,
+                  `| Loading in ${itemPath} | Loaded '${dataEvent.listen}' | type ${dataEvent.type || "aoitelegram"} | custom-event |`,
+                );
+              }
+              this.command(dataEvent);
+            });
+          } else {
             if (log) {
               console.log(
                 `|---------------------------------------------------------------------|\n`,
-                `| Loading in ${itemPath} | Loaded '${dataEvent.listen}' | type ${dataEvent.type} | custom-event |`,
+                `| Loading in ${itemPath} | Loaded '${dataEvent.listen}' | type ${dataEvent.type || "aoitelegram"} | custom-event |`,
               );
             }
             this.command(dataEvent);
-          });
-        } else {
-          if (log) {
-            console.log(
-              `|---------------------------------------------------------------------|\n`,
-              `| Loading in ${itemPath} | Loaded '${dataEvent.listen}' | type ${dataEvent.type} | custom-event |`,
-            );
           }
-          this.command(dataEvent);
         }
       }
+      return this;
+    } catch (error) {
+      console.error("Error loading events:", error);
       return this;
     }
   }

@@ -128,7 +128,7 @@ class PluginManager {
 async function loadPluginsFunction(dirPath: string, aoitelegram: AoiClient) {
   const processFile = async (itemPath: string) => {
     try {
-      const dataRequire = await import(itemPath);
+      const dataRequire = importSync(itemPath);
       const dataFunction = dataRequire.default || dataRequire;
       aoitelegram.ensureFunction(dataFunction);
     } catch (error) {

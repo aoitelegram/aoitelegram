@@ -64,13 +64,7 @@ class LoadCommands {
       if (stats.isDirectory()) {
         this.loadCommands(itemPath, log, updated);
       } else if (itemPath.endsWith(".js")) {
-        const requireFun = importSync(itemPath, {
-          esmOptions: {
-            cjs: {
-              cache: false,
-            },
-          },
-        });
+        const requireFun = importSync(itemPath);
         const dataFunc = requireFun.default || requireFun;
 
         if (Array.isArray(dataFunc)) {
