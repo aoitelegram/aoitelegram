@@ -82,6 +82,17 @@ class AoiClient extends AoiBase {
       options.disableFunctions,
       options.disableAoiDB,
     );
+
+    const allAoiExtends = options.extension?.every(
+      (cls) => cls instanceof AoiExtension,
+    );
+    if (!allAoiExtends && options.extension?.length) {
+      throw new AoijsError(
+        "extensions",
+        "in the parameter 'extension', all classes should be inherited from the class 'AoiExtension'",
+      );
+    }
+
     this.#optionLogging =
       options.logging === undefined ? true : options.logging;
     this.#aoiWarning = options.autoUpdate?.aoiWarning;
@@ -292,19 +303,23 @@ class AoiClient extends AoiBase {
   /**
    * Connect to the service and perform initialization tasks.
    */
-  async connect() {
+  connect() {
     if (this.#aoiWarning) {
-      await this.#warningManager.checkUpdates();
+      this.#warningManager.checkUpdates();
     }
-    await this.registerCommand.handler();
-    await this.registerAction.handler();
-    await this.registerTimeout.handler();
-    await this.registerAwaited.handler();
+    this.registerCommand.handler();
+    this.registerAction.handler();
+    this.registerTimeout.handler();
+    this.registerAwaited.handler();
 
     if (this.extensions?.length) {
       for (let i = 0; i < this.extensions.length; i++) {
         const initPlugins = this.extensions[i];
-        await initPlugins["initPlugins"](this);
+        try {
+          initPlugins["initPlugins"](this);
+        } catch (err) {
+          console.log(err);
+        }
       }
     }
 
@@ -337,7 +352,7 @@ class AoiClient extends AoiBase {
         }, 4000);
       });
     }
-    await super.login();
+    super.login();
   }
 
   /**
