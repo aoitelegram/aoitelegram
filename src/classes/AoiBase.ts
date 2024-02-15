@@ -1,4 +1,4 @@
-import fs from "node:fs";
+import { promises as fs } from "node:fs";
 import path from "node:path";
 import importSync from "import-sync";
 import { AoijsError } from "./AoiError";
@@ -104,11 +104,8 @@ class AoiBase extends TelegramBot {
     );
 
     this.disableFunctions = disableFunctions || [];
-    this.availableFunctions = loadFunctionsLib(
-      path.join(__dirname, "../function/"),
-      new Collection<string, LibWithDataFunction>(),
-      disableFunctions || [],
-    );
+
+    this.#initializeAvailableFunctions();
 
     if (!disableAoiDB) {
       if (database?.type === "KeyValue" || !database?.type) {
@@ -119,9 +116,22 @@ class AoiBase extends TelegramBot {
       } else {
         throw new AoijsError(
           undefined,
-          "The specified database type is incorrect; it should be either 'MongoDB' or 'KeyValue'",
+          "the specified database type is incorrect; it should be either 'MongoDB' or 'KeyValue'",
         );
       }
+    }
+  }
+
+  async #initializeAvailableFunctions() {
+    try {
+      const loadedFunctions = await loadFunctionsLib(
+        path.join(__dirname, "../function/"),
+        new Collection<string, LibWithDataFunction>(),
+        this.disableFunctions,
+      );
+      this.availableFunctions = loadedFunctions;
+    } catch (error) {
+      console.error("Error initializing available functions:", error);
     }
   }
 
@@ -1009,35 +1019,49 @@ class AoiBase extends TelegramBot {
  * @param functionsArray - An array to store processed data functions.
  * @param disableFunctions - An array of function names to be disabled.
  */
-function loadFunctionsLib(
+async function loadFunctionsLib(
   dirPath: string,
   availableFunctions: Collection<string, LibWithDataFunction>,
   disableFunctions: string[],
-) {
-  const processFile = (itemPath: string) => {
-    const dataFunction = importSync(itemPath).default;
-    if (!dataFunction?.name && typeof !dataFunction?.callback !== "function")
-      return;
-    const dataFunctionName = dataFunction.name.toLowerCase();
-    if (disableFunctions.includes(dataFunctionName)) return;
+): Promise<Collection<string, LibWithDataFunction>> {
+  const processFile = async (itemPath: string) => {
+    try {
+      const dataFunction = await import(itemPath).then(
+        (module) => module.default,
+      );
+      if (!dataFunction?.name && typeof !dataFunction?.callback !== "function")
+        return;
+      const dataFunctionName = dataFunction.name.toLowerCase();
+      if (disableFunctions.includes(dataFunctionName)) return;
 
-    availableFunctions.set(dataFunction.name.toLowerCase(), dataFunction);
-  };
-
-  const processItem = (item: string) => {
-    const itemPath = path.join(dirPath, item);
-    const stats = fs.statSync(itemPath);
-
-    if (stats.isDirectory()) {
-      loadFunctionsLib(itemPath, availableFunctions, disableFunctions);
-    } else if (itemPath.endsWith(".js")) {
-      processFile(itemPath);
+      availableFunctions.set(dataFunctionName, dataFunction);
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  const items = fs.readdirSync(dirPath);
-  items.forEach(processItem);
-  return availableFunctions;
+  const processItem = async (item: string) => {
+    const itemPath = path.join(dirPath, item);
+    try {
+      const stats = await fs.stat(itemPath);
+      if (stats.isDirectory()) {
+        await loadFunctionsLib(itemPath, availableFunctions, disableFunctions);
+      } else if (itemPath.endsWith(".js")) {
+        await processFile(itemPath);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  try {
+    const items = await fs.readdir(dirPath);
+    await Promise.all(items.map(processItem));
+    return availableFunctions;
+  } catch (error) {
+    console.error(error);
+    return availableFunctions;
+  }
 }
 
 export { AoiBase, TelegramOptions };
