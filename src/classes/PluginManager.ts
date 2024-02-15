@@ -1,4 +1,4 @@
-import fs from "node:fs";
+import { promises as fs } from "node:fs";
 import fsx from "fs-extra";
 import path from "node:path";
 import importSync from "import-sync";
@@ -29,12 +29,9 @@ class PluginManager {
         ".aoiplugins",
       );
 
-      const existsAoiPlugins = fs.existsSync(pathAoiPlugins);
-      if (!existsAoiPlugins) {
-        fs.mkdirSync(pathAoiPlugins);
-      }
-
-      this.searchingForPlugins();
+      fs.access(pathAoiPlugins)
+        .catch(() => fs.mkdir(pathAoiPlugins))
+        .then(() => this.searchingForPlugins());
     }
   }
 
@@ -43,8 +40,11 @@ class PluginManager {
    * @param plugins - The path to the directory containing plugins.
    * @returns An array of plugin functions.
    */
-  loadDirPlugins(plugins: string) {
-    loadPluginsFunction(path.join(process.cwd(), plugins), this.aoitelegram);
+  async loadDirPlugins(plugins: string) {
+    await loadPluginsFunction(
+      path.join(process.cwd(), plugins),
+      this.aoitelegram,
+    );
   }
 
   /**
@@ -52,7 +52,7 @@ class PluginManager {
    * @param plugins - List of plugin names to load.
    * @returns An array of plugin functions.
    */
-  loadPlugins(...plugins: string[]) {
+  async loadPlugins(...plugins: string[]) {
     for (const dirFunc of plugins) {
       const pathPlugin = path.join(
         process.cwd(),
@@ -60,7 +60,9 @@ class PluginManager {
         ".aoiplugins",
         dirFunc,
       );
-      if (!fs.existsSync(pathPlugin)) {
+      try {
+        await fs.access(pathPlugin);
+      } catch (error) {
         throw new AoijsError(
           "aoiplugins",
           `path to the specified plugin does not exist "${pathPlugin}"`,
@@ -69,44 +71,40 @@ class PluginManager {
       const packageJSON = importSync(
         path.join(pathPlugin, ".aoiplugin.json"),
       ).main;
-
       if (!packageJSON) {
         throw new AoijsError(
           "aoiplugins",
-          `incorrect path to the specified main file in the plugin does not exist "${path.join(
-            pathPlugin,
-            ".aoiplugin.json",
-          )}"`,
+          `incorrect path to the specified main file in the plugin does not exist "${path.join(pathPlugin, ".aoiplugin.json")}"`,
         );
       }
-
-      loadPluginsFunction(path.join(pathPlugin, packageJSON), this.aoitelegram);
+      await loadPluginsFunction(
+        path.join(pathPlugin, packageJSON),
+        this.aoitelegram,
+      );
     }
   }
 
   /**
    * Search for plugins in the 'node_modules' directory and copy them to the '.aoiplugins' directory.
    */
-  searchingForPlugins() {
+  async searchingForPlugins() {
     const nodeModulesPath = path.join(process.cwd(), "node_modules");
     const aoiPluginsPath = path.join(nodeModulesPath, ".aoiplugins");
 
-    if (!fs.existsSync(aoiPluginsPath)) {
-      fs.mkdirSync(aoiPluginsPath);
-    }
+    await fs.access(aoiPluginsPath).catch(() => fs.mkdir(aoiPluginsPath));
 
-    const items = fs.readdirSync(nodeModulesPath);
+    const items = await fs.readdir(nodeModulesPath);
 
     for (const folder of items) {
       const folderPath = path.join(nodeModulesPath, folder);
 
-      if (!fs.lstatSync(folderPath).isDirectory()) continue;
+      if (!(await fs.lstat(folderPath)).isDirectory()) continue;
       const aoiPluginJsonPath = path.join(folderPath, ".aoiplugin.json");
 
-      if (!fs.existsSync(aoiPluginJsonPath)) continue;
+      if (!(await fs.access(aoiPluginJsonPath).catch(() => false))) continue;
       const pluginInfo = importSync(aoiPluginJsonPath);
-      if (!pluginInfo.main) continue;
 
+      if (!pluginInfo.main) continue;
       if (pluginInfo.version > version) {
         throw new AoijsError(
           "aoiplugins",
@@ -117,10 +115,8 @@ class PluginManager {
       const mainFilePath = path.join(folderPath, pluginInfo.main);
       const destPath = path.join(aoiPluginsPath, folder);
 
-      if (!fs.existsSync(destPath)) {
-        fs.mkdirSync(destPath);
-      }
-      fsx.copySync(folderPath, destPath);
+      await fs.access(destPath).catch(() => fs.mkdir(destPath));
+      await fsx.copy(folderPath, destPath);
     }
   }
 }
@@ -129,31 +125,36 @@ class PluginManager {
  * Recursively reads and collects custom functions from a directory, and optionally registers them with an AoiClient.
  * @param dirPath - The directory path to search for custom functions.
  **/
-function loadPluginsFunction(dirPath: string, aoitelegram: AoiClient) {
-  const processFile = (itemPath: string) => {
-    const dataRequire = importSync(itemPath);
-    const dataFunction = dataRequire.default || dataRequire;
-    aoitelegram.ensureFunction(dataFunction);
-  };
-
-  const processItem = (item: string) => {
-    const itemPath = path.join(dirPath, item);
-    const stats = fs.statSync(itemPath);
-
-    if (stats.isDirectory()) {
-      loadPluginsFunction(itemPath, aoitelegram);
-    } else if (itemPath.endsWith(".js")) {
-      processFile(itemPath);
-    }
-  };
-
-  const items = fs.readdirSync(dirPath);
-  for (const file of items) {
+async function loadPluginsFunction(dirPath: string, aoitelegram: AoiClient) {
+  const processFile = async (itemPath: string) => {
     try {
-      processItem(file);
-    } catch (err) {
-      console.log(err);
+      const dataRequire = await import(itemPath);
+      const dataFunction = dataRequire.default || dataRequire;
+      aoitelegram.ensureFunction(dataFunction);
+    } catch (error) {
+      console.error(error);
     }
+  };
+
+  const processItem = async (item: string) => {
+    const itemPath = path.join(dirPath, item);
+    try {
+      const stats = await fs.stat(itemPath);
+      if (stats.isDirectory()) {
+        await loadPluginsFunction(itemPath, aoitelegram);
+      } else if (itemPath.endsWith(".js")) {
+        await processFile(itemPath);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  try {
+    const items = await fs.readdir(dirPath);
+    await Promise.all(items.map(processItem));
+  } catch (error) {
+    console.error(error);
   }
 }
 
