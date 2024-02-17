@@ -1,4 +1,4 @@
-import { promises as fs } from "node:fs";
+import fs from "node:fs";
 import path from "node:path";
 import importSync from "import-sync";
 import { AoijsError } from "./AoiError";
@@ -104,8 +104,11 @@ class AoiBase extends TelegramBot {
     );
 
     this.disableFunctions = disableFunctions || [];
-
-    this.#initializeAvailableFunctions();
+    this.availableFunctions = loadFunctionsLib(
+      path.join(__dirname, "../function/"),
+      new Collection<string, LibWithDataFunction>(),
+      disableFunctions || [],
+    );
 
     if (!disableAoiDB) {
       if (database?.type === "KeyValue" || !database?.type) {
@@ -119,19 +122,6 @@ class AoiBase extends TelegramBot {
           "the specified database type is incorrect; it should be either 'MongoDB' or 'KeyValue'",
         );
       }
-    }
-  }
-
-  async #initializeAvailableFunctions() {
-    try {
-      const loadedFunctions = await loadFunctionsLib(
-        path.join(__dirname, "../function/"),
-        new Collection<string, LibWithDataFunction>(),
-        this.disableFunctions,
-      );
-      this.availableFunctions = loadedFunctions;
-    } catch (error) {
-      console.error("Error initializing available functions:", error);
     }
   }
 
@@ -1019,16 +1009,14 @@ class AoiBase extends TelegramBot {
  * @param functionsArray - An array to store processed data functions.
  * @param disableFunctions - An array of function names to be disabled.
  */
-async function loadFunctionsLib(
+function loadFunctionsLib(
   dirPath: string,
   availableFunctions: Collection<string, LibWithDataFunction>,
   disableFunctions: string[],
 ) {
-  const processFile = async (itemPath: string) => {
+  const processFile = (itemPath: string) => {
     try {
-      const dataFunction = await import(itemPath).then(
-        (module) => module.default,
-      );
+      const dataFunction = require(itemPath).default;
       if (!dataFunction?.name && typeof !dataFunction?.callback !== "function")
         return;
       const dataFunctionName = dataFunction.name.toLowerCase();
@@ -1040,14 +1028,14 @@ async function loadFunctionsLib(
     }
   };
 
-  const processItem = async (item: string) => {
+  const processItem = (item: string) => {
     const itemPath = path.join(dirPath, item);
     try {
-      const stats = await fs.stat(itemPath);
+      const stats = fs.statSync(itemPath);
       if (stats.isDirectory()) {
-        await loadFunctionsLib(itemPath, availableFunctions, disableFunctions);
+        loadFunctionsLib(itemPath, availableFunctions, disableFunctions);
       } else if (itemPath.endsWith(".js")) {
-        await processFile(itemPath);
+        processFile(itemPath);
       }
     } catch (error) {
       console.error(error);
@@ -1055,8 +1043,8 @@ async function loadFunctionsLib(
   };
 
   try {
-    const items = await fs.readdir(dirPath);
-    await Promise.all(items.map(processItem));
+    const items = fs.readdirSync(dirPath);
+    items.map(processItem);
     return availableFunctions;
   } catch (error) {
     console.error(error);

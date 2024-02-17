@@ -369,12 +369,15 @@ class TaskCompleter {
           callback.params || [],
           context.splits,
         );
+
         const availableFunction = this.availableFunction;
 
         availableFunction.set("$argumentscount", {
           name: "$argumentscount",
           callback: () => context.splits.length,
         });
+
+        const nativeFunction = availableFunction.get(`$${func}`) || {};
 
         const taskCompleter = new TaskCompleter(
           code,
@@ -384,6 +387,9 @@ class TaskCompleter {
           this.database,
           availableFunction,
           [...this.onlySearchFunction, "$argumentscount"],
+          "useNative" in nativeFunction
+            ? (nativeFunction.useNative as Function[])
+            : undefined,
         );
         return await taskCompleter.completeTask();
       } catch (err) {
@@ -416,10 +422,10 @@ class TaskCompleter {
 
       const functionName = func.replace(/[$![]/g, "");
 
-      (this.dataContext.inside = codeSegment.inside),
-        (this.dataContext.splits = codeSegment.splits.map((inside) =>
-          inside.trim() === "" ? undefined : inside,
-        ));
+      this.dataContext.inside = codeSegment.inside;
+      this.dataContext.splits = codeSegment.splits.map((inside) =>
+        inside.trim() === "" ? undefined : inside,
+      );
       this.dataContext.negative = negative;
       this.dataContext.currentFunction = func;
 

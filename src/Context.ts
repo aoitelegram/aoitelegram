@@ -24,6 +24,7 @@ class Context {
   negative?: boolean;
   currentFunction: string;
   suppressErrors?: string;
+  [key: string]: any;
   packageJSON: typeof PackageJSON = importSync("../package.json");
 
   constructor(options: {

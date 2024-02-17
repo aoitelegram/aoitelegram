@@ -6,6 +6,6 @@ export default {
     if (context.isError) return;
 
     const result = context.array.get("splitText") || [];
-    return result.join(result);
+    return result.join(sep);
   },
 };

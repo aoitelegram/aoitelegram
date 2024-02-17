@@ -1,7 +1,7 @@
 import os from "node:os";
 
 export default {
-  name: "$getOsHost.ts",
+  name: "$getOsHost",
   callback: (context) => {
     return os.hostname();
   },

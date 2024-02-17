@@ -1,4 +1,5 @@
 import importSync from "import-sync";
+import { Context } from "./Context";
 import { AoiBase } from "./classes/AoiBase";
 import { AoiClient } from "./classes/AoiClient";
 import { AoijsError } from "./classes/AoiError";
@@ -22,6 +23,7 @@ export {
   CustomEvent,
   LoadCommands,
   DataFunction,
+  Context,
   version,
 };
 export default {
@@ -34,5 +36,6 @@ export default {
   PluginManager,
   CustomEvent,
   LoadCommands,
+  Context,
   version,
 };

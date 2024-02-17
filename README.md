@@ -1,7 +1,7 @@
 # AoiTelegram
 
 [![NPM Version](https://img.shields.io/npm/v/aoitelegram)](https://www.npmjs.com/package/aoitelegram)
-[![Bot API](https://img.shields.io/badge/Bot%20API-v.7.0-00aced.svg?style=flat-square&logo=telegram)](https://core.telegram.org/bots/api)
+[![Bot API](https://img.shields.io/badge/Bot%20API-v.7.1-00aced.svg?style=flat-square&logo=telegram)](https://core.telegram.org/bots/api)
 [![NPM Downloads](https://img.shields.io/npm/dt/aoitelegram.svg?maxAge=3600)](https://www.npmjs.com/package/aoitelegram)
 [![License](https://img.shields.io/npm/l/aoitelegram)](https://github.com/Sempai-07/aoitelegram/blob/main/LICENSE)
 
@@ -9,7 +9,7 @@
 
 ## Features
 
-- **Over 150 Pre-built Functions:** aoitelegram comes equipped with more than 150 pre-built functions, empowering you to effortlessly create dynamic and interactive Telegram bots.
+- **Over 200 Pre-built Functions:** aoitelegram comes equipped with more than 200 pre-built functions, empowering you to effortlessly create dynamic and interactive Telegram bots.
 
 - **Built-in Customizable Local Database:** With aoitelegram, you have a robust customizable local database right out of the box.
 
@@ -60,8 +60,10 @@ const bot = new AoiClient({
   },
   /** Functions that will be removed from the library's loading functions. **/
   disableFunctions: [],
-  /** An array of customFunction functions **/
-  customFunction: [],
+  /** Adds native functions to the command handler **/
+  native: [],
+  /** An array of AoiExtension functions **/
+  extension: [],
   /** For the error handler of functions **/
   functionError: true,
   /** To disable text errors **/

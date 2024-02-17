@@ -56,6 +56,7 @@ class AoiClient extends AoiBase {
    * @param options.telegram - Options for the Telegram integration.
    * @param options.database - Options for the database.
    * @param options.disableFunctions - Functions that will be removed from the library's loading functions.
+   * @param options.native - Adds native functions to the command handler.
    * @param options.extensions - An array of AoiExtension functions.
    * @param options.functionError - For the error handler of functions.
    * @param options.sendMessageError - To disable text errors.
@@ -68,6 +69,7 @@ class AoiClient extends AoiBase {
     telegram?: TelegramOptions;
     database?: DatabaseOptions;
     disableFunctions?: string[];
+    native?: Function[];
     extension?: AoiExtension[];
     functionError?: boolean;
     sendMessageError?: boolean;
@@ -102,6 +104,7 @@ class AoiClient extends AoiBase {
     this.sendMessageError = options.sendMessageError;
     this.timeoutManager = new TimeoutManager(this);
     this.awaitedManager = new AwaitedManager(this);
+    this.addNative(options.native || []);
   }
 
   /**
@@ -264,7 +267,7 @@ class AoiClient extends AoiBase {
         name: `$${func.name}`,
         callback: async (context) => {
           const splitsParsed = context.splits.map(toConvertParse);
-          const result = await func(context, ...splitsParsed);
+          const result = await func(context, splitsParsed);
           return typeof result === "object" && result !== null
             ? JSON.stringify({ ...result })
             : result;
