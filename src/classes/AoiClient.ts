@@ -32,9 +32,7 @@ type DatabaseOptions = {
  * A class representing an AoiClient, which extends AoiBase.
  */
 class AoiClient extends AoiBase {
-  #optionLogging: boolean | undefined;
-  #aoiWarning: boolean | undefined;
-  #warningManager: AoiWarning;
+  warningManager: AoiWarning;
   functionError: boolean | undefined;
   sendMessageError: boolean | undefined;
   registerCallback: Callback = new Callback(this);
@@ -46,7 +44,9 @@ class AoiClient extends AoiBase {
   awaitedManager: AwaitedManager;
   loadCommands?: LoadCommands;
   customEvent?: CustomEvent;
+  autoUpdate?: AoiWarningOptions;
   extensions?: AoiExtension[];
+  logging?: boolean;
   commands: Collection<CommandInfoSet, unknown> = new Collection();
   globalVars: Collection<string, unknown> = new Collection();
   /**
@@ -94,12 +94,11 @@ class AoiClient extends AoiBase {
         "in the parameter 'extension', all classes should be inherited from the class 'AoiExtension'",
       );
     }
-
-    this.#optionLogging =
-      options.logging === undefined ? true : options.logging;
-    this.#aoiWarning = options.autoUpdate?.aoiWarning;
-    this.#warningManager = new AoiWarning(options.autoUpdate || {});
+    
+    this.warningManager = new AoiWarning(options.autoUpdate || {});
+    this.logging = options.logging;
     this.extensions = options.extension;
+    this.autoUpdate = options.autoUpdate;
     this.functionError = options.functionError;
     this.sendMessageError = options.sendMessageError;
     this.timeoutManager = new TimeoutManager(this);
@@ -307,8 +306,8 @@ class AoiClient extends AoiBase {
    * Connect to the service and perform initialization tasks.
    */
   connect() {
-    if (this.#aoiWarning) {
-      this.#warningManager.checkUpdates();
+    if (this.autoUpdate?.aoiWarning) {
+      this.warningManager.checkUpdates();
     }
     this.registerCommand.handler();
     this.registerAction.handler();
@@ -326,7 +325,7 @@ class AoiClient extends AoiBase {
       }
     }
 
-    if (this.#optionLogging) {
+    if (this.logging) {
       this.on("ready", async (ctx) => {
         setTimeout(() => {
           const ctxUsername = `@${ctx.username}`;
