@@ -24,11 +24,17 @@ abstract class AoiExtension {
   abstract init(aoitelegram: AoiClient): void;
 
   /**
+   * Initializes the extension.
+   * @param aoitelegram - The AoiClient instance.
+   */
+  abstract init(aoitelegram: AoiClient): Promise<void>;
+
+  /**
    * Initializes plugins and performs version and dependency checks.
    * @param aoitelegram - The AoiClient instance.
    */
-  initPlugins(aoitelegram: AoiClient) {
-    if (typeof this?.targetVersion === "string") {
+  async initPlugins(aoitelegram: AoiClient) {
+    if (typeof this.targetVersion === "string") {
       if (this.targetVersion > version) {
         throw new AoijsError(
           this.name,
@@ -37,7 +43,7 @@ abstract class AoiExtension {
       }
     }
 
-    if (Array.isArray(this?.targetVersion)) {
+    if (Array.isArray(this.targetVersion)) {
       const requireVersion = this.targetVersion.some((v) => v === version);
       if (!requireVersion) {
         throw new AoijsError(
@@ -47,7 +53,7 @@ abstract class AoiExtension {
       }
     }
 
-    if (this?.requireExtension?.length) {
+    if (this.requireExtension?.length) {
       const currentExtensions = aoitelegram.extensions || [];
       for (const extension of this.requireExtension) {
         const hasExtensions = currentExtensions.findIndex(
@@ -62,7 +68,7 @@ abstract class AoiExtension {
       }
     }
 
-    this.init(aoitelegram);
+    await this.init(aoitelegram);
   }
 }
 

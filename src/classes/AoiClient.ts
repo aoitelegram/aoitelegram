@@ -94,7 +94,7 @@ class AoiClient extends AoiBase {
         "in the parameter 'extension', all classes should be inherited from the class 'AoiExtension'",
       );
     }
-    
+
     this.warningManager = new AoiWarning(options.autoUpdate || {});
     this.logging = options.logging;
     this.extensions = options.extension;
@@ -305,9 +305,9 @@ class AoiClient extends AoiBase {
   /**
    * Connect to the service and perform initialization tasks.
    */
-  connect() {
+  async connect() {
     if (this.autoUpdate?.aoiWarning) {
-      this.warningManager.checkUpdates();
+      await this.warningManager.checkUpdates();
     }
     this.registerCommand.handler();
     this.registerAction.handler();
@@ -318,7 +318,7 @@ class AoiClient extends AoiBase {
       for (let i = 0; i < this.extensions.length; i++) {
         const initPlugins = this.extensions[i];
         try {
-          initPlugins["initPlugins"](this);
+          await initPlugins["initPlugins"](this);
         } catch (err) {
           console.log(err);
         }
@@ -326,7 +326,7 @@ class AoiClient extends AoiBase {
     }
 
     if (this.logging) {
-      this.on("ready", async (ctx) => {
+      this.on("ready", (ctx) => {
         setTimeout(() => {
           const ctxUsername = `@${ctx.username}`;
 
