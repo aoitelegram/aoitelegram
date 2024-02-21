@@ -59,10 +59,16 @@ class Timeout {
   handler() {
     this.telegram.on("timeout", async (timeoutData, context) => {
       for (const [timeoutId, timeoutDescription] of this.timeouts) {
-        if (timeoutId !== context.id) continue;
-        if (!this.telegram.timeoutManager.timeouts.has(context.id)) break;
+        if (`${timeoutId}_${context.date}` !== `${context.id}_${context.date}`)
+          continue;
+        if (
+          !this.telegram.timeoutManager.timeouts.has(
+            `${context.id}_${context.date}`,
+          )
+        )
+          break;
 
-        const parsedTimeoutData = JSON.parse(`${context.data}`);
+        const parsedTimeoutData = JSON.parse(JSON.stringify(context.data));
 
         this.telegram.ensureFunction({
           name: "$timeoutData",
@@ -84,7 +90,9 @@ class Timeout {
           timeoutDescription.useNative,
         );
 
-        this.telegram.timeoutManager.timeouts.delete(context.id);
+        this.telegram.timeoutManager.timeouts.delete(
+          `${context.id}_${context.date}`,
+        );
         break;
       }
     });

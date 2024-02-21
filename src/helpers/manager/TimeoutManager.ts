@@ -45,16 +45,17 @@ class TimeoutManager {
 
         const remainingTime =
           timeoutData.date + timeoutData.milliseconds - Date.now();
+        const timeoutDataId = `${timeoutData.id}_${timeoutData.date}`;
 
         if (remainingTime > 0) {
           const timeoutId = setTimeout(async () => {
             this.telegram.emit("timeout", this.telegram, timeoutData);
-            await this.removeTimeout(timeoutData.id);
+            await this.removeTimeout(timeoutDataId);
           }, timeoutData.milliseconds);
-          this.timeouts.set(timeoutData.id, timeoutId);
+          this.timeouts.set(timeoutDataId, timeoutId);
         } else {
           this.telegram.emit("timeout", this.telegram, timeoutData);
-          await this.removeTimeout(timeoutData.id);
+          await this.removeTimeout(timeoutDataId);
         }
       });
     });
@@ -65,19 +66,13 @@ class TimeoutManager {
      */
     this.telegram.on("addTimeout", (context) => {
       if (!context) return;
-      if (context.milliseconds <= 5000) {
-        throw new AoijsError(
-          "timeout",
-          `the specified time should be greater than 5000 milliseconds. Timeout ID: ${context.id}`,
-        );
-      }
 
       const timeoutId = setTimeout(async () => {
         this.telegram.emit("timeout", this.telegram, context);
-        await this.database.delete("timeout", context.id);
+        await this.database.delete("timeout", `${context.id}_${context.date}`);
       }, context.milliseconds);
 
-      this.timeouts.set(context.id, timeoutId);
+      this.timeouts.set(`${context.id}_${context.date}`, timeoutId);
     });
   }
 
@@ -99,7 +94,8 @@ class TimeoutManager {
       date: Date.now(),
     };
     this.telegram.emit("addTimeout", data);
-    await this.database.set("timeout", id, data);
+    await this.database.set("timeout", `${id}_${data.date}`, data);
+    return `${id}_${data.date}`;
   }
 
   /**

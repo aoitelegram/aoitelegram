@@ -1,6 +1,6 @@
 import ms from "ms";
 
-function hasObject(arg: any): arg is object {
+function hasObject(arg: any) {
   try {
     return !!JSON.parse(JSON.stringify(arg));
   } catch (err) {
@@ -12,7 +12,7 @@ export default {
   name: "$setTimeout",
   callback: async (context) => {
     context.argsCheck(2);
-    const [name, milliseconds, data = {}] = context.splits;
+    const [name, milliseconds, data = "{}"] = context.splits;
     context.checkArgumentTypes(["string", "string", "object"]);
     if (context.isError) return;
 
@@ -21,9 +21,16 @@ export default {
       return;
     }
 
-    await context.telegram.timeoutManager.addTimeout(name, {
+    if (+ms(milliseconds) <= 5000) {
+      context.sendError(
+        `The specified time should be greater than 5000 milliseconds. Timeout ID: ${context.id}`,
+      );
+      return;
+    }
+
+    return await context.telegram.timeoutManager.addTimeout(name, {
       milliseconds: +ms(milliseconds),
-      data: JSON.parse(JSON.stringify(data)),
+      data: JSON.parse(data),
     });
   },
 };

@@ -325,7 +325,7 @@ class AoiClient extends AoiBase {
       }
     }
 
-    if (this.logging) {
+    if (this.logging === undefined || this.logging) {
       this.on("ready", (ctx) => {
         setTimeout(() => {
           const ctxUsername = `@${ctx.username}`;
