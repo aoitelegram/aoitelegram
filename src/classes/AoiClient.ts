@@ -127,7 +127,7 @@ class AoiClient extends AoiBase {
       );
     }
     this.registerCommand.register(options);
-    this.#commandInfo({ name: `/${options.name}` }, { ...options });
+    this.commands.set({ name: `/${options.name}` }, { ...options });
     return this;
   }
 
@@ -152,7 +152,7 @@ class AoiClient extends AoiBase {
       );
     }
     this.registerAction.register(options);
-    this.#commandInfo({ data: options.data }, { ...options });
+    this.commands.set({ data: options.data }, { ...options });
     return this;
   }
 
@@ -176,7 +176,7 @@ class AoiClient extends AoiBase {
       );
     }
     this.registerTimeout.register(options);
-    this.#commandInfo({ id: options.id }, { ...options });
+    this.commands.set({ id: options.id }, { ...options });
     return this;
   }
 
@@ -200,7 +200,7 @@ class AoiClient extends AoiBase {
       );
     }
     this.registerAwaited.register(options);
-    this.#commandInfo({ awaited: options.awaited }, { ...options });
+    this.commands.set({ awaited: options.awaited }, { ...options });
 
     return this;
   }
@@ -233,7 +233,7 @@ class AoiClient extends AoiBase {
     }
 
     this.registerCallback.register(options);
-    this.#commandInfo({ callback: options.name }, { ...options });
+    this.commands.set({ callback: options.name }, { ...options });
 
     return this;
   }
@@ -353,15 +353,6 @@ class AoiClient extends AoiBase {
       });
     }
     super.login();
-  }
-
-  /**
-   * Updates information about a command set with the provided name.
-   * @param name - The name of the command set to update.
-   * @param commands - The new information to set for the command set.
-   */
-  #commandInfo(name: CommandInfoSet, commands: unknown) {
-    this.commands.set(name, commands);
   }
 }
 
