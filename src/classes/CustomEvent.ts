@@ -1,4 +1,4 @@
-import { promises as fs } from "node:fs";
+import fs from "node:fs";
 import path from "node:path";
 import figlet from "figlet";
 import importSync from "import-sync";
@@ -152,7 +152,7 @@ class CustomEvent extends EventEmitter {
    * @param dirPath - The path to the directory containing event files.
    * @param log - A flag indicating whether to log loading events (default: true).
    */
-  async loadEvents(dirPath: string, log: boolean = true) {
+  loadEvents(dirPath: string, log: boolean = true) {
     if (!dirPath) {
       throw new AoijsError(
         "parameter",
@@ -160,9 +160,7 @@ class CustomEvent extends EventEmitter {
       );
     }
 
-    try {
-      await fs.access(dirPath);
-    } catch (error) {
+    if (!fs.existsSync(dirPath)) {
       throw new AoijsError(
         "file",
         "the specified file path was not found",
@@ -179,29 +177,19 @@ class CustomEvent extends EventEmitter {
       this.#count = 0;
     }
 
-    try {
-      const items = await fs.readdir(dirPath);
+    const items = fs.readdirSync(dirPath);
 
-      for (const item of items) {
-        const itemPath = path.join(dirPath, item);
-        const stats = await fs.stat(itemPath);
+    for (const item of items) {
+      const itemPath = path.join(dirPath, item);
+      const stats = fs.statSync(itemPath);
 
-        if (stats.isDirectory()) {
-          await this.loadEvents(itemPath, log);
-        } else if (itemPath.endsWith(".js")) {
-          const requireEvent = importSync(itemPath);
-          const dataEvent = requireEvent.default || requireEvent;
-          if (Array.isArray(dataEvent)) {
-            dataEvent.forEach((dataEvent) => {
-              if (log) {
-                console.log(
-                  `|---------------------------------------------------------------------|\n`,
-                  `| Loading in ${itemPath} | Loaded '${dataEvent.listen}' | type ${dataEvent.type || "aoitelegram"} | custom-event |`,
-                );
-              }
-              this.command(dataEvent);
-            });
-          } else {
+      if (stats.isDirectory()) {
+        this.loadEvents(itemPath, log);
+      } else if (itemPath.endsWith(".js")) {
+        const requireEvent = importSync(itemPath);
+        const dataEvent = requireEvent.default || requireEvent;
+        if (Array.isArray(dataEvent)) {
+          dataEvent.forEach((dataEvent) => {
             if (log) {
               console.log(
                 `|---------------------------------------------------------------------|\n`,
@@ -209,14 +197,19 @@ class CustomEvent extends EventEmitter {
               );
             }
             this.command(dataEvent);
+          });
+        } else {
+          if (log) {
+            console.log(
+              `|---------------------------------------------------------------------|\n`,
+              `| Loading in ${itemPath} | Loaded '${dataEvent.listen}' | type ${dataEvent.type || "aoitelegram"} | custom-event |`,
+            );
           }
+          this.command(dataEvent);
         }
       }
-      return this;
-    } catch (error) {
-      console.error(error);
-      return this;
     }
+    return this;
   }
 
   /**
