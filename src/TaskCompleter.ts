@@ -111,6 +111,7 @@ class TaskCompleter {
 
     for (const func of options) {
       const funcLowerCase = `$${func.name}`.toLowerCase();
+      if (funcLowerCase === "") continue;
       this.availableFunction.set(funcLowerCase, {
         name: funcLowerCase,
         callback: async ({ splits }) => {
@@ -411,7 +412,7 @@ class TaskCompleter {
    */
   async completeTask() {
     this.code = await this.completesV4If(this.code);
-    this.foundFunctions = await this.searchFunctions();
+    this.foundFunctions = this.searchFunctions();
     this.code = this.code.replace(
       /\$executiontime/gi,
       (performance.now() - this.executionTime).toFixed(3),

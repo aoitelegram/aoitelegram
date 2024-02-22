@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import process from "node:process";
 import { AoijsError } from "./AoiError";
 import { Collection } from "telegramsjs";
 import { DataFunction } from "./AoiTyping";
@@ -6,6 +7,7 @@ import { CustomEvent } from "./CustomEvent";
 import { AoiExtension } from "./AoiExtension";
 import { LoadCommands } from "./LoadCommands";
 import { KeyValueOptions } from "./AoiManager";
+import { MongoDBManager } from "./MongoDBManager";
 import { toConvertParse } from "../function/parser";
 import { AoiBase, TelegramOptions } from "./AoiBase";
 import { AoiWarning, AoiWarningOptions } from "./AoiWarning";

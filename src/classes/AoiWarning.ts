@@ -1,6 +1,5 @@
 import chalk from "chalk";
 import fetch from "node-fetch";
-import process from "node:process";
 import { version } from "../index";
 import { setTimeout } from "node:timers";
 import { execSync, spawn } from "node:child_process";
@@ -32,21 +31,6 @@ class AoiWarning {
     this.autoUpdate = options.autoUpdate || false;
     this.enableDev = options.enableDev || false;
     this.enableBeta = options.enableBeta || false;
-    this.setupExitHandlers();
-  }
-
-  /**
-   * Set up exit handlers for graceful process exit.
-   */
-  private setupExitHandlers() {
-    if (!this.autoUpdate) return;
-
-    process.on("SIGINT", () => {
-      setTimeout(() => {
-        console.log(chalk.yellow("Received SIGINT. Exiting gracefully..."));
-        process.exit(0);
-      }, 250);
-    });
   }
 
   /**

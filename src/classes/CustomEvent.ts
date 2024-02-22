@@ -21,37 +21,55 @@ class CustomEvent extends EventEmitter {
   /**
    * Constructs a new CustomEvent instance.
    * @param aoitelegram - The AoiClient instance for Telegram functionality.
+   * @param options - An object containing optional configuration options.
+   *                  It can specify which process events to listen for and emit custom events accordingly.
+   *                  If not provided, default options are used.
    */
-  constructor(aoitelegram: AoiClient) {
+  constructor(
+    aoitelegram: AoiClient,
+    options: {
+      process?: {
+        exit?: boolean;
+        worker?: boolean;
+        SIGINT?: boolean;
+        message?: boolean;
+        warning?: boolean;
+        SIGTERM?: boolean;
+        beforeExit?: boolean;
+        disconnect?: boolean;
+        multipleResolves?: boolean;
+        rejectionHandled?: boolean;
+        uncaughtException?: boolean;
+        unhandledRejection?: boolean;
+        uncaughtExceptionMonitor?: boolean;
+      };
+    } = {},
+  ) {
     super();
     this.aoitelegram = aoitelegram;
     aoitelegram.customEvent = this;
 
-    process.on("beforeExit", (code) => this.emit("process:beforeExit", code));
-    process.on("disconnect", () => this.emit("process:disconnect"));
-    process.on("exit", (code) => this.emit("process:exit", code));
-    process.on("message", (message, sendHandle) =>
-      this.emit("process:message", message, sendHandle),
-    );
-    process.on("multipleResolves", async (type, promise, value) =>
-      this.emit("process:multipleResolves", type, await promise, value),
-    );
-    process.on("rejectionHandled", async (promise) =>
-      this.emit("process:rejectionHandled", await promise),
-    );
-    process.on("uncaughtException", (err) =>
-      this.emit("process:uncaughtException", err),
-    );
-    process.on("uncaughtExceptionMonitor", (err) =>
-      this.emit("process:uncaughtExceptionMonitor", err),
-    );
-    process.on("unhandledRejection", async (reason, promise) =>
-      this.emit("process:unhandledRejection", reason, await promise),
-    );
-    process.on("warning", (warning) => this.emit("process:warning", warning));
-    process.on("worker", (worker) => this.emit("process:worker", worker));
-    process.on("SIGINT", () => this.emit("process:SIGINT"));
-    process.on("SIGTERM", () => this.emit("process:SIGTERM"));
+    const { process = {} } = options;
+
+    const processListeners: [string, string][] = [
+      ["beforeExit", "process:beforeExit"],
+      ["disconnect", "process:disconnect"],
+      ["exit", "process:exit"],
+      ["message", "process:message"],
+      ["multipleResolves", "process:multipleResolves"],
+      ["rejectionHandled", "process:rejectionHandled"],
+      ["uncaughtException", "process:uncaughtException"],
+      ["uncaughtExceptionMonitor", "process:uncaughtExceptionMonitor"],
+      ["unhandledRejection", "process:unhandledRejection"],
+      ["warning", "process:warning"],
+      ["worker", "process:worker"],
+      ["SIGINT", "process:SIGINT"],
+      ["SIGTERM", "process:SIGTERM"],
+    ];
+
+    processListeners.forEach(([eventName, emitEventName]) => {
+      this.addProcessListener(process, eventName, emitEventName);
+    });
   }
 
   /**
@@ -196,8 +214,27 @@ class CustomEvent extends EventEmitter {
       }
       return this;
     } catch (error) {
-      console.error("Error loading events:", error);
+      console.error(error);
       return this;
+    }
+  }
+
+  /**
+   * Adds a process event listener if the event is enabled in the eventNames object.
+   * @param eventNames - An object containing event names as keys and boolean values indicating whether the event is enabled.
+   * @param eventName - The name of the process event to listen for.
+   * @param emitEventName - The name of the custom event to emit when the process event occurs.
+   */
+  addProcessListener(
+    eventNames: { [key: string]: boolean },
+    eventName: string,
+    emitEventName: string,
+  ) {
+    if (eventNames[eventName]) {
+      process.on(eventName, async (...args: any[]) => {
+        const parsedPromise = await Promise.all(args);
+        this.emit(emitEventName, ...parsedPromise);
+      });
     }
   }
 

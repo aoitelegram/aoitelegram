@@ -21,9 +21,9 @@ export default {
       return;
     }
 
-    if (+ms(milliseconds) <= 5000) {
+    if (!isNaN(+ms(milliseconds)) && +ms(milliseconds) <= 5000) {
       context.sendError(
-        `The specified time should be greater than 5000 milliseconds. Timeout ID: ${context.id}`,
+        `The specified time should be greater than 5000 milliseconds. Timeout ID: ${name}`,
       );
       return;
     }
