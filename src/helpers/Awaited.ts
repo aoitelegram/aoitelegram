@@ -1,5 +1,5 @@
 import { Collection } from "telegramsjs";
-import { setInterval, clearInterval } from "node:timers";
+import { setInterval, clearInterval } from "long-timeout";
 import { AoijsError } from "../classes/AoiError";
 import { AoiClient } from "../classes/AoiClient";
 import { getObjectKey } from "../function/parser";
@@ -63,7 +63,7 @@ class Awaited {
 
         let currentIndex = 1;
         const intervalId = setInterval(async () => {
-          const parsedAwaitedData = JSON.parse(awaited.data);
+          const parsedAwaitedData = JSON.parse(JSON.stringify(awaited.data));
           this.telegram.ensureFunction([
             {
               name: "$awaitedData",

@@ -1,13 +1,5 @@
 import ms from "ms";
 
-function hasObject(arg: any) {
-  try {
-    return !!JSON.parse(JSON.stringify(arg));
-  } catch (err) {
-    return false;
-  }
-}
-
 export default {
   name: "$setTimeout",
   callback: async (context) => {
@@ -15,11 +7,6 @@ export default {
     const [name, milliseconds, data = "{}"] = context.splits;
     context.checkArgumentTypes(["string", "string", "object"]);
     if (context.isError) return;
-
-    if (!hasObject(data)) {
-      context.sendError("Invalid Object");
-      return;
-    }
 
     if (!isNaN(+ms(milliseconds)) && +ms(milliseconds) <= 5000) {
       context.sendError(

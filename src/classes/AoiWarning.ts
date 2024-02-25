@@ -1,7 +1,6 @@
 import chalk from "chalk";
 import fetch from "node-fetch";
 import { version } from "../index";
-import { setTimeout } from "node:timers";
 import { execSync, spawn } from "node:child_process";
 
 interface AoiWarningOptions {

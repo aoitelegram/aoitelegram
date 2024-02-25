@@ -5,7 +5,7 @@ import { AoijsError } from "./AoiError";
 import { Update } from "@telegram.ts/types";
 import { TaskCompleter } from "../TaskCompleter";
 import { getObjectKey } from "../function/parser";
-import { setInterval, clearInterval } from "node:timers";
+import { setInterval, clearInterval } from "long-timeout";
 import { AoiClient, DatabaseOptions } from "./AoiClient";
 import { ContextEvent, CombinedEventFunctions } from "./AoiTyping";
 import { TelegramBot, Collection, Context } from "telegramsjs";

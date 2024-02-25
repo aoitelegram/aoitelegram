@@ -1,4 +1,4 @@
-import { setTimeout } from "node:timers";
+import { type Timeout, setTimeout, clearTimeout } from "long-timeout";
 import { Collection } from "telegramsjs";
 import { AoijsError } from "../../classes/AoiError";
 import { AoiClient } from "../../classes/AoiClient";
@@ -18,7 +18,7 @@ class TimeoutManager {
   /**
    * The collection of registered timeouts.
    */
-  timeouts: Collection<string, NodeJS.Timeout> = new Collection();
+  timeouts: Collection<string, Timeout> = new Collection();
   /**
    * A reference to the AoiClient instance.
    */

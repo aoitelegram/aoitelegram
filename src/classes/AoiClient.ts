@@ -105,150 +105,150 @@ class AoiClient extends AoiBase {
 
   /**
    * Define a command for the client.
-   * @param parameters - Command parameters.
-   * @param parameters.name - The name of the command.
-   * @param parameters.typeChannel- In what type of channels to watch command
-   * @param parameters.code - The code to be executed when the command is invoked.
+   * @param options - Command options.
+   * @param options.name - The name of the command.
+   * @param options.typeChannel- In what type of channels to watch command
+   * @param options.code - The code to be executed when the command is invoked.
    */
-  addCommand(parameters: CommandDescription) {
-    if (!parameters?.name) {
+  addCommand(options: CommandDescription) {
+    if (!options?.name) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'name' parameter",
       );
     }
-    if (!parameters?.code) {
+    if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'code' parameter",
       );
     }
-    this.registerCommand.register(parameters);
-    this.commands.set({ name: `/${parameters.name}` }, { ...parameters });
+    this.registerCommand.register(options);
+    this.commands.set({ name: `/${options.name}` }, { ...options });
     return this;
   }
 
   /**
    * Defines an action handler.
-   * @param parameters - Command parameters.
-   * @param parameters.data - The action data string or an array of action data strings.
-   * @param parameters.answer - Whether to answer the action.
-   * @param parameters.code - The code to be executed when the command is invoked.
+   * @param options - Command options.
+   * @param options.data - The action data string or an array of action data strings.
+   * @param options.answer - Whether to answer the action.
+   * @param options.code - The code to be executed when the command is invoked.
    */
-  addAction(parameters: ActionDescription) {
-    if (!parameters?.data) {
+  addAction(options: ActionDescription) {
+    if (!options?.data) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'data' parameter",
       );
     }
-    if (!parameters?.code) {
+    if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'code' parameter",
       );
     }
-    this.registerAction.register(parameters);
-    this.commands.set({ data: parameters.data }, { ...parameters });
+    this.registerAction.register(options);
+    this.commands.set({ data: options.data }, { ...options });
     return this;
   }
 
   /**
    * Defines an timeout handler.
-   * @param parameters - Command parameters.
-   * @param parameters.id - The unique identifier for the timeout command.
-   * @param parameters.code - The code or content associated with the timeout command.
+   * @param options - Command options.
+   * @param options.id - The unique identifier for the timeout command.
+   * @param options.code - The code or content associated with the timeout command.
    */
-  timeoutCommand(parameters: TimeoutDescription) {
-    if (!parameters?.id) {
+  timeoutCommand(options: TimeoutDescription) {
+    if (!options?.id) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'id' parameter",
       );
     }
-    if (!parameters?.code) {
+    if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'code' parameter",
       );
     }
-    this.registerTimeout.register(parameters);
-    this.commands.set({ id: parameters.id }, { ...parameters });
+    this.registerTimeout.register(options);
+    this.commands.set({ id: options.id }, { ...options });
     return this;
   }
 
   /**
-   * Adds an awaited command with the specified parameters.
-   * @param parameters - Options for the awaited command.
-   * @param parameters.awaited - The name or identifier of the awaited event.
-   * @param parameters.code - The code or content associated with the awaited command.
+   * Adds an awaited command with the specified options.
+   * @param options - Options for the awaited command.
+   * @param options.awaited - The name or identifier of the awaited event.
+   * @param options.code - The code or content associated with the awaited command.
    */
-  awaitedCommand(parameters: AwaitedDescription) {
-    if (!parameters?.awaited) {
+  awaitedCommand(options: AwaitedDescription) {
+    if (!options?.awaited) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'awaited' parameter",
       );
     }
-    if (!parameters?.code) {
+    if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'code' parameter",
       );
     }
-    this.registerAwaited.register(parameters);
-    this.commands.set({ awaited: parameters.awaited }, { ...parameters });
+    this.registerAwaited.register(options);
+    this.commands.set({ awaited: options.awaited }, { ...options });
 
     return this;
   }
 
   /**
-   * Adds a callback with specified parameters to the AoiClient.
-   * @param parameters - The callback description containing 'name', 'type', and additional parameters based on the type.
+   * Adds a callback with specified options to the AoiClient.
+   * @param options - The callback description containing 'name', 'type', and additional options based on the type.
    * @returns The AoiClient instance for method chaining.
    */
-  addCallback(parameters: CallbackDescription) {
-    if (!parameters?.name) {
+  addCallback(options: CallbackDescription) {
+    if (!options?.name) {
       throw new AoijsError(
         "parameter",
         "You did not specify the 'name' parameter.",
       );
     }
 
-    if (parameters.type === "aoitelegram" && !parameters?.code) {
+    if (options.type === "aoitelegram" && !options?.code) {
       throw new AoijsError(
         "parameter",
         "You did not specify the 'code' parameter.",
       );
     }
 
-    if (parameters.type === "js" && !parameters?.callback) {
+    if (options.type === "js" && !options?.callback) {
       throw new AoijsError(
         "parameter",
         "You did not specify the 'callback' parameter.",
       );
     }
 
-    this.registerCallback.register(parameters);
-    this.commands.set({ callback: parameters.name }, { ...parameters });
+    this.registerCallback.register(options);
+    this.commands.set({ callback: options.name }, { ...options });
 
     return this;
   }
 
   /**
    * Adds native functions to the command handler.
-   * @param parameters An array of functions to add as native commands.
+   * @param options An array of functions to add as native commands.
    * @returns Returns the current instance of the command handler.
    */
-  addNative(parameters: Function[]) {
-    if (!Array.isArray(parameters)) {
+  addNative(options: Function[]) {
+    if (!Array.isArray(options)) {
       throw new AoijsError(
         "parameter",
         "the parameter should contain an array of functions",
       );
     }
 
-    const allFuncs = parameters.every(
+    const allFuncs = options.every(
       (func) => typeof func === "function" && func.name !== "",
     );
     if (!allFuncs) {
@@ -258,7 +258,7 @@ class AoiClient extends AoiBase {
       );
     }
 
-    for (const func of parameters) {
+    for (const func of options) {
       this.addFunction({
         name: `$${func.name}`,
         callback: async (context) => {
@@ -276,12 +276,12 @@ class AoiClient extends AoiBase {
 
   /**
    * Adds a function error command to handle errors.
-   * @param parameters - Options for the function error command.
-   * @param parameters.code - The code to be executed on function error.
-   * @param parameters.useNative - The native functions to the command handler.
+   * @param options - Options for the function error command.
+   * @param options.code - The code to be executed on function error.
+   * @param options.useNative - The native functions to the command handler.
    */
-  functionErrorCommand(parameters: { code: string; useNative?: Function[] }) {
-    if (!parameters?.code) {
+  functionErrorCommand(options: { code: string; useNative?: Function[] }) {
+    if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'code' parameter",
@@ -291,9 +291,9 @@ class AoiClient extends AoiBase {
       event.telegram.functionError = false;
       this.evaluateCommand(
         { event: "functionError" },
-        parameters.code,
+        options.code,
         event,
-        parameters.useNative,
+        options.useNative,
       );
       event.telegram.functionError = true;
     });
