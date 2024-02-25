@@ -114,8 +114,9 @@ class TaskCompleter {
       if (funcLowerCase === "") continue;
       this.availableFunction.set(funcLowerCase, {
         name: funcLowerCase,
-        callback: async ({ splits }) => {
-          const splitsParsed = splits.map(toConvertParse);
+        callback: async (context) => {
+          if (context.isError) return;
+          const splitsParsed = context.splits.map(toConvertParse);
           const result = await func(...splitsParsed);
           return typeof result === "object" && result !== null
             ? JSON.stringify({ ...result })

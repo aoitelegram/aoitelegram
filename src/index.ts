@@ -1,7 +1,8 @@
-import importSync from "import-sync";
+const version = "1.0.0";
 import { Context } from "./Context";
 import { AoiBase } from "./classes/AoiBase";
 import { AoiClient } from "./classes/AoiClient";
+import { AoiLogger } from "./classes/AoiLogger";
 import { AoijsError } from "./classes/AoiError";
 import { AoiWarning } from "./classes/AoiWarning";
 import { AoiManager } from "./classes/AoiManager";
@@ -9,17 +10,17 @@ import { DataFunction } from "./classes/AoiTyping";
 import { CustomEvent } from "./classes/CustomEvent";
 import { LoadCommands } from "./classes/LoadCommands";
 import { AoiExtension } from "./classes/AoiExtension";
-import { PluginManager } from "./classes/PluginManager";
-const { version } = importSync("../package.json");
+// import { PluginManager } from "@aoitelegram/plugin";
 
 export {
-  AoiClient,
   AoiBase,
+  AoiClient,
+  AoiLogger,
   AoiWarning,
   AoiManager,
   AoijsError,
   AoiExtension,
-  PluginManager,
+  //  PluginManager,
   CustomEvent,
   LoadCommands,
   DataFunction,
@@ -27,13 +28,14 @@ export {
   version,
 };
 export default {
-  AoiClient,
   AoiBase,
+  AoiClient,
+  AoiLogger,
   AoiWarning,
   AoiManager,
   AoijsError,
   AoiExtension,
-  PluginManager,
+  //  PluginManager,
   CustomEvent,
   LoadCommands,
   Context,

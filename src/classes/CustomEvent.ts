@@ -186,10 +186,20 @@ class CustomEvent extends EventEmitter {
       if (stats.isDirectory()) {
         this.loadEvents(itemPath, log);
       } else if (itemPath.endsWith(".js")) {
-        const requireEvent = importSync(itemPath);
-        const dataEvent = requireEvent.default || requireEvent;
-        if (Array.isArray(dataEvent)) {
-          dataEvent.forEach((dataEvent) => {
+        try {
+          const requireEvent = importSync(itemPath);
+          const dataEvent = requireEvent.default || requireEvent;
+          if (Array.isArray(dataEvent)) {
+            dataEvent.forEach((dataEvent) => {
+              if (log) {
+                console.log(
+                  `|---------------------------------------------------------------------|\n`,
+                  `| Loading in ${itemPath} | Loaded '${dataEvent.listen}' | type ${dataEvent.type || "aoitelegram"} | custom-event |`,
+                );
+              }
+              this.command(dataEvent);
+            });
+          } else {
             if (log) {
               console.log(
                 `|---------------------------------------------------------------------|\n`,
@@ -197,15 +207,9 @@ class CustomEvent extends EventEmitter {
               );
             }
             this.command(dataEvent);
-          });
-        } else {
-          if (log) {
-            console.log(
-              `|---------------------------------------------------------------------|\n`,
-              `| Loading in ${itemPath} | Loaded '${dataEvent.listen}' | type ${dataEvent.type || "aoitelegram"} | custom-event |`,
-            );
           }
-          this.command(dataEvent);
+        } catch (err) {
+          console.error(err);
         }
       }
     }

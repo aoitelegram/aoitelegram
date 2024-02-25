@@ -1,5 +1,5 @@
-import chalk from "chalk";
 import { Collection } from "telegramsjs";
+import { AoiLogger } from "./AoiLogger";
 import { AoijsError } from "./AoiError";
 import { KeyValue } from "@aoitelegram/database";
 
@@ -39,10 +39,9 @@ class AoiManager extends KeyValue<string, unknown> {
    */
   constructor(options: KeyValueOptions = {}) {
     super({ ...options, tables: [...(options.tables || []), "timeout"] });
-    if (options.logging === true || options.logging === undefined) {
+    if (options.logging === undefined || options.logging) {
       this.on("ready", async () => {
-        const text = chalk.green("Database has been established");
-        console.log(text);
+        AoiLogger.info("Database has been established");
       });
     }
     this.connect();

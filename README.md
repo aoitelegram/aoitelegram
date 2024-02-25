@@ -3,7 +3,7 @@
 [![NPM Version](https://img.shields.io/npm/v/aoitelegram)](https://www.npmjs.com/package/aoitelegram)
 [![Bot API](https://img.shields.io/badge/Bot%20API-v.7.1-00aced.svg?style=flat-square&logo=telegram)](https://core.telegram.org/bots/api)
 [![NPM Downloads](https://img.shields.io/npm/dt/aoitelegram.svg?maxAge=3600)](https://www.npmjs.com/package/aoitelegram)
-[![License](https://img.shields.io/npm/l/aoitelegram)](https://github.com/Sempai-07/aoitelegram/blob/main/LICENSE)
+[![License](https://img.shields.io/npm/l/aoitelegram)](https://github.com/Sempai-07/aoitelegram/blob/v1/LICENSE)
 
 `aoitelegram` is a `JavaScript/TypeScript` library for creating `Telegram` bots with ease. It simplifies the process of building and managing `Telegram` bot functionality, similar to aoijs but tailored for `Telegram`.
 

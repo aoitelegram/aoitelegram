@@ -54,7 +54,7 @@ abstract class AoiExtension {
     }
 
     if (this.requireExtension?.length) {
-      const currentExtensions = aoitelegram.extensions || [];
+      const currentExtensions = aoitelegram.parameters.extensions || [];
       for (const extension of this.requireExtension) {
         const hasExtensions = currentExtensions.findIndex(
           ({ name }) => name === extension,

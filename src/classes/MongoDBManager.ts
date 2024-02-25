@@ -1,6 +1,6 @@
 import ms from "ms";
-import chalk from "chalk";
 import { AoiBase } from "./AoiBase";
+import { AoiLogger } from "./AoiLogger";
 import { Collection } from "telegramsjs";
 import { AoijsError } from "./AoiError";
 import { hasChatPrivate } from "../function/helpers";
@@ -102,10 +102,9 @@ class MongoDBManager extends MongoDB<string, unknown> {
     }
 
     super(options.url);
-    if (options.logging === true || options.logging === undefined) {
+    if (options.logging === undefined || options.logging) {
       this.on("ready", async () => {
-        const text = chalk.green("MongoDB has been established");
-        console.log(text);
+        AoiLogger.info("MongoDB has been established");
       });
     }
     this.tables = options.tables || ["main"];
