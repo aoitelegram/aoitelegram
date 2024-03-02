@@ -29,7 +29,7 @@ interface DeveloperOptions {
 class TaskCompleter {
   dataContext: Context;
   searchedFunctions: string[];
-  foundFunctions: { func: string; optional: boolean }[] = [];
+  foundFunctions: { func: string; negative: boolean }[] = [];
   eventData: ContextEvent;
   code: string;
   telegram: AoiClient;
@@ -44,7 +44,7 @@ class TaskCompleter {
   developerOptions: DeveloperOptions;
   isError: boolean = false;
   onlySearchFunction: string[];
-  searchOptionalFunction: string[];
+  searchNegativeFunction: string[];
   suppressErrors?: string;
   executionTime: number = performance.now();
 
@@ -103,13 +103,13 @@ class TaskCompleter {
       this.onlySearchFunction.push(funcLowerCase);
     }
 
-    this.searchOptionalFunction = this.onlySearchFunction.map((func) =>
-      func.replace("$", "$?"),
+    this.searchNegativeFunction = this.onlySearchFunction.map((func) =>
+      func.replace("$", "$!"),
     );
 
     this.code = findAndTransform(code, [
       ...this.onlySearchFunction,
-      ...this.searchOptionalFunction,
+      ...this.searchNegativeFunction,
     ]);
     this.foundFunctions = this.searchFunctions();
   }
@@ -131,7 +131,7 @@ class TaskCompleter {
    */
   searchFunctions() {
     let onlySearchFunctions = this.onlySearchFunction.concat(
-      ...this.searchOptionalFunction,
+      ...this.searchNegativeFunction,
     );
     let foundFunctions = [];
 
@@ -139,7 +139,9 @@ class TaskCompleter {
       this.code.includes(func),
     );
 
-    for (const [name] of this.code.matchAll(/\$!?[\w]+(\[\.\.\.\])?/g)) {
+    for (const [name] of this.code.matchAll(
+      /\$(!?[a-zA-Z_][a-zA-Z0-9_]*)(\[\.\.\.\])?/g,
+    )) {
       if (findElement(onlySearchFunctions, name)) continue;
       const {
         notifiedOfUnknownFunction = true,
@@ -165,7 +167,7 @@ class TaskCompleter {
     const functionSegments = this.code.split("$");
 
     for (const functionSegment of functionSegments) {
-      const isOptionalFunction = functionSegment.startsWith("?");
+      const isNegativeFunction = functionSegment.startsWith("!");
       let matchingFunction = matchingFunctions.filter(
         (func) => func === `$${functionSegment}`.slice(0, func.length),
       );
@@ -173,12 +175,12 @@ class TaskCompleter {
       if (matchingFunction.length === 1) {
         foundFunctions.push({
           func: matchingFunction[0],
-          optional: isOptionalFunction,
+          negative: isNegativeFunction,
         });
       } else if (matchingFunction.length > 1) {
         foundFunctions.push({
           func: matchingFunction.sort((a, b) => b.length - a.length)[0],
-          optional: isOptionalFunction,
+          negative: isNegativeFunction,
         });
       }
     }
@@ -330,14 +332,14 @@ class TaskCompleter {
   /**
    * Asynchronously completes a task using Aoi.
    * @param func - The name of the function.
-   * @param optional - Whether the function is negated or not.
+   * @param negative - Whether the function is negated or not.
    * @param context - The context function containing necessary contextual callback.
    * @param callback - Either a string of code or a function to be executed.
    * @returns A promise that resolves once the task is completed.
    */
   async completeTaskCallback(
     func: string,
-    optional: boolean,
+    negative: boolean,
     context: Context,
     callback:
       | { code: string; params?: string[] }
@@ -348,7 +350,7 @@ class TaskCompleter {
         const result = await callback(context);
         return result;
       } catch (err) {
-        if (optional) {
+        if (negative) {
           return undefined;
         } else if (`${err}`.includes("TelegramApiError")) {
           const text = `❌ <b>TelegramApiError[$${func}]:</b><code>${`${err}`
@@ -396,7 +398,7 @@ class TaskCompleter {
         );
         return await taskCompleter.completeTask();
       } catch (err) {
-        if (optional) return undefined;
+        if (negative) return undefined;
         console.log(err);
       }
     } else {
@@ -424,16 +426,16 @@ class TaskCompleter {
       (performance.now() - this.executionTime).toFixed(3),
     );
 
-    for (const { func, optional } of this.foundFunctions.reverse()) {
+    for (const { func, negative } of this.foundFunctions.reverse()) {
       const codeSegment = unpack(this.code, func.toLowerCase());
 
-      const functionName = func.replace(/[$?\[]/g, "");
+      const functionName = func.replace(/[$!\[]/g, "");
 
       this.dataContext.inside = codeSegment.inside;
       this.dataContext.splits = codeSegment.splits.map((inside) =>
         inside.trim() === "" ? undefined : inside,
       );
-      this.dataContext.optional = optional;
+      this.dataContext.negative = negative;
       this.dataContext.currentFunction = func;
 
       const functionRun = this.availableFunction.get(
@@ -450,7 +452,7 @@ class TaskCompleter {
 
       let resultFunction = await this.completeTaskCallback(
         functionName,
-        optional,
+        negative,
         this.dataContext,
         "callback" in functionRun ? functionRun.callback : functionRun,
       );
@@ -463,10 +465,10 @@ class TaskCompleter {
       this.code = replaceLast(this.code, segment, `${resultFunction}`);
 
       const isError = this.dataContext.isError || this.isError;
-      if (isError === true && optional === false) {
+      if (isError === true && negative === false) {
         this.code = "";
         break;
-      } else if (this.dataContext.isError === true && optional === true) {
+      } else if (this.dataContext.isError === true && negative === true) {
         this.dataContext.isError = false;
       }
     }
