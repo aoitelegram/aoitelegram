@@ -86,43 +86,8 @@ class TaskCompleter {
       command: command,
     });
 
-    this.addNative(useNative || []);
-    this.searchOptionalFunction = this.onlySearchFunction.map((func) =>
-      func.replace("$", "$?"),
-    );
-    this.code = findAndTransform(code, [
-      ...this.onlySearchFunction,
-      ...this.searchOptionalFunction,
-    ]);
-    this.foundFunctions = this.searchFunctions();
-  }
-
-  /**
-   * Adds native functions to the command handler.
-   * @param options An array of functions to add as native commands.
-   * @returns Returns the current instance of the command handler.
-   */
-  addNative(options: Function[]) {
-    if (!Array.isArray(options)) {
-      throw new AoijsError(
-        "parameter",
-        "the parameter should contain an array of functions",
-      );
-    }
-
-    const allFuncs = options.every(
-      (func) => typeof func === "function" && func.name !== "",
-    );
-    if (!allFuncs) {
-      throw new AoijsError(
-        "parameter",
-        "the parameter should contain an array of functions",
-      );
-    }
-
-    for (const func of options) {
+    for (const func of useNative || []) {
       const funcLowerCase = `$${func.name}`.toLowerCase();
-      if (funcLowerCase === "") continue;
       this.availableFunction.set(funcLowerCase, {
         name: funcLowerCase,
         callback: async (context) => {
@@ -136,7 +101,16 @@ class TaskCompleter {
       });
       this.onlySearchFunction.push(funcLowerCase);
     }
-    return this;
+
+    this.searchOptionalFunction = this.onlySearchFunction.map((func) =>
+      func.replace("$", "$?"),
+    );
+
+    this.code = findAndTransform(code, [
+      ...this.onlySearchFunction,
+      ...this.searchOptionalFunction,
+    ]);
+    this.foundFunctions = this.searchFunctions();
   }
 
   /**

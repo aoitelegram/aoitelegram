@@ -221,7 +221,7 @@ function unpack(
  * @returns The modified string after applying transformations.
  */
 function findAndTransform(str: string, array: string[]) {
-  const regex = /\$(!?\?[a-zA-Z_][a-zA-Z0-9_]*)(\[\.\.\.\])?/gi;
+  const regex = /\$!?[\w]+(\[\.\.\.\])?/g;
   if (!str || array.length < 1) return str;
   array.forEach((element) => {
     str = str.replace(regex, (match) => match.toLowerCase());
