@@ -3,13 +3,13 @@ import path from "node:path";
 import importSync from "import-sync";
 import { AoijsError } from "./AoiError";
 import { Update } from "@telegram.ts/types";
-import { TaskCompleter } from "../TaskCompleter";
 import { getObjectKey } from "../function/parser";
 import { setInterval, clearInterval } from "long-timeout";
 import { AoiClient, DatabaseOptions } from "./AoiClient";
 import { ContextEvent, CombinedEventFunctions } from "./AoiTyping";
 import { TelegramBot, Collection, Context } from "telegramsjs";
 import { AoiManager, KeyValueOptions } from "./AoiManager";
+import { TaskCompleter, type DeveloperOptions } from "../TaskCompleter";
 import { MongoDBManager, MongoDBManagerOptions } from "./MongoDBManager";
 import {
   LibDataFunction,
@@ -74,6 +74,7 @@ class AoiBase extends TelegramBot {
   disableFunctions: string[];
   availableFunctions: Collection<string, LibWithDataFunction> =
     new Collection();
+  developerOptions: DeveloperOptions;
   /**
    * Creates a new instance of AoiBase.
    * @param  token - The token for authentication.
@@ -88,6 +89,7 @@ class AoiBase extends TelegramBot {
     database: DatabaseOptions = {},
     disableFunctions?: string[],
     disableAoiDB?: boolean,
+    developerOptions?: DeveloperOptions,
   ) {
     if (!token) {
       throw new AoijsError(
@@ -102,7 +104,7 @@ class AoiBase extends TelegramBot {
         ? telegram
         : { ...telegram, allowed_updates: defaultAllowedUpdates },
     );
-
+    this.developerOptions = developerOptions || {};
     this.disableFunctions = disableFunctions || [];
     this.availableFunctions = loadFunctionsLib(
       path.join(__dirname, "../function/"),
@@ -176,6 +178,7 @@ class AoiBase extends TelegramBot {
         this.database,
         this.availableFunctions,
         [...this.availableFunctions.keys()],
+        this.developerOptions,
         useNative,
       );
       return await taskCompleter.completeTask();

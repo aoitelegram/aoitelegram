@@ -8,6 +8,7 @@ import { getObjectKey, toConvertParse } from "./function/parser";
 import {
   unpack,
   replaceLast,
+  findElement,
   findAndTransform,
   updateParamsFromArray,
 } from "./prototype";
@@ -16,11 +17,19 @@ import {
   LibDataFunction,
   LibWithDataFunction,
 } from "./classes/AoiTyping";
+import { AoiLogger } from "./classes/AoiLogger";
+import { WordMatcher } from "./utils/WordMatcher";
+
+interface DeveloperOptions {
+  notifiedOfUnknownFunction?: boolean;
+  stopOnUnknownFunction?: boolean;
+  sendErrorOnUnknownFunction?: boolean;
+}
 
 class TaskCompleter {
   dataContext: Context;
   searchedFunctions: string[];
-  foundFunctions: { func: string; negative: boolean }[] = [];
+  foundFunctions: { func: string; optional: boolean }[] = [];
   eventData: ContextEvent;
   code: string;
   telegram: AoiClient;
@@ -32,9 +41,10 @@ class TaskCompleter {
   };
   database: AoiManager | MongoDBManager;
   availableFunction: Collection<string, LibWithDataFunction>;
+  developerOptions: DeveloperOptions;
   isError: boolean = false;
   onlySearchFunction: string[];
-  searchNegationFunction: string[];
+  searchOptionalFunction: string[];
   suppressErrors?: string;
   executionTime: number = performance.now();
 
@@ -57,6 +67,7 @@ class TaskCompleter {
     database: AoiManager | MongoDBManager,
     availableFunctions: Collection<string, LibWithDataFunction>,
     onlySearchFunctions: string[],
+    developerOptions: DeveloperOptions,
     useNative?: Function[],
   ) {
     this.searchedFunctions = [];
@@ -66,6 +77,7 @@ class TaskCompleter {
     this.database = database;
     this.availableFunction = availableFunctions.clone();
     this.onlySearchFunction = onlySearchFunctions;
+    this.developerOptions = developerOptions;
 
     this.dataContext = new Context({
       event: eventData,
@@ -75,13 +87,12 @@ class TaskCompleter {
     });
 
     this.addNative(useNative || []);
-
-    this.searchNegationFunction = this.onlySearchFunction.map((func) =>
-      func.replace("$", "$!"),
+    this.searchOptionalFunction = this.onlySearchFunction.map((func) =>
+      func.replace("$", "$?"),
     );
     this.code = findAndTransform(code, [
       ...this.onlySearchFunction,
-      ...this.searchNegationFunction,
+      ...this.searchOptionalFunction,
     ]);
     this.foundFunctions = this.searchFunctions();
   }
@@ -145,7 +156,7 @@ class TaskCompleter {
    */
   searchFunctions() {
     let onlySearchFunctions = this.onlySearchFunction.concat(
-      ...this.searchNegationFunction,
+      ...this.searchOptionalFunction,
     );
     let foundFunctions = [];
 
@@ -153,34 +164,49 @@ class TaskCompleter {
       this.code.includes(func),
     );
 
+    for (const [name] of this.code.matchAll(
+      /\$(!?\?[a-zA-Z_][a-zA-Z0-9_]*)(\[\.\.\.\])?/g,
+    )) {
+      if (findElement(onlySearchFunctions, name)) continue;
+      const {
+        notifiedOfUnknownFunction = true,
+        sendErrorOnUnknownFunction = false,
+        stopOnUnknownFunction = false,
+      } = this.developerOptions;
+      if (notifiedOfUnknownFunction && !sendErrorOnUnknownFunction) {
+        AoiLogger.warn(
+          `This function '${name}' does not exist. Check the official documentation or install the necessary plugin where the function is available`,
+        );
+      }
+      if (notifiedOfUnknownFunction && sendErrorOnUnknownFunction) {
+        const matcher = new WordMatcher(onlySearchFunctions);
+        this.#sendErrorMessage(
+          `This function ${name} does not exist. Perhaps you meant the function: ${matcher.search(name)}`,
+          false,
+          name,
+        );
+      }
+      if (stopOnUnknownFunction) this.code = "";
+    }
+
     const functionSegments = this.code.split("$");
+
     for (const functionSegment of functionSegments) {
-      if (functionSegment.startsWith("!")) {
-        let matchingFunction = matchingFunctions.filter(
-          (func) => func === `$${functionSegment}`.slice(0, func.length),
-        );
+      const isOptionalFunction = functionSegment.startsWith("?");
+      let matchingFunction = matchingFunctions.filter(
+        (func) => func === `$${functionSegment}`.slice(0, func.length),
+      );
 
-        if (matchingFunction.length === 1) {
-          foundFunctions.push({ func: matchingFunction[0], negative: true });
-        } else if (matchingFunction.length > 1) {
-          foundFunctions.push({
-            func: matchingFunction.sort((a, b) => b.length - a.length)[0],
-            negative: true,
-          });
-        }
-      } else {
-        let matchingFunction = matchingFunctions.filter(
-          (func) => func === `$${functionSegment}`.slice(0, func.length),
-        );
-
-        if (matchingFunction.length === 1) {
-          foundFunctions.push({ func: matchingFunction[0], negative: false });
-        } else if (matchingFunction.length > 1) {
-          foundFunctions.push({
-            func: matchingFunction.sort((a, b) => b.length - a.length)[0],
-            negative: false,
-          });
-        }
+      if (matchingFunction.length === 1) {
+        foundFunctions.push({
+          func: matchingFunction[0],
+          optional: isOptionalFunction,
+        });
+      } else if (matchingFunction.length > 1) {
+        foundFunctions.push({
+          func: matchingFunction.sort((a, b) => b.length - a.length)[0],
+          optional: isOptionalFunction,
+        });
       }
     }
 
@@ -194,7 +220,7 @@ class TaskCompleter {
    */
   async completesV4If(inputCode: string) {
     let code = inputCode;
-    if (!code.toLowerCase().includes("$if[")) return code;
+    if (!code.toLowerCase().includes("$if[")) return { code, isSuccess: false };
     for (let ifBlock of code
       .split(/\$if\[/gi)
       .slice(1)
@@ -203,7 +229,7 @@ class TaskCompleter {
 
       if (!code.toLowerCase().includes("$endif")) {
         this.#sendErrorMessage(`is missing $endif`, false, "$if");
-        return "";
+        return {};
       }
 
       const entireBlock = code
@@ -226,6 +252,7 @@ class TaskCompleter {
           this.database,
           this.availableFunction,
           this.onlySearchFunction,
+          this.developerOptions,
         );
         const response = await taskCompleter.completeTask();
         pass = response.trim() == "true";
@@ -241,7 +268,7 @@ class TaskCompleter {
         for (const elseIfData of ifBlock.split(/\$elseif\[/gi).slice(1)) {
           if (!elseIfData.toLowerCase().includes("$endelseif")) {
             this.#sendErrorMessage(`is missing $endelseIf!`, false, "$elseIf");
-            return "";
+            return {};
           }
 
           const insideBlock = elseIfData.split(/\$endelseIf/gi)[0];
@@ -302,6 +329,7 @@ class TaskCompleter {
                 this.database,
                 this.availableFunction,
                 this.onlySearchFunction,
+                this.developerOptions,
               );
               const result = await taskCompleter.completeTask();
               response = result.trim() == "true";
@@ -323,20 +351,20 @@ class TaskCompleter {
         (pass ? ifCodeBlock : passes ? lastCodeBlock : elseCodeBlock) as string,
       );
     }
-    return code;
+    return { code, isSuccess: true };
   }
 
   /**
    * Asynchronously completes a task using Aoi.
    * @param func - The name of the function.
-   * @param negative - Whether the function is negated or not.
+   * @param optional - Whether the function is negated or not.
    * @param context - The context function containing necessary contextual callback.
    * @param callback - Either a string of code or a function to be executed.
    * @returns A promise that resolves once the task is completed.
    */
   async completeTaskCallback(
     func: string,
-    negative: boolean,
+    optional: boolean,
     context: Context,
     callback:
       | { code: string; params?: string[] }
@@ -347,7 +375,7 @@ class TaskCompleter {
         const result = await callback(context);
         return result;
       } catch (err) {
-        if (negative) {
+        if (optional) {
           return undefined;
         } else if (`${err}`.includes("TelegramApiError")) {
           const text = `❌ <b>TelegramApiError[$${func}]:</b><code>${`${err}`
@@ -380,7 +408,6 @@ class TaskCompleter {
         });
 
         const nativeFunction = availableFunction.get(`$${func}`) || {};
-
         const taskCompleter = new TaskCompleter(
           code,
           this.eventData,
@@ -389,13 +416,14 @@ class TaskCompleter {
           this.database,
           availableFunction,
           [...this.onlySearchFunction, "$argumentscount"],
+          this.developerOptions,
           "useNative" in nativeFunction
             ? (nativeFunction.useNative as Function[])
             : undefined,
         );
         return await taskCompleter.completeTask();
       } catch (err) {
-        if (negative) return undefined;
+        if (optional) return undefined;
         console.log(err);
       }
     } else {
@@ -412,23 +440,27 @@ class TaskCompleter {
    * Completes the task by processing found functions in reverse.
    */
   async completeTask() {
-    this.code = await this.completesV4If(this.code);
-    this.foundFunctions = this.searchFunctions();
+    const { code, isSuccess } = await this.completesV4If(this.code);
+    if (isSuccess) {
+      this.code = code;
+      this.foundFunctions = this.searchFunctions();
+    }
+
     this.code = this.code.replace(
       /\$executiontime/gi,
       (performance.now() - this.executionTime).toFixed(3),
     );
 
-    for (const { func, negative } of this.foundFunctions.reverse()) {
+    for (const { func, optional } of this.foundFunctions.reverse()) {
       const codeSegment = unpack(this.code, func.toLowerCase());
 
-      const functionName = func.replace(/[$![]/g, "");
+      const functionName = func.replace(/[$?\[]/g, "");
 
       this.dataContext.inside = codeSegment.inside;
       this.dataContext.splits = codeSegment.splits.map((inside) =>
         inside.trim() === "" ? undefined : inside,
       );
-      this.dataContext.negative = negative;
+      this.dataContext.optional = optional;
       this.dataContext.currentFunction = func;
 
       const functionRun = this.availableFunction.get(
@@ -445,7 +477,7 @@ class TaskCompleter {
 
       let resultFunction = await this.completeTaskCallback(
         functionName,
-        negative,
+        optional,
         this.dataContext,
         "callback" in functionRun ? functionRun.callback : functionRun,
       );
@@ -458,10 +490,10 @@ class TaskCompleter {
       this.code = replaceLast(this.code, segment, `${resultFunction}`);
 
       const isError = this.dataContext.isError || this.isError;
-      if (isError && !negative) {
+      if (isError === true && optional === false) {
         this.code = "";
         break;
-      } else if (this.dataContext.isError && negative) {
+      } else if (this.dataContext.isError === true && optional === true) {
         this.dataContext.isError = false;
       }
     }
@@ -508,9 +540,17 @@ class TaskCompleter {
       });
       this.telegram.emit("functionError", this.eventData, this.telegram);
     } else {
-      throw new AoijsError(undefined, error, this.command.name, functionName);
+      const codeRegex = /<code>(.*?)<\/code>/;
+      const match = error.match(codeRegex);
+      AoiLogger.custom({
+        title: { color: "yellow", text: `[ FunctionError ]:`, bold: true },
+        args: [
+          { color: "red", text: match ? match[1] : error, bold: true },
+          { color: "red", text: `(${functionName})`, bold: true },
+        ],
+      });
     }
   }
 }
 
-export { TaskCompleter };
+export { TaskCompleter, DeveloperOptions };

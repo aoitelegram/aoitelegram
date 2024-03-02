@@ -85,7 +85,7 @@ const bot = new AoiClient({
   },
 });
 
-client.functionErrorCommand({
+bot.functionErrorCommand({
   code: `$sendMessage[Sorry, but there was an error in the $handleError[function] function within the $handleError[command] command: $handleError[error]]`,
 });
 

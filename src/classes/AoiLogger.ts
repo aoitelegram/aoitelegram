@@ -4,11 +4,10 @@ import chalk, { type ForegroundColor } from "chalk";
 /**
  * AoiLogger class provides logging functionalities with customizable text and date colors.
  * @example
- * const logger = new AoiLogger();
- * logger.debug("Debug message"); // Logs a debug message
- * logger.error("Error message"); // Logs an error message
- * logger.warn("Warning message"); // Logs a warning message
- * logger.info("Info message"); // Logs an info message
+ * AoiLogger.debug("Debug message"); // Logs a debug message
+ * AoiLogger.error("Error message"); // Logs an error message
+ * AoiLogger.warn("Warning message"); // Logs a warning message
+ * AoiLogger.info("Info message"); // Logs an info message
  * AoiLogger.custom({
  *   time: true,
  *   title: { color: "blue", text: "Custom Log", bold: true },
@@ -94,8 +93,9 @@ class AoiLogger {
         .join(" ");
     }
 
-    if (time) console.log(formattedDate, formattedTitle, formattedArgs);
-    else console.log(formattedTitle, formattedArgs);
+    if (time) {
+      console.log(formattedDate, formattedTitle, formattedArgs);
+    } else console.log(formattedTitle, formattedArgs);
   }
 
   /**

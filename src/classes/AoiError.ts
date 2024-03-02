@@ -1,15 +1,4 @@
 /**
- * Extracts the content inside <code> tags from the provided HTML-like string.
- * @param inputString - The input string containing HTML-like structure.
- * @returns The content inside <code> tags, or null if not found.
- */
-function extractCodeContent(inputString: string) {
-  const codeRegex = /<code>(.*?)<\/code>/;
-  const match = inputString.match(codeRegex);
-  return match ? match[1] : inputString;
-}
-
-/**
  * A custom error class for Aoijs with additional properties for error details.
  */
 class AoijsError extends Error {
@@ -31,7 +20,7 @@ class AoijsError extends Error {
     command?: unknown,
     functions?: string,
   ) {
-    super(extractCodeContent(description));
+    super(description);
 
     /**
      * The name or category of the error.
@@ -41,7 +30,7 @@ class AoijsError extends Error {
     /**
      * A description of the error.
      */
-    this.description = extractCodeContent(description);
+    this.description = description;
 
     /**
      * The name of the command associated with the error.

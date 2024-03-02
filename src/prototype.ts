@@ -175,6 +175,24 @@ function after(text: string): {
 }
 
 /**
+ * Find an element in an array.
+ * @param array - The array to search.
+ * @param search - The element to search for.
+ * @returns True if the element is found in the array, otherwise false.
+ */
+function findElement<T extends Array<string>>(
+  array: T,
+  search: string,
+): boolean {
+  const foundExact = array.includes(search);
+  if (foundExact) return true;
+
+  const foundIndexApproximate = array.findIndex((name) => name === search);
+  const foundApproximate = array.some((name) => search.startsWith(name));
+  return foundIndexApproximate === -1 ? foundApproximate : true;
+}
+
+/**
  * Unpacks a portion of code based on a specified function signature.
  * @param code - The code to unpack.
  * @param func - The function signature to use for unpacking.
@@ -203,7 +221,7 @@ function unpack(
  * @returns The modified string after applying transformations.
  */
 function findAndTransform(str: string, array: string[]) {
-  const regex = /\$(!?[a-zA-Z_][a-zA-Z0-9_]*)(\[\.\.\.\])?/g;
+  const regex = /\$(!?\?[a-zA-Z_][a-zA-Z0-9_]*)(\[\.\.\.\])?/gi;
   if (!str || array.length < 1) return str;
   array.forEach((element) => {
     str = str.replace(regex, (match) => match.toLowerCase());
@@ -238,4 +256,11 @@ function updateParamsFromArray(
   return inputString;
 }
 
-export { unpack, after, replaceLast, findAndTransform, updateParamsFromArray };
+export {
+  unpack,
+  after,
+  findElement,
+  replaceLast,
+  findAndTransform,
+  updateParamsFromArray,
+};

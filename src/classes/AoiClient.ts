@@ -10,12 +10,13 @@ import { LoadCommands } from "./LoadCommands";
 import { KeyValueOptions } from "./AoiManager";
 import { toConvertParse } from "../function/parser";
 import { AoiBase, TelegramOptions } from "./AoiBase";
+import { type DeveloperOptions } from "../TaskCompleter";
+import { MongoDBManagerOptions } from "./MongoDBManager";
 import { AoiWarning, AoiWarningOptions } from "./AoiWarning";
 import { Action, ActionDescription } from "../helpers/Action";
 import { Callback, CallbackDescription } from "../helpers/Callback";
 import { TimeoutManager } from "../helpers/manager/TimeoutManager";
 import { AwaitedManager } from "../helpers/manager/AwaitedManager";
-import { MongoDBManagerOptions } from "./MongoDBManager";
 import { Command, CommandDescription } from "../helpers/Command";
 import { Timeout, TimeoutDescription } from "../helpers/Timeout";
 import { Awaited, AwaitedDescription } from "../helpers/Awaited";
@@ -75,6 +76,7 @@ class AoiClient extends AoiBase {
       disableAoiDB?: boolean;
       logging?: boolean;
       autoUpdate?: AoiWarningOptions;
+      developerOptions?: DeveloperOptions;
     },
   ) {
     super(
@@ -83,6 +85,7 @@ class AoiClient extends AoiBase {
       parameters.database,
       parameters.disableFunctions,
       parameters.disableAoiDB,
+      parameters.developerOptions,
     );
 
     const allAoiExtends = parameters.extensions?.every(

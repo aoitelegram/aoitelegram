@@ -2,6 +2,7 @@ import { Context } from "../Context";
 import { Collection } from "telegramsjs";
 import { AoiClient } from "../classes/AoiClient";
 import { AoijsError } from "../classes/AoiError";
+import { findAndTransform } from "../prototype";
 
 interface AoiCallbackDescription {
   name: string;

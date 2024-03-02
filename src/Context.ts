@@ -21,7 +21,7 @@ class Context {
   command: { name: string; hasCommand?: boolean; hasEvent?: boolean };
   isError: boolean = false;
   database: AoiManager | MongoDBManager;
-  negative?: boolean;
+  optional?: boolean;
   currentFunction: string;
   suppressErrors?: string;
   [key: string]: any;
@@ -34,7 +34,7 @@ class Context {
     telegram: AoiClient;
     database: AoiManager | MongoDBManager;
     command: { name: string; hasCommand?: boolean; hasEvent?: boolean };
-    negative?: boolean;
+    optional?: boolean;
     currentFunction?: string;
   }) {
     this.inside = options.inside || "";
@@ -43,7 +43,7 @@ class Context {
     this.telegram = options.telegram;
     this.database = options.database;
     this.command = options.command;
-    this.negative = options.negative;
+    this.optional = options.optional;
     this.currentFunction = options.currentFunction || "";
   }
 
@@ -137,7 +137,7 @@ class Context {
    */
   sendError(error: string, custom: boolean = false) {
     if (!error) return;
-    if (!this.negative) {
+    if (!this.optional) {
       this.isError = true;
       this.#sendErrorMessage(error, custom, this.currentFunction);
     } else this.isError = true;
