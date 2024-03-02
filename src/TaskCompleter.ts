@@ -88,6 +88,7 @@ class TaskCompleter {
 
     for (const func of useNative || []) {
       const funcLowerCase = `$${func.name}`.toLowerCase();
+      if (funcLowerCase === "") continue;
       this.availableFunction.set(funcLowerCase, {
         name: funcLowerCase,
         callback: async (context) => {
@@ -138,9 +139,7 @@ class TaskCompleter {
       this.code.includes(func),
     );
 
-    for (const [name] of this.code.matchAll(
-      /\$(!?\?[a-zA-Z_][a-zA-Z0-9_]*)(\[\.\.\.\])?/g,
-    )) {
+    for (const [name] of this.code.matchAll(/\$!?[\w]+(\[\.\.\.\])?/g)) {
       if (findElement(onlySearchFunctions, name)) continue;
       const {
         notifiedOfUnknownFunction = true,
@@ -517,11 +516,12 @@ class TaskCompleter {
       const codeRegex = /<code>(.*?)<\/code>/;
       const match = error.match(codeRegex);
       AoiLogger.custom({
-        title: { color: "yellow", text: `[ FunctionError ]:`, bold: true },
-        args: [
-          { color: "red", text: match ? match[1] : error, bold: true },
-          { color: "red", text: `(${functionName})`, bold: true },
-        ],
+        title: {
+          color: "yellow",
+          text: `[ FunctionError (${functionName}) ]:`,
+          bold: true,
+        },
+        args: [{ color: "red", text: match ? match[1] : error, bold: true }],
       });
     }
   }
