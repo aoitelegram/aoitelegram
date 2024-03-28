@@ -5,30 +5,18 @@ import importSync from "import-sync";
 import { AoiClient } from "./AoiClient";
 import { AoijsError } from "./AoiError";
 
-/**
- * Class to load and process commands for AoiTelegram.
- */
 class LoadCommands {
   #aoitelegram: AoiClient;
   #countLoadCmd: number = 1;
   #countLoadCallback: number = 1;
   #countLoadVar: number = 1;
   path?: string;
-  /**
-   * Constructor for LoadCommands.
-   * @param aoitelegram - The AoiClient instance to load commands into.
-   */
+
   constructor(aoitelegram: AoiClient) {
     this.#aoitelegram = aoitelegram;
     aoitelegram.loadCommands = this;
   }
 
-  /**
-   * Asynchronously loads commands from the specified directory path.
-   * @param dirPath - The directory path from which to load commands.
-   * @param log - The console load commands.
-   * @param updated - The updated commands
-   */
   loadCommands(dirPath: string, log: boolean = true, updated: boolean = false) {
     if (!dirPath) {
       throw new AoijsError(
@@ -217,11 +205,6 @@ class LoadCommands {
     return this;
   }
 
-  /**
-   * Asynchronously loads callbacks from the specified directory path.
-   * @param dirPath - The directory path from which to load callbacks.
-   * @param log - The console load callbacks.
-   */
   loadCallbacks(dirPath: string, log: boolean = true) {
     if (!dirPath) {
       throw new AoijsError(
@@ -296,11 +279,6 @@ class LoadCommands {
     return this;
   }
 
-  /**
-   * Asynchronously loads variables from the specified directory path.
-   * @param dirPath - The directory path from which to load variables.
-   * @param log - The console load variables.
-   */
   loadVariables(dirPath: string, log: boolean = true) {
     if (!dirPath) {
       throw new AoijsError(
@@ -394,13 +372,6 @@ class LoadCommands {
     return this;
   }
 
-  /**
-   * Run an event based on its type.
-   *
-   * @param aoitelegram - The AoiClient instance to handle the event.
-   * @param eventType - The event type to be processed, including 'hasEvent' and 'parameter' properties.
-   * @param data - The data associated with the event, containing a 'code' property.
-   */
   runEvent(
     aoitelegram: AoiClient,
     eventType: { hasEvent: string | null; parameter: string },
@@ -484,11 +455,6 @@ class LoadCommands {
     }
   }
 
-  /**
-   * Get the loader event type based on a given type string.
-   * @param type - The type of the event.
-   * @returns An object with 'hasEvent' and 'parameter' properties representing the event type.
-   */
   static loaderEventType(type: string) {
     const events: { [key: string]: string } = {
       ready: "ready",

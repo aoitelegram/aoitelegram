@@ -1,27 +1,7 @@
 import { inspect } from "node:util";
 import chalk, { type ForegroundColor } from "chalk";
 
-/**
- * AoiLogger class provides logging functionalities with customizable text and date colors.
- * @example
- * AoiLogger.debug("Debug message"); // Logs a debug message
- * AoiLogger.error("Error message"); // Logs an error message
- * AoiLogger.warn("Warning message"); // Logs a warning message
- * AoiLogger.info("Info message"); // Logs an info message
- * AoiLogger.custom({
- *   time: true,
- *   title: { color: "blue", text: "Custom Log", bold: true },
- *   args: [
- *     { color: "red", text: "Error:" },
- *     { color: "yellow", text: "Warning:" },
- *     { color: "green", text: "Info:" }
- *   ]
- * }); // Logs a custom message with specified colors and options
- */
 class AoiLogger {
-  /**
-   * Defines text colors for different log types.
-   */
   static readonly textColors = {
     debug: chalk.whiteBright.bold,
     error: chalk.red.bold,
@@ -29,16 +9,8 @@ class AoiLogger {
     info: chalk.cyan.bold,
   };
 
-  /**
-   * Defines date color for log timestamps.
-   */
   static readonly dateColors = chalk.green.bold;
 
-  /**
-   * Logs a message with specified type and arguments.
-   * @param type - Type of log message (debug, error, warn, info).
-   * @param args - Arguments to log.
-   */
   private static log(
     type: keyof (typeof AoiLogger)["textColors"],
     ...args: unknown[]
@@ -56,10 +28,6 @@ class AoiLogger {
     );
   }
 
-  /**
-   * Logs a custom message with specified options.
-   * @param options - Custom log options.
-   */
   static custom(options: {
     time?: boolean;
     title: {
@@ -98,34 +66,18 @@ class AoiLogger {
     } else console.log(formattedTitle, formattedArgs);
   }
 
-  /**
-   * Logs a debug message.
-   * @param args - Arguments to log.
-   */
   static debug(...args: unknown[]) {
     this.log("debug", ...args);
   }
 
-  /**
-   * Logs an error message.
-   * @param args - Arguments to log.
-   */
   static error(...args: unknown[]) {
     this.log("error", ...args);
   }
 
-  /**
-   * Logs a warning message.
-   * @param args - Arguments to log.
-   */
   static warn(...args: unknown[]) {
     this.log("warn", ...args);
   }
 
-  /**
-   * Logs an info message.
-   * @param args - Arguments to log.
-   */
   static info(...args: unknown[]) {
     this.log("info", ...args);
   }

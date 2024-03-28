@@ -2,37 +2,16 @@ import { version } from "../index.js";
 import { AoiClient } from "./AoiClient";
 import { AoijsError } from "./AoiError";
 
-/**
- * Abstract class representing an Aoi extension.
- */
 abstract class AoiExtension {
-  /** The name of the extension. */
   abstract name: string;
-  /** The description of the extension. */
   abstract description: string;
-  /** The version of the extension. */
   abstract version: string;
-  /** The target version(s) of the Aoi library this extension supports. */
   abstract targetVersion?: string | string[];
-  /** The required extensions for this extension to function properly. */
   abstract requireExtension?: string[];
 
-  /**
-   * Initializes the extension.
-   * @param aoitelegram - The AoiClient instance.
-   */
   abstract init(aoitelegram: AoiClient): void;
-
-  /**
-   * Initializes the extension.
-   * @param aoitelegram - The AoiClient instance.
-   */
   abstract init(aoitelegram: AoiClient): Promise<void>;
 
-  /**
-   * Initializes plugins and performs version and dependency checks.
-   * @param aoitelegram - The AoiClient instance.
-   */
   async initPlugins(aoitelegram: AoiClient) {
     if (typeof this.targetVersion === "string") {
       if (this.targetVersion > version) {

@@ -1,8 +1,7 @@
-import { Context } from "../Context";
 import { Collection } from "telegramsjs";
 import { AoiClient } from "../classes/AoiClient";
 import { AoijsError } from "../classes/AoiError";
-import { findAndTransform } from "../prototype";
+import { Context } from "../src/classes/core/Context";
 
 interface AoiCallbackDescription {
   name: string;
@@ -22,33 +21,15 @@ interface JsCallbackDescription {
 
 type CallbackDescription = AoiCallbackDescription | JsCallbackDescription;
 
-/**
- * Class representing a collection of callbacks for an AoiClient instance.
- */
 class Callback {
-  /**
-   * Collection of registered callbacks.
-   */
   callbacks: Collection<string, CallbackDescription> = new Collection();
 
-  /**
-   * AoiClient instance associated with the Callback class.
-   */
   telegram: AoiClient;
 
-  /**
-   * Creates an instance of Callback with a reference to the associated AoiClient.
-   * @param telegram - The AoiClient instance.
-   */
   constructor(telegram: AoiClient) {
     this.telegram = telegram;
   }
 
-  /**
-   * Registers a callback with the given CallbackDescription.
-   * @param callback - The CallbackDescription to register.
-   * @returns The Callback instance for method chaining.
-   */
   register(callback: CallbackDescription) {
     const existingIndex = this.callbacks.has(callback.name);
 
@@ -64,13 +45,6 @@ class Callback {
     return this;
   }
 
-  /**
-   * Runs the specified callback with provided arguments and context.
-   * @param name - The name of the callback to run.
-   * @param args - Array of arguments for the callback.
-   * @param context - The context function's event object.
-   * @returns The result of the executed callback.
-   */
   async runCallback(name: string, args: string[], context: Context["event"]) {
     if (!name) {
       throw new AoijsError(

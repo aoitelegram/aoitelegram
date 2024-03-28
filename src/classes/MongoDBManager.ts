@@ -63,36 +63,16 @@ function replaceTextUsers(text: string, chatData: ChatDataUsers) {
     .replace(/{bio}/g, `${chatData.bio}`);
 }
 
-/**
- * Configuration options for the database connection.
- */
 interface MongoDBManagerOptions {
-  /**
-   * MongoDB connection URL.
-   */
   url?: string;
-
-  /**
-   * An array of table names within the database.
-   */
   tables?: string[];
-
-  /**
-   * Log ready database
-   */
   logging?: boolean;
 }
 
-/**
- * A class that extends MongoDBManager and is responsible for managing database operations.
- */
 class MongoDBManager extends MongoDB<string, unknown> {
   collection: Collection<string, unknown> = new Collection();
   tables: string[] = ["main"];
-  /**
-   * Creates a new instance of AoiManager.
-   * @param options - Configuration options for the database connection.
-   */
+
   constructor(options: MongoDBManagerOptions = {}) {
     if (!options?.url) {
       throw new AoijsError(
@@ -763,29 +743,14 @@ class MongoDBManager extends MongoDB<string, unknown> {
     ]);
   }
 
-  /**
-   * Checks if a table exists.
-   * @param tableName - Name of the table to check.
-   * @returns True if the table exists, otherwise false.
-   */
   hasTable(tableName: string) {
     return this.tables.includes(tableName);
   }
 
-  /**
-   * Retrieves the default value for a specific variable from a given table.
-   * @param vars - The variable name.
-   * @param table - The table name where the variable is stored.
-   */
   defaultValue(vars: string, table: string) {
     return this.collection.get(`${vars}_${table}`);
   }
 
-  /**
-   * Set variables in the database.
-   * @param variables - Key-value pairs of variables to set.
-   * @param tables - The database table to use.
-   */
   async variables(
     variables: { [key: string]: unknown },
     tables: string | string[] = this.tables[0],

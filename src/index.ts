@@ -1,43 +1,12 @@
-const version = "1.0.0";
-import { Context } from "./Context";
-import { AoiBase } from "./classes/AoiBase";
-import { AoiClient } from "./classes/AoiClient";
-import { AoiLogger } from "./classes/AoiLogger";
-import { AoijsError } from "./classes/AoiError";
-import { AoiWarning } from "./classes/AoiWarning";
-import { AoiManager } from "./classes/AoiManager";
-import { DataFunction } from "./classes/AoiTyping";
-import { CustomEvent } from "./classes/CustomEvent";
-import { LoadCommands } from "./classes/LoadCommands";
-import { AoiExtension } from "./classes/AoiExtension";
-// import { PluginManager } from "@aoitelegram/plugin";
-
-export {
-  AoiBase,
-  AoiClient,
-  AoiLogger,
-  AoiWarning,
-  AoiManager,
-  AoijsError,
-  AoiExtension,
-  //  PluginManager,
-  CustomEvent,
-  LoadCommands,
-  DataFunction,
-  Context,
-  version,
-};
-export default {
-  AoiBase,
-  AoiClient,
-  AoiLogger,
-  AoiWarning,
-  AoiManager,
-  AoijsError,
-  AoiExtension,
-  //  PluginManager,
-  CustomEvent,
-  LoadCommands,
-  Context,
-  version,
-};
+export * from "./classes/AoiBase";
+export * from "./classes/AoiClient";
+export * from "./classes/AoiLogger";
+export * from "./classes/AoiError";
+export * from "./classes/AoiWarning";
+export * from "./classes/AoiManager";
+export * from "./classes/AoiTyping";
+export * from "./classes/CustomEvent";
+export * from "./classes/LoadCommands";
+export * from "./classes/AoiExtension";
+export * from "@aoitelegram/plugins";
+export { version } from "../package.json";

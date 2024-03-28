@@ -6,25 +6,11 @@ import { AoiClient } from "./AoiClient";
 import { DataEvent } from "./AoiTyping";
 import { AoijsError } from "./AoiError";
 import { EventEmitter } from "node:events";
-import { getObjectKey } from "../function/parser";
 
-/**
- * CustomEvent class extends EventEmitter for handling custom events.
- */
 class CustomEvent extends EventEmitter {
   #count: number = 1;
-  /**
-   * AoiClient instance for handling Telegram-specific functionality.
-   */
   aoitelegram: AoiClient;
 
-  /**
-   * Constructs a new CustomEvent instance.
-   * @param aoitelegram - The AoiClient instance for Telegram functionality.
-   * @param options - An object containing optional configuration options.
-   *                  It can specify which process events to listen for and emit custom events accordingly.
-   *                  If not provided, default options are used.
-   */
   constructor(
     aoitelegram: AoiClient,
     options: {
@@ -72,11 +58,6 @@ class CustomEvent extends EventEmitter {
     });
   }
 
-  /**
-   * Registers a custom event listener.
-   * @param options - The options for the custom event.
-   * @returns Returns the CustomEvent instance for method chaining.
-   */
   command(options: DataEvent) {
     if (!options?.listen) {
       throw new AoijsError(
@@ -147,11 +128,6 @@ class CustomEvent extends EventEmitter {
     return this;
   }
 
-  /**
-   * Loads and registers events from a specified directory path.
-   * @param dirPath - The path to the directory containing event files.
-   * @param log - A flag indicating whether to log loading events (default: true).
-   */
   loadEvents(dirPath: string, log: boolean = true) {
     if (!dirPath) {
       throw new AoijsError(
@@ -216,12 +192,6 @@ class CustomEvent extends EventEmitter {
     return this;
   }
 
-  /**
-   * Adds a process event listener if the event is enabled in the eventNames object.
-   * @param eventNames - An object containing event names as keys and boolean values indicating whether the event is enabled.
-   * @param eventName - The name of the process event to listen for.
-   * @param emitEventName - The name of the custom event to emit when the process event occurs.
-   */
   addProcessListener(
     eventNames: { [key: string]: boolean },
     eventName: string,
@@ -235,12 +205,6 @@ class CustomEvent extends EventEmitter {
     }
   }
 
-  /**
-   * Emits a custom event with the specified name and arguments.
-   * @param name - The name of the custom event to emit.
-   * @param args - Additional arguments to pass to the event listeners.
-   * @returns Returns the CustomEvent instance for method chaining.
-   */
   override emit<T>(name: string, ...args: T[]) {
     return super.emit(name, ...args);
   }

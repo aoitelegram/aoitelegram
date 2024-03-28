@@ -1,10 +1,14 @@
 export default {
   name: "$print",
-  callback: (context) => {
-    context.argsCheck(1);
-    if (context.isError) return;
-
-    console.log(context.inside);
-    return "";
+  brackets: true,
+  fields: [
+    {
+      name: "optiond",
+      required: true,
+    },
+  ],
+  callback: (context, func) => {
+    console.log(context, func);
+    return func.resolve("");
   },
 };

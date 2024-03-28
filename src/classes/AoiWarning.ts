@@ -14,27 +14,17 @@ function versionToArray(versionString: string) {
   return versionString.split(".").map(Number);
 }
 
-/**
- * A class to manage package updates and project restarts.
- */
 class AoiWarning {
   autoUpdate: boolean;
   enableDev: boolean;
   enableBeta: boolean;
 
-  /**
-   * Constructs an instance of AoiWarning.
-   * @param options - Configuration options for AoiWarning.
-   */
   constructor(options: AoiWarningOptions = {}) {
     this.autoUpdate = options.autoUpdate || false;
     this.enableDev = options.enableDev || false;
     this.enableBeta = options.enableBeta || false;
   }
 
-  /**
-   * Checks for available package updates and performs an update if enabled.
-   */
   async checkUpdates() {
     try {
       const response = await fetch("https://registry.npmjs.org/aoitelegram");
@@ -56,11 +46,6 @@ class AoiWarning {
     }
   }
 
-  /**
-   * Determines if an update should be checked based on current configuration and version.
-   * @param latestVersion - The latest version available on npm.
-   * @returns True if an update should be checked, otherwise false.
-   */
   private shouldCheckForUpdate(latestVersion: string) {
     const isBetaEnabled = this.enableBeta;
     const isDevEnabled = this.enableDev;
@@ -74,10 +59,6 @@ class AoiWarning {
     );
   }
 
-  /**
-   * Displays a colored update message based on version differences.
-   * @param latestVersion - The latest version available on npm.
-   */
   private displayUpdateMessage(latestVersion: string) {
     const currentVersionParts = versionToArray(version);
     const latestVersionParts = versionToArray(latestVersion);
@@ -93,10 +74,6 @@ class AoiWarning {
     }
   }
 
-  /**
-   * Updates to the specified version and restarts the project.
-   * @param version - The version to update to.
-   */
   async updateToLatestVersion(version: string) {
     try {
       console.log(chalk.blue("Updating to the latest version..."));

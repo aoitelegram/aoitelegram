@@ -1,7 +1,6 @@
 import { Collection } from "telegramsjs";
 import { AoiClient } from "../classes/AoiClient";
 import { AoijsError } from "../classes/AoiError";
-import { getObjectKey } from "../function/parser";
 import { ValueDatabase } from "./manager/TimeoutManager";
 
 interface TimeoutDescription {
@@ -11,33 +10,15 @@ interface TimeoutDescription {
   [key: string]: unknown;
 }
 
-/**
- * A class that manages timeouts and associated actions.
- */
 class Timeout {
-  /**
-   * The collection of registered timeouts.
-   */
   timeouts: Collection<string, TimeoutDescription> = new Collection();
 
-  /**
-   * The AoiClient instance.
-   */
   telegram: AoiClient;
 
-  /**
-   * Constructs a new Timeout instance.
-   * @param telegram The AoiClient instance.
-   */
   constructor(telegram: AoiClient) {
     this.telegram = telegram;
   }
 
-  /**
-   * Registers a timeout with the specified ID and code.
-   * @param timeout The timeout description.
-   * @returns The Timeout instance for chaining.
-   */
   register(timeout: TimeoutDescription) {
     const existingIndex = this.timeouts.has(timeout.id);
 
@@ -53,9 +34,6 @@ class Timeout {
     return this;
   }
 
-  /**
-   * Sets up the event handler for timeouts.
-   */
   handler() {
     this.telegram.on("timeout", async (timeoutData, context) => {
       for (const [timeoutId, timeoutDescription] of this.timeouts) {

@@ -1,8 +1,8 @@
-import { Context } from "../Context";
-import { AoiClient } from "./AoiClient";
-import { AoiManager } from "./AoiManager";
-import { Context as EventContext } from "telegramsjs";
-import { ValueDatabase } from "../helpers/manager/TimeoutManager";
+import type { AoiClient } from "./AoiClient";
+import type { AoiManager } from "./AoiManager";
+import type { Container, Context } from "./core/";
+import type { Context as EventContext, IEventFunctions } from "telegramsjs";
+import type { ValueDatabase } from "../helpers/manager/TimeoutManager";
 import {
   Update,
   UserFromGetMe,
@@ -34,35 +34,7 @@ interface AwaitedEvent {
   code: string;
 }
 
-interface EventDataMap<F> {
-  update: (data: Update) => void;
-  ready: (data: UserFromGetMe) => void;
-  message: (data: Message & EventContext<F>) => void;
-  "message:text": (data: Message.TextMessage & EventContext<F>) => void;
-  message_reaction: (data: MessageReactionUpdated & EventContext<F>) => void;
-  message_reaction_count: (
-    data: MessageReactionCountUpdated & EventContext<F>,
-  ) => void;
-  edited_message: (data: Message & Update.Edited & EventContext<F>) => void;
-  channel_post: (data: Message & Update.Channel & EventContext<F>) => void;
-  edited_channel_post: (data: Message & Update.Edited & Update.Channel) => void;
-  inline_query: (data: InlineQuery & EventContext<F>) => void;
-  callback_query: (data: CallbackQuery & EventContext<F>) => void;
-  "callback_query:data": (
-    data: CallbackQuery & { data: string } & EventContext<F>,
-  ) => void;
-  shipping_query: (data: ShippingQuery & EventContext<F>) => void;
-  pre_checkout_query: (data: PreCheckoutQuery & EventContext<F>) => void;
-  poll: (data: Poll & EventContext<F>) => void;
-  poll_answer: (data: PollAnswer & EventContext<F>) => void;
-  chat_member: (data: ChatMemberUpdated & EventContext<F>) => void;
-  my_chat_member: (data: ChatMemberUpdated & EventContext<F>) => void;
-  chat_join_request: (data: ChatJoinRequest & EventContext<F>) => void;
-  chat_boost: (data: ChatBoostUpdated & EventContext<F>) => void;
-  removed_chat_boost: (data: ChatBoostRemoved & EventContext<F>) => void;
-}
-
-interface EventHandlers {
+interface EventHandlers extends IEventFunctions {
   timeout: (client: AoiClient, database: ValueDatabase) => void;
   awaited: (event: AwaitedEvent, data: unknown) => void;
   functionError: (
@@ -74,6 +46,8 @@ interface EventHandlers {
 
 interface LibDataFunction {
   name: string;
+  brackets?: boolean;
+  optional?: boolean;
   callback: (context: Context) => unknown;
 }
 
@@ -82,6 +56,8 @@ type DataFunction =
       name: string;
       type: "aoitelegram";
       version?: string;
+      brackets?: boolean;
+      optional?: boolean;
       useNative?: Function[];
       params?: string[];
       code: string;
@@ -89,8 +65,10 @@ type DataFunction =
   | {
       name: string;
       type?: "js";
+      brackets?: boolean;
+      optional?: boolean;
       version?: string;
-      callback: (context: Context) => unknown;
+      callback: (container: Container, context: Context) => unknown;
     };
 
 type ContextEvent = EventContext &
@@ -118,14 +96,12 @@ type DataEvent = {
   callback?: (...args: any[]) => void;
 };
 
-type CombinedEventFunctions = EventHandlers & EventDataMap<Buffer>;
-
 type LibWithDataFunction = DataFunction | LibDataFunction;
 
 export {
-  CombinedEventFunctions,
   LibWithDataFunction,
   LibDataFunction,
+  EventHandlers,
   ContextEvent,
   DataFunction,
   DataEvent,

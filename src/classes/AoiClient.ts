@@ -2,16 +2,15 @@ import chalk from "chalk";
 import aoiStart from "../utils/AoiStart";
 import { AoijsError } from "./AoiError";
 import { AoiLogger } from "./AoiLogger";
-import { Collection } from "telegramsjs";
+import type { RequestInit } from "node-fetch";
+import type { ILoginOptions } from "telegramsjs";
+import { Collection } from "@telegram.ts/collection";
 import { DataFunction } from "./AoiTyping";
 import { CustomEvent } from "./CustomEvent";
 import { AoiExtension } from "./AoiExtension";
 import { LoadCommands } from "./LoadCommands";
 import { KeyValueOptions } from "./AoiManager";
-import { toConvertParse } from "../function/parser";
 import { AoiBase, TelegramOptions } from "./AoiBase";
-import { type DeveloperOptions } from "../TaskCompleter";
-import { MongoDBManagerOptions } from "./MongoDBManager";
 import { AoiWarning, AoiWarningOptions } from "./AoiWarning";
 import { Action, ActionDescription } from "../helpers/Action";
 import { Callback, CallbackDescription } from "../helpers/Callback";
@@ -25,14 +24,6 @@ interface CommandInfoSet {
   [key: string]: string;
 }
 
-type DatabaseOptions = {
-  type?: "MongoDB" | "KeyValue";
-} & MongoDBManagerOptions &
-  KeyValueOptions;
-
-/**
- * A class representing an AoiClient, which extends AoiBase.
- */
 class AoiClient extends AoiBase {
   customEvent?: CustomEvent;
   warningManager: AoiWarning;
@@ -48,26 +39,12 @@ class AoiClient extends AoiBase {
   registerCallback: Callback = new Callback(this);
   commands: Collection<CommandInfoSet, unknown> = new Collection();
   globalVars: Collection<string, unknown> = new Collection();
-  /**
-   * Creates a new instance of AoiClient.
-   * @param parameters - Configuration parameters for the client.
-   * @param parameters.token - The token for authentication.
-   * @param parameters.telegram - Options for the Telegram integration.
-   * @param parameters.database - Options for the database.
-   * @param parameters.disableFunctions - Functions that will be removed from the library's loading functions.
-   * @param parameters.native - Adds native functions to the command handler.
-   * @param parameters.extensions - An array of AoiExtension functions.
-   * @param parameters.functionError - For the error handler of functions.
-   * @param parameters.sendMessageError - To disable text errors.
-   * @param parameters.disableAoiDB - Disabled built-in database.
-   * @param parameters.logging - Outputting system messages to the console.
-   * @param parameters.autoUpdate - Checks for available package updates and performs an update if enabled
-   */
+
   constructor(
+    public readonly token: string,
     public readonly parameters: {
-      token: string;
-      telegram?: TelegramOptions;
-      database?: DatabaseOptions;
+      requestOptions?: RequestInit;
+      database?: AoiManagerOptions;
       disableFunctions?: string[];
       native?: Function[];
       extensions?: AoiExtension[];
@@ -76,22 +53,20 @@ class AoiClient extends AoiBase {
       disableAoiDB?: boolean;
       logging?: boolean;
       autoUpdate?: AoiWarningOptions;
-      developerOptions?: DeveloperOptions;
-    },
+    } = {},
   ) {
     super(
-      parameters.token,
-      parameters.telegram,
+      token,
+      parameters.requestOptions,
       parameters.database,
       parameters.disableFunctions,
       parameters.disableAoiDB,
-      parameters.developerOptions,
     );
 
     const allAoiExtends = parameters.extensions?.every(
       (cls) => cls instanceof AoiExtension,
     );
-    if (!allAoiExtends && parameters.extensions?.length) {
+    if (!allAoiExtends && Array.isArray(parameters.extensions)) {
       throw new AoijsError(
         "extensions",
         "in the parameter 'extensions', all classes should be inherited from the class 'AoiExtension'",
@@ -106,13 +81,6 @@ class AoiClient extends AoiBase {
     this.addNative(parameters.native || []);
   }
 
-  /**
-   * Define a command for the client.
-   * @param options - Command options.
-   * @param options.name - The name of the command.
-   * @param options.typeChannel- In what type of channels to watch command
-   * @param options.code - The code to be executed when the command is invoked.
-   */
   addCommand(options: CommandDescription) {
     if (!options?.name) {
       throw new AoijsError(
@@ -131,13 +99,6 @@ class AoiClient extends AoiBase {
     return this;
   }
 
-  /**
-   * Defines an action handler.
-   * @param options - Command options.
-   * @param options.data - The action data string or an array of action data strings.
-   * @param options.answer - Whether to answer the action.
-   * @param options.code - The code to be executed when the command is invoked.
-   */
   addAction(options: ActionDescription) {
     if (!options?.data) {
       throw new AoijsError(
@@ -156,12 +117,6 @@ class AoiClient extends AoiBase {
     return this;
   }
 
-  /**
-   * Defines an timeout handler.
-   * @param options - Command options.
-   * @param options.id - The unique identifier for the timeout command.
-   * @param options.code - The code or content associated with the timeout command.
-   */
   timeoutCommand(options: TimeoutDescription) {
     if (!options?.id) {
       throw new AoijsError(
@@ -180,12 +135,6 @@ class AoiClient extends AoiBase {
     return this;
   }
 
-  /**
-   * Adds an awaited command with the specified options.
-   * @param options - Options for the awaited command.
-   * @param options.awaited - The name or identifier of the awaited event.
-   * @param options.code - The code or content associated with the awaited command.
-   */
   awaitedCommand(options: AwaitedDescription) {
     if (!options?.awaited) {
       throw new AoijsError(
@@ -205,11 +154,6 @@ class AoiClient extends AoiBase {
     return this;
   }
 
-  /**
-   * Adds a callback with specified options to the AoiClient.
-   * @param options - The callback description containing 'name', 'type', and additional options based on the type.
-   * @returns The AoiClient instance for method chaining.
-   */
   addCallback(options: CallbackDescription) {
     if (!options?.name) {
       throw new AoijsError(
@@ -238,11 +182,6 @@ class AoiClient extends AoiBase {
     return this;
   }
 
-  /**
-   * Adds native functions to the command handler.
-   * @param options An array of functions to add as native commands.
-   * @returns Returns the current instance of the command handler.
-   */
   addNative(options: Function[]) {
     if (!Array.isArray(options)) {
       throw new AoijsError(
@@ -277,12 +216,6 @@ class AoiClient extends AoiBase {
     return this;
   }
 
-  /**
-   * Adds a function error command to handle errors.
-   * @param options - Options for the function error command.
-   * @param options.code - The code to be executed on function error.
-   * @param options.useNative - The native functions to the command handler.
-   */
   functionErrorCommand(options: { code: string; useNative?: Function[] }) {
     if (!options?.code) {
       throw new AoijsError(
@@ -303,10 +236,7 @@ class AoiClient extends AoiBase {
     return this;
   }
 
-  /**
-   * Connect to the service and perform initialization tasks.
-   */
-  async connect() {
+  async connect(options?: ILoginOptions) {
     const { autoUpdate = {}, extensions = [], logging } = this.parameters;
 
     if (autoUpdate.aoiWarning) {
@@ -326,7 +256,7 @@ class AoiClient extends AoiBase {
             `Plugin "${initPlugins.name}" has been dreadfully registered`,
           );
         } catch (err) {
-          console.error(err);
+          AoiLogger.error(err);
         }
       }
     }
@@ -338,4 +268,4 @@ class AoiClient extends AoiBase {
   }
 }
 
-export { AoiClient, DatabaseOptions };
+export { AoiClient };

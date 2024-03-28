@@ -2,7 +2,6 @@ import { Collection } from "telegramsjs";
 import { setInterval, clearInterval } from "long-timeout";
 import { AoijsError } from "../classes/AoiError";
 import { AoiClient } from "../classes/AoiClient";
-import { getObjectKey } from "../function/parser";
 
 interface AwaitedDescription {
   awaited: string;
@@ -11,33 +10,15 @@ interface AwaitedDescription {
   [key: string]: unknown;
 }
 
-/**
- * Represents a manager for handling awaited events.
- */
 class Awaited {
-  /**
-   * Collection to store awaited descriptions.
-   */
   awaiteds: Collection<string, AwaitedDescription> = new Collection();
 
-  /**
-   * A reference to the AoiClient instance.
-   */
   telegram: AoiClient;
 
-  /**
-   * Constructs the Awaited instance.
-   * @param telegram - The AoiClient instance.
-   */
   constructor(telegram: AoiClient) {
     this.telegram = telegram;
   }
 
-  /**
-   * Registers a new awaited description.
-   * @param awaited - The awaited description to register.
-   * @returns The Awaited instance.
-   */
   register(awaited: AwaitedDescription) {
     const existingIndex = this.awaiteds.has(awaited.awaited);
 
@@ -53,9 +34,6 @@ class Awaited {
     return this;
   }
 
-  /**
-   * Sets up a handler for awaited events.
-   */
   handler() {
     this.telegram.on("awaited", async (awaited, context) => {
       for (const [awaitedId, awaitedDescription] of this.awaiteds) {

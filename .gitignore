@@ -1,4 +1,6 @@
 /index.js
-/lib/
+/index.ts
+/database/
+/dist/
 /node_modules/
 package-lock.json

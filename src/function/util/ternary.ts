@@ -1,4 +1,4 @@
-import { ConditionChecker } from "../condition";
+// import { ConditionChecker } from "../condition";
 
 export default {
   name: "$ternary",
