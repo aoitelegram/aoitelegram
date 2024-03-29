@@ -1,4 +1,6 @@
+import fs from "node:fs";
 import chalk from "chalk";
+import path from "node:path";
 import aoiStart from "../utils/AoiStart";
 import { AoijsError } from "./AoiError";
 import { AoiLogger } from "./AoiLogger";
@@ -9,8 +11,8 @@ import { DataFunction } from "./AoiTyping";
 import { CustomEvent } from "./CustomEvent";
 import { AoiExtension } from "./AoiExtension";
 import { LoadCommands } from "./LoadCommands";
-import { KeyValueOptions } from "./AoiManager";
-import { AoiBase, TelegramOptions } from "./AoiBase";
+import { AoiManagerOptions } from "./AoiManager";
+import { AoiBase } from "./AoiBase";
 import { AoiWarning, AoiWarningOptions } from "./AoiWarning";
 import { Action, ActionDescription } from "../helpers/Action";
 import { Callback, CallbackDescription } from "../helpers/Callback";
@@ -19,10 +21,6 @@ import { AwaitedManager } from "../helpers/manager/AwaitedManager";
 import { Command, CommandDescription } from "../helpers/Command";
 import { Timeout, TimeoutDescription } from "../helpers/Timeout";
 import { Awaited, AwaitedDescription } from "../helpers/Awaited";
-
-interface CommandInfoSet {
-  [key: string]: string;
-}
 
 class AoiClient extends AoiBase {
   customEvent?: CustomEvent;
@@ -37,7 +35,6 @@ class AoiClient extends AoiBase {
   registerTimeout: Timeout = new Timeout(this);
   registerCommand: Command = new Command(this);
   registerCallback: Callback = new Callback(this);
-  commands: Collection<CommandInfoSet, unknown> = new Collection();
   globalVars: Collection<string, unknown> = new Collection();
 
   constructor(
@@ -59,7 +56,6 @@ class AoiClient extends AoiBase {
       token,
       parameters.requestOptions,
       parameters.database,
-      parameters.disableFunctions,
       parameters.disableAoiDB,
     );
 
@@ -262,9 +258,59 @@ class AoiClient extends AoiBase {
     }
 
     if (logging === undefined || logging) {
-      this.on("ready", aoiStart);
+      this.on("ready", async (ctx) => {
+        await this.#loadFunctionsLib(path.join(__dirname, "../function/"));
+        (await import("./handlers/Ready"))(this);
+        await aoiStart(ctx);
+        this.emit("onStart", this);
+      });
     }
     super.login();
+  }
+
+  async #loadFunctionsLib(dirPath: string) {
+    const processFile = async (itemPath: string) => {
+      try {
+        const dataFunction = require(itemPath).default;
+        if (
+          !dataFunction ||
+          typeof dataFunction.name !== "string" ||
+          typeof dataFunction.callback !== "function"
+        ) {
+          return;
+        }
+        const dataFunctionName = dataFunction.name.toLowerCase();
+        if (this.parameters.disableFunctions?.includes(dataFunctionName))
+          return;
+
+        this.availableFunctions.set(dataFunctionName, dataFunction);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    const processItem = async (item: string) => {
+      const itemPath = path.join(dirPath, item);
+      try {
+        const stats = await fs.promises.stat(itemPath);
+        if (stats.isDirectory()) {
+          await this.#loadFunctionsLib(itemPath);
+        } else if (itemPath.endsWith(".js")) {
+          await processFile(itemPath);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    try {
+      const items = await fs.promises.readdir(dirPath);
+      for (const item of items) {
+        await processItem(item);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   }
 }
 

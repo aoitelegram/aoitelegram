@@ -1,6 +1,25 @@
-async function hasChatPrivate(event: any, chatId: number | string) {
-  const getChat = await event.telegram.getChat(chatId).catch(() => null);
-  return getChat ? getChat?.type === "private" : false;
+function getObjectKey<T extends Record<string, any>>(
+  object: T,
+  property: string,
+  parse: boolean = true,
+) {
+  try {
+    const resultProperty = property.startsWith("[")
+      ? eval(`object${property}`)
+      : eval(`object.${property}`);
+    return {
+      isError: false,
+      result:
+        typeof resultProperty === "object"
+          ? JSON.stringify(resultProperty)
+          : resultProperty,
+    };
+  } catch (err) {
+    return {
+      isError: true,
+      result: err,
+    };
+  }
 }
 
-export { hasChatPrivate };
+export { getObjectKey };

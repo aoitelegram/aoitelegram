@@ -5,7 +5,7 @@ class AoijsError extends Error {
   functions?: string;
 
   constructor(
-    name: string | undefined,
+    name: string | null,
     description: string,
     command?: unknown,
     functions?: string,

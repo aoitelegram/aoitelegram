@@ -2,7 +2,30 @@
 
 export default {
   name: "$ternary",
-  callback: (context) => {
+  brackets: !0,
+  description:
+    "Creates a condition and executes a code depending on the condition.",
+  fields: [
+    {
+      name: "condition",
+      description: "the condition to test.",
+      type: "STRING",
+      required: !0,
+    },
+    {
+      name: "when true",
+      description: "the code to execute if condition is true.",
+      type: "STRING",
+      required: !1,
+    },
+    {
+      name: "when false",
+      description: "the code to execute if condition is false",
+      type: "STRING",
+      required: !1,
+    },
+  ],
+  callback: (i, t) => {
     context.argsCheck(3);
     const [condition, isTrue, isFalse] = context.splits;
     if (context.isError) return;

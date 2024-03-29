@@ -1,7 +1,5 @@
-import fs from "node:fs";
-import path from "node:path";
-import importSync from "import-sync";
-import { AoijsError } from "./AoiError";
+import { AoijsError, AoijsTypeError } from "./AoiError";
+import { getObjectKey } from "../utils/";
 import type { RequestInit } from "node-fetch";
 import { Update } from "@telegram.ts/types";
 import { setInterval, clearInterval } from "long-timeout";
@@ -17,17 +15,49 @@ import {
 } from "./AoiTyping";
 import { version } from "../index";
 
+interface ICommandsSet {
+  name: string;
+  description?: string;
+  reverseReading?: boolean;
+  chatId?: number | string;
+  useNative?: Function[];
+  code: string;
+}
+
 class AoiBase extends TelegramBot {
   database: AoiManager = {} as AoiManager;
-  disableFunctions: string[];
+  commands: Collection<string, ICommandsSet[]> = new Collection();
   availableFunctions: Collection<string, LibWithDataFunction> =
     new Collection();
+  availableCollectFunctions = [
+    "callbackQuery",
+    "editedMessage",
+    "myChatMember",
+    "shippingQuery",
+    "channelPost",
+    "inlineQuery",
+    "poll",
+    "variableCreate",
+    "chatBoost",
+    "loop",
+    "pollAnswer",
+    "variableDelete",
+    "chatJoinRequest",
+    "message",
+    "preCheckoutQuery",
+    "variableUpdate",
+    "chatMember",
+    "messageReaction",
+    "ready",
+    "editedChannelPost",
+    "messageReactionCount",
+    "removedChatBoost",
+  ];
 
   constructor(
     token: string,
     requestOptions?: RequestInit,
     database?: AoiManagerOptions,
-    disableFunctions?: string[],
     disableAoiDB?: boolean,
   ) {
     if (!token) {
@@ -37,12 +67,6 @@ class AoiBase extends TelegramBot {
       );
     }
     super(token, requestOptions);
-    this.disableFunctions = disableFunctions || [];
-    this.availableFunctions = loadFunctionsLib(
-      path.join(__dirname, "../function/"),
-      new Collection<string, LibWithDataFunction>(),
-      disableFunctions || [],
-    );
 
     if (!disableAoiDB) {
       this.database = new AoiManager(database);
@@ -268,7 +292,7 @@ class AoiBase extends TelegramBot {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
 
@@ -300,341 +324,209 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  readyCommand(options: { code: string; useNative?: Function[] }) {
+  readyCommand(options: ICommandsSet) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
-    this.on("ready", async (ctx) => {
-      await this.evaluateCommand(
-        { event: "ready" },
-        options.code,
-        {
-          ...ctx,
-          telegram: this,
-        },
-        options.useNative,
-      );
-    });
+    this.#addCommands("ready", options);
     return this;
   }
 
-  messageCommand(options: { code: string; useNative?: Function[] }) {
+  messageCommand(options: ICommandsSet) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
-    this.on("message", async (ctx) => {
-      await this.evaluateCommand(
-        { event: "message" },
-        options.code,
-        ctx,
-        options.useNative,
-      );
-    });
+    this.#addCommands("message", options);
     return this;
   }
 
-  callbackQueryCommand(options: { code: string; useNative?: Function[] }) {
+  callbackQueryCommand(options: ICommandsSet) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
-    this.on("callback_query", async (ctx) => {
-      await this.evaluateCommand(
-        { event: "callback_query" },
-        options.code,
-        ctx,
-        options.useNative,
-      );
-    });
+    this.#addCommands("callbackQuery", options);
     return this;
   }
 
-  messageReactionCommand(options: { code: string; useNative?: Function[] }) {
+  messageReactionCommand(options: ICommandsSet) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
-    this.on("message_reaction", async (ctx) => {
-      await this.evaluateCommand(
-        { event: "message_reaction" },
-        options.code,
-        ctx,
-        options.useNative,
-      );
-    });
+    this.#addCommands("messageReaction", options);
     return this;
   }
 
-  messageReactionCountCommand(options: {
-    code: string;
-    useNative?: Function[];
-  }) {
+  messageReactionCountCommand(options: ICommandsSet) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
-    this.on("message_reaction_count", async (ctx) => {
-      await this.evaluateCommand(
-        { event: "message_reaction_count" },
-        options.code,
-        ctx,
-        options.useNative,
-      );
-    });
+    this.#addCommands("messageReactionCount", options);
     return this;
   }
 
-  editedMessageCommand(options: { code: string; useNative?: Function[] }) {
+  editedMessageCommand(options: ICommandsSet) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
-    this.on("edited_message", async (ctx) => {
-      await this.evaluateCommand(
-        { event: "edited_message" },
-        options.code,
-        ctx,
-        options.useNative,
-      );
-    });
+    this.#addCommands("editedMessage", options);
     return this;
   }
 
-  channelPostCommand(options: { code: string; useNative?: Function[] }) {
+  channelPostCommand(options: ICommandsSet) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
-    this.on("channel_post", async (ctx) => {
-      await this.evaluateCommand(
-        { event: "channel_post" },
-        options.code,
-        ctx,
-        options.useNative,
-      );
-    });
+    this.#addCommands("channelPost", options);
     return this;
   }
 
-  editedChannelPostCommand(options: { code: string; useNative?: Function[] }) {
+  editedChannelPostCommand(options: ICommandsSet) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
-    this.on("edited_channel_post", async (ctx) => {
-      await this.evaluateCommand(
-        { event: "edited_channel_post" },
-        options.code,
-        ctx,
-        options.useNative,
-      );
-    });
+    this.#addCommands("editedChannelPost", options);
     return this;
   }
 
-  inlineQueryCommand(options: { code: string; useNative?: Function[] }) {
+  inlineQueryCommand(options: ICommandsSet) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
-    this.on("inline_query", async (ctx) => {
-      await this.evaluateCommand(
-        { event: "inline_query" },
-        options.code,
-        ctx,
-        options.useNative,
-      );
-    });
+    this.#addCommands("inlineQuery", options);
     return this;
   }
 
-  shippingQueryCommand(options: { code: string; useNative?: Function[] }) {
+  shippingQueryCommand(options: ICommandsSet) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
-    this.on("shipping_query", async (ctx) => {
-      await this.evaluateCommand(
-        { event: "shipping_query" },
-        options.code,
-        ctx,
-        options.useNative,
-      );
-    });
+    this.#addCommands("shippingQuery", options);
     return this;
   }
 
-  preCheckoutQueryCommand(options: { code: string; useNative?: Function[] }) {
+  preCheckoutQueryCommand(options: ICommandsSet) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
-    this.on("pre_checkout_query", async (ctx) => {
-      await this.evaluateCommand(
-        { event: "pre_checkout_query" },
-        options.code,
-        ctx,
-        options.useNative,
-      );
-    });
+    this.#addCommands("preCheckoutQuery", options);
     return this;
   }
 
-  pollCommand(options: { code: string; useNative?: Function[] }) {
+  pollCommand(options: ICommandsSet) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
-    this.on("poll", async (ctx) => {
-      await this.evaluateCommand(
-        { event: "poll" },
-        options.code,
-        ctx,
-        options.useNative,
-      );
-    });
+    this.#addCommands("poll", options);
     return this;
   }
 
-  pollAnswerCommand(options: { code: string; useNative?: Function[] }) {
+  pollAnswerCommand(options: ICommandsSet) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
-    this.on("poll_answer", async (ctx) => {
-      await this.evaluateCommand(
-        { event: "poll_answer" },
-        options.code,
-        ctx,
-        options.useNative,
-      );
-    });
+    this.#addCommands("pollAnswer", options);
     return this;
   }
 
-  chatMemberCommand(options: { code: string; useNative?: Function[] }) {
+  chatMemberCommand(options: ICommandsSet) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
-    this.on("chat_member", async (ctx) => {
-      await this.evaluateCommand(
-        { event: "chat_member" },
-        options.code,
-        ctx,
-        options.useNative,
-      );
-    });
+    this.#addCommands("chatMember", options);
     return this;
   }
 
-  myChatMemberCommand(options: { code: string; useNative?: Function[] }) {
+  myChatMemberCommand(options: ICommandsSet) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
-    this.on("my_chat_member", async (ctx) => {
-      await this.evaluateCommand(
-        { event: "my_chat_member" },
-        options.code,
-        ctx,
-        options.useNative,
-      );
-    });
+    this.#addCommands("myChatMember", options);
     return this;
   }
 
-  chatJoinRequestCommand(options: { code: string; useNative?: Function[] }) {
+  chatJoinRequestCommand(options: ICommandsSet) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
-    this.on("chat_join_request", async (ctx) => {
-      await this.evaluateCommand(
-        { event: "chat_join_request" },
-        options.code,
-        ctx,
-        options.useNative,
-      );
-    });
+    this.#addCommands("chatJoinRequest", options);
     return this;
   }
 
-  chatBoostCommand(options: { code: string; useNative?: Function[] }) {
+  chatBoostCommand(options: ICommandsSet) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
-    this.on("chat_boost", async (ctx) => {
-      await this.evaluateCommand(
-        { event: "chat_boost" },
-        options.code,
-        ctx,
-        options.useNative,
-      );
-    });
+    this.#addCommands("chatBoost", options);
     return this;
   }
 
-  removedChatBoostCommand(options: { code: string; useNative?: Function[] }) {
+  removedChatBoostCommand(options: ICommandsSet) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
-    this.on("removed_chat_boost", async (ctx) => {
-      await this.evaluateCommand(
-        { event: "removed_chat_boost" },
-        options.code,
-        ctx,
-        options.useNative,
-      );
-    });
+    this.#addCommands("removedChatBoost", options);
     return this;
   }
 
-  variableCreateCommand(options: { code: string; useNative?: Function[] }) {
+  variableCreateCommand(options: ICommandsSet) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
     this.database.on("create", async (newVariable) => {
@@ -658,11 +550,11 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  variableUpdateCommand(options: { code: string; useNative?: Function[] }) {
+  variableUpdateCommand(options: ICommandsSet) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
     this.database.on("update", async (variable) => {
@@ -686,11 +578,11 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  variableDeleteCommand(options: { code: string; useNative?: Function[] }) {
+  variableDeleteCommand(options: ICommandsSet) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
-        "you did not specify the 'code' parameter",
+        "you did not specify the 'options.code' parameter",
       );
     }
     this.database.on("delete", async (oldVariable) => {
@@ -714,55 +606,30 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  async variables(
-    options: { [key: string]: unknown },
-    tables?: string | string[],
+  #addCommands(
+    type: (typeof AoiBase)["availableCollectFunctions"],
+    command: ICommandsSet,
   ) {
+    if (!this.availableCollectFunctions.includes(type)) {
+      throw new AoijsTypeError(
+        `The specified type ${type} does not exist for recording, here are all the available types: ${this.availableCollectFunctions.join(", ")}`,
+      );
+    }
+    if (this.commands.has(type)) {
+      const commandsType = this.commands.get(type);
+      this.commands.set(type, [...commandsType, command]);
+    } else this.commands.set(type, [command]);
+  }
+
+  async variables(options: { [key: string]: any }, tables?: string | string[]) {
+    if (!("variables" in this.database)) {
+      throw new AoijsTypeError(
+        'No method named "variables" was found in the database class',
+      );
+    }
     await this.database.variables(options, tables);
+    return;
   }
 }
 
-function loadFunctionsLib(
-  dirPath: string,
-  availableFunctions: Collection<string, LibWithDataFunction>,
-  disableFunctions: string[],
-) {
-  const processFile = (itemPath: string) => {
-    try {
-      const dataFunction = require(itemPath).default;
-      if (!dataFunction?.name && typeof !dataFunction?.callback !== "function")
-        return;
-      const dataFunctionName = dataFunction.name.toLowerCase();
-      if (disableFunctions.includes(dataFunctionName)) return;
-
-      availableFunctions.set(dataFunctionName, dataFunction);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const processItem = (item: string) => {
-    const itemPath = path.join(dirPath, item);
-    try {
-      const stats = fs.statSync(itemPath);
-      if (stats.isDirectory()) {
-        loadFunctionsLib(itemPath, availableFunctions, disableFunctions);
-      } else if (itemPath.endsWith(".js")) {
-        processFile(itemPath);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  try {
-    const items = fs.readdirSync(dirPath);
-    items.map(processItem);
-    return availableFunctions;
-  } catch (error) {
-    console.error(error);
-    return availableFunctions;
-  }
-}
-
-export { AoiBase, TelegramOptions };
+export { AoiBase };

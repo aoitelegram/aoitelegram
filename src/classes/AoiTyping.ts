@@ -35,6 +35,7 @@ interface AwaitedEvent {
 }
 
 interface EventHandlers extends IEventFunctions {
+  onStart: (client: AoiClient) => void;
   timeout: (client: AoiClient, database: ValueDatabase) => void;
   awaited: (event: AwaitedEvent, data: unknown) => void;
   functionError: (

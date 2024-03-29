@@ -18,10 +18,24 @@ type AoiManagerOptions = { logging: boolean } & (
 );
 
 class AoiManager<Value = any> {
+  tables: string[];
   database: StorageDB<Value> | MongoDB<Value> | FirebaseDB<Value>;
   collection: Collection<string, Value> = new Collection();
 
-  constructor(options: AoiManagerOptions = { type: "storage", logging: true }) {
+  constructor(
+    options: AoiManagerOptions = {
+      type: "storage",
+      logging: true,
+      options: {},
+    },
+  ) {
+    options.options = !options.options ? {} : options.options;
+    if (Array.isArray(options.options?.tables)) {
+      options.options.tables = [...options.options.tables, "timeout"];
+    } else {
+      options.options.tables = ["main", "timeout"];
+    }
+    this.tables = options.options.tables;
     if (options.type === "storage") {
       this.database = new StorageDB(options.options);
     } else if (options.type === "mongo") {
@@ -158,7 +172,7 @@ class AoiManager<Value = any> {
   }
 
   variables(
-    options: { [key: string]: unknown },
+    options: { [key: string]: any },
     tables: string | string[] = this.tables[0],
   ) {
     if (Array.isArray(tables)) {
@@ -190,4 +204,4 @@ class AoiManager<Value = any> {
   }
 }
 
-export { AoiManager, KeyValueOptions };
+export { AoiManager, AoiManagerOptions };

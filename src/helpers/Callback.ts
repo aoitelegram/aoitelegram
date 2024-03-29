@@ -1,7 +1,7 @@
 import { Collection } from "telegramsjs";
+import { Context } from "../classes/core/";
 import { AoiClient } from "../classes/AoiClient";
 import { AoijsError } from "../classes/AoiError";
-import { Context } from "../src/classes/core/Context";
 
 interface AoiCallbackDescription {
   name: string;

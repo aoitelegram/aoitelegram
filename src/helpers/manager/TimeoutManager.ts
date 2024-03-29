@@ -19,30 +19,27 @@ class TimeoutManager {
     this.telegram = telegram;
     this.database = telegram.database;
 
-    this.database.on("ready", () => {
-      this.database?.forEach?.("timeout", async (value, key) => {
-        const timeoutData = (await this.database.get(
-          "timeout",
-          key,
-        )) as ValueDatabase;
+    this.database.on("ready", async () => {
+      const timeout = await this.database.findMany(
+        "timeout",
+        async ({ value }) => typeof value === "object",
+      );
 
-        if (!timeoutData) return;
-
-        const remainingTime =
-          timeoutData.date + timeoutData.milliseconds - Date.now();
-        const timeoutDataId = `${timeoutData.id}_${timeoutData.date}`;
+      for (const { key, value } of timeout) {
+        const remainingTime = value.date + value.milliseconds - Date.now();
+        const timeoutDataId = `${value.id}_${value.date}`;
 
         if (remainingTime > 0) {
           const timeoutId = setTimeout(async () => {
-            this.telegram.emit("timeout", this.telegram, timeoutData);
+            this.telegram.emit("timeout", this.telegram, value);
             await this.removeTimeout(timeoutDataId);
-          }, timeoutData.milliseconds);
+          }, value.milliseconds);
           this.timeouts.set(timeoutDataId, timeoutId);
         } else {
-          this.telegram.emit("timeout", this.telegram, timeoutData);
+          this.telegram.emit("timeout", this.telegram, value);
           await this.removeTimeout(timeoutDataId);
         }
-      });
+      }
     });
 
     this.telegram.on("addTimeout", (context) => {

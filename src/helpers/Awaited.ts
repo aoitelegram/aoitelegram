@@ -1,4 +1,5 @@
 import { Collection } from "telegramsjs";
+import { getObjectKey } from "../utils/";
 import { setInterval, clearInterval } from "long-timeout";
 import { AoijsError } from "../classes/AoiError";
 import { AoiClient } from "../classes/AoiClient";
