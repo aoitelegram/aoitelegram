@@ -1,5 +1,3 @@
-import { getObjectKey } from "../Helpres";
-
 function isInteger(content: string) {
   let isBigInt: boolean = false;
   try {
@@ -99,54 +97,6 @@ function toConvertParse(character?: string) {
   }
 }
 
-interface Data {
-  [key: string]: any;
-}
-
-function getObjectKey<T extends Data, K extends keyof T>(
-  data: T,
-  path: string,
-): T[K] {
-  if (!path) return data as T[K];
-  const properties = path.split(".");
-  function getProperty(obj: Data, props: string[]): any {
-    const [currentProp, ...rest] = props;
-    if (obj && obj[currentProp]) {
-      if (rest.length > 0) {
-        return getProperty(obj[currentProp], rest);
-      } else {
-        return obj[currentProp];
-      }
-    }
-    return undefined;
-  }
-  return getProperty(data, properties) as T[K];
-}
-
-function setObjectKey<T extends Data, K extends keyof T>(
-  data: T,
-  path: string,
-  newValue: T[K],
-): T {
-  if (!path) return newValue as T;
-
-  const properties = path.split(".");
-
-  function setProperty(obj: Data, props: string[], value: any): any {
-    const [currentProp, ...rest] = props;
-    if (obj && obj[currentProp]) {
-      if (rest.length > 0) {
-        obj[currentProp] = setProperty(obj[currentProp], rest, value);
-      } else {
-        obj[currentProp] = value;
-      }
-    }
-    return obj;
-  }
-
-  return setProperty({ ...data }, properties, newValue);
-}
-
 function formatTime(milliseconds: number) {
   const calculateUnit = (unitInMilliseconds: number): number => {
     const result = Math.trunc(Math.abs(milliseconds) / unitInMilliseconds);
@@ -215,12 +165,4 @@ function arrayAt<T>(arr: ArrayLike<T>, index: number): T | undefined {
   return arr[realIndex];
 }
 
-export {
-  toParse,
-  toConvertParse,
-  getObjectKey,
-  setObjectKey,
-  formatTime,
-  replaceData,
-  arrayAt,
-};
+export { toParse, toConvertParse, formatTime, replaceData, arrayAt };

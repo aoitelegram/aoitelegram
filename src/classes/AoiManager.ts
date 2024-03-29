@@ -26,7 +26,10 @@ class AoiManager<Value = any> {
     options: AoiManagerOptions = {
       type: "storage",
       logging: true,
-      options: {},
+      options: {
+        path: "database",
+        tables: ["main"],
+      },
     },
   ) {
     options.options = !options.options ? {} : options.options;

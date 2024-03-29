@@ -35,7 +35,6 @@ interface AwaitedEvent {
 }
 
 interface EventHandlers extends IEventFunctions {
-  onStart: (client: AoiClient) => void;
   timeout: (client: AoiClient, database: ValueDatabase) => void;
   awaited: (event: AwaitedEvent, data: unknown) => void;
   functionError: (
@@ -45,31 +44,31 @@ interface EventHandlers extends IEventFunctions {
   addTimeout: (eventContext: ValueDatabase) => void;
 }
 
-interface LibDataFunction {
-  name: string;
-  brackets?: boolean;
-  optional?: boolean;
-  callback: (context: Context) => unknown;
-}
-
 type DataFunction =
   | {
       name: string;
       type: "aoitelegram";
       version?: string;
       brackets?: boolean;
-      optional?: boolean;
       useNative?: Function[];
       params?: string[];
       code: string;
     }
   | {
       name: string;
-      type?: "js";
+      type?: "javascript";
       brackets?: boolean;
+      fields?: { name?: string; required: boolean };
       optional?: boolean;
       version?: string;
-      callback: (container: Container, context: Context) => unknown;
+      callback: (
+        container: Container,
+        context: Context,
+      ) => {
+        id: string;
+        replace: string;
+        with: string;
+      };
     };
 
 type ContextEvent = EventContext &
@@ -97,13 +96,4 @@ type DataEvent = {
   callback?: (...args: any[]) => void;
 };
 
-type LibWithDataFunction = DataFunction | LibDataFunction;
-
-export {
-  LibWithDataFunction,
-  LibDataFunction,
-  EventHandlers,
-  ContextEvent,
-  DataFunction,
-  DataEvent,
-};
+export { EventHandlers, ContextEvent, DataFunction, DataEvent };

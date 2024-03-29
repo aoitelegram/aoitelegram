@@ -1,18 +1,19 @@
 import { Context } from "./Context";
 import { AoijsTypeError } from "../AoiError";
+import type { ICommandsOptions } from "../AoiBase";
 import { Collection } from "@telegram.ts/collection";
-import type { LibWithDataFunction } from "../AoiTyping";
+import type { DataFunction } from "../AoiTyping";
 
 class Complite<TArray extends any[]> {
   code: string;
-  command: Record<string, any>;
-  availableFunctions: Collection<string, LibWithDataFunction>;
+  command: ICommandsOptions;
+  availableFunctions: Collection<string, DataFunction>;
   escapedCode: { code: string; functions: Collection<string, Context> };
 
   constructor(
     code: string,
-    command: Record<string, any>,
-    availableFunctions: Collection<string, LibWithDataFunction>,
+    command: ICommandsOptions,
+    availableFunctions: Collection<string, DataFunction>,
   ) {
     this.code = code;
     this.command = command;
@@ -32,7 +33,7 @@ class Complite<TArray extends any[]> {
         new RegExp(
           `(${this.availableFunctions
             .keyArray()
-            .map((func) => `\\${func}`)
+            .map((name) => `\\${name}`)
             .join("|")})`,
           "g",
         ),
@@ -49,9 +50,9 @@ class Complite<TArray extends any[]> {
         const searchString = `\\${functionSearch.name}`;
         const codeSegment = this.escapedCode.code
           .split(new RegExp(`\\${functionSearch.name}`, "gm"))
-          .findLast(() => true);
+          .find((el, index, array) => array.length === index + 1);
 
-        if (!functionSearch.optional && !codeSegment?.startsWith("[")) {
+        if (functionSearch.brackets && !codeSegment?.startsWith("[")) {
           throwBracketError(
             functionSearch,
             this.escapedCode.code,
@@ -127,16 +128,15 @@ class Complite<TArray extends any[]> {
 
   replaceLast(code: string, search: string, replace: string): string {
     let parts = code.split(search);
-    code = parts.pop()!;
-    return parts.join(search) + replace + code;
+    return parts.join(search) + replace + parts.pop();
   }
 }
 
 function throwBracketError(
-  func: LibWithDataFunction,
+  func: DataFunction,
   code: string,
   errorType: string,
-  command?: Record<string, unknown>,
+  command?: ICommandsOptions,
 ): never {
   const errorMessage = `${func.name}`;
   const pointer = " ".repeat(7) + "^".repeat(func.name.length);
@@ -145,9 +145,9 @@ function throwBracketError(
   const lastIndexOfFunc =
     lineNumber !== 0 ? lines[lineNumber - 1].lastIndexOf(func.name) : "unknown";
 
-  //   throw new AoijsTypeError(
-  //     `${errorMessage}\n${pointer} this function requires ${errorType} at line ${lineNumber}:${typeof lastIndexOfFunc !== "number" ? lastIndexOfFunc : lastIndexOfFunc + 1}${command ? ` for command ${JSON.stringify(command)}` : ""}.`,
-  //   );
+  throw new AoijsTypeError(
+    `${errorMessage}\n${pointer} this function requires ${errorType} at line ${lineNumber}:${typeof lastIndexOfFunc !== "number" ? lastIndexOfFunc : lastIndexOfFunc + 1}${command ? ` for command ${JSON.stringify(command)}` : ""}.`,
+  );
 }
 
 export { Complite };

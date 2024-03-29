@@ -2,7 +2,7 @@ import { inspect } from "node:util";
 import { Container } from "./Container";
 import { randomUUID } from "node:crypto";
 import { AoijsTypeError } from "../AoiError";
-import type { LibWithDataFunction } from "../AoiTyping";
+import type { DataFunction } from "../AoiTyping";
 
 enum FieldsType {
   "String" = 1,
@@ -35,9 +35,9 @@ class Context<TArray extends unknown[]> {
   public fields: string[] = [];
   public total: string;
   public underFunctions: Context<TArray>[] = [];
-  public readonly data: LibWithDataFunction;
+  public readonly data: DataFunction;
 
-  constructor(data: LibWithDataFunction) {
+  constructor(data: DataFunction) {
     this.data = data;
     this.id = `${randomUUID()}-${Date.now()}`;
     this.underFunctions = [];

@@ -1,14 +1,8 @@
 import { AoiClient } from "../classes/AoiClient";
 import { AoijsError } from "../classes/AoiError";
+import type { ICommandsOptions } from "../classes/AoiBase";
 
-interface CommandDescription {
-  name: string;
-  typeChannel?: false | "private" | "group" | "supergroup" | "channel";
-  aliases?: string[];
-  code: string;
-  useNative?: Function[];
-  [key: string]: unknown;
-}
+type CommandDescription = Pick<ICommandsOptions, "typeChannel" | "aliases">;
 
 class Command {
   commands: CommandDescription[] = [];
@@ -45,12 +39,7 @@ class Command {
         )
           continue;
 
-        await this.telegram.evaluateCommand(
-          commandIdentifier,
-          commandDescription.code,
-          message,
-          commandDescription.useNative,
-        );
+        await this.telegram.evaluateCommand(commandDescription, message);
         break;
       }
     });

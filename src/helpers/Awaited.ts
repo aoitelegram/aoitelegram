@@ -1,8 +1,8 @@
-import { Collection } from "telegramsjs";
 import { getObjectKey } from "../utils/";
-import { setInterval, clearInterval } from "long-timeout";
-import { AoijsError } from "../classes/AoiError";
 import { AoiClient } from "../classes/AoiClient";
+import { AoijsError } from "../classes/AoiError";
+import { Collection } from "@telegram.ts/collection";
+import { setInterval, clearInterval } from "long-timeout";
 
 interface AwaitedDescription {
   awaited: string;

@@ -1,9 +1,55 @@
-import { UserFromGetMe } from "@telegram.ts/types";
-import { AoiLogger } from "../classes/AoiLogger";
 import { version } from "../index";
+import { AoiLogger } from "../classes/AoiLogger";
+import type { AoiClient } from "../classes/AoiClient";
+import type { UserFromGetMe } from "@telegram.ts/types";
+import onCallbackQuery from "../classes/handlers/CallbackQuery";
+import onEditedMessage from "../classes/handlers/EditedMessage";
+import onMyChatMember from "../classes/handlers/MyChatMember";
+import onShippingQuery from "../classes/handlers/ShippingQuery";
+import onChannelPost from "../classes/handlers/ChannelPost";
+import onInlineQuery from "../classes/handlers/InlineQuery";
+import onPoll from "../classes/handlers/Poll";
+import onVariableCreate from "../classes/handlers/VariableCreate";
+import onChatBoost from "../classes/handlers/ChatBoost";
+import onLoop from "../classes/handlers/Loop";
+import onPollAnswer from "../classes/handlers/PollAnswer";
+import onVariableDelete from "../classes/handlers/VariableDelete";
+import onChatJoinRequest from "../classes/handlers/ChatJoinRequest";
+import onMessage from "../classes/handlers/Message";
+import onPreCheckoutQuery from "../classes/handlers/PreCheckoutQuery";
+import onVariableUpdate from "../classes/handlers/VariableUpdate";
+import onChatMember from "../classes/handlers/ChatMember";
+import onMessageReaction from "../classes/handlers/MessageReaction";
+import onReady from "../classes/handlers/Ready";
+import onEditedChannelPost from "../classes/handlers/EditedChannelPost";
+import onMessageReactionCount from "../classes/handlers/MessageReactionCount";
+import onRemovedChatBoost from "../classes/handlers/RemovedChatBoost";
 
-export default function aoiStart(context: UserFromGetMe) {
-  const username = `@${context.username}`;
+export default async function aoiStart(telegram: AoiClient) {
+  const username = `@${telegram.botInfo.username}`;
+
+  await onCallbackQuery(telegram);
+  await onEditedMessage(telegram);
+  await onMyChatMember(telegram);
+  await onShippingQuery(telegram);
+  await onChannelPost(telegram);
+  await onInlineQuery(telegram);
+  await onPoll(telegram);
+  await onVariableCreate(telegram);
+  await onChatBoost(telegram);
+  await onLoop(telegram);
+  await onPollAnswer(telegram);
+  await onVariableDelete(telegram);
+  await onChatJoinRequest(telegram);
+  await onMessage(telegram);
+  await onPreCheckoutQuery(telegram);
+  await onVariableUpdate(telegram);
+  await onChatMember(telegram);
+  await onMessageReaction(telegram);
+  await onEditedChannelPost(telegram);
+  await onMessageReactionCount(telegram);
+  await onRemovedChatBoost(telegram);
+  await onReady(telegram);
 
   AoiLogger.custom({
     title: {

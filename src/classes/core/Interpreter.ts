@@ -1,25 +1,27 @@
 import { Container } from "./Container";
-import { Context } from "./Context";
+import type { Context } from "./Context";
 import { AoijsTypeError } from "../AoiError";
-import { Collection } from "@telegram.ts/collection";
-import type { LibWithDataFunction, ContextEvent } from "../AoiTyping";
-
-interface IInterpreterOptions {
-  code: string;
-  functions: Context[];
-  useNative?: Function[];
-}
+import type { ICommandsOptions } from "../AoiBase";
+import type { Collection } from "@telegram.ts/collection";
+import type { DataFunction, ContextEvent } from "../AoiTyping";
 
 class Interpreter {
   container: Container;
-  inputData: IInterpreterOptions;
+  inputData: ICommandsOptions & {
+    functions: Collection<string, DataFunction>;
+  };
 
-  constructor(inputData: IInterpreterOptions, ctx: ContextEvent) {
+  constructor(
+    inputData: ICommandsOptions & {
+      functions: Collection<string, DataFunction>;
+    },
+    ctx: ContextEvent,
+  ) {
     this.inputData = inputData;
     this.container = new Container(ctx);
   }
 
-  async runInput(reverseReading: boolean) {
+  async runInput(reverseReading?: boolean) {
     let textResult = this.inputData.code;
     const reverseFunctions = reverseReading
       ? this.inputData.functions.toReversed()

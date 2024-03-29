@@ -38,7 +38,7 @@ class AoiClient extends AoiBase {
   globalVars: Collection<string, unknown> = new Collection();
 
   constructor(
-    public readonly token: string,
+    token: string,
     public readonly parameters: {
       requestOptions?: RequestInit;
       database?: AoiManagerOptions;
@@ -91,7 +91,6 @@ class AoiClient extends AoiBase {
       );
     }
     this.registerCommand.register(options);
-    this.commands.set({ name: `/${options.name}` }, { ...options });
     return this;
   }
 
@@ -109,7 +108,6 @@ class AoiClient extends AoiBase {
       );
     }
     this.registerAction.register(options);
-    this.commands.set({ data: options.data }, { ...options });
     return this;
   }
 
@@ -127,7 +125,6 @@ class AoiClient extends AoiBase {
       );
     }
     this.registerTimeout.register(options);
-    this.commands.set({ id: options.id }, { ...options });
     return this;
   }
 
@@ -145,8 +142,6 @@ class AoiClient extends AoiBase {
       );
     }
     this.registerAwaited.register(options);
-    this.commands.set({ awaited: options.awaited }, { ...options });
-
     return this;
   }
 
@@ -173,8 +168,6 @@ class AoiClient extends AoiBase {
     }
 
     this.registerCallback.register(options);
-    this.commands.set({ callback: options.name }, { ...options });
-
     return this;
   }
 
@@ -260,9 +253,7 @@ class AoiClient extends AoiBase {
     if (logging === undefined || logging) {
       this.on("ready", async (ctx) => {
         await this.#loadFunctionsLib(path.join(__dirname, "../function/"));
-        (await import("./handlers/Ready"))(this);
-        await aoiStart(ctx);
-        this.emit("onStart", this);
+        await aoiStart(this);
       });
     }
     super.login();

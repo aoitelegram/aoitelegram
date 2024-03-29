@@ -1,7 +1,7 @@
-import { Collection } from "telegramsjs";
+import { getObjectKey } from "../utils/";
 import { AoiClient } from "../classes/AoiClient";
 import { AoijsError } from "../classes/AoiError";
-import { getObjectKey } from "../utils/";
+import { Collection } from "@telegram.ts/collection";
 import { ValueDatabase } from "./manager/TimeoutManager";
 
 interface TimeoutDescription {
@@ -52,13 +52,7 @@ class Timeout {
         this.telegram.ensureFunction({
           name: "$timeoutData",
           callback: (context) => {
-            const response = getObjectKey(
-              parsedTimeoutData,
-              context.inside as string,
-            );
-            return typeof response === "object"
-              ? JSON.stringify(response)
-              : response;
+            return getObjectKey(parsedTimeoutData, context.inside as string);
           },
         });
 

@@ -25,11 +25,41 @@ type IFunctionManager =
     };
 
 class FunctionManager {
+  name: string;
+  brackets?: boolean;
+  param: string[];
+  type?: "javascript" | "aoitelegram";
+  fields: {
+    name?: string;
+    required?: boolean;
+  }[];
+  inside: {
+    name?: string;
+    required?: boolean;
+  };
+  callback?: (ctx: Container, func: Context<any>) => unknown;
+  code?: string;
+
   constructor(
-    public parameters: IFunctionManager = {
+    parameters: IFunctionManager = {
       fields: [],
     } as unknown as IFunctionManager,
-  ) {}
+  ) {
+    if (typeof parameters !== "object") {
+      throw new AoijsTypeError(
+        `The expected type is "object", but received type ${typeof parameters}`,
+      );
+    }
+    this.name = parameters.name;
+    this.brackets = parameters.brackets;
+    this.type = parameters.type || "javascript";
+    this.fields = ("fields" in parameters && parameters.fields) || [];
+    this.inside = ("inside" in parameters && parameters.inside) || {};
+    this.param = ("param" in parameters && parameters.param) || [];
+    this.callback =
+      ("callback" in parameters && parameters.callback) || undefined;
+    this.code = ("code" in parameters && parameters.code) || "";
+  }
 
   setName(name: string) {
     if (typeof name !== "string") {
@@ -37,40 +67,37 @@ class FunctionManager {
         `The expected type is "string", but received type ${typeof name}`,
       );
     }
-    this.parameters.name = name;
+    this.name = name;
     return this;
   }
 
-  setFields(fields: { name?: string; required: boolean }[]) {
-    if (this.parameters.type === "aoitelegram") {
+  setFields(fields: { name?: string; required: boolean }) {
+    if (this.type === "aoitelegram") {
       throw new AoijsTypeError(
         "Methods for type 'javascript' are not accessible when the type is set to 'aoitelegram'",
       );
     }
-    if (!Array.isArray(fields)) {
+    if (typeof fields !== "object") {
       throw new AoijsTypeError(
-        `The expected type is "array", but received type ${typeof fields}`,
+        `The expected type is "object", but received type ${typeof fields}`,
       );
     }
-    if (this.parameters?.inside) {
+    if (Object.keys(this.inside).length > 1) {
       throw new AoijsTypeError(
         'If you specified "inside" early, then the specified "fields" cannot be entities',
       );
     }
-    fields.map(
-      (fields) =>
-        "fields" in this.parameters && this.parameters.fields?.push(fields),
-    );
+    this.fields.push(fields);
     return this;
   }
 
   setInside(inside: { name?: string; required: boolean }) {
-    if (this.parameters.type === "aoitelegram") {
+    if (this.type === "aoitelegram") {
       throw new AoijsTypeError(
         "Methods for type 'javascript' are not accessible when the type is set to 'aoitelegram'",
       );
     }
-    this.parameters.inside = inside;
+    this.inside = inside;
     return this;
   }
 
@@ -80,12 +107,12 @@ class FunctionManager {
         `The expected type is "boolean", but received type ${typeof brackets}`,
       );
     }
-    this.parameters.brackets = brackets;
+    this.brackets = brackets;
     return this;
   }
 
   onCallback(callback: (ctx: Container, func: Context<any>) => unknown) {
-    if (this.parameters.type === "aoitelegram") {
+    if (this.type === "aoitelegram") {
       throw new AoijsTypeError(
         "Methods for type 'javascript' are not accessible when the type is set to 'aoitelegram'",
       );
@@ -95,27 +122,32 @@ class FunctionManager {
         `The expected type is "function", but received type ${typeof callback}`,
       );
     }
-    this.parameters.callback = callback;
-    return;
+    this.callback = callback;
+    return this;
   }
 
   setParam(param: string[]) {
-    if (this.parameters.type !== "aoitelegram") {
+    if (this.type !== "aoitelegram") {
       throw new AoijsTypeError(
         "This method is only accessible for type 'aoitelegram'",
       );
     }
-    this.parameters.param = param;
+    if (!Array.isArray(param)) {
+      throw new AoijsTypeError(
+        `The expected type is "array", but received type ${typeof param}`,
+      );
+    }
+    this.param.push(...param);
     return this;
   }
 
   setCode(code: string) {
-    if (this.parameters.type !== "aoitelegram") {
+    if (this.type !== "aoitelegram") {
       throw new AoijsTypeError(
         "This method is only accessible for type 'aoitelegram'",
       );
     }
-    this.parameters.code = code;
+    this.code = code;
     return this;
   }
 }

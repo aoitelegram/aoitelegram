@@ -8,15 +8,12 @@ import { ContextEvent, EventHandlers } from "./AoiTyping";
 import { TelegramBot, Collection, Context } from "telegramsjs";
 import { AoiManager, AoiManagerOptions } from "./AoiManager";
 import { Interpreter, Complite } from "./core/";
-import {
-  LibDataFunction,
-  DataFunction,
-  LibWithDataFunction,
-} from "./AoiTyping";
+import { DataFunction } from "./AoiTyping";
 import { version } from "../index";
 
-interface ICommandsSet {
+interface ICommandsOptions {
   name: string;
+  every?: number;
   description?: string;
   reverseReading?: boolean;
   chatId?: number | string;
@@ -26,9 +23,8 @@ interface ICommandsSet {
 
 class AoiBase extends TelegramBot {
   database: AoiManager = {} as AoiManager;
-  commands: Collection<string, ICommandsSet[]> = new Collection();
-  availableFunctions: Collection<string, LibWithDataFunction> =
-    new Collection();
+  commands: Collection<string, ICommandsOptions[]> = new Collection();
+  availableFunctions: Collection<string, DataFunction> = new Collection();
   availableCollectFunctions = [
     "callbackQuery",
     "editedMessage",
@@ -82,16 +78,18 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  async evaluateCommand(
-    command: string | { event: string },
-    code: string,
-    eventData: unknown,
-    useNative?: Function[],
-  ) {
+  async evaluateCommand(command: ICommandsOptions, eventData: any) {
     try {
-      const complited = new Complite(code, {}, this.availableFunctions);
-      const interpreter = new Interpreter(complited.compile(), eventData);
-      return await interpreter.runInput();
+      const complited = new Complite(
+        command.code,
+        command,
+        this.availableFunctions,
+      );
+      const interpreter = new Interpreter(
+        Object.assign(complited.compile(), command),
+        eventData,
+      );
+      return await interpreter.runInput(command.reverseReading);
     } catch (err) {
       console.log(err);
     }
@@ -284,47 +282,18 @@ class AoiBase extends TelegramBot {
     return this.availableFunctions.size;
   }
 
-  loopCommand(options: {
-    every?: number;
-    code: string;
-    useNative?: Function[];
-  }) {
+  loopCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-
-    let currentIndex = 1;
-    const intervalId = setInterval(async () => {
-      this.ensureFunction([
-        {
-          name: "$break",
-          callback: () => clearInterval(intervalId),
-        },
-        {
-          name: "$continue",
-          callback: (context) => (context.isError = true),
-        },
-        {
-          name: "$index",
-          callback: () => currentIndex,
-        },
-      ]);
-
-      await this.evaluateCommand(
-        { event: "loop" },
-        options.code,
-        this,
-        options.useNative,
-      );
-      currentIndex++;
-    }, options.every || 60000);
+    this.#addCommands("loop", options);
     return this;
   }
 
-  readyCommand(options: ICommandsSet) {
+  readyCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -335,7 +304,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  messageCommand(options: ICommandsSet) {
+  messageCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -346,7 +315,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  callbackQueryCommand(options: ICommandsSet) {
+  callbackQueryCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -357,7 +326,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  messageReactionCommand(options: ICommandsSet) {
+  messageReactionCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -368,7 +337,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  messageReactionCountCommand(options: ICommandsSet) {
+  messageReactionCountCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -379,7 +348,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  editedMessageCommand(options: ICommandsSet) {
+  editedMessageCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -390,7 +359,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  channelPostCommand(options: ICommandsSet) {
+  channelPostCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -401,7 +370,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  editedChannelPostCommand(options: ICommandsSet) {
+  editedChannelPostCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -412,7 +381,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  inlineQueryCommand(options: ICommandsSet) {
+  inlineQueryCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -423,7 +392,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  shippingQueryCommand(options: ICommandsSet) {
+  shippingQueryCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -434,7 +403,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  preCheckoutQueryCommand(options: ICommandsSet) {
+  preCheckoutQueryCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -445,7 +414,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  pollCommand(options: ICommandsSet) {
+  pollCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -456,7 +425,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  pollAnswerCommand(options: ICommandsSet) {
+  pollAnswerCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -467,7 +436,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  chatMemberCommand(options: ICommandsSet) {
+  chatMemberCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -478,7 +447,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  myChatMemberCommand(options: ICommandsSet) {
+  myChatMemberCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -489,7 +458,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  chatJoinRequestCommand(options: ICommandsSet) {
+  chatJoinRequestCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -500,7 +469,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  chatBoostCommand(options: ICommandsSet) {
+  chatBoostCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -511,7 +480,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  removedChatBoostCommand(options: ICommandsSet) {
+  removedChatBoostCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -522,7 +491,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  variableCreateCommand(options: ICommandsSet) {
+  variableCreateCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -550,35 +519,18 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  variableUpdateCommand(options: ICommandsSet) {
+  variableUpdateCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.database.on("update", async (variable) => {
-      this.ensureFunction({
-        name: "$variable",
-        callback: (context) => {
-          const result = getObjectKey(variable, context.inside as string);
-          return typeof result === "object" ? JSON.stringify(result) : result;
-        },
-      });
-      await this.evaluateCommand(
-        { event: "variableUpdate" },
-        options.code,
-        {
-          variable,
-          telegram: this,
-        },
-        options.useNative,
-      );
-    });
+    this.#addCommands("variableUpdate", options);
     return this;
   }
 
-  variableDeleteCommand(options: ICommandsSet) {
+  variableDeleteCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -608,7 +560,7 @@ class AoiBase extends TelegramBot {
 
   #addCommands(
     type: (typeof AoiBase)["availableCollectFunctions"],
-    command: ICommandsSet,
+    command: ICommandsOptions,
   ) {
     if (!this.availableCollectFunctions.includes(type)) {
       throw new AoijsTypeError(
@@ -617,7 +569,7 @@ class AoiBase extends TelegramBot {
     }
     if (this.commands.has(type)) {
       const commandsType = this.commands.get(type);
-      this.commands.set(type, [...commandsType, command]);
+      this.commands.set(type, [...(commandsType || []), command]);
     } else this.commands.set(type, [command]);
   }
 
@@ -632,4 +584,4 @@ class AoiBase extends TelegramBot {
   }
 }
 
-export { AoiBase };
+export { AoiBase, ICommandsOptions };

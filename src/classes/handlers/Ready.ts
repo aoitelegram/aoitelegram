@@ -1,14 +1,12 @@
 import type { AoiClient } from "../AoiClient";
 
-function onReady(telegram: AoiClient) {
-  const commandsReady = telegram.commands.get("ready");
-  if (!commandsReady) return;
+async function onReady(telegram: AoiClient) {
+  const commands = telegram.commands.get("ready");
+  if (!commands) return;
 
-  telegram.on("onStart", async () => {
-    for (const command of commandsReady) {
-      await telegram.evaluateCommand({}, command.code, telegram, []);
-    }
-  });
+  for (const command of commands) {
+    await telegram.evaluateCommand(command, telegram);
+  }
 }
 
 export default onReady;

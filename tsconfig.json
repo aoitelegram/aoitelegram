@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "target": "es2019",
-    "lib": ["ESNext.Array"],
     "module": "nodenext",
     "declaration": true,
     "noEmit": false,
