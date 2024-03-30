@@ -14,7 +14,11 @@ type IFunctionManager =
         name?: string;
         required?: boolean;
       };
-      callback: (ctx: Container, func: Context<any>) => unknown;
+      callback: (ctx: Container & Context) => {
+        id: string;
+        replace: string;
+        with: string;
+      };
     }
   | {
       name: string;
@@ -37,7 +41,10 @@ class FunctionManager {
     name?: string;
     required?: boolean;
   };
-  callback?: (ctx: Container, func: Context<any>) => unknown;
+  callback?: (
+    ctx: Container,
+    func: Context,
+  ) => { id: string; replace: string; with: string };
   code?: string;
 
   constructor(
@@ -111,7 +118,13 @@ class FunctionManager {
     return this;
   }
 
-  onCallback(callback: (ctx: Container, func: Context<any>) => unknown) {
+  onCallback(
+    callback: (ctx: Container & Context) => {
+      id: string;
+      replace: string;
+      with: string;
+    },
+  ) {
     if (this.type === "aoitelegram") {
       throw new AoijsTypeError(
         "Methods for type 'javascript' are not accessible when the type is set to 'aoitelegram'",

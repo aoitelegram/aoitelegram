@@ -1,15 +1,15 @@
-import { AoijsError, AoijsTypeError } from "./AoiError";
-import { getObjectKey } from "../utils/";
-import type { RequestInit } from "node-fetch";
-import { Update } from "@telegram.ts/types";
-import { setInterval, clearInterval } from "long-timeout";
-import { AoiClient } from "./AoiClient";
-import { ContextEvent, EventHandlers } from "./AoiTyping";
-import { TelegramBot, Collection, Context } from "telegramsjs";
-import { AoiManager, AoiManagerOptions } from "./AoiManager";
-import { Interpreter, Complite } from "./core/";
-import { DataFunction } from "./AoiTyping";
 import { version } from "../index";
+import { AoiClient } from "./AoiClient";
+import { getObjectKey } from "../utils/";
+import { DataFunction } from "./AoiTyping";
+import { Update } from "@telegram.ts/types";
+import type { RequestInit } from "node-fetch";
+import { Interpreter, Complite } from "./core/";
+import { AoijsError, AoijsTypeError } from "./AoiError";
+import { setInterval, clearInterval } from "long-timeout";
+import { ContextEvent, EventHandlers } from "./AoiTyping";
+import { AoiManager, AoiManagerOptions } from "./AoiManager";
+import { TelegramBot, Collection, Context } from "telegramsjs";
 
 interface ICommandsOptions {
   name: string;
@@ -559,7 +559,29 @@ class AoiBase extends TelegramBot {
   }
 
   #addCommands(
-    type: (typeof AoiBase)["availableCollectFunctions"],
+    type:
+      | "callbackQuery"
+      | "editedMessage"
+      | "myChatMember"
+      | "shippingQuery"
+      | "channelPost"
+      | "inlineQuery"
+      | "poll"
+      | "variableCreate"
+      | "chatBoost"
+      | "loop"
+      | "pollAnswer"
+      | "variableDelete"
+      | "chatJoinRequest"
+      | "message"
+      | "preCheckoutQuery"
+      | "variableUpdate"
+      | "chatMember"
+      | "messageReaction"
+      | "ready"
+      | "editedChannelPost"
+      | "messageReactionCount"
+      | "removedChatBoost",
     command: ICommandsOptions,
   ) {
     if (!this.availableCollectFunctions.includes(type)) {

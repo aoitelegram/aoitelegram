@@ -29,12 +29,12 @@ interface IOveeload {
   callback: Function;
 }
 
-class Context<TArray extends unknown[]> {
+class Context {
   public readonly id: string;
   public inside: string = "";
   public fields: string[] = [];
   public total: string;
-  public underFunctions: Context<TArray>[] = [];
+  public underFunctions: Context[] = [];
   public readonly data: DataFunction;
 
   constructor(data: DataFunction) {
@@ -57,12 +57,12 @@ class Context<TArray extends unknown[]> {
     return this;
   }
 
-  addUnderFunctions(overload: Context<TArray>): this {
+  addUnderFunctions(overload: Context): this {
     this.underFunctions.push(overload);
     return this;
   }
 
-  underFunctionsFor(array: Context<TArray>[]): Context<TArray>[] {
+  underFunctionsFor(array: Context[]): Context[] {
     if (undefined === this.inside) return [];
     return array.filter((item) => this.total.includes(item.id));
   }
@@ -138,11 +138,25 @@ class Context<TArray extends unknown[]> {
     return this.underFunctions.filter((overload) => code.includes(overload.id));
   }
 
-  async callback(
-    data: Container,
-    overload: IOveeload,
-  ): Promise<ICallbackResolve> {
-    return this.data.callback(data, overload);
+  async callback(data: Container): Promise<ICallbackResolve> {
+    if ("callback" in this.data) {
+      return this.data.callback(data);
+    }
+    if ("code" in this.data) {
+      console.log(data, this.data);
+      const result = await data.eventData?.api?.evaluateCommand?.(
+        this.data,
+        data.eventData,
+      );
+      return {
+        id: data.id,
+        replace: data.total,
+        with: result,
+      };
+    }
+    throw new AoijsTypeError(
+      `Something went wrong, the called function ${this.data.name} does not have the necessary parameters to execute`,
+    );
   }
 
   private resolve(result: unknown): ICallbackResolve {

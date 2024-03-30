@@ -61,10 +61,7 @@ type DataFunction =
       fields?: { name?: string; required: boolean };
       optional?: boolean;
       version?: string;
-      callback: (
-        container: Container,
-        context: Context,
-      ) => {
+      callback: (context: Container & Context) => {
         id: string;
         replace: string;
         with: string;

@@ -7,8 +7,8 @@ export default new FunctionManager()
     name: "text",
     required: true,
   })
-  .onCallback(async (ctx, func) => {
-    const text = await func.resolveArray(ctx);
+  .onCallback(async (context) => {
+    const text = await context.resolveArray(context);
     console.log(...text);
-    return func.resolve("");
+    return context.resolve("");
   });

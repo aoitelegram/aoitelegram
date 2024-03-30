@@ -29,7 +29,7 @@ class Complite<TArray extends any[]> {
 
   extractFunctions() {
     for (const func of this.code.split(/\$/g).slice(1).reverse()) {
-      const textMatch = `$${func}`.match(
+      const textMatch = `$${func.toLowerCase()}`.match(
         new RegExp(
           `(${this.availableFunctions
             .keyArray()
@@ -45,57 +45,56 @@ class Complite<TArray extends any[]> {
         ({ name }) => textMatch[0] === name.toLowerCase(),
       );
 
-      if (functionSearch) {
-        const callFunction = new Context<TArray>(functionSearch);
-        const searchString = `\\${functionSearch.name}`;
-        const codeSegment = this.escapedCode.code
-          .split(new RegExp(`\\${functionSearch.name}`, "gm"))
-          .find((el, index, array) => array.length === index + 1);
+      if (!functionSearch) continue;
 
-        if (functionSearch.brackets && !codeSegment?.startsWith("[")) {
-          throwBracketError(
-            functionSearch,
-            this.escapedCode.code,
-            "brackets",
-            this.command,
-          );
-        }
+      const callFunction = new Context(functionSearch);
+      const codeSegment = this.escapedCode.code
+        .split(new RegExp(`\\${functionSearch.name}`, "gm"))
+        .find((el, index, array) => array.length === index + 1);
 
-        if (
-          functionSearch.brackets &&
-          codeSegment?.startsWith("[") &&
-          !codeSegment.includes("]")
-        ) {
-          throwBracketError(
-            functionSearch,
-            this.escapedCode.code,
-            "bracket closing",
-            this.command,
-          );
-        }
-
-        const insideBrackets = codeSegment?.startsWith("[")
-          ? codeSegment.slice(1).split(/\]/)[0]
-          : undefined;
-
-        if (insideBrackets !== undefined) {
-          callFunction.total = insideBrackets;
-          callFunction.setInside(insideBrackets);
-          callFunction.setFields(insideBrackets.split(";"));
-        }
-
-        this.escapedCode.code = this.replaceLast(
+      if (functionSearch.brackets && !codeSegment?.startsWith("[")) {
+        throwBracketError(
+          functionSearch,
           this.escapedCode.code,
-          callFunction.total,
-          callFunction.id,
+          "brackets",
+          this.command,
         );
-        this.escapedCode.functions.set(functionSearch.name, callFunction);
       }
+
+      if (
+        functionSearch.brackets &&
+        codeSegment?.startsWith("[") &&
+        !codeSegment.includes("]")
+      ) {
+        throwBracketError(
+          functionSearch,
+          this.escapedCode.code,
+          "bracket closing",
+          this.command,
+        );
+      }
+
+      const insideBrackets = codeSegment?.startsWith("[")
+        ? codeSegment.slice(1).split(/\]/)[0]
+        : undefined;
+
+      if (insideBrackets !== undefined) {
+        callFunction.total = insideBrackets;
+        callFunction.setInside(insideBrackets);
+        callFunction.setFields(insideBrackets.split(";"));
+      }
+
+      this.escapedCode.code = this.replaceLast(
+        this.escapedCode.code,
+        callFunction.total,
+        callFunction.id,
+      );
+      this.escapedCode.functions.set(functionSearch.name, callFunction);
     }
   }
 
   processFunctions() {
-    const loadedFunctions: Context<TArray>[] = [];
+    const loadedFunctions: Context[] = [];
     const processedFunctionIds: string[] = [];
 
     for (const [, currentFunction] of this.escapedCode.functions.toReversed()) {
