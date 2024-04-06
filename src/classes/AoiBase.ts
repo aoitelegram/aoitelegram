@@ -1,7 +1,7 @@
 import { version } from "../index";
 import { AoiClient } from "./AoiClient";
 import { getObjectKey } from "../utils/";
-import { DataFunction } from "./AoiTyping";
+import { DataFunction, CustomJSFunction } from "./AoiTyping";
 import { Update } from "@telegram.ts/types";
 import type { RequestInit } from "node-fetch";
 import { Interpreter, Complite } from "./core/";
@@ -17,14 +17,13 @@ interface ICommandsOptions {
   description?: string;
   reverseReading?: boolean;
   chatId?: number | string;
-  useNative?: Function[];
   code: string;
 }
 
 class AoiBase extends TelegramBot {
   database: AoiManager = {} as AoiManager;
   commands: Collection<string, ICommandsOptions[]> = new Collection();
-  availableFunctions: Collection<string, DataFunction> = new Collection();
+  availableFunctions: Collection<string, CustomJSFunction> = new Collection();
   availableCollectFunctions = [
     "callbackQuery",
     "editedMessage",
@@ -80,50 +79,27 @@ class AoiBase extends TelegramBot {
 
   async evaluateCommand(command: ICommandsOptions, eventData: any) {
     try {
-      const complited = new Complite(
-        command.code,
-        command,
-        this.availableFunctions,
-      );
+      const complited = new Complite({
+        code: command.code,
+        reverseFunctions: command.reverseReading,
+        availableFunctions: this.availableFunctions,
+      });
       const interpreter = new Interpreter(
-        Object.assign(complited.compile(), command),
+        Object.assign(complited.complite(), command),
         eventData,
       );
-      return await interpreter.runInput(command.reverseReading);
+      return await interpreter.runInput();
     } catch (err) {
       console.log(err);
     }
   }
 
-  addFunction(dataFunction: DataFunction | DataFunction[]) {
-    if (Array.isArray(dataFunction)) {
-      for (const func of dataFunction) {
-        const functionName = func?.name?.toLowerCase();
-        if (!functionName) {
-          throw new AoijsError(
-            "customFunction",
-            "you did not specify the 'name' parameter",
-          );
-        }
-
-        if (this.availableFunctions.has(functionName)) {
-          throw new AoijsError(
-            "customFunction",
-            `the function "${functionName}" already exists; to overwrite it, use the <AoiClient>.editFunction method!`,
-          );
-        }
-
-        if ((func?.version || 0) > version) {
-          throw new AoijsError(
-            "customFunction",
-            `to load this function ${functionName}, the library version must be equal to or greater than ${func?.version || 0}`,
-          );
-        }
-
-        this.availableFunctions.set(functionName, func);
-      }
-    } else {
-      const functionName = dataFunction?.name?.toLowerCase();
+  createCustomFunction(dataFunction: DataFunction | DataFunction[]) {
+    const arrayDataFunction = Array.isArray(dataFunction)
+      ? dataFunction
+      : [dataFunction];
+    for (const func of arrayDataFunction) {
+      const functionName = func?.name?.toLowerCase();
       if (!functionName) {
         throw new AoijsError(
           "customFunction",
@@ -138,40 +114,50 @@ class AoiBase extends TelegramBot {
         );
       }
 
-      if ((dataFunction?.version || 0) > version) {
+      if ((func?.version || 0) > version) {
         throw new AoijsError(
           "customFunction",
-          `to load this function ${functionName}, the library version must be equal to or greater than ${dataFunction?.version || 0}`,
+          `to load this function ${functionName}, the library version must be equal to or greater than ${func?.version || 0}`,
         );
       }
-
-      this.availableFunctions.set(functionName, dataFunction);
+      if (func.type === "aoitelegram") {
+        this.availableFunctions.set(functionName, {
+          name: functionName,
+          brackets: func.params?.length! > 0,
+          fields: func.params?.map((name) => {
+            return {
+              name: name.replace("?", "").replace("...", ""),
+              required: !name.endsWith("?"),
+              rest: name.startsWith("..."),
+            };
+          }),
+          callback: async (ctx, fun) => {
+            const result = await this.evaluateCommand(
+              {
+                name: func.name,
+                reverseReading: func.reverseReading,
+                code: func.code,
+              },
+              ctx.eventData,
+            );
+            return fun.resolve(result);
+          },
+        });
+      } else
+        this.availableFunctions.set(
+          functionName,
+          func as unknown as CustomJSFunction,
+        );
     }
     return this;
   }
 
-  ensureFunction(dataFunction: DataFunction | DataFunction[]) {
-    if (Array.isArray(dataFunction)) {
-      for (const func of dataFunction) {
-        const functionName = func?.name?.toLowerCase();
-        if (!functionName) {
-          throw new AoijsError(
-            "customFunction",
-            "you did not specify the 'name' parameter",
-          );
-        }
-
-        if ((func?.version || 0) > version) {
-          throw new AoijsError(
-            "customFunction",
-            `to load this function ${functionName}, the library version must be equal to or greater than ${func?.version || 0}`,
-          );
-        }
-
-        this.availableFunctions.set(functionName, func);
-      }
-    } else {
-      const functionName = dataFunction?.name?.toLowerCase();
+  ensureCustomFunction(dataFunction: DataFunction | DataFunction[]) {
+    const arrayDataFunction = Array.isArray(dataFunction)
+      ? dataFunction
+      : [dataFunction];
+    for (const func of arrayDataFunction) {
+      const functionName = func?.name?.toLowerCase();
       if (!functionName) {
         throw new AoijsError(
           "customFunction",
@@ -179,19 +165,46 @@ class AoiBase extends TelegramBot {
         );
       }
 
-      if ((dataFunction?.version || 0) > version) {
+      if ((func?.version || 0) > version) {
         throw new AoijsError(
           "customFunction",
-          `to load this function ${functionName}, the library version must be equal to or greater than ${dataFunction?.version || 0}`,
+          `to load this function ${functionName}, the library version must be equal to or greater than ${func?.version || 0}`,
         );
       }
 
-      this.availableFunctions.set(functionName, dataFunction);
+      if (func.type === "aoitelegram") {
+        this.availableFunctions.set(functionName, {
+          name: functionName,
+          brackets: func.params?.length! > 0,
+          fields: func.params?.map((name) => {
+            return {
+              name: name.replace("?", "").replace("...", ""),
+              required: name.endsWith("?"),
+              rest: name.startsWith("..."),
+            };
+          }),
+          callback: async (ctx, fun) => {
+            const result = await this.evaluateCommand(
+              {
+                name: func.name,
+                reverseReading: func.reverseReading,
+                code: func.code,
+              },
+              ctx.eventData,
+            );
+            return fun.resolve(result);
+          },
+        });
+      } else
+        this.availableFunctions.set(
+          functionName,
+          func as unknown as CustomJSFunction,
+        );
     }
     return this;
   }
 
-  removeFunction(functionName: string | string[]) {
+  removeFunction(functionName: string | string[]): boolean {
     const functionNames = Array.isArray(functionName)
       ? functionName
       : [functionName];
@@ -216,7 +229,7 @@ class AoiBase extends TelegramBot {
     return true;
   }
 
-  editFunction(dataFunction: DataFunction | DataFunction[]) {
+  editCustomFunction(dataFunction: DataFunction | DataFunction[]) {
     const functionsToEdit = Array.isArray(dataFunction)
       ? dataFunction
       : [dataFunction];
@@ -237,13 +250,42 @@ class AoiBase extends TelegramBot {
         );
       }
 
-      this.availableFunctions.set(lowerCaseName, func);
+      if (func.type === "aoitelegram") {
+        this.availableFunctions.set(lowerCaseName, {
+          name: lowerCaseName,
+          brackets: func.params?.length! > 0,
+          fields: func.params?.map((name) => {
+            return {
+              name: name.replace("?", "").replace("...", ""),
+              required: name.endsWith("?"),
+              rest: name.startsWith("..."),
+            };
+          }),
+          callback: async (ctx, fun) => {
+            const result = await this.evaluateCommand(
+              {
+                name: func.name,
+                reverseReading: func.reverseReading,
+                code: func.code,
+              },
+              ctx.eventData,
+            );
+            return fun.resolve(result);
+          },
+        });
+      } else
+        this.availableFunctions.set(
+          lowerCaseName,
+          func as unknown as CustomJSFunction,
+        );
     }
 
     return true;
   }
 
-  getFunction(functionName: string | string[]) {
+  getCustomFunction(functionName: string): CustomJSFunction | undefined;
+  getCustomFunction(functionName: string[]): (CustomJSFunction | undefined)[];
+  getCustomFunction(functionName: string | string[]) {
     const functionNames = Array.isArray(functionName)
       ? functionName
       : [functionName];
@@ -262,23 +304,27 @@ class AoiBase extends TelegramBot {
     }
   }
 
-  hasFunction(functionName: string | string[]) {
+  hasCustomFunction(functionName: string): boolean;
+  hasCustomFunction(
+    functionName: string[],
+  ): { name: string; result: boolean }[];
+  hasCustomFunction(functionName: string | string[]) {
     if (Array.isArray(functionName)) {
       return functionName.map((fun) => ({
         name: fun,
         result: this.availableFunctions.has(fun),
       }));
     } else if (typeof functionName === "string") {
-      return this.availableFunctions.has(functionName);
+      return this.availableFunctions.has(functionName) as boolean;
     } else {
       throw new AoijsError(
         "customFunction",
-        `the specified type should be "string | string[]`,
+        `the specified type should be "string | string[]"`,
       );
     }
   }
 
-  get countFunction() {
+  get countCustomFunction() {
     return this.availableFunctions.size;
   }
 
@@ -498,24 +544,7 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.database.on("create", async (newVariable) => {
-      this.ensureFunction({
-        name: "$newVariable",
-        callback: (context) => {
-          const result = getObjectKey(newVariable, context.inside as string);
-          return typeof result === "object" ? JSON.stringify(result) : result;
-        },
-      });
-      await this.evaluateCommand(
-        { event: "variableCreate" },
-        options.code,
-        {
-          newVariable,
-          telegram: this,
-        },
-        options.useNative,
-      );
-    });
+    this.#addCommands("variableCreate", options);
     return this;
   }
 
@@ -537,24 +566,7 @@ class AoiBase extends TelegramBot {
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.database.on("delete", async (oldVariable) => {
-      this.ensureFunction({
-        name: "$oldVariable",
-        callback: (context) => {
-          const result = getObjectKey(oldVariable, context.inside as string);
-          return typeof result === "object" ? JSON.stringify(result) : result;
-        },
-      });
-      await this.evaluateCommand(
-        { event: "variableDelete" },
-        options.code,
-        {
-          oldVariable,
-          telegram: this,
-        },
-        options.useNative,
-      );
-    });
+    this.#addCommands("variableDelete", options);
     return this;
   }
 

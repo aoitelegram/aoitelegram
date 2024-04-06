@@ -7,7 +7,6 @@ import { setInterval, clearInterval } from "long-timeout";
 interface AwaitedDescription {
   awaited: string;
   code: string;
-  useNative?: Function[];
   [key: string]: unknown;
 }
 
@@ -74,7 +73,6 @@ class Awaited {
             { event: "awaited" },
             awaitedDescription.code,
             context,
-            awaitedDescription.useNative,
           );
           currentIndex++;
         }, awaited.milliseconds);

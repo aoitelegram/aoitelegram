@@ -12,7 +12,7 @@ import { CustomEvent } from "./CustomEvent";
 import { AoiExtension } from "./AoiExtension";
 import { LoadCommands } from "./LoadCommands";
 import { AoiManagerOptions } from "./AoiManager";
-import { AoiBase } from "./AoiBase";
+import { AoiBase, type ICommandsOptions } from "./AoiBase";
 import { AoiWarning, AoiWarningOptions } from "./AoiWarning";
 import { Action, ActionDescription } from "../helpers/Action";
 import { Callback, CallbackDescription } from "../helpers/Callback";
@@ -28,8 +28,8 @@ class AoiClient extends AoiBase {
   loadCommands?: LoadCommands;
   timeoutManager: TimeoutManager;
   awaitedManager: AwaitedManager;
-  functionError: boolean | undefined;
-  sendMessageError: boolean | undefined;
+  functionError?: boolean = false;
+  sendMessageError?: boolean = true;
   registerAction: Action = new Action(this);
   registerAwaited: Awaited = new Awaited(this);
   registerTimeout: Timeout = new Timeout(this);
@@ -43,7 +43,6 @@ class AoiClient extends AoiBase {
       requestOptions?: RequestInit;
       database?: AoiManagerOptions;
       disableFunctions?: string[];
-      native?: Function[];
       extensions?: AoiExtension[];
       functionError?: boolean;
       sendMessageError?: boolean;
@@ -69,12 +68,11 @@ class AoiClient extends AoiBase {
       );
     }
 
-    this.warningManager = new AoiWarning(parameters.autoUpdate || {});
     this.functionError = parameters.functionError;
     this.sendMessageError = parameters.sendMessageError;
     this.timeoutManager = new TimeoutManager(this);
     this.awaitedManager = new AwaitedManager(this);
-    this.addNative(parameters.native || []);
+    this.warningManager = new AoiWarning(parameters.autoUpdate || {});
   }
 
   addCommand(options: CommandDescription) {
@@ -171,56 +169,17 @@ class AoiClient extends AoiBase {
     return this;
   }
 
-  addNative(options: Function[]) {
-    if (!Array.isArray(options)) {
-      throw new AoijsError(
-        "parameter",
-        "the parameter should contain an array of functions",
-      );
-    }
-
-    const allFuncs = options.every(
-      (func) => typeof func === "function" && func.name !== "",
-    );
-    if (!allFuncs) {
-      throw new AoijsError(
-        "parameter",
-        "the parameter should contain an array of functions",
-      );
-    }
-
-    for (const func of options) {
-      this.addFunction({
-        name: `$${func.name}`,
-        callback: async (context) => {
-          if (context.isError) return;
-          const splitsParsed = context.splits.map(toConvertParse);
-          const result = await func(context, splitsParsed);
-          return typeof result === "object" && result !== null
-            ? JSON.stringify({ ...result })
-            : result;
-        },
-      });
-    }
-    return this;
-  }
-
-  functionErrorCommand(options: { code: string; useNative?: Function[] }) {
+  functionErrorCommand(options: ICommandsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'code' parameter",
       );
     }
-    this.on("functionError", async (context, event) => {
-      event.telegram.functionError = false;
-      this.evaluateCommand(
-        { event: "functionError" },
-        options.code,
-        event,
-        options.useNative,
-      );
-      event.telegram.functionError = true;
+    this.on("functionError", async (context, telegram) => {
+      telegram.functionError = false;
+      this.evaluateCommand(options, context);
+      telegram.functionError = true;
     });
     return this;
   }
@@ -275,8 +234,8 @@ class AoiClient extends AoiBase {
           return;
 
         this.availableFunctions.set(dataFunctionName, dataFunction);
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error(err);
       }
     };
 
@@ -289,8 +248,8 @@ class AoiClient extends AoiBase {
         } else if (itemPath.endsWith(".js")) {
           await processFile(itemPath);
         }
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error(err);
       }
     };
 
@@ -299,8 +258,8 @@ class AoiClient extends AoiBase {
       for (const item of items) {
         await processItem(item);
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
     }
   }
 }

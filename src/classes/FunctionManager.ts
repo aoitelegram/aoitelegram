@@ -1,5 +1,6 @@
 import { AoijsTypeError } from "./AoiError";
-import type { Container, Context } from "./core/";
+import type { AllPromise } from "./AoiTyping";
+import type { Container, ParserFunction } from "./core/";
 
 type IFunctionManager =
   | {
@@ -9,16 +10,20 @@ type IFunctionManager =
       fields?: {
         name?: string;
         required?: boolean;
+        rest?: boolean;
       }[];
       inside?: {
         name?: string;
         required?: boolean;
       };
-      callback: (ctx: Container & Context) => {
+      callback: (
+        ctx: Container,
+        func: ParserFunction,
+      ) => AllPromise<{
         id: string;
         replace: string;
         with: string;
-      };
+      }>;
     }
   | {
       name: string;
@@ -36,6 +41,7 @@ class FunctionManager {
   fields: {
     name?: string;
     required?: boolean;
+    rest?: boolean;
   }[];
   inside: {
     name?: string;
@@ -43,8 +49,8 @@ class FunctionManager {
   };
   callback?: (
     ctx: Container,
-    func: Context,
-  ) => { id: string; replace: string; with: string };
+    func: ParserFunction,
+  ) => AllPromise<{ id: string; replace: string; with: string }>;
   code?: string;
 
   constructor(
@@ -78,7 +84,7 @@ class FunctionManager {
     return this;
   }
 
-  setFields(fields: { name?: string; required: boolean }) {
+  setFields(fields: { name?: string; required: boolean; rest?: boolean }) {
     if (this.type === "aoitelegram") {
       throw new AoijsTypeError(
         "Methods for type 'javascript' are not accessible when the type is set to 'aoitelegram'",
@@ -119,11 +125,14 @@ class FunctionManager {
   }
 
   onCallback(
-    callback: (ctx: Container & Context) => {
+    callback: (
+      ctx: Container,
+      func: ParserFunction,
+    ) => AllPromise<{
       id: string;
       replace: string;
       with: string;
-    },
+    }>,
   ) {
     if (this.type === "aoitelegram") {
       throw new AoijsTypeError(

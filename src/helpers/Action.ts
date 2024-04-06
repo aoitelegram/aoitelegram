@@ -5,7 +5,6 @@ interface ActionDescription {
   data: string;
   answer?: boolean;
   code: string;
-  useNative?: Function[];
   [key: string]: unknown;
 }
 
@@ -43,7 +42,6 @@ class Action {
           { event: "callback_query" },
           actionDescription.code,
           query,
-          actionDescription.useNative,
         );
       }
     });

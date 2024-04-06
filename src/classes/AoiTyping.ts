@@ -1,8 +1,13 @@
 import type { AoiClient } from "./AoiClient";
 import type { AoiManager } from "./AoiManager";
-import type { Container, Context } from "./core/";
-import type { Context as EventContext, IEventFunctions } from "telegramsjs";
+import type { Context, IEventFunctions } from "telegramsjs";
 import type { ValueDatabase } from "../helpers/manager/TimeoutManager";
+import type {
+  Container,
+  ParserFunction,
+  ICallbackResolve,
+  ICallbackReject,
+} from "./core/";
 import {
   Update,
   UserFromGetMe,
@@ -39,36 +44,35 @@ interface EventHandlers extends IEventFunctions {
   awaited: (event: AwaitedEvent, data: unknown) => void;
   functionError: (
     client: AoiClient,
-    eventContext: EventContext & { telegram: AoiClient },
+    eventContext: Context & { telegram: AoiClient },
   ) => void;
   addTimeout: (eventContext: ValueDatabase) => void;
 }
 
-type DataFunction =
-  | {
-      name: string;
-      type: "aoitelegram";
-      version?: string;
-      brackets?: boolean;
-      useNative?: Function[];
-      params?: string[];
-      code: string;
-    }
-  | {
-      name: string;
-      type?: "javascript";
-      brackets?: boolean;
-      fields?: { name?: string; required: boolean };
-      optional?: boolean;
-      version?: string;
-      callback: (context: Container & Context) => {
-        id: string;
-        replace: string;
-        with: string;
-      };
-    };
+interface CustomAoiFunction {
+  name: string;
+  type: "aoitelegram";
+  version?: string;
+  reverseReading?: boolean;
+  params?: string[];
+  code: string;
+}
 
-type ContextEvent = EventContext &
+interface CustomJSFunction {
+  name: string;
+  type?: "javascript";
+  fields?: { required: boolean; rest?: boolean }[];
+  brackets?: boolean;
+  version?: string;
+  callback: (
+    context: Container,
+    func: ParserFunction,
+  ) => AllPromise<ICallbackResolve | ICallbackReject>;
+}
+
+type DataFunction = CustomAoiFunction | CustomJSFunction;
+
+type ContextEvent = Context &
   UserFromGetMe &
   Message &
   MessageReactionUpdated &
@@ -82,15 +86,24 @@ type ContextEvent = EventContext &
   ChatMemberUpdated &
   ChatJoinRequest &
   ChatBoostUpdated &
-  ChatBoostRemoved & { telegram: AoiClient };
+  ChatBoostRemoved & { api: AoiClient };
 
 type DataEvent = {
   listen: string;
   type: string;
   once?: boolean;
   code?: string;
-  useNative?: Function[];
   callback?: (...args: any[]) => void;
 };
 
-export { EventHandlers, ContextEvent, DataFunction, DataEvent };
+type AllPromise<T> = T | Promise<T>;
+
+export {
+  EventHandlers,
+  ContextEvent,
+  CustomJSFunction,
+  CustomAoiFunction,
+  DataFunction,
+  DataEvent,
+  AllPromise,
+};

@@ -1,19 +1,19 @@
 import { Container } from "./Container";
-import type { Context } from "./Context";
+import { getObjectKey } from "../../utils/";
 import { AoijsTypeError } from "../AoiError";
-import type { ICommandsOptions } from "../AoiBase";
-import type { Collection } from "@telegram.ts/collection";
 import type { ContextEvent } from "../AoiTyping";
+import type { ICommandsOptions } from "../AoiBase";
+import type { ParserFunction } from "./ParserFunction";
 
 class Interpreter {
   container: Container;
   inputData: ICommandsOptions & {
-    functions: Collection<string, Context>;
+    functions: ParserFunction[];
   };
 
   constructor(
     inputData: ICommandsOptions & {
-      functions: Collection<string, Context>;
+      functions: ParserFunction[];
     },
     ctx: ContextEvent,
   ) {
@@ -21,27 +21,101 @@ class Interpreter {
     this.container = new Container(ctx);
   }
 
-  async runInput(reverseReading?: boolean) {
+  async runInput() {
     let textResult = this.inputData.code;
-    const reverseFunctions = reverseReading
-      ? this.inputData.functions.toReversed()
-      : this.inputData.functions;
 
-    for await (const [name, func] of reverseFunctions) {
+    for await (const dataFunction of this.inputData.functions) {
       try {
-        const result = await func.callback(Object.assign(func, this.container));
+        const result = await dataFunction.structures.callback(
+          this.container,
+          dataFunction,
+        );
         if (typeof result !== "object") {
           throw new AoijsTypeError(
-            `The function "${name}" should return an object with the required values, but it received type: ${typeof result}.`,
+            `The function "${
+              dataFunction.structures.name
+            }" should return an object with the required values, but it received type: ${typeof result}.`,
           );
         }
+
+        if ("reason" in result) {
+          this.#sendErrorMessage(
+            result.reason,
+            dataFunction.structures.name,
+            result.custom,
+          );
+          break;
+        }
+
         textResult = textResult.replace(result.id, result.with);
       } catch (err) {
-        console.log(err);
+        this.#sendErrorMessage(`${err}`, dataFunction.structures.name);
         break;
       }
     }
     return textResult;
+  }
+
+  #sendErrorMessage(
+    error: string,
+    functionName: string,
+    custom: boolean = false,
+  ) {
+    if (
+      !custom &&
+      !this.container?.suppressErrors &&
+      this.container?.telegram?.functionError
+    ) {
+      this.container.telegram.ensureCustomFunction({
+        name: "$handleerror",
+        brackets: true,
+        fields: [
+          {
+            required: false,
+          },
+        ],
+        callback: async (context, func) => {
+          const options = await func.resolveAll(context);
+
+          const dataError = {
+            name: functionName,
+            command: this.inputData.name,
+            error,
+          };
+          const result = getObjectKey(dataError, options);
+          return func.resolve(result);
+        },
+      });
+      this.container.telegram.emit(
+        "functionError",
+        this.container.eventData,
+        this.container.telegram,
+      );
+    }
+
+    if (
+      !custom &&
+      this.container?.suppressErrors &&
+      this.container.eventData?.sendMessage
+    ) {
+      return this.container.eventData.sendMessage(
+        this.container.suppressErrors,
+        {
+          parse_mode: "HTML",
+        },
+      );
+    } else if (
+      this.container?.telegram?.sendMessageError &&
+      !this.container?.telegram?.functionError &&
+      this.container.eventData?.sendMessage
+    ) {
+      return this.container.eventData.sendMessage(
+        custom ? error : `❌ <b>${functionName}:</b> <code>${error}</code>`,
+        { parse_mode: "HTML" },
+      );
+    } else if (!this.container?.telegram?.functionError) {
+      throw new AoijsTypeError(error);
+    }
   }
 }
 

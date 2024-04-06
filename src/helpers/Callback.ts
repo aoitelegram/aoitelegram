@@ -6,7 +6,6 @@ import { Collection } from "@telegram.ts/collection";
 interface AoiCallbackDescription {
   name: string;
   type: "aoitelegram";
-  useNative?: Function[];
   code: string;
 }
 
@@ -82,7 +81,6 @@ class Callback {
         { event: "callback" },
         callback.code,
         context,
-        callback.useNative,
       );
 
       return `${resultFunc || result}`;

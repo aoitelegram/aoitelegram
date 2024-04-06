@@ -99,7 +99,6 @@ class CustomEvent extends EventEmitter {
           { event: options.listen },
           options.code as string,
           { ...args, telegram: this.aoitelegram },
-          options.useNative,
         );
       };
 

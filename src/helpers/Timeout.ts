@@ -7,7 +7,6 @@ import { ValueDatabase } from "./manager/TimeoutManager";
 interface TimeoutDescription {
   id: string;
   code: string;
-  useNative?: Function[];
   [key: string]: unknown;
 }
 
@@ -60,7 +59,6 @@ class Timeout {
           { event: "timeout" },
           timeoutDescription.code,
           timeoutData,
-          timeoutDescription.useNative,
         );
 
         this.telegram.timeoutManager.timeouts.delete(
