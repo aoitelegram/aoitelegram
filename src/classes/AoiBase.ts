@@ -11,7 +11,7 @@ import { ContextEvent, EventHandlers } from "./AoiTyping";
 import { AoiManager, AoiManagerOptions } from "./AoiManager";
 import { TelegramBot, Collection, Context } from "telegramsjs";
 
-interface ICommandsOptions {
+interface IEventsOptions {
   name: string;
   every?: number;
   description?: string;
@@ -22,7 +22,7 @@ interface ICommandsOptions {
 
 class AoiBase extends TelegramBot {
   database: AoiManager = {} as AoiManager;
-  commands: Collection<string, ICommandsOptions[]> = new Collection();
+  events: Collection<string, IEventsOptions[]> = new Collection();
   availableFunctions: Collection<string, CustomJSFunction> = new Collection();
   availableCollectFunctions = [
     "callbackQuery",
@@ -77,7 +77,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  async evaluateCommand(command: ICommandsOptions, eventData: any) {
+  async evaluateCommand(command: Record<string, any>, eventData: any) {
     try {
       const complited = new Complite({
         code: command.code,
@@ -328,249 +328,249 @@ class AoiBase extends TelegramBot {
     return this.availableFunctions.size;
   }
 
-  loopCommand(options: ICommandsOptions) {
+  loopCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("loop", options);
+    this.#addEvents("loop", options);
     return this;
   }
 
-  readyCommand(options: ICommandsOptions) {
+  readyCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("ready", options);
+    this.#addEvents("ready", options);
     return this;
   }
 
-  messageCommand(options: ICommandsOptions) {
+  messageCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("message", options);
+    this.#addEvents("message", options);
     return this;
   }
 
-  callbackQueryCommand(options: ICommandsOptions) {
+  callbackQueryCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("callbackQuery", options);
+    this.#addEvents("callbackQuery", options);
     return this;
   }
 
-  messageReactionCommand(options: ICommandsOptions) {
+  messageReactionCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("messageReaction", options);
+    this.#addEvents("messageReaction", options);
     return this;
   }
 
-  messageReactionCountCommand(options: ICommandsOptions) {
+  messageReactionCountCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("messageReactionCount", options);
+    this.#addEvents("messageReactionCount", options);
     return this;
   }
 
-  editedMessageCommand(options: ICommandsOptions) {
+  editedMessageCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("editedMessage", options);
+    this.#addEvents("editedMessage", options);
     return this;
   }
 
-  channelPostCommand(options: ICommandsOptions) {
+  channelPostCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("channelPost", options);
+    this.#addEvents("channelPost", options);
     return this;
   }
 
-  editedChannelPostCommand(options: ICommandsOptions) {
+  editedChannelPostCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("editedChannelPost", options);
+    this.#addEvents("editedChannelPost", options);
     return this;
   }
 
-  inlineQueryCommand(options: ICommandsOptions) {
+  inlineQueryCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("inlineQuery", options);
+    this.#addEvents("inlineQuery", options);
     return this;
   }
 
-  shippingQueryCommand(options: ICommandsOptions) {
+  shippingQueryCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("shippingQuery", options);
+    this.#addEvents("shippingQuery", options);
     return this;
   }
 
-  preCheckoutQueryCommand(options: ICommandsOptions) {
+  preCheckoutQueryCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("preCheckoutQuery", options);
+    this.#addEvents("preCheckoutQuery", options);
     return this;
   }
 
-  pollCommand(options: ICommandsOptions) {
+  pollCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("poll", options);
+    this.#addEvents("poll", options);
     return this;
   }
 
-  pollAnswerCommand(options: ICommandsOptions) {
+  pollAnswerCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("pollAnswer", options);
+    this.#addEvents("pollAnswer", options);
     return this;
   }
 
-  chatMemberCommand(options: ICommandsOptions) {
+  chatMemberCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("chatMember", options);
+    this.#addEvents("chatMember", options);
     return this;
   }
 
-  myChatMemberCommand(options: ICommandsOptions) {
+  myChatMemberCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("myChatMember", options);
+    this.#addEvents("myChatMember", options);
     return this;
   }
 
-  chatJoinRequestCommand(options: ICommandsOptions) {
+  chatJoinRequestCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("chatJoinRequest", options);
+    this.#addEvents("chatJoinRequest", options);
     return this;
   }
 
-  chatBoostCommand(options: ICommandsOptions) {
+  chatBoostCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("chatBoost", options);
+    this.#addEvents("chatBoost", options);
     return this;
   }
 
-  removedChatBoostCommand(options: ICommandsOptions) {
+  removedChatBoostCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("removedChatBoost", options);
+    this.#addEvents("removedChatBoost", options);
     return this;
   }
 
-  variableCreateCommand(options: ICommandsOptions) {
+  variableCreateCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("variableCreate", options);
+    this.#addEvents("variableCreate", options);
     return this;
   }
 
-  variableUpdateCommand(options: ICommandsOptions) {
+  variableUpdateCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("variableUpdate", options);
+    this.#addEvents("variableUpdate", options);
     return this;
   }
 
-  variableDeleteCommand(options: ICommandsOptions) {
+  variableDeleteCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
         "you did not specify the 'options.code' parameter",
       );
     }
-    this.#addCommands("variableDelete", options);
+    this.#addEvents("variableDelete", options);
     return this;
   }
 
-  #addCommands(
+  #addEvents(
     type:
       | "callbackQuery"
       | "editedMessage"
@@ -594,17 +594,17 @@ class AoiBase extends TelegramBot {
       | "editedChannelPost"
       | "messageReactionCount"
       | "removedChatBoost",
-    command: ICommandsOptions,
+    command: IEventsOptions,
   ) {
     if (!this.availableCollectFunctions.includes(type)) {
       throw new AoijsTypeError(
         `The specified type ${type} does not exist for recording, here are all the available types: ${this.availableCollectFunctions.join(", ")}`,
       );
     }
-    if (this.commands.has(type)) {
-      const commandsType = this.commands.get(type);
-      this.commands.set(type, [...(commandsType || []), command]);
-    } else this.commands.set(type, [command]);
+    if (this.events.has(type)) {
+      const eventsType = this.events.get(type);
+      this.events.set(type, [...(eventsType || []), command]);
+    } else this.events.set(type, [command]);
   }
 
   async variables(options: { [key: string]: any }, tables?: string | string[]) {
@@ -618,4 +618,4 @@ class AoiBase extends TelegramBot {
   }
 }
 
-export { AoiBase, ICommandsOptions };
+export { AoiBase, IEventsOptions };

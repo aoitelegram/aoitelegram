@@ -5,18 +5,15 @@ import type { Collection } from "@telegram.ts/collection";
 
 class Complite {
   code: string;
-  checkBrackets?: boolean;
   reverseFunctions?: boolean;
   availableFunctions: Collection<string, CustomJSFunction>;
 
   constructor(parameters: {
     code: string;
-    checkBrackets?: boolean;
     reverseFunctions?: boolean;
     availableFunctions: Collection<string, CustomJSFunction>;
   }) {
     this.code = parameters.code;
-    this.checkBrackets = parameters?.checkBrackets;
     this.reverseFunctions = parameters?.reverseFunctions;
     this.availableFunctions = parameters.availableFunctions;
     parameters.availableFunctions.forEach((value, key) => {
@@ -36,10 +33,6 @@ class Complite {
         .join("|")})`,
       "g",
     );
-
-    if (this.checkBrackets) {
-      this.checkBracketsComplite(regExpFunc);
-    }
 
     for (const content of this.code.split(/\$/g).reverse()) {
       const [functionName] = `$${content}`.match(regExpFunc) || [];
@@ -119,21 +112,6 @@ class Complite {
         ? loadedFunctions.reverse()
         : loadedFunctions,
     };
-  }
-
-  checkBracketsComplite(regExp: RegExp) {
-    const checkFunctions = this.code.match(regExp) || [];
-    for (const name of checkFunctions) {
-      const findFunc = this.availableFunctions.find(
-        (value, key) => key === name,
-      );
-      if (findFunc) {
-        this.code = this.code.replace(
-          new RegExp(`\\${name}`, "g"),
-          findFunc.name,
-        );
-      }
-    }
   }
 
   replaceLast(content: string, search: string, toReplace: string) {

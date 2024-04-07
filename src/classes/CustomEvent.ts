@@ -84,22 +84,25 @@ class CustomEvent extends EventEmitter {
 
     if ((options.type === "aoitelegram" || !options.type) && options.code) {
       const eventHandler = async (...args: string[]) => {
-        this.aoitelegram.editFunction({
+        this.aoitelegram.editCustomFunction({
           name: "$eventData",
-          callback: (context) => {
-            return !context.inside
-              ? JSON.stringify({ ...args })
-              : context.inside
-                ? getObjectKey({ ...args }, context.inside)
-                : JSON.stringify({ ...args });
+          brackets: true,
+          fields: [
+            {
+              required: false,
+            },
+          ],
+          callback: async (context, func) => {
+            const options = await func.resolveAll(context);
+            const result = getObjectKey({ ...args }, options);
+            return func.resolve(result);
           },
         });
 
-        await this.aoitelegram.evaluateCommand(
-          { event: options.listen },
-          options.code as string,
-          { ...args, telegram: this.aoitelegram },
-        );
+        await this.aoitelegram.evaluateCommand(options, {
+          ...args,
+          telegram: this.aoitelegram,
+        });
       };
 
       if (options.once === true) {

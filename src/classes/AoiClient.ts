@@ -12,13 +12,13 @@ import { CustomEvent } from "./CustomEvent";
 import { AoiExtension } from "./AoiExtension";
 import { LoadCommands } from "./LoadCommands";
 import { AoiManagerOptions } from "./AoiManager";
-import { AoiBase, type ICommandsOptions } from "./AoiBase";
+import { AoiBase, type IEventsOptions } from "./AoiBase";
 import { AoiWarning, AoiWarningOptions } from "./AoiWarning";
-import { Action, ActionDescription } from "../helpers/Action";
+import type { IActionDescription } from "./handlers/command/Action";
+import type { ICommandDescription } from "./handlers/command/Command";
 import { Callback, CallbackDescription } from "../helpers/Callback";
 import { TimeoutManager } from "../helpers/manager/TimeoutManager";
 import { AwaitedManager } from "../helpers/manager/AwaitedManager";
-import { Command, CommandDescription } from "../helpers/Command";
 import { Timeout, TimeoutDescription } from "../helpers/Timeout";
 import { Awaited, AwaitedDescription } from "../helpers/Awaited";
 
@@ -30,11 +30,11 @@ class AoiClient extends AoiBase {
   awaitedManager: AwaitedManager;
   functionError?: boolean = false;
   sendMessageError?: boolean = true;
-  registerAction: Action = new Action(this);
   registerAwaited: Awaited = new Awaited(this);
   registerTimeout: Timeout = new Timeout(this);
-  registerCommand: Command = new Command(this);
   registerCallback: Callback = new Callback(this);
+  commands: Collection<string, (ICommandDescription | IActionDescription)[]> =
+    new Collection();
   globalVars: Collection<string, unknown> = new Collection();
 
   constructor(
@@ -75,7 +75,7 @@ class AoiClient extends AoiBase {
     this.warningManager = new AoiWarning(parameters.autoUpdate || {});
   }
 
-  addCommand(options: CommandDescription) {
+  addCommand(options: ICommandDescription) {
     if (!options?.name) {
       throw new AoijsError(
         "parameter",
@@ -88,11 +88,14 @@ class AoiClient extends AoiBase {
         "you did not specify the 'code' parameter",
       );
     }
-    this.registerCommand.register(options);
+    if (!this.commands.has("command")) {
+      const commandsType = this.commands.get("command");
+      this.commands.set("command", [...(commandsType || []), options]);
+    } else this.commands.set("command", [options]);
     return this;
   }
 
-  addAction(options: ActionDescription) {
+  addAction(options: IActionDescription) {
     if (!options?.data) {
       throw new AoijsError(
         "parameter",
@@ -105,7 +108,10 @@ class AoiClient extends AoiBase {
         "you did not specify the 'code' parameter",
       );
     }
-    this.registerAction.register(options);
+    if (!this.commands.has("action")) {
+      const actionType = this.commands.get("action");
+      this.commands.set("action", [...(actionType || []), options]);
+    } else this.commands.set("action", [options]);
     return this;
   }
 
@@ -169,7 +175,7 @@ class AoiClient extends AoiBase {
     return this;
   }
 
-  functionErrorCommand(options: ICommandsOptions) {
+  functionErrorCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -190,8 +196,6 @@ class AoiClient extends AoiBase {
     if (autoUpdate.aoiWarning) {
       await this.warningManager.checkUpdates();
     }
-    this.registerCommand.handler();
-    this.registerAction.handler();
     this.registerTimeout.handler();
     this.registerAwaited.handler();
 

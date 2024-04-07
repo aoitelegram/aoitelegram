@@ -1,12 +1,12 @@
 import type { AoiClient } from "../AoiClient";
 
 function onPollAnswer(telegram: AoiClient) {
-  const commands = telegram.commands.get("pollAnswer");
-  if (!commands) return;
+  const events = telegram.events.get("pollAnswer");
+  if (!events) return;
 
-  for (const command of commands) {
+  for (const event of events) {
     telegram.on("poll_answer", async (ctx) => {
-      await telegram.evaluateCommand(command, ctx);
+      await telegram.evaluateCommand(event, ctx);
     });
   }
 }

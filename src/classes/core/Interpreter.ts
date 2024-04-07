@@ -2,17 +2,16 @@ import { Container } from "./Container";
 import { getObjectKey } from "../../utils/";
 import { AoijsTypeError } from "../AoiError";
 import type { ContextEvent } from "../AoiTyping";
-import type { ICommandsOptions } from "../AoiBase";
 import type { ParserFunction } from "./ParserFunction";
 
 class Interpreter {
   container: Container;
-  inputData: ICommandsOptions & {
+  inputData: Record<string, any> & {
     functions: ParserFunction[];
   };
 
   constructor(
-    inputData: ICommandsOptions & {
+    inputData: Record<string, any> & {
       functions: ParserFunction[];
     },
     ctx: ContextEvent,

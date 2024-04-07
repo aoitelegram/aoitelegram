@@ -1,12 +1,12 @@
 import type { AoiClient } from "../AoiClient";
 
 function onShippingQuery(telegram: AoiClient) {
-  const commands = telegram.commands.get("shippingQuery");
-  if (!commands) return;
+  const events = telegram.events.get("shippingQuery");
+  if (!events) return;
 
-  for (const command of commands) {
+  for (const event of events) {
     telegram.on("shipping_query", async (ctx) => {
-      await telegram.evaluateCommand(command, ctx);
+      await telegram.evaluateCommand(event, ctx);
     });
   }
 }

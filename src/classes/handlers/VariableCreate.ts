@@ -2,10 +2,10 @@ import { getObjectKey } from "../../utils";
 import type { AoiClient } from "../AoiClient";
 
 function onVariableCreate(telegram: AoiClient) {
-  const commands = telegram.commands.get("variableCreate");
-  if (!commands) return;
+  const events = telegram.events.get("variableCreate");
+  if (!events) return;
 
-  for (const command of commands) {
+  for (const event of events) {
     telegram.database.on("create", async (newVariable) => {
       telegram.ensureCustomFunction({
         name: "$newVariable",
@@ -21,7 +21,7 @@ function onVariableCreate(telegram: AoiClient) {
           return func.resolve(result);
         },
       });
-      await telegram.evaluateCommand(command, { newVariable, telegram });
+      await telegram.evaluateCommand(event, { newVariable, telegram });
     });
   }
 }

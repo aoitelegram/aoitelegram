@@ -1,12 +1,12 @@
 import type { AoiClient } from "../AoiClient";
 
 function onMessageReaction(telegram: AoiClient) {
-  const commands = telegram.commands.get("messageReaction");
-  if (!commands) return;
+  const events = telegram.events.get("messageReaction");
+  if (!events) return;
 
-  for (const command of commands) {
+  for (const event of events) {
     telegram.on("message_reaction", async (ctx) => {
-      await telegram.evaluateCommand(command, ctx);
+      await telegram.evaluateCommand(event, ctx);
     });
   }
 }

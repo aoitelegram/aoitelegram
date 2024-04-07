@@ -1,12 +1,12 @@
 import type { AoiClient } from "../AoiClient";
 
 function onCallbackQuery(telegram: AoiClient) {
-  const commands = telegram.commands.get("callbackQuery");
-  if (!commands) return;
+  const events = telegram.events.get("callbackQuery");
+  if (!events) return;
 
-  for (const command of commands) {
+  for (const event of events) {
     telegram.on("callback_query", async (ctx) => {
-      await telegram.evaluateCommand(command, ctx);
+      await telegram.evaluateCommand(event, ctx);
     });
   }
 }

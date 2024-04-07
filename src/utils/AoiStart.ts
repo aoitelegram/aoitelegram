@@ -24,10 +24,13 @@ import onReady from "../classes/handlers/Ready";
 import onEditedChannelPost from "../classes/handlers/EditedChannelPost";
 import onMessageReactionCount from "../classes/handlers/MessageReactionCount";
 import onRemovedChatBoost from "../classes/handlers/RemovedChatBoost";
+import onAction from "../classes/handlers/command/Action";
+import onCommand from "../classes/handlers/command/Command";
 
 export default async function aoiStart(telegram: AoiClient) {
   const username = `@${telegram.botInfo.username}`;
 
+  await onAction(telegram);
   await onCallbackQuery(telegram);
   await onEditedMessage(telegram);
   await onMyChatMember(telegram);
@@ -41,6 +44,7 @@ export default async function aoiStart(telegram: AoiClient) {
   await onPollAnswer(telegram);
   await onVariableDelete(telegram);
   await onChatJoinRequest(telegram);
+  await onCommand(telegram);
   await onMessage(telegram);
   await onPreCheckoutQuery(telegram);
   await onVariableUpdate(telegram);

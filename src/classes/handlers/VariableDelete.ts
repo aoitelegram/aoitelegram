@@ -2,10 +2,10 @@ import { getObjectKey } from "../../utils";
 import type { AoiClient } from "../AoiClient";
 
 function onVariableDelete(telegram: AoiClient) {
-  const commands = telegram.commands.get("variableDelete");
-  if (!commands) return;
+  const events = telegram.events.get("variableDelete");
+  if (!events) return;
 
-  for (const command of commands) {
+  for (const event of events) {
     telegram.database.on("create", async (oldVariable) => {
       telegram.ensureCustomFunction({
         name: "$oldVariable",
@@ -21,7 +21,7 @@ function onVariableDelete(telegram: AoiClient) {
           return func.resolve(result);
         },
       });
-      await telegram.evaluateCommand(command, { oldVariable, telegram });
+      await telegram.evaluateCommand(event, { oldVariable, telegram });
     });
   }
 }

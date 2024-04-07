@@ -1,11 +1,11 @@
 import type { AoiClient } from "../AoiClient";
 
 async function onReady(telegram: AoiClient) {
-  const commands = telegram.commands.get("ready");
-  if (!commands) return;
+  const events = telegram.events.get("ready");
+  if (!events) return;
 
-  for (const command of commands) {
-    await telegram.evaluateCommand(command, telegram);
+  for (const event of events) {
+    await telegram.evaluateCommand(event, telegram);
   }
 }
 

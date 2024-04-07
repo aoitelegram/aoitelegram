@@ -1,12 +1,12 @@
 import type { AoiClient } from "../AoiClient";
 
 function onMyChatMember(telegram: AoiClient) {
-  const commands = telegram.commands.get("myChatMember");
-  if (!commands) return;
+  const events = telegram.events.get("myChatMember");
+  if (!events) return;
 
-  for (const command of commands) {
+  for (const event of events) {
     telegram.on("my_chat_member", async (ctx) => {
-      await telegram.evaluateCommand(command, ctx);
+      await telegram.evaluateCommand(event, ctx);
     });
   }
 }

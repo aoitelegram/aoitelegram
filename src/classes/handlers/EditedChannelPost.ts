@@ -1,12 +1,12 @@
 import type { AoiClient } from "../AoiClient";
 
 function onEditedChannelPost(telegram: AoiClient) {
-  const commands = telegram.commands.get("editedChannelPost");
-  if (!commands) return;
+  const events = telegram.events.get("editedChannelPost");
+  if (!events) return;
 
-  for (const command of commands) {
+  for (const event of events) {
     telegram.on("edited_channel_post", async (ctx) => {
-      await telegram.evaluateCommand(command, ctx);
+      await telegram.evaluateCommand(event, ctx);
     });
   }
 }
