@@ -48,18 +48,24 @@ class Timeout {
 
         const parsedTimeoutData = JSON.parse(JSON.stringify(context.data));
 
-        this.telegram.ensureFunction({
+        this.telegram.ensureCustomFunction({
           name: "$timeoutData",
-          callback: (context) => {
-            return getObjectKey(parsedTimeoutData, context.inside as string);
+          brackets: true,
+          fields: [
+            {
+              required: false,
+            },
+          ],
+          callback: async (context, func) => {
+            const result = getObjectKey(
+              parsedTimeoutData,
+              await func.resolveAll(context),
+            );
+            return func.resolve(result);
           },
         });
 
-        await this.telegram.evaluateCommand(
-          { event: "timeout" },
-          timeoutDescription.code,
-          timeoutData,
-        );
+        await this.telegram.evaluateCommand(timeoutDescription, timeoutData);
 
         this.telegram.timeoutManager.timeouts.delete(
           `${context.id}_${context.date}`,

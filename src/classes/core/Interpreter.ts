@@ -38,11 +38,13 @@ class Interpreter {
         }
 
         if ("reason" in result) {
-          this.#sendErrorMessage(
-            result.reason,
-            dataFunction.structures.name,
-            result.custom,
-          );
+          if (result.reason) {
+            this.#sendErrorMessage(
+              result.reason,
+              dataFunction.structures.name,
+              result.custom,
+            );
+          }
           break;
         }
 

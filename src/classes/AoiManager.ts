@@ -1,17 +1,17 @@
-import { Collection } from "telegramsjs";
 import { AoiLogger } from "./AoiLogger";
 import { AoijsError } from "./AoiError";
+import { Collection } from "@telegram.ts/collection";
 import {
   StorageDB,
   MongoDB,
   FirebaseDB,
-  type EventDataMap,
+  type IEventDataMap,
   type StorageDBOptions,
   type MongoDBOptions,
   type FirebaseDBOptions,
 } from "@aoitelegram/database";
 
-type AoiManagerOptions = { logging: boolean } & (
+type AoiManagerOptions = { logging?: boolean } & (
   | { type: "storage"; options?: StorageDBOptions }
   | { type: "mongo"; url: string; options?: MongoDBOptions }
   | { type: "firebase"; url: string; options?: FirebaseDBOptions }
@@ -57,23 +57,23 @@ class AoiManager<Value = any> {
     this.database.connect();
   }
 
-  on<T extends keyof EventDataMap<Value, this["database"]>>(
+  on<T extends keyof IEventDataMap<Value, this["database"]>>(
     eventName: T,
-    listener: (args: EventDataMap<Value, this["database"]>[T]) => unknown,
+    listener: (args: IEventDataMap<Value, this["database"]>[T]) => void,
   ) {
     return this.database.on(eventName, listener);
   }
 
-  once<T extends keyof EventDataMap<Value, this["database"]>>(
+  once<T extends keyof IEventDataMap<Value, this["database"]>>(
     eventName: T,
-    listener: (args: EventDataMap<Value, this["database"]>[T]) => unknown,
+    listener: (args: IEventDataMap<Value, this["database"]>[T]) => void,
   ) {
     return this.database.once(eventName, listener);
   }
 
-  off<T extends keyof EventDataMap<Value, this["database"]>>(
+  off<T extends keyof IEventDataMap<Value, this["database"]>>(
     eventName: T,
-    listener: (args: EventDataMap<Value, this["database"]>[T]) => unknown,
+    listener: (args: IEventDataMap<Value, this["database"]>[T]) => void,
   ) {
     return this.database.off(eventName, listener);
   }

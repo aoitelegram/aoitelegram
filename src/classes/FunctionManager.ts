@@ -1,6 +1,11 @@
 import { AoijsTypeError } from "./AoiError";
 import type { AllPromise } from "./AoiTyping";
-import type { Container, ParserFunction } from "./core/";
+import type {
+  Container,
+  ParserFunction,
+  ICallbackResolve,
+  ICallbackReject,
+} from "./core/";
 
 type IFunctionManager =
   | {
@@ -19,11 +24,7 @@ type IFunctionManager =
       callback: (
         ctx: Container,
         func: ParserFunction,
-      ) => AllPromise<{
-        id: string;
-        replace: string;
-        with: string;
-      }>;
+      ) => AllPromise<ICallbackResolve | ICallbackReject>;
     }
   | {
       name: string;
@@ -50,7 +51,7 @@ class FunctionManager {
   callback?: (
     ctx: Container,
     func: ParserFunction,
-  ) => AllPromise<{ id: string; replace: string; with: string }>;
+  ) => AllPromise<ICallbackResolve | ICallbackReject>;
   code?: string;
 
   constructor(

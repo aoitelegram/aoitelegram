@@ -42,38 +42,44 @@ class Awaited {
         let currentIndex = 1;
         const intervalId = setInterval(async () => {
           const parsedAwaitedData = JSON.parse(JSON.stringify(awaited.data));
-          this.telegram.ensureFunction([
+          this.telegram.ensureCustomFunction([
             {
               name: "$awaitedData",
-              callback: (context) => {
+              brackets: true,
+              fields: [
+                {
+                  required: false,
+                },
+              ],
+              callback: async (context, func) => {
                 const response = getObjectKey(
                   parsedAwaitedData,
-                  context.inside as string,
+                  await func.resolveAll(context),
                 );
-                return typeof response === "object"
-                  ? JSON.stringify(response)
-                  : response;
+                return func.resolve(response);
               },
             },
             {
               name: "$break",
-              callback: () => clearInterval(intervalId),
+              brackets: false,
+              callback: (context, func) => {
+                clearInterval(intervalId);
+                return func.resolve();
+              },
             },
             {
               name: "$continue",
-              callback: (context) => (context.isError = true),
+              brackets: false,
+              callback: (context, func) => func.reject(),
             },
             {
               name: "$index",
-              callback: () => currentIndex,
+              brackets: false,
+              callback: (context, func) => func.resolve(currentIndex),
             },
           ]);
 
-          await this.telegram.evaluateCommand(
-            { event: "awaited" },
-            awaitedDescription.code,
-            context,
-          );
+          await this.telegram.evaluateCommand(awaitedDescription, context);
           currentIndex++;
         }, awaited.milliseconds);
       }

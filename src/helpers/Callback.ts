@@ -1,6 +1,6 @@
-import { Context } from "../classes/core/";
 import { AoiClient } from "../classes/AoiClient";
 import { AoijsError } from "../classes/AoiError";
+import type { Container } from "../classes/core/";
 import { Collection } from "@telegram.ts/collection";
 
 interface AoiCallbackDescription {
@@ -14,7 +14,7 @@ interface JsCallbackDescription {
   type?: "js";
   callback: (
     args: (string | undefined)[],
-    context: Context["event"],
+    context: Container["eventData"],
   ) => unknown;
 }
 
@@ -44,7 +44,11 @@ class Callback {
     return this;
   }
 
-  async runCallback(name: string, args: string[], context: Context["event"]) {
+  async runCallback(
+    name: string,
+    args: string[],
+    context: Container["eventData"],
+  ) {
     if (!name) {
       throw new AoijsError(
         "callback",
@@ -58,30 +62,41 @@ class Callback {
     if (callback.type === "aoitelegram" && callback.code) {
       let resultFunc = "";
 
-      this.telegram.ensureFunction({
+      this.telegram.ensureCustomFunction({
         name: "$arguments",
-        callback: (context) =>
-          context.splits[0] ? args[Number(context.splits[0]) - 1] : args[0],
-      });
-
-      this.telegram.ensureFunction({
-        name: "$argumentsCount",
-        callback: (context) => context.splits.length,
-      });
-
-      this.telegram.ensureFunction({
-        name: "$return",
-        callback: (context) => {
-          resultFunc = `${context.inside}`;
-          context.isError = true;
+        brackets: true,
+        fields: [
+          {
+            required: false,
+          },
+        ],
+        callback: async (context, func) => {
+          const result = Number(await func.resolveAll(context));
+          return func.resolve(result ? args[result - 1] : args[0]);
         },
       });
 
-      const result = await this.telegram.evaluateCommand(
-        { event: "callback" },
-        callback.code,
-        context,
-      );
+      this.telegram.ensureCustomFunction({
+        name: "$argumentsCount",
+        brackets: false,
+        callback: (context, func) => func.resolve(func.fields.length),
+      });
+
+      this.telegram.ensureCustomFunction({
+        name: "$return",
+        brackets: true,
+        fields: [
+          {
+            required: false,
+          },
+        ],
+        callback: async (context, func) => {
+          resultFunc = await func.resolveAll(context);
+          return func.reject();
+        },
+      });
+
+      const result = await this.telegram.evaluateCommand(callback, context);
 
       return `${resultFunc || result}`;
     }
