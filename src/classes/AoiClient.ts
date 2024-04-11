@@ -69,7 +69,10 @@ class AoiClient extends AoiBase {
     }
 
     this.functionError = parameters.functionError;
-    this.sendMessageError = parameters.sendMessageError;
+    this.sendMessageError =
+      typeof parameters.sendMessageError === "undefined"
+        ? true
+        : parameters.sendMessageError;
     this.timeoutManager = new TimeoutManager(this);
     this.awaitedManager = new AwaitedManager(this);
     this.warningManager = new AoiWarning(parameters.autoUpdate || {});

@@ -26,7 +26,7 @@ class ParserFunction {
   public structures: CustomJSFunction;
   public inside: string = "";
   public fields: string[] = [];
-  public id: string = randomUUID();
+  public id: string = `\{FUN\=${randomUUID()}\}`;
   public raw: string = "";
   public overloads = new Array<ParserFunction>();
   public parentID: string = "";

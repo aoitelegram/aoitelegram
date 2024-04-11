@@ -1,12 +1,13 @@
 import { AoijsTypeError } from "../AoiError";
 import { ParserFunction } from "./ParserFunction";
+import { Collection } from "@telegram.ts/collection";
 import type { CustomJSFunction } from "../AoiTyping";
-import type { Collection } from "@telegram.ts/collection";
 
-class Complite {
+class Compiler {
   code: string;
   reverseFunctions?: boolean;
   availableFunctions: Collection<string, CustomJSFunction>;
+  functionCounts: Collection<string, number> = new Collection();
 
   constructor(parameters: {
     code: string;
@@ -14,37 +15,48 @@ class Complite {
     availableFunctions: Collection<string, CustomJSFunction>;
   }) {
     this.code = parameters.code;
-    this.reverseFunctions = parameters?.reverseFunctions;
+    this.reverseFunctions = parameters.reverseFunctions;
     this.availableFunctions = parameters.availableFunctions;
-    parameters.availableFunctions.forEach((value, key) => {
+    this.processFunctionNames();
+  }
+
+  processFunctionNames() {
+    this.availableFunctions.forEach((func, name) => {
+      const lowerCaseName = name.toLowerCase();
+      const counts = this.functionCounts.get(lowerCaseName) || 1;
+      const functionNameWithCount = `${lowerCaseName}:${counts}:`;
+      this.functionCounts.set(lowerCaseName, counts + 1);
       this.code = this.code.replace(
-        new RegExp(`\\${key}`, "gi"),
-        key.toLowerCase(),
+        new RegExp(`\\${name}`, "gi"),
+        functionNameWithCount,
       );
     });
   }
 
-  complite() {
-    const functions: ParserFunction[] = [];
-    const regExpFunc = new RegExp(
+  compile() {
+    const parsedFunctions: ParserFunction[] = [];
+    const functionRegExp = new RegExp(
       `(${this.availableFunctions
         .keyArray()
-        .map((name) => `\\${name}`)
+        .map((name) => `\\${name}:\\d+:`)
         .join("|")})`,
       "g",
     );
 
-    for (const content of this.code.split(/\$/g).reverse()) {
-      const [functionName] = `$${content}`.match(regExpFunc) || [];
-      if (!functionName && !this.availableFunctions.has(`${functionName}`))
+    const segments = this.code.split(/\$/g).reverse();
+    for (const segment of segments) {
+      const matches = `$${segment}`.match(functionRegExp) || [];
+      const functionName = matches?.[0]?.split(":")[0];
+      if (!functionName || !this.availableFunctions.has(`${functionName}`))
         continue;
 
       const dataFunction = this.availableFunctions.get(`${functionName}`)!;
+      dataFunction.name = `${matches}`;
 
       const parserFunction = new ParserFunction(dataFunction);
       const segmentCode =
         this.code
-          .split(new RegExp(`\\${functionName}`, "gm"))
+          .split(new RegExp(`\\${matches}`, "gm"))
           .find((el, index, array) => array.length === index + 1) || "";
 
       if (
@@ -64,11 +76,11 @@ class Complite {
       }
 
       if (segmentCode.startsWith("[")) {
-        const fileds = segmentCode.slice(1).split(/\]/)[0];
-        parserFunction.raw = fileds;
-        parserFunction.setInside(this.unescapeCode(fileds));
+        const fields = segmentCode.slice(1).split(/\]/)[0].split(":")[0];
+        parserFunction.raw = fields;
+        parserFunction.setInside(this.unescapeCode(fields));
         parserFunction.setFields(
-          fileds.split(";").map((fileds) => this.unescapeCode(fileds)),
+          fields.split(";").map((field) => this.unescapeCode(field)),
         );
       }
 
@@ -77,15 +89,15 @@ class Complite {
         parserFunction.rawTotal,
         parserFunction.id,
       );
-      functions.push(parserFunction);
+      parsedFunctions.push(parserFunction);
     }
 
     const processedIds: string[] = [];
     const loadedFunctions: ParserFunction[] = [];
 
-    for (const func of functions.reverse()) {
+    for (const func of parsedFunctions.reverse()) {
       if (processedIds.includes(func.id)) {
-        const overloads = func.overloadsFor(functions);
+        const overloads = func.overloadsFor(parsedFunctions);
         if (overloads.length) {
           for (const overload of overloads) {
             func.addOverload(overload);
@@ -93,7 +105,7 @@ class Complite {
           }
         }
       } else {
-        const overloads = func.overloadsFor(functions);
+        const overloads = func.overloadsFor(parsedFunctions);
         if (overloads.length) {
           for (const overload of overloads) {
             func.addOverload(overload);
@@ -165,4 +177,4 @@ function throwBracketError(
   );
 }
 
-export { Complite };
+export { Compiler };

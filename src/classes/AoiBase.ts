@@ -4,7 +4,7 @@ import { getObjectKey } from "../utils/";
 import { DataFunction, CustomJSFunction } from "./AoiTyping";
 import { Update } from "@telegram.ts/types";
 import type { RequestInit } from "node-fetch";
-import { Interpreter, Complite } from "./core/";
+import { Interpreter, Compiler } from "./core/";
 import { AoijsError, AoijsTypeError } from "./AoiError";
 import { setInterval, clearInterval } from "long-timeout";
 import { ContextEvent, EventHandlers } from "./AoiTyping";
@@ -79,13 +79,13 @@ class AoiBase extends TelegramBot {
 
   async evaluateCommand(command: Record<string, any>, eventData: any) {
     try {
-      const complited = new Complite({
+      const complited = new Compiler({
         code: command.code,
         reverseFunctions: command.reverseReading,
         availableFunctions: this.availableFunctions,
       });
       const interpreter = new Interpreter(
-        Object.assign(complited.complite(), command),
+        Object.assign(complited.compile(), command),
         eventData,
       );
       return await interpreter.runInput();
