@@ -12,7 +12,6 @@ interface ICallbackResolve {
 
 interface ICallbackReject {
   id: string;
-  with: string;
   reason: string;
   custom?: boolean;
 }
@@ -26,7 +25,7 @@ class ParserFunction {
   public structures: CustomJSFunction;
   public inside: string = "";
   public fields: string[] = [];
-  public id: string = `\{FUN\=${randomUUID()}\}`;
+  public id: string = `{FUN=${randomUUID()}}`;
   public raw: string = "";
   public overloads = new Array<ParserFunction>();
   public parentID: string = "";
@@ -98,6 +97,10 @@ class ParserFunction {
           if (result === null) {
             return [];
           }
+          
+          if ("reason" in result) {
+            throw new AoijsTypeError(result.reason);
+          }
 
           modifiedField = modifiedField.replace(result.id, result.with);
         }
@@ -160,6 +163,9 @@ class ParserFunction {
       if (result === null) {
         return code;
       }
+                if ("reason" in result) {
+            throw new AoijsTypeError(result.reason);
+          }
       code = code.replace(result.id, result.with);
     }
 
@@ -193,7 +199,7 @@ class ParserFunction {
   }
 
   reject(reason?: string, custom?: boolean): ICallbackReject {
-    return { id: this.id, with: "", custom, reason: reason || "" };
+    return { id: this.id, custom, reason: reason || "" };
   }
 }
 

@@ -3,7 +3,7 @@ class ConditionChecker {
     return msg.includes(operator);
   }
 
-  static solveComparison(part: string, operator: string) {
+  static solveComparison(part: string, operator: string): boolean {
     const parts = part.split(operator);
     let pass = true;
 
@@ -33,7 +33,7 @@ class ConditionChecker {
     return pass;
   }
 
-  static solveAnd(part: string) {
+  static solveAnd(part: string): string {
     const conditions = part.split("&&");
     const finalConditions: string[] = [];
 
@@ -74,7 +74,7 @@ class ConditionChecker {
     return finalConditions.join("&&");
   }
 
-  static solveOr(part: string) {
+  static solveOr(part: string): string {
     const conditions = part.split("||");
     const finalConditions: string[] = [];
 
@@ -111,7 +111,7 @@ class ConditionChecker {
     return finalConditions.join("||");
   }
 
-  static solve(msg: string) {
+  static solve(msg: string): string {
     const parts = msg.split("(");
     const finalConditions: string[] = [];
 
@@ -133,6 +133,14 @@ class ConditionChecker {
     }
 
     return result;
+  }
+
+  static checkCondition(code: string): boolean {
+    try {
+      return eval(ConditionChecker.solve(code));
+    } catch {
+      return false;
+    }
   }
 }
 

@@ -22,14 +22,13 @@ class Compiler {
 
   processFunctionNames() {
     this.availableFunctions.forEach((func, name) => {
-      const lowerCaseName = name.toLowerCase();
-      const counts = this.functionCounts.get(lowerCaseName) || 1;
-      const functionNameWithCount = `${lowerCaseName}:${counts}:`;
-      this.functionCounts.set(lowerCaseName, counts + 1);
-      this.code = this.code.replace(
-        new RegExp(`\\${name}`, "gi"),
-        functionNameWithCount,
-      );
+      this.code = this.code.replace(new RegExp(`\\${name}`, "gi"), (search) => {
+        const lowerCaseName = name.toLowerCase();
+        const counts = this.functionCounts.get(lowerCaseName) || 1;
+        const functionNameWithCount = `${lowerCaseName}:${counts}:`;
+        this.functionCounts.set(lowerCaseName, counts + 1);
+        return functionNameWithCount;
+      });
     });
   }
 
@@ -55,9 +54,7 @@ class Compiler {
 
       const parserFunction = new ParserFunction(dataFunction);
       const segmentCode =
-        this.code
-          .split(new RegExp(`\\${matches}`, "gm"))
-          .find((el, index, array) => array.length === index + 1) || "";
+        this.code.split(new RegExp(`\\${matches}`, "gm")).at(-1) || "";
 
       if (
         dataFunction.brackets &&
