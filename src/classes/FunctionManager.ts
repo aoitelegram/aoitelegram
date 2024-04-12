@@ -1,5 +1,5 @@
 import { AoijsTypeError } from "./AoiError";
-import type { AllPromise } from "./AoiTyping";
+import type { AllPromise, DataFunction } from "./AoiTyping";
 import type {
   Container,
   ParserFunction,
@@ -7,37 +7,11 @@ import type {
   ICallbackReject,
 } from "./core/";
 
-type IFunctionManager =
-  | {
-      name: string;
-      brackets?: boolean;
-      type?: "javascript";
-      fields?: {
-        name?: string;
-        required?: boolean;
-        rest?: boolean;
-      }[];
-      inside?: {
-        name?: string;
-        required?: boolean;
-      };
-      callback: (
-        ctx: Container,
-        func: ParserFunction,
-      ) => AllPromise<ICallbackResolve | ICallbackReject>;
-    }
-  | {
-      name: string;
-      brackets?: boolean;
-      type: "aoitelegram";
-      param?: string[];
-      code: string;
-    };
-
 class FunctionManager {
   name: string;
+  params: string[];
+  aliases: string[];
   brackets?: boolean;
-  param: string[];
   type?: "javascript" | "aoitelegram";
   fields: {
     name?: string;
@@ -55,9 +29,9 @@ class FunctionManager {
   code?: string;
 
   constructor(
-    parameters: IFunctionManager = {
+    parameters: DataFunction = {
       fields: [],
-    } as unknown as IFunctionManager,
+    } as unknown as DataFunction,
   ) {
     if (typeof parameters !== "object") {
       throw new AoijsTypeError(
@@ -65,11 +39,12 @@ class FunctionManager {
       );
     }
     this.name = parameters.name;
-    this.brackets = parameters.brackets;
+    this.aliases = parameters.aliases || [];
     this.type = parameters.type || "javascript";
+    this.brackets = ("brackets" in parameters && parameters.brackets) || false;
     this.fields = ("fields" in parameters && parameters.fields) || [];
     this.inside = ("inside" in parameters && parameters.inside) || {};
-    this.param = ("param" in parameters && parameters.param) || [];
+    this.params = ("params" in parameters && parameters.params) || [];
     this.callback =
       ("callback" in parameters && parameters.callback) || undefined;
     this.code = ("code" in parameters && parameters.code) || "";
@@ -85,15 +60,30 @@ class FunctionManager {
     return this;
   }
 
-  setFields(fields: { name?: string; required: boolean; rest?: boolean }) {
+  setAliases(aliases: string | string[]) {
+    if (typeof aliases !== "string" || !Array.isArray(aliases)) {
+      throw new AoijsTypeError(
+        `The expected type is "string | array", but received type ${typeof aliases}`,
+      );
+    }
+    if (Array.isArray(aliases)) {
+      this.aliases.push(...aliases);
+    } else this.aliases.push(aliases);
+  }
+
+  setFields(
+    fields:
+      | { name?: string; required: boolean; rest?: boolean }
+      | { name?: string; required: boolean; rest?: boolean }[],
+  ) {
     if (this.type === "aoitelegram") {
       throw new AoijsTypeError(
         "Methods for type 'javascript' are not accessible when the type is set to 'aoitelegram'",
       );
     }
-    if (typeof fields !== "object") {
+    if (typeof fields !== "object" || !Array.isArray(fields)) {
       throw new AoijsTypeError(
-        `The expected type is "object", but received type ${typeof fields}`,
+        `The expected type is "array | object", but received type ${typeof fields}`,
       );
     }
     if (Object.keys(this.inside).length > 1) {
@@ -101,7 +91,9 @@ class FunctionManager {
         'If you specified "inside" early, then the specified "fields" cannot be entities',
       );
     }
-    this.fields.push(fields);
+    if (Array.isArray(fields)) {
+      this.fields.push(...fields);
+    } else this.fields.push(fields);
     return this;
   }
 
@@ -129,11 +121,7 @@ class FunctionManager {
     callback: (
       ctx: Container,
       func: ParserFunction,
-    ) => AllPromise<{
-      id: string;
-      replace: string;
-      with: string;
-    }>,
+    ) => AllPromise<ICallbackResolve | ICallbackReject>,
   ) {
     if (this.type === "aoitelegram") {
       throw new AoijsTypeError(
@@ -149,18 +137,20 @@ class FunctionManager {
     return this;
   }
 
-  setParam(param: string[]) {
+  setParam(params: string | string[]) {
     if (this.type !== "aoitelegram") {
       throw new AoijsTypeError(
         "This method is only accessible for type 'aoitelegram'",
       );
     }
-    if (!Array.isArray(param)) {
+    if (typeof params !== "string" || !Array.isArray(params)) {
       throw new AoijsTypeError(
-        `The expected type is "array", but received type ${typeof param}`,
+        `The expected type is "string | array", but received type ${typeof params}`,
       );
     }
-    this.param.push(...param);
+    if (Array.isArray(params)) {
+      this.params.push(...params);
+    } else this.params.push(params);
     return this;
   }
 
