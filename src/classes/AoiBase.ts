@@ -1,15 +1,15 @@
 import { version } from "../index";
 import { AoiClient } from "./AoiClient";
 import { getObjectKey } from "../utils/";
-import { DataFunction, CustomJSFunction } from "./AoiTyping";
 import { Update } from "@telegram.ts/types";
 import type { RequestInit } from "node-fetch";
 import { Interpreter, Compiler } from "./core/";
 import { AoijsError, AoijsTypeError } from "./AoiError";
 import { setInterval, clearInterval } from "long-timeout";
 import { ContextEvent, EventHandlers } from "./AoiTyping";
-import { AoiManager, AoiManagerOptions } from "./AoiManager";
-import { TelegramBot, Collection, Context } from "telegramsjs";
+import { AoiManager, type AoiManagerOptions } from "./AoiManager";
+import type { DataFunction, CustomJSFunction } from "./AoiTyping";
+import { TelegramBot, Collection, type Context } from "telegramsjs";
 
 interface IEventsOptions {
   name: string;
@@ -123,6 +123,8 @@ class AoiBase extends TelegramBot {
       if (func.type === "aoitelegram") {
         this.availableFunctions.set(functionName, {
           name: functionName,
+          version: func.version,
+          aliases: func.aliases,
           brackets: func.params?.length! > 0,
           fields: func.params?.map((name) => {
             return {
@@ -175,6 +177,8 @@ class AoiBase extends TelegramBot {
       if (func.type === "aoitelegram") {
         this.availableFunctions.set(functionName, {
           name: functionName,
+          version: func.version,
+          aliases: func.aliases,
           brackets: func.params?.length! > 0,
           fields: func.params?.map((name) => {
             return {
@@ -253,6 +257,8 @@ class AoiBase extends TelegramBot {
       if (func.type === "aoitelegram") {
         this.availableFunctions.set(lowerCaseName, {
           name: lowerCaseName,
+          version: func.version,
+          aliases: func.aliases,
           brackets: func.params?.length! > 0,
           fields: func.params?.map((name) => {
             return {

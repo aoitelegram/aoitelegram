@@ -97,7 +97,7 @@ class ParserFunction {
           if (result === null) {
             return [];
           }
-          
+
           if ("reason" in result) {
             throw new AoijsTypeError(result.reason);
           }
@@ -163,9 +163,9 @@ class ParserFunction {
       if (result === null) {
         return code;
       }
-                if ("reason" in result) {
-            throw new AoijsTypeError(result.reason);
-          }
+      if ("reason" in result) {
+        throw new AoijsTypeError(result.reason);
+      }
       code = code.replace(result.id, result.with);
     }
 
