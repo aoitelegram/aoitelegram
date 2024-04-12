@@ -21,7 +21,14 @@ class Compiler {
   }
 
   processFunctionNames() {
-    this.availableFunctions.forEach((func, name) => {
+    for (const [name, func] of this.availableFunctions) {
+      if (!func.aliases) continue;
+      delete func["aliases"];
+      func.aliases?.forEach((name: string) => {
+        this.availableFunctions.set(name, func);
+      });
+    }
+    for (const [name, func] of this.availableFunctions) {
       this.code = this.code.replace(new RegExp(`\\${name}`, "gi"), (search) => {
         const lowerCaseName = name.toLowerCase();
         const counts = this.functionCounts.get(lowerCaseName) || 1;
@@ -29,7 +36,7 @@ class Compiler {
         this.functionCounts.set(lowerCaseName, counts + 1);
         return functionNameWithCount;
       });
-    });
+    }
   }
 
   compile() {

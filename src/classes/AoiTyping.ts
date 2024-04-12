@@ -51,15 +51,17 @@ interface EventHandlers extends IEventFunctions {
 
 interface CustomAoiFunction {
   name: string;
+  aliases?: string[];
+  reverseReading?: boolean;
   type: "aoitelegram";
   version?: string;
-  reverseReading?: boolean;
   params?: string[];
   code: string;
 }
 
 interface CustomJSFunction {
   name: string;
+  aliases?: string[];
   type?: "javascript";
   fields?: { required: boolean; rest?: boolean }[];
   brackets?: boolean;
