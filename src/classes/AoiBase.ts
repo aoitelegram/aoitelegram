@@ -45,6 +45,10 @@ class AoiBase extends TelegramBot {
     "messageReaction",
     "ready",
     "editedChannelPost",
+    "businessConnection",
+    "businessMessage",
+    "editedBusinessMessage",
+    "deletedBusinessMessages",
     "messageReactionCount",
     "removedChatBoost",
   ];
@@ -433,6 +437,50 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
+  businessConnectionCommand(options: IEventsOptions) {
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "you did not specify the 'options.code' parameter",
+      );
+    }
+    this.#addEvents("businessConnection", options);
+    return this;
+  }
+
+  businessMessageCommand(options: IEventsOptions) {
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "you did not specify the 'options.code' parameter",
+      );
+    }
+    this.#addEvents("businessMessage", options);
+    return this;
+  }
+
+  editedBusinessMessageCommand(options: IEventsOptions) {
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "you did not specify the 'options.code' parameter",
+      );
+    }
+    this.#addEvents("editedBusinessMessage", options);
+    return this;
+  }
+
+  deletedBusinessMessagesCommand(options: IEventsOptions) {
+    if (!options?.code) {
+      throw new AoijsError(
+        "parameter",
+        "you did not specify the 'options.code' parameter",
+      );
+    }
+    this.#addEvents("deletedBusinessMessages", options);
+    return this;
+  }
+
   inlineQueryCommand(options: IEventsOptions) {
     if (!options?.code) {
       throw new AoijsError(
@@ -598,6 +646,10 @@ class AoiBase extends TelegramBot {
       | "messageReaction"
       | "ready"
       | "editedChannelPost"
+      | "businessConnection"
+      | "businessMessage"
+      | "editedBusinessMessage"
+      | "deletedBusinessMessages"
       | "messageReactionCount"
       | "removedChatBoost",
     command: IEventsOptions,
