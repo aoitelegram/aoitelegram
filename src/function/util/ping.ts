@@ -5,6 +5,6 @@ export default new FunctionManager()
   .setBrackets(false)
   .onCallback(async (context, func) => {
     const now = Date.now();
-    await context.telegram.getMe?.();
+    await context.telegram.getMe();
     return func.resolve(Date.now() - now);
   });

@@ -61,7 +61,7 @@ class FunctionManager {
   }
 
   setAliases(aliases: string | string[]) {
-    if (typeof aliases !== "string" || !Array.isArray(aliases)) {
+    if (typeof aliases !== "string" && !Array.isArray(aliases)) {
       throw new AoijsTypeError(
         `The expected type is "string | array", but received type ${typeof aliases}`,
       );
@@ -81,7 +81,7 @@ class FunctionManager {
         "Methods for type 'javascript' are not accessible when the type is set to 'aoitelegram'",
       );
     }
-    if (typeof fields !== "object" || !Array.isArray(fields)) {
+    if (typeof fields !== "object" && !Array.isArray(fields)) {
       throw new AoijsTypeError(
         `The expected type is "array | object", but received type ${typeof fields}`,
       );
@@ -143,7 +143,7 @@ class FunctionManager {
         "This method is only accessible for type 'aoitelegram'",
       );
     }
-    if (typeof params !== "string" || !Array.isArray(params)) {
+    if (typeof params !== "string" && !Array.isArray(params)) {
       throw new AoijsTypeError(
         `The expected type is "string | array", but received type ${typeof params}`,
       );

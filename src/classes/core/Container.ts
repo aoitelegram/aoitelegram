@@ -11,7 +11,7 @@ class Container {
   readonly array: Collection<string, any[]> = new Collection();
   readonly object: Collection<string, object> = new Collection();
   readonly random: Collection<string, number> = new Collection();
-  readonly condition: ConditionChecker = ConditionChecker;
+  readonly condition: typeof ConditionChecker = ConditionChecker;
   readonly wordMatcher: typeof WordMatcher = WordMatcher;
   public suppressErrors: string = "";
   public readonly eventData: ContextEvent;

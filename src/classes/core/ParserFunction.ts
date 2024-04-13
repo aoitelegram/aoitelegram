@@ -198,8 +198,12 @@ class ParserFunction {
     return { id: this.id, replace: this.rawTotal, with: inspect(result) };
   }
 
-  reject(reason?: string, custom?: boolean): ICallbackReject {
-    return { id: this.id, custom, reason: reason || "" };
+  reject(reason?: string, customError?: boolean): ICallbackReject {
+    return {
+      id: this.id,
+      custom: customError,
+      reason: reason || "",
+    };
   }
 }
 
