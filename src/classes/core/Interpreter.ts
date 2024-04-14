@@ -1,8 +1,8 @@
 import { Container } from "./Container";
-import { getObjectKey } from "../../utils/";
 import { AoijsTypeError } from "../AoiError";
 import type { ContextEvent } from "../AoiTyping";
 import type { ParserFunction } from "./ParserFunction";
+import { getObjectKey, removePattern } from "../../utils/";
 
 class Interpreter {
   container: Container;
@@ -41,7 +41,7 @@ class Interpreter {
           if (result.reason) {
             await this.#sendErrorMessage(
               result.reason,
-              dataFunction.structures.name,
+              removePattern(dataFunction.structures.name),
               result.custom,
             );
           }
@@ -50,7 +50,18 @@ class Interpreter {
 
         textResult = textResult.replace(result.id, result.with);
       } catch (err) {
-        await this.#sendErrorMessage(`${err}`, dataFunction.structures.name);
+        if (err instanceof AoijsTypeError) {
+          const errorMessage = `${err}`.split(":").slice(1).join(" ");
+          await this.#sendErrorMessage(
+            errorMessage,
+            removePattern(dataFunction.structures.name),
+          );
+        } else {
+          await this.#sendErrorMessage(
+            `${err}`,
+            removePattern(dataFunction.structures.name),
+          );
+        }
         break;
       }
     }
@@ -105,6 +116,7 @@ class Interpreter {
           parse_mode: "HTML",
         },
       );
+      return;
     } else if (
       this.container?.telegram?.sendMessageError &&
       !this.container?.telegram?.functionError &&
@@ -114,6 +126,7 @@ class Interpreter {
         custom ? error : `❌ <b>${functionName}:</b> <code>${error}</code>`,
         { parse_mode: "HTML" },
       );
+      return;
     } else if (!this.container?.telegram?.functionError) {
       throw new AoijsTypeError(error);
     }

@@ -1,5 +1,5 @@
 import { AoijsTypeError } from "./AoiError";
-import type { AllPromise, DataFunction } from "./AoiTyping";
+import type { PossiblyAsync, DataFunction } from "./AoiTyping";
 import type {
   Container,
   ParserFunction,
@@ -25,7 +25,7 @@ class FunctionManager {
   callback?: (
     ctx: Container,
     func: ParserFunction,
-  ) => AllPromise<ICallbackResolve | ICallbackReject>;
+  ) => PossiblyAsync<ICallbackResolve | ICallbackReject>;
   code?: string;
 
   constructor(
@@ -122,7 +122,7 @@ class FunctionManager {
     callback: (
       ctx: Container,
       func: ParserFunction,
-    ) => AllPromise<ICallbackResolve | ICallbackReject>,
+    ) => PossiblyAsync<ICallbackResolve | ICallbackReject>,
   ): FunctionManager {
     if (this.type === "aoitelegram") {
       throw new AoijsTypeError(

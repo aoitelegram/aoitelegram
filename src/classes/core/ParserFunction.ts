@@ -1,8 +1,8 @@
-import { inspect } from "../../utils";
 import { Container } from "./Container";
 import { randomUUID } from "node:crypto";
 import { AoijsTypeError } from "../AoiError";
 import type { CustomJSFunction } from "../AoiTyping";
+import { inspect, removePattern } from "../../utils";
 
 interface ICallbackResolve {
   id: string;
@@ -27,7 +27,7 @@ class ParserFunction {
   public fields: string[] = [];
   public id: string = `{FUN=${randomUUID()}}`;
   public raw: string = "";
-  public overloads = new Array<ParserFunction>();
+  public overloads: ParserFunction[] = [];
   public parentID: string = "";
 
   constructor(structures: CustomJSFunction) {
@@ -76,9 +76,10 @@ class ParserFunction {
     context: Container,
     indicesToSkip?: number[],
   ): Promise<any[]> {
+    this.checkArg();
     if (!this.fields) {
       throw new Error(
-        `Attempted to resolve array of function with no fields: ${this.structures.name}`,
+        `Attempted to resolve array of function with no fields: ${removePattern(this.structures.name)}`,
       );
     }
 
@@ -149,7 +150,14 @@ class ParserFunction {
     return resolvedArgs;
   }
 
-  async checkArg(): Promise<boolean> {
+  checkArg(): boolean {
+    const argsRequired =
+      this.structures.fields?.filter(({ required }) => required) || [];
+    if (argsRequired.length > this.fields.length) {
+      throw new AoijsTypeError(
+        `The function ${removePattern(this.structures.name)} expects ${argsRequired.length} parameters, but ${this.fields.length} were received`,
+      );
+    }
     return true;
   }
 

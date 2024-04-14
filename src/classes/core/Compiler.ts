@@ -171,7 +171,7 @@ function throwBracketError(
   const lines = code.split(/\n/g);
   let lineNumber = lines.findIndex((line) => line.includes(func.name)) + 1;
   const lastIndexOfFunc =
-    lineNumber !== 0 ? lines[lineNumber - 1].lastIndexOf(func.name) : "unknown";
+    lineNumber !== 0 ? lines[lineNumber - 1].lastIndexOf(func.name) : 0;
 
   const errorLine =
     typeof lastIndexOfFunc !== "number" ? lastIndexOfFunc : lastIndexOfFunc + 1;

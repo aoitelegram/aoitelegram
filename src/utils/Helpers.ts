@@ -30,4 +30,8 @@ function inspect(obj: any): string {
   }
 }
 
-export { getObjectKey, inspect };
+function removePattern(name: string): string {
+  return name.split(":")[0];
+}
+
+export { getObjectKey, removePattern, inspect };

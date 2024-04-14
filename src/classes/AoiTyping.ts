@@ -69,7 +69,7 @@ interface CustomJSFunction {
   callback: (
     context: Container,
     func: ParserFunction,
-  ) => AllPromise<ICallbackResolve | ICallbackReject>;
+  ) => PossiblyAsync<ICallbackResolve | ICallbackReject>;
 }
 
 type DataFunction = CustomAoiFunction | CustomJSFunction;
@@ -98,7 +98,7 @@ type DataEvent = {
   callback?: (...args: any[]) => void;
 };
 
-type AllPromise<T> = T | Promise<T>;
+type PossiblyAsync<T> = T | Promise<T>;
 
 export {
   EventHandlers,
@@ -107,5 +107,5 @@ export {
   CustomAoiFunction,
   DataFunction,
   DataEvent,
-  AllPromise,
+  PossiblyAsync,
 };
