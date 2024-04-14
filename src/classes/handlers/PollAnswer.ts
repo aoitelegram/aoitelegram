@@ -1,6 +1,6 @@
 import type { AoiClient } from "../AoiClient";
 
-function onPollAnswer(telegram: AoiClient) {
+function onPollAnswer(telegram: AoiClient): void {
   const events = telegram.events.get("pollAnswer");
   if (!events) return;
 

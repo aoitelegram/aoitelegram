@@ -60,7 +60,7 @@ class TimeoutManager {
       milliseconds: number;
       data: object;
     },
-  ) {
+  ): Promise<string> {
     const data = {
       ...options,
       id,
@@ -71,7 +71,7 @@ class TimeoutManager {
     return `${id}_${data.date}`;
   }
 
-  async removeTimeout(timeout: string) {
+  async removeTimeout(timeout: string): Promise<boolean> {
     const timeoutId = this.timeouts.get(timeout);
     if (!timeoutId) return false;
 

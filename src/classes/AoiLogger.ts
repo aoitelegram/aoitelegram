@@ -14,7 +14,7 @@ class AoiLogger {
   private static log(
     type: keyof (typeof AoiLogger)["textColors"],
     ...args: unknown[]
-  ) {
+  ): void {
     console.log(
       AoiLogger.dateColors(
         `[${new Date().toLocaleDateString("de-DE")} ${new Date().toLocaleTimeString()}]`,
@@ -40,7 +40,7 @@ class AoiLogger {
       text: string;
       bold?: boolean;
     }[];
-  }) {
+  }): void {
     const { time, title, args = [] } = options;
 
     const formattedDate = AoiLogger.dateColors(
@@ -66,19 +66,19 @@ class AoiLogger {
     } else console.log(formattedTitle, formattedArgs);
   }
 
-  static debug(...args: unknown[]) {
+  static debug(...args: unknown[]): void {
     this.log("debug", ...args);
   }
 
-  static error(...args: unknown[]) {
+  static error(...args: unknown[]): void {
     this.log("error", ...args);
   }
 
-  static warn(...args: unknown[]) {
+  static warn(...args: unknown[]): void {
     this.log("warn", ...args);
   }
 
-  static info(...args: unknown[]) {
+  static info(...args: unknown[]): void {
     this.log("info", ...args);
   }
 }

@@ -78,7 +78,7 @@ class AoiClient extends AoiBase {
     this.warningManager = new AoiWarning(parameters.autoUpdate || {});
   }
 
-  addCommand(options: ICommandDescription) {
+  addCommand(options: ICommandDescription): AoiClient {
     if (!options?.name) {
       throw new AoijsError(
         "parameter",
@@ -98,7 +98,7 @@ class AoiClient extends AoiBase {
     return this;
   }
 
-  addAction(options: IActionDescription) {
+  addAction(options: IActionDescription): AoiClient {
     if (!options?.data) {
       throw new AoijsError(
         "parameter",
@@ -118,7 +118,7 @@ class AoiClient extends AoiBase {
     return this;
   }
 
-  timeoutCommand(options: TimeoutDescription) {
+  timeoutCommand(options: TimeoutDescription): AoiClient {
     if (!options?.id) {
       throw new AoijsError(
         "parameter",
@@ -135,7 +135,7 @@ class AoiClient extends AoiBase {
     return this;
   }
 
-  awaitedCommand(options: AwaitedDescription) {
+  awaitedCommand(options: AwaitedDescription): AoiClient {
     if (!options?.awaited) {
       throw new AoijsError(
         "parameter",
@@ -152,7 +152,7 @@ class AoiClient extends AoiBase {
     return this;
   }
 
-  addCallback(options: CallbackDescription) {
+  addCallback(options: CallbackDescription): AoiClient {
     if (!options?.name) {
       throw new AoijsError(
         "parameter",
@@ -178,7 +178,7 @@ class AoiClient extends AoiBase {
     return this;
   }
 
-  functionErrorCommand(options: IEventsOptions) {
+  functionErrorCommand(options: IEventsOptions): AoiClient {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -193,7 +193,7 @@ class AoiClient extends AoiBase {
     return this;
   }
 
-  async connect(options?: ILoginOptions) {
+  async connect(options?: ILoginOptions): Promise<void> {
     const { autoUpdate = {}, extensions = [], logging } = this.parameters;
 
     if (autoUpdate.aoiWarning) {
@@ -225,7 +225,7 @@ class AoiClient extends AoiBase {
     super.login();
   }
 
-  async #loadFunctionsLib(dirPath: string) {
+  async #loadFunctionsLib(dirPath: string): Promise<void> {
     const processFile = async (itemPath: string) => {
       try {
         const dataFunction = require(itemPath).default;

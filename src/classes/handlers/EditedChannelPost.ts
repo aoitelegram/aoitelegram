@@ -1,6 +1,6 @@
 import type { AoiClient } from "../AoiClient";
 
-function onEditedChannelPost(telegram: AoiClient) {
+function onEditedChannelPost(telegram: AoiClient): void {
   const events = telegram.events.get("editedChannelPost");
   if (!events) return;
 

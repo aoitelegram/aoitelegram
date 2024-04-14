@@ -1,7 +1,7 @@
 import { getObjectKey } from "../../utils";
 import type { AoiClient } from "../AoiClient";
 
-function onVariableCreate(telegram: AoiClient) {
+function onVariableCreate(telegram: AoiClient): void {
   const events = telegram.events.get("variableCreate");
   if (!events) return;
 

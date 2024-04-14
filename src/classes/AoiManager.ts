@@ -170,38 +170,38 @@ class AoiManager<Value = any> {
     return await this.database.connect();
   }
 
-  defaulValue(vars: string, table: string) {
+  defaulValue(vars: string, table: string): any {
     return this.collection.get(`${vars}_${table}`);
   }
 
-  variables(
+  async variables(
     options: { [key: string]: any },
     tables: string | string[] = this.tables[0],
-  ) {
+  ): Promise<void> {
     if (Array.isArray(tables)) {
       for (const table of tables) {
         for (const varName in options) {
           if (!options.hasOwnProperty(varName)) continue;
-          const hasVar = this.has(table, varName);
+          const hasVar = await this.has(table, varName);
           this.collection.set(`${varName}_${table}`, options[varName]);
           if (!hasVar) {
-            this.set(table, varName, options[varName]);
+            await this.set(table, varName, options[varName]);
           }
         }
       }
     } else if (typeof tables === "string") {
       for (const varName in options) {
         if (!options.hasOwnProperty(varName)) continue;
-        const hasVar = this.has(tables, varName);
+        const hasVar = await this.has(tables, varName);
         this.collection.set(`${varName}_${tables}`, options[varName]);
         if (!hasVar) {
-          this.set(tables, varName, options[varName]);
+          await this.set(tables, varName, options[varName]);
         }
       }
     } else {
       throw new AoijsError(
         "parameter",
-        "the parameter should be of type 'string' or 'string[]'",
+        "The parameter should be of type 'string' or 'string[]'",
       );
     }
   }

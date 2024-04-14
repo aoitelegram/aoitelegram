@@ -1,6 +1,6 @@
 import type { AoiClient } from "../AoiClient";
 
-function onChatBoost(telegram: AoiClient) {
+function onChatBoost(telegram: AoiClient): void {
   const events = telegram.events.get("chatBoost");
   if (!events) return;
 

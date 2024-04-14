@@ -1,6 +1,6 @@
 import type { AoiClient } from "../AoiClient";
 
-function onDeletedBusinessMessages(telegram: AoiClient) {
+function onDeletedBusinessMessages(telegram: AoiClient): void {
   const events = telegram.events.get("deletedBusinessMessages");
   if (!events) return;
 

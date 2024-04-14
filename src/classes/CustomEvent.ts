@@ -59,7 +59,7 @@ class CustomEvent extends EventEmitter {
     });
   }
 
-  command(options: DataEvent) {
+  command(options: DataEvent): CustomEvent {
     if (!options?.listen) {
       throw new AoijsError(
         "CustomEvent",
@@ -131,7 +131,7 @@ class CustomEvent extends EventEmitter {
     return this;
   }
 
-  loadEvents(dirPath: string, log: boolean = true) {
+  loadEvents(dirPath: string, log: boolean = true): CustomEvent {
     if (!dirPath) {
       throw new AoijsError(
         "parameter",
@@ -199,7 +199,7 @@ class CustomEvent extends EventEmitter {
     eventNames: { [key: string]: boolean },
     eventName: string,
     emitEventName: string,
-  ) {
+  ): void {
     if (eventNames[eventName]) {
       process.on(eventName, async (...args: any[]) => {
         const parsedPromise = await Promise.all(args);
@@ -208,7 +208,7 @@ class CustomEvent extends EventEmitter {
     }
   }
 
-  override emit<T>(name: string, ...args: T[]) {
+  override emit<T>(name: string, ...args: T[]): boolean {
     return super.emit(name, ...args);
   }
 }

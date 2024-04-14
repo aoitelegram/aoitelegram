@@ -19,7 +19,7 @@ class Timeout {
     this.telegram = telegram;
   }
 
-  register(timeout: TimeoutDescription) {
+  register(timeout: TimeoutDescription): Timeout {
     const existingIndex = this.timeouts.has(timeout.id);
 
     if (!existingIndex) {
@@ -34,7 +34,7 @@ class Timeout {
     return this;
   }
 
-  handler() {
+  handler(): void {
     this.telegram.on("timeout", async (timeoutData, context) => {
       for (const [timeoutId, timeoutDescription] of this.timeouts) {
         if (`${timeoutId}_${context.date}` !== `${context.id}_${context.date}`)

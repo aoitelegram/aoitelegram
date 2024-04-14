@@ -1,6 +1,6 @@
 import type { AoiClient } from "../AoiClient";
 
-function onChatMember(telegram: AoiClient) {
+function onChatMember(telegram: AoiClient): void {
   const events = telegram.events.get("chatMember");
   if (!events) return;
 

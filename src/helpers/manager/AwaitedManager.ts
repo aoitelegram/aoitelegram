@@ -15,7 +15,7 @@ class AwaitedManager {
       data: object;
       context: unknown;
     },
-  ) {
+  ): void {
     if (options.milliseconds <= 50) {
       throw new AoijsError(
         "timeout",

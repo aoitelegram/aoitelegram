@@ -1,6 +1,6 @@
 import type { AoiClient } from "../AoiClient";
 
-function onPreCheckoutQuery(telegram: AoiClient) {
+function onPreCheckoutQuery(telegram: AoiClient): void {
   const events = telegram.events.get("preCheckoutQuery");
   if (!events) return;
 

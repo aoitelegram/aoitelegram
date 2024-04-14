@@ -1,6 +1,6 @@
 import type { AoiClient } from "../AoiClient";
 
-function onCallbackQuery(telegram: AoiClient) {
+function onCallbackQuery(telegram: AoiClient): void {
   const events = telegram.events.get("callbackQuery");
   if (!events) return;
 

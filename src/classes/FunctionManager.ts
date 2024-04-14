@@ -50,7 +50,7 @@ class FunctionManager {
     this.code = ("code" in parameters && parameters.code) || "";
   }
 
-  setName(name: string) {
+  setName(name: string): FunctionManager {
     if (typeof name !== "string") {
       throw new AoijsTypeError(
         `The expected type is "string", but received type ${typeof name}`,
@@ -60,7 +60,7 @@ class FunctionManager {
     return this;
   }
 
-  setAliases(aliases: string | string[]) {
+  setAliases(aliases: string | string[]): FunctionManager {
     if (typeof aliases !== "string" && !Array.isArray(aliases)) {
       throw new AoijsTypeError(
         `The expected type is "string | array", but received type ${typeof aliases}`,
@@ -69,13 +69,14 @@ class FunctionManager {
     if (Array.isArray(aliases)) {
       this.aliases.push(...aliases);
     } else this.aliases.push(aliases);
+    return this;
   }
 
   setFields(
     fields:
       | { name?: string; required: boolean; rest?: boolean }
       | { name?: string; required: boolean; rest?: boolean }[],
-  ) {
+  ): FunctionManager {
     if (this.type === "aoitelegram") {
       throw new AoijsTypeError(
         "Methods for type 'javascript' are not accessible when the type is set to 'aoitelegram'",
@@ -97,7 +98,7 @@ class FunctionManager {
     return this;
   }
 
-  setInside(inside: { name?: string; required: boolean }) {
+  setInside(inside: { name?: string; required: boolean }): FunctionManager {
     if (this.type === "aoitelegram") {
       throw new AoijsTypeError(
         "Methods for type 'javascript' are not accessible when the type is set to 'aoitelegram'",
@@ -107,7 +108,7 @@ class FunctionManager {
     return this;
   }
 
-  setBrackets(brackets: boolean = true) {
+  setBrackets(brackets: boolean = true): FunctionManager {
     if (typeof brackets !== "boolean") {
       throw new AoijsTypeError(
         `The expected type is "boolean", but received type ${typeof brackets}`,
@@ -122,7 +123,7 @@ class FunctionManager {
       ctx: Container,
       func: ParserFunction,
     ) => AllPromise<ICallbackResolve | ICallbackReject>,
-  ) {
+  ): FunctionManager {
     if (this.type === "aoitelegram") {
       throw new AoijsTypeError(
         "Methods for type 'javascript' are not accessible when the type is set to 'aoitelegram'",
@@ -137,7 +138,7 @@ class FunctionManager {
     return this;
   }
 
-  setParam(params: string | string[]) {
+  setParam(params: string | string[]): FunctionManager {
     if (this.type !== "aoitelegram") {
       throw new AoijsTypeError(
         "This method is only accessible for type 'aoitelegram'",
@@ -154,7 +155,7 @@ class FunctionManager {
     return this;
   }
 
-  setCode(code: string) {
+  setCode(code: string): FunctionManager {
     if (this.type !== "aoitelegram") {
       throw new AoijsTypeError(
         "This method is only accessible for type 'aoitelegram'",

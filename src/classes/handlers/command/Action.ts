@@ -7,7 +7,7 @@ interface IActionDescription {
   reverseReading?: boolean;
 }
 
-function onAction(telegram: AoiClient) {
+function onAction(telegram: AoiClient): void {
   const actions = telegram.commands.get("action");
   if (!actions) return;
 

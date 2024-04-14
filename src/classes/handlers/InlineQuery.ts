@@ -1,6 +1,6 @@
 import type { AoiClient } from "../AoiClient";
 
-function onInlineQuery(telegram: AoiClient) {
+function onInlineQuery(telegram: AoiClient): void {
   const events = telegram.events.get("inlineQuery");
   if (!events) return;
 

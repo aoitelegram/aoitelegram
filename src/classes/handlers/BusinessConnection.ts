@@ -1,6 +1,6 @@
 import type { AoiClient } from "../AoiClient";
 
-function onBusinessConnection(telegram: AoiClient) {
+function onBusinessConnection(telegram: AoiClient): void {
   const events = telegram.events.get("businessConnection");
   if (!events) return;
 

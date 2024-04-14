@@ -61,7 +61,7 @@ class ParserFunction {
     return this;
   }
 
-  overloadsFor(loadFunctions: ParserFunction[]) {
+  overloadsFor(loadFunctions: ParserFunction[]): ParserFunction[] {
     if (!this.inside) return [];
     const functions: ParserFunction[] = [];
     for (const func of loadFunctions) {

@@ -5,7 +5,6 @@ import { Update } from "@telegram.ts/types";
 import type { RequestInit } from "node-fetch";
 import { Interpreter, Compiler } from "./core/";
 import { AoijsError, AoijsTypeError } from "./AoiError";
-import { setInterval, clearInterval } from "long-timeout";
 import { ContextEvent, EventHandlers } from "./AoiTyping";
 import { AoiManager, type AoiManagerOptions } from "./AoiManager";
 import type { DataFunction, CustomJSFunction } from "./AoiTyping";
@@ -338,7 +337,7 @@ class AoiBase extends TelegramBot {
     return this.availableFunctions.size;
   }
 
-  loopCommand(options: IEventsOptions) {
+  loopCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -349,7 +348,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  readyCommand(options: IEventsOptions) {
+  readyCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -360,7 +359,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  messageCommand(options: IEventsOptions) {
+  messageCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -371,7 +370,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  callbackQueryCommand(options: IEventsOptions) {
+  callbackQueryCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -382,7 +381,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  messageReactionCommand(options: IEventsOptions) {
+  messageReactionCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -393,7 +392,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  messageReactionCountCommand(options: IEventsOptions) {
+  messageReactionCountCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -404,7 +403,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  editedMessageCommand(options: IEventsOptions) {
+  editedMessageCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -415,7 +414,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  channelPostCommand(options: IEventsOptions) {
+  channelPostCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -426,7 +425,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  editedChannelPostCommand(options: IEventsOptions) {
+  editedChannelPostCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -437,7 +436,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  businessConnectionCommand(options: IEventsOptions) {
+  businessConnectionCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -448,7 +447,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  businessMessageCommand(options: IEventsOptions) {
+  businessMessageCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -459,7 +458,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  editedBusinessMessageCommand(options: IEventsOptions) {
+  editedBusinessMessageCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -470,7 +469,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  deletedBusinessMessagesCommand(options: IEventsOptions) {
+  deletedBusinessMessagesCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -481,7 +480,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  inlineQueryCommand(options: IEventsOptions) {
+  inlineQueryCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -492,7 +491,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  shippingQueryCommand(options: IEventsOptions) {
+  shippingQueryCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -503,7 +502,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  preCheckoutQueryCommand(options: IEventsOptions) {
+  preCheckoutQueryCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -514,7 +513,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  pollCommand(options: IEventsOptions) {
+  pollCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -525,7 +524,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  pollAnswerCommand(options: IEventsOptions) {
+  pollAnswerCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -536,7 +535,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  chatMemberCommand(options: IEventsOptions) {
+  chatMemberCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -547,7 +546,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  myChatMemberCommand(options: IEventsOptions) {
+  myChatMemberCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -558,7 +557,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  chatJoinRequestCommand(options: IEventsOptions) {
+  chatJoinRequestCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -569,7 +568,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  chatBoostCommand(options: IEventsOptions) {
+  chatBoostCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -580,7 +579,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  removedChatBoostCommand(options: IEventsOptions) {
+  removedChatBoostCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -591,7 +590,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  variableCreateCommand(options: IEventsOptions) {
+  variableCreateCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -602,7 +601,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  variableUpdateCommand(options: IEventsOptions) {
+  variableUpdateCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -613,7 +612,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  variableDeleteCommand(options: IEventsOptions) {
+  variableDeleteCommand(options: IEventsOptions): AoiBase {
     if (!options?.code) {
       throw new AoijsError(
         "parameter",
@@ -653,7 +652,7 @@ class AoiBase extends TelegramBot {
       | "messageReactionCount"
       | "removedChatBoost",
     command: IEventsOptions,
-  ) {
+  ): void {
     if (!this.availableCollectFunctions.includes(type)) {
       throw new AoijsTypeError(
         `The specified type ${type} does not exist for recording, here are all the available types: ${this.availableCollectFunctions.join(", ")}`,
@@ -665,14 +664,17 @@ class AoiBase extends TelegramBot {
     } else this.events.set(type, [command]);
   }
 
-  async variables(options: { [key: string]: any }, tables?: string | string[]) {
+  async variables(
+    options: { [key: string]: any },
+    tables?: string | string[],
+  ): Promise<AoiBase> {
     if (!("variables" in this.database)) {
       throw new AoijsTypeError(
         'No method named "variables" was found in the database class',
       );
     }
     await this.database.variables(options, tables);
-    return;
+    return this;
   }
 }
 

@@ -1,7 +1,7 @@
 import { getObjectKey } from "../../utils";
 import type { AoiClient } from "../AoiClient";
 
-function onVariableDelete(telegram: AoiClient) {
+function onVariableDelete(telegram: AoiClient): void {
   const events = telegram.events.get("variableDelete");
   if (!events) return;
 

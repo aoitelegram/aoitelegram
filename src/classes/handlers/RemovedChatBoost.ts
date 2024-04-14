@@ -1,6 +1,6 @@
 import type { AoiClient } from "../AoiClient";
 
-function onRemovedChatBoost(telegram: AoiClient) {
+function onRemovedChatBoost(telegram: AoiClient): void {
   const events = telegram.events.get("removedChatBoost");
   if (!events) return;
 

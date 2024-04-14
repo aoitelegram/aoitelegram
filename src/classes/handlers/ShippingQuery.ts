@@ -1,6 +1,6 @@
 import type { AoiClient } from "../AoiClient";
 
-function onShippingQuery(telegram: AoiClient) {
+function onShippingQuery(telegram: AoiClient): void {
   const events = telegram.events.get("shippingQuery");
   if (!events) return;
 

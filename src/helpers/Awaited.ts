@@ -19,7 +19,7 @@ class Awaited {
     this.telegram = telegram;
   }
 
-  register(awaited: AwaitedDescription) {
+  register(awaited: AwaitedDescription): Awaited {
     const existingIndex = this.awaiteds.has(awaited.awaited);
 
     if (!existingIndex) {
@@ -34,7 +34,7 @@ class Awaited {
     return this;
   }
 
-  handler() {
+  handler(): void {
     this.telegram.on("awaited", async (awaited, context) => {
       for (const [awaitedId, awaitedDescription] of this.awaiteds) {
         if (awaitedId !== awaited.awaited) continue;

@@ -26,7 +26,7 @@ class Container {
         : {}) as unknown as AoiClient;
   }
 
-  setSuppressErrors(reason: string) {
+  setSuppressErrors(reason: string): Container {
     this.suppressErrors = reason;
     return this;
   }

@@ -1,6 +1,6 @@
 import type { AoiClient } from "../AoiClient";
 
-function onMessageReaction(telegram: AoiClient) {
+function onMessageReaction(telegram: AoiClient): void {
   const events = telegram.events.get("messageReaction");
   if (!events) return;
 

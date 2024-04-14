@@ -9,7 +9,7 @@ interface ICommandDescription {
   reverseReading?: boolean;
 }
 
-function onCommand(telegram: AoiClient) {
+function onCommand(telegram: AoiClient): void {
   const commands = telegram.commands.get("command");
   if (!commands) return;
 

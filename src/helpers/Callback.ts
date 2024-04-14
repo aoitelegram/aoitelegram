@@ -29,7 +29,7 @@ class Callback {
     this.telegram = telegram;
   }
 
-  register(callback: CallbackDescription) {
+  register(callback: CallbackDescription): Callback {
     const existingIndex = this.callbacks.has(callback.name);
 
     if (!existingIndex) {
@@ -48,7 +48,7 @@ class Callback {
     name: string,
     args: string[],
     context: Container["eventData"],
-  ) {
+  ): Promise<boolean | string> {
     if (!name) {
       throw new AoijsError(
         "callback",

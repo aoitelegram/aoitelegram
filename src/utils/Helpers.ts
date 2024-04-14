@@ -2,7 +2,7 @@ function getObjectKey<T extends Record<string, any>>(
   object: T,
   property: string,
   parse: boolean = true,
-) {
+): string {
   try {
     const resultProperty = property.startsWith("[")
       ? eval(`object${property}`)

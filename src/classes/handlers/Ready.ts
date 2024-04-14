@@ -1,6 +1,6 @@
 import type { AoiClient } from "../AoiClient";
 
-async function onReady(telegram: AoiClient) {
+async function onReady(telegram: AoiClient): Promise<void> {
   const events = telegram.events.get("ready");
   if (!events) return;
 

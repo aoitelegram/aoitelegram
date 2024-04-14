@@ -31,7 +31,7 @@ import onRemovedChatBoost from "../classes/handlers/RemovedChatBoost";
 import onAction from "../classes/handlers/command/Action";
 import onCommand from "../classes/handlers/command/Command";
 
-export default async function aoiStart(telegram: AoiClient) {
+async function aoiStart(telegram: AoiClient): Promise<void> {
   const username = `@${telegram.botInfo.username}`;
 
   await onAction(telegram);
@@ -138,3 +138,5 @@ export default async function aoiStart(telegram: AoiClient) {
     ],
   });
 }
+
+export default aoiStart;

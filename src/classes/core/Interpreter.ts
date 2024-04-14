@@ -20,7 +20,7 @@ class Interpreter {
     this.container = new Container(ctx);
   }
 
-  async runInput() {
+  async runInput(): Promise<string> {
     let textResult = this.inputData.code;
 
     for await (const dataFunction of this.inputData.functions) {
@@ -39,7 +39,7 @@ class Interpreter {
 
         if ("reason" in result) {
           if (result.reason) {
-            this.#sendErrorMessage(
+            await this.#sendErrorMessage(
               result.reason,
               dataFunction.structures.name,
               result.custom,
@@ -50,18 +50,18 @@ class Interpreter {
 
         textResult = textResult.replace(result.id, result.with);
       } catch (err) {
-        this.#sendErrorMessage(`${err}`, dataFunction.structures.name);
+        await this.#sendErrorMessage(`${err}`, dataFunction.structures.name);
         break;
       }
     }
     return textResult;
   }
 
-  #sendErrorMessage(
+  async #sendErrorMessage(
     error: string,
     functionName: string,
     custom: boolean = false,
-  ) {
+  ): Promise<void> {
     if (
       !custom &&
       !this.container?.suppressErrors &&
@@ -99,7 +99,7 @@ class Interpreter {
       this.container?.suppressErrors &&
       this.container.eventData?.sendMessage
     ) {
-      return this.container.eventData.sendMessage(
+      await this.container.eventData.sendMessage(
         this.container.suppressErrors,
         {
           parse_mode: "HTML",
@@ -110,7 +110,7 @@ class Interpreter {
       !this.container?.telegram?.functionError &&
       this.container.eventData?.sendMessage
     ) {
-      return this.container.eventData.sendMessage(
+      await this.container.eventData.sendMessage(
         custom ? error : `❌ <b>${functionName}:</b> <code>${error}</code>`,
         { parse_mode: "HTML" },
       );

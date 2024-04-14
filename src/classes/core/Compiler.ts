@@ -20,7 +20,7 @@ class Compiler {
     this.processFunctionNames();
   }
 
-  processFunctionNames() {
+  processFunctionNames(): void {
     for (const [name, func] of this.availableFunctions) {
       if (!func.aliases) continue;
       delete func["aliases"];
@@ -39,7 +39,7 @@ class Compiler {
     }
   }
 
-  compile() {
+  compile(): { code: string; functions: ParserFunction[] } {
     const parsedFunctions: ParserFunction[] = [];
     const functionRegExp = new RegExp(
       `(${this.availableFunctions
@@ -130,13 +130,13 @@ class Compiler {
     };
   }
 
-  replaceLast(content: string, search: string, toReplace: string) {
+  replaceLast(content: string, search: string, toReplace: string): string {
     let splits = content.split(search);
     content = splits.pop()!;
     return splits.join(search) + toReplace + content;
   }
 
-  escapeCode(content: string) {
+  escapeCode(content: string): string {
     return content
       .split("\\[")
       .join("{#REPLACED_BRACKET_RIGHT#}")
@@ -148,7 +148,7 @@ class Compiler {
       .join("{#REPLACED_SEMICOLON_SIGN#}");
   }
 
-  unescapeCode(content: string) {
+  unescapeCode(content: string): string {
     return content
       .split("{#REPLACED_BRACKET_RIGHT#}")
       .join("[")
