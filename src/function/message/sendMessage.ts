@@ -8,7 +8,7 @@ export default new FunctionManager()
     required: true,
   })
   .onCallback(async (context, func) => {
-    const text = await func.resolveAll(context);
+    const text = await func.resolveAllFields(context);
     await context.eventData.reply(text);
     return func.resolve("");
   });

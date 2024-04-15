@@ -59,7 +59,7 @@ class Timeout {
           callback: async (context, func) => {
             const result = getObjectKey(
               parsedTimeoutData,
-              await func.resolveAll(context),
+              await func.resolveAllFields(context),
             );
             return func.resolve(result);
           },

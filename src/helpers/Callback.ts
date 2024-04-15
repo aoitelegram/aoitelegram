@@ -71,7 +71,7 @@ class Callback {
           },
         ],
         callback: async (context, func) => {
-          const result = Number(await func.resolveAll(context));
+          const result = Number(await func.resolveAllFields(context));
           return func.resolve(result ? args[result - 1] : args[0]);
         },
       });
@@ -91,7 +91,7 @@ class Callback {
           },
         ],
         callback: async (context, func) => {
-          resultFunc = await func.resolveAll(context);
+          resultFunc = await func.resolveAllFields(context);
           return func.reject();
         },
       });

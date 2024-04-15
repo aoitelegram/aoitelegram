@@ -8,6 +8,6 @@ export default new FunctionManager()
     required: true,
   })
   .onCallback(async (context, func) => {
-    console.log(await func.resolveAll(context));
+    console.log(await func.resolveAllFields(context));
     return func.resolve("");
   });

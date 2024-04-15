@@ -87,7 +87,7 @@ class Interpreter {
           },
         ],
         callback: async (context, func) => {
-          const options = await func.resolveAll(context);
+          const options = await func.resolveAllFields(context);
 
           const dataError = {
             name: functionName,

@@ -54,7 +54,7 @@ class Awaited {
               callback: async (context, func) => {
                 const response = getObjectKey(
                   parsedAwaitedData,
-                  await func.resolveAll(context),
+                  await func.resolveAllFields(context),
                 );
                 return func.resolve(response);
               },

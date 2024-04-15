@@ -16,7 +16,7 @@ function onVariableCreate(telegram: AoiClient): void {
           },
         ],
         callback: async (context, func) => {
-          const options = await func.resolveAll(context);
+          const options = await func.resolveAllFields(context);
           const result = getObjectKey(newVariable, options);
           return func.resolve(result);
         },

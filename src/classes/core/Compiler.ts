@@ -101,7 +101,7 @@ class Compiler {
 
     for (const func of parsedFunctions.reverse()) {
       if (processedIds.includes(func.id)) {
-        const overloads = func.overloadsFor(parsedFunctions);
+        const overloads = func.filterFunctions(parsedFunctions);
         if (overloads.length) {
           for (const overload of overloads) {
             func.addOverload(overload);
@@ -109,7 +109,7 @@ class Compiler {
           }
         }
       } else {
-        const overloads = func.overloadsFor(parsedFunctions);
+        const overloads = func.filterFunctions(parsedFunctions);
         if (overloads.length) {
           for (const overload of overloads) {
             func.addOverload(overload);

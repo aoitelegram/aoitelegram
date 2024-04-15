@@ -16,7 +16,7 @@ function onVariableDelete(telegram: AoiClient): void {
           },
         ],
         callback: async (context, func) => {
-          const options = await func.resolveAll(context);
+          const options = await func.resolveAllFields(context);
           const result = getObjectKey(oldVariable, options);
           return func.resolve(result);
         },
