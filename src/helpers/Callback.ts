@@ -21,9 +21,9 @@ interface JsCallbackDescription {
 type CallbackDescription = AoiCallbackDescription | JsCallbackDescription;
 
 class Callback {
-  callbacks: Collection<string, CallbackDescription> = new Collection();
-
-  telegram: AoiClient;
+  public readonly callbacks: Collection<string, CallbackDescription> =
+    new Collection();
+  public readonly telegram: AoiClient;
 
   constructor(telegram: AoiClient) {
     this.telegram = telegram;

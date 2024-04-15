@@ -1,8 +1,8 @@
 class AoijsError extends Error {
-  name: string;
-  description: string;
-  command?: unknown;
-  functions?: string;
+  public name: string;
+  public description: string;
+  public command?: unknown;
+  public functions?: string;
 
   constructor(
     name: string | null,

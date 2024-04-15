@@ -10,7 +10,7 @@ import { EventEmitter } from "node:events";
 
 class CustomEvent extends EventEmitter {
   #count: number = 1;
-  aoitelegram: AoiClient;
+  public readonly aoitelegram: AoiClient;
 
   constructor(
     aoitelegram: AoiClient,

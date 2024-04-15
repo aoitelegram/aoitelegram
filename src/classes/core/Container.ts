@@ -8,14 +8,14 @@ import { ConditionChecker, WordMatcher } from "../../utils/";
 type EventData<T> = { eventData: T } & Container;
 
 class Container {
-  readonly array: Collection<string, any[]> = new Collection();
-  readonly object: Collection<string, object> = new Collection();
-  readonly random: Collection<string, number> = new Collection();
-  readonly condition: typeof ConditionChecker = ConditionChecker;
-  readonly wordMatcher: typeof WordMatcher = WordMatcher;
+  public readonly array: Collection<string, any[]> = new Collection();
+  public readonly object: Collection<string, object> = new Collection();
+  public readonly random: Collection<string, number> = new Collection();
+  public readonly condition: typeof ConditionChecker = ConditionChecker;
+  public readonly wordMatcher: typeof WordMatcher = WordMatcher;
   public suppressErrors: string = "";
   public readonly eventData: ContextEvent;
-  readonly telegram: AoiClient;
+  public readonly telegram: AoiClient;
 
   constructor(ctx: ContextEvent) {
     this.eventData = ctx;

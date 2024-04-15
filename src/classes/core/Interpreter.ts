@@ -5,8 +5,8 @@ import type { ParserFunction } from "./ParserFunction";
 import { getObjectKey, removePattern } from "../../utils/";
 
 class Interpreter {
-  container: Container;
-  inputData: Record<string, any> & {
+  public readonly container: Container;
+  public readonly inputData: Record<string, any> & {
     functions: ParserFunction[];
   };
 

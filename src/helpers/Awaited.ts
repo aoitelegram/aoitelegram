@@ -11,7 +11,8 @@ interface AwaitedDescription {
 }
 
 class Awaited {
-  awaiteds: Collection<string, AwaitedDescription> = new Collection();
+  public readonly awaiteds: Collection<string, AwaitedDescription> =
+    new Collection();
 
   telegram: AoiClient;
 

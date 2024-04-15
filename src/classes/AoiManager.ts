@@ -18,9 +18,12 @@ type AoiManagerOptions = { logging?: boolean } & (
 );
 
 class AoiManager<Value = any> {
-  tables: string[];
-  database: StorageDB<Value> | MongoDB<Value> | FirebaseDB<Value>;
-  collection: Collection<string, Value> = new Collection();
+  public readonly tables: string[];
+  public readonly database:
+    | StorageDB<Value>
+    | MongoDB<Value>
+    | FirebaseDB<Value>;
+  public readonly collection: Collection<string, Value> = new Collection();
 
   constructor(
     options: AoiManagerOptions = {

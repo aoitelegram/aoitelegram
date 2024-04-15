@@ -11,9 +11,9 @@ interface ValueDatabase {
 }
 
 class TimeoutManager {
-  database: AoiClient["database"];
-  timeouts: Collection<string, Timeout> = new Collection();
-  telegram: AoiClient;
+  public readonly database: AoiClient["database"];
+  public readonly timeouts: Collection<string, Timeout> = new Collection();
+  public readonly telegram: AoiClient;
 
   constructor(telegram: AoiClient) {
     this.telegram = telegram;

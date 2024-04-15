@@ -22,10 +22,10 @@ interface IOveeload {
 }
 
 class ParserFunction {
-  public structures: CustomJSFunction;
+  public readonly structures: CustomJSFunction;
   public inside: string = "";
   public fields: string[] = [];
-  public id: string = `{FUN=${randomUUID()}}`;
+  public readonly id: string = `{FUN=${randomUUID()}}`;
   public raw: string = "";
   public overloads: ParserFunction[] = [];
   public parentID: string = "";

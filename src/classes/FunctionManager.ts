@@ -8,25 +8,25 @@ import type {
 } from "./core/";
 
 class FunctionManager {
-  name: string;
-  params: string[];
-  aliases: string[];
-  brackets?: boolean;
-  type?: "javascript" | "aoitelegram";
-  fields: {
+  public name: string;
+  public params: string[];
+  public aliases: string[];
+  public brackets?: boolean;
+  public type?: "javascript" | "aoitelegram";
+  public fields: {
     name?: string;
     required?: boolean;
     rest?: boolean;
   }[];
-  inside: {
+  public inside: {
     name?: string;
     required?: boolean;
   };
-  callback?: (
+  public callback?: (
     ctx: Container,
     func: ParserFunction,
   ) => PossiblyAsync<ICallbackResolve | ICallbackReject>;
-  code?: string;
+  public code?: string;
 
   constructor(
     parameters: DataFunction = {

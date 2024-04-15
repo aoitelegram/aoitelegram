@@ -23,19 +23,21 @@ import { Timeout, TimeoutDescription } from "../helpers/Timeout";
 import { Awaited, AwaitedDescription } from "../helpers/Awaited";
 
 class AoiClient extends AoiBase {
-  customEvent?: CustomEvent;
-  warningManager: AoiWarning;
-  loadCommands?: LoadCommands;
-  timeoutManager: TimeoutManager;
-  awaitedManager: AwaitedManager;
-  functionError?: boolean = false;
-  sendMessageError?: boolean = true;
-  registerAwaited: Awaited = new Awaited(this);
-  registerTimeout: Timeout = new Timeout(this);
-  registerCallback: Callback = new Callback(this);
-  commands: Collection<string, (ICommandDescription | IActionDescription)[]> =
-    new Collection();
-  globalVars: Collection<string, unknown> = new Collection();
+  public customEvent?: CustomEvent;
+  public warningManager: AoiWarning;
+  public loadCommands?: LoadCommands;
+  public timeoutManager: TimeoutManager;
+  public awaitedManager: AwaitedManager;
+  public functionError?: boolean = false;
+  public sendMessageError?: boolean = true;
+  public readonly registerAwaited: Awaited = new Awaited(this);
+  public readonly registerTimeout: Timeout = new Timeout(this);
+  public readonly registerCallback: Callback = new Callback(this);
+  public readonly commands: Collection<
+    string,
+    (ICommandDescription | IActionDescription)[]
+  > = new Collection();
+  public readonly globalVars: Collection<string, unknown> = new Collection();
 
   constructor(
     token: string,

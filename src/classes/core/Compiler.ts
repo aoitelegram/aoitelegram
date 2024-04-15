@@ -4,10 +4,10 @@ import { Collection } from "@telegram.ts/collection";
 import type { CustomJSFunction } from "../AoiTyping";
 
 class Compiler {
-  code: string;
-  reverseFunctions?: boolean;
-  availableFunctions: Collection<string, CustomJSFunction>;
-  functionCounts: Collection<string, number> = new Collection();
+  public code: string;
+  public readonly reverseFunctions?: boolean;
+  public readonly availableFunctions: Collection<string, CustomJSFunction>;
+  public readonly functionCounts: Collection<string, number> = new Collection();
 
   constructor(parameters: {
     code: string;
@@ -24,7 +24,7 @@ class Compiler {
     for (const [name, func] of this.availableFunctions) {
       if (!func.aliases) continue;
       delete func["aliases"];
-      func.aliases?.forEach((name: string) => {
+      func.aliases.forEach((name: string) => {
         this.availableFunctions.set(name, func);
       });
     }

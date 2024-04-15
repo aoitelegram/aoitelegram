@@ -15,9 +15,9 @@ function versionToArray(versionString: string): number[] {
 }
 
 class AoiWarning {
-  autoUpdate: boolean;
-  enableDev: boolean;
-  enableBeta: boolean;
+  public readonly autoUpdate: boolean;
+  public readonly enableDev: boolean;
+  public readonly enableBeta: boolean;
 
   constructor(options: AoiWarningOptions = {}) {
     this.autoUpdate = options.autoUpdate || false;

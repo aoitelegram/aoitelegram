@@ -20,10 +20,12 @@ interface IEventsOptions {
 }
 
 class AoiBase extends TelegramBot {
-  database: AoiManager = {} as AoiManager;
-  events: Collection<string, IEventsOptions[]> = new Collection();
-  availableFunctions: Collection<string, CustomJSFunction> = new Collection();
-  availableCollectFunctions = [
+  public database: AoiManager = {} as AoiManager;
+  public readonly events: Collection<string, IEventsOptions[]> =
+    new Collection();
+  public readonly availableFunctions: Collection<string, CustomJSFunction> =
+    new Collection();
+  public readonly availableCollectFunctions = [
     "callbackQuery",
     "editedMessage",
     "myChatMember",

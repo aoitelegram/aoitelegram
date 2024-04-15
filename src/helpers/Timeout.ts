@@ -11,9 +11,9 @@ interface TimeoutDescription {
 }
 
 class Timeout {
-  timeouts: Collection<string, TimeoutDescription> = new Collection();
-
-  telegram: AoiClient;
+  public readonly timeouts: Collection<string, TimeoutDescription> =
+    new Collection();
+  public readonly telegram: AoiClient;
 
   constructor(telegram: AoiClient) {
     this.telegram = telegram;

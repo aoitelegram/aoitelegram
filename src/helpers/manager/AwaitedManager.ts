@@ -2,7 +2,7 @@ import { AoiClient } from "../../classes/AoiClient";
 import { AoijsError } from "../../classes/AoiError";
 
 class AwaitedManager {
-  telegram: AoiClient;
+  public readonly telegram: AoiClient;
 
   constructor(telegram: AoiClient) {
     this.telegram = telegram;
