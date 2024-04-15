@@ -1,7 +1,7 @@
 import { getObjectKey } from "../utils/";
-import { AoiClient } from "../classes/AoiClient";
 import { AoijsError } from "../classes/AoiError";
 import { Collection } from "@telegram.ts/collection";
+import type { AoiClient } from "../classes/AoiClient";
 import { setInterval, clearInterval } from "long-timeout";
 
 interface AwaitedDescription {

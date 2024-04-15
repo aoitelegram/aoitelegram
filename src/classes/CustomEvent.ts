@@ -2,11 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 import figlet from "figlet";
 import importSync from "import-sync";
-import { getObjectKey } from "../utils/";
 import { AoiClient } from "./AoiClient";
-import { DataEvent } from "./AoiTyping";
 import { AoijsError } from "./AoiError";
+import { getObjectKey } from "../utils/";
 import { EventEmitter } from "node:events";
+import type { DataEvent } from "./AoiTyping";
 
 class CustomEvent extends EventEmitter {
   #count: number = 1;

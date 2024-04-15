@@ -1,6 +1,6 @@
 import { version } from "../index.js";
-import { AoiClient } from "./AoiClient";
 import { AoijsError } from "./AoiError";
+import type { AoiClient } from "./AoiClient";
 
 abstract class AoiExtension {
   abstract name: string;

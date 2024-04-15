@@ -1,7 +1,7 @@
-import { AoiClient } from "../../classes/AoiClient";
 import { AoijsError } from "../../classes/AoiError";
 import { Collection } from "@telegram.ts/collection";
-import { type Timeout, setTimeout, clearTimeout } from "long-timeout";
+import type { AoiClient } from "../../classes/AoiClient";
+import { setTimeout, clearTimeout, type Timeout } from "long-timeout";
 
 interface ValueDatabase {
   id: string;

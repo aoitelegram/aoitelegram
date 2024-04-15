@@ -1,5 +1,5 @@
-import { AoiClient } from "../../classes/AoiClient";
 import { AoijsError } from "../../classes/AoiError";
+import type { AoiClient } from "../../classes/AoiClient";
 
 class AwaitedManager {
   public readonly telegram: AoiClient;

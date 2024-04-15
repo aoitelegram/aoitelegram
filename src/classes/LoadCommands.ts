@@ -2,8 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import figlet from "figlet";
 import importSync from "import-sync";
-import { AoiClient } from "./AoiClient";
 import { AoijsError } from "./AoiError";
+import type { AoiClient } from "./AoiClient";
 
 class LoadCommands {
   #aoitelegram: AoiClient;

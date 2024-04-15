@@ -1,26 +1,26 @@
 import fs from "node:fs";
 import chalk from "chalk";
 import path from "node:path";
-import aoiStart from "../utils/AoiStart";
-import { AoijsError } from "./AoiError";
 import { AoiLogger } from "./AoiLogger";
-import type { RequestInit } from "node-fetch";
-import type { ILoginOptions } from "telegramsjs";
-import { Collection } from "@telegram.ts/collection";
-import { DataFunction } from "./AoiTyping";
+import { AoijsError } from "./AoiError";
+import aoiStart from "../utils/AoiStart";
 import { CustomEvent } from "./CustomEvent";
+import type { RequestInit } from "node-fetch";
 import { AoiExtension } from "./AoiExtension";
-import { LoadCommands } from "./LoadCommands";
-import { AoiManagerOptions } from "./AoiManager";
+import type { DataFunction } from "./AoiTyping";
+import type { ILoginOptions } from "telegramsjs";
+import type { LoadCommands } from "./LoadCommands";
+import { Collection } from "@telegram.ts/collection";
+import type { AoiManagerOptions } from "./AoiManager";
 import { AoiBase, type IEventsOptions } from "./AoiBase";
-import { AoiWarning, AoiWarningOptions } from "./AoiWarning";
+import { Timeout, TimeoutDescription } from "../helpers/Timeout";
+import { Awaited, AwaitedDescription } from "../helpers/Awaited";
+import { AoiWarning, type AoiWarningOptions } from "./AoiWarning";
 import type { IActionDescription } from "./handlers/command/Action";
 import type { ICommandDescription } from "./handlers/command/Command";
 import { Callback, CallbackDescription } from "../helpers/Callback";
 import { TimeoutManager } from "../helpers/manager/TimeoutManager";
 import { AwaitedManager } from "../helpers/manager/AwaitedManager";
-import { Timeout, TimeoutDescription } from "../helpers/Timeout";
-import { Awaited, AwaitedDescription } from "../helpers/Awaited";
 
 class AoiClient extends AoiBase {
   public customEvent?: CustomEvent;

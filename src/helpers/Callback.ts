@@ -1,7 +1,7 @@
-import { AoiClient } from "../classes/AoiClient";
 import { AoijsError } from "../classes/AoiError";
 import type { Container } from "../classes/core/";
 import { Collection } from "@telegram.ts/collection";
+import type { AoiClient } from "../classes/AoiClient";
 
 interface AoiCallbackDescription {
   name: string;

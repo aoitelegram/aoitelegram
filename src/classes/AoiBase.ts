@@ -1,11 +1,10 @@
 import { version } from "../index";
-import { AoiClient } from "./AoiClient";
 import { getObjectKey } from "../utils/";
-import { Update } from "@telegram.ts/types";
 import type { RequestInit } from "node-fetch";
 import { Interpreter, Compiler } from "./core/";
+import type { Update } from "@telegram.ts/types";
 import { AoijsError, AoijsTypeError } from "./AoiError";
-import { ContextEvent, EventHandlers } from "./AoiTyping";
+import type { ContextEvent, EventHandlers } from "./AoiTyping";
 import { AoiManager, type AoiManagerOptions } from "./AoiManager";
 import type { DataFunction, CustomJSFunction } from "./AoiTyping";
 import { TelegramBot, Collection, type Context } from "telegramsjs";

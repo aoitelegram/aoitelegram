@@ -1,8 +1,8 @@
 import { getObjectKey } from "../utils/";
-import { AoiClient } from "../classes/AoiClient";
 import { AoijsError } from "../classes/AoiError";
 import { Collection } from "@telegram.ts/collection";
-import { ValueDatabase } from "./manager/TimeoutManager";
+import type { AoiClient } from "../classes/AoiClient";
+import type { ValueDatabase } from "./manager/TimeoutManager";
 
 interface TimeoutDescription {
   id: string;
