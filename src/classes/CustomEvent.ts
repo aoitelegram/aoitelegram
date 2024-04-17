@@ -3,9 +3,9 @@ import path from "node:path";
 import figlet from "figlet";
 import importSync from "import-sync";
 import { AoiClient } from "./AoiClient";
-import { AoijsError } from "./AoiError";
 import { getObjectKey } from "../utils/";
 import { EventEmitter } from "node:events";
+import { AoijsTypeError } from "./AoiError";
 import type { DataEvent } from "./AoiTyping";
 
 class CustomEvent extends EventEmitter {
@@ -61,14 +61,14 @@ class CustomEvent extends EventEmitter {
 
   command(options: DataEvent): CustomEvent {
     if (!options?.listen) {
-      throw new AoijsError(
+      throw new AoijsTypeError(
         "CustomEvent",
         `you did not specify the 'listen' parameter`,
       );
     }
 
     if (options.type === "js" && typeof options.callback !== "function") {
-      throw new AoijsError(
+      throw new AoijsTypeError(
         "CustomEvent",
         "you did not specify the 'callback' parameter",
       );
@@ -76,7 +76,7 @@ class CustomEvent extends EventEmitter {
       options.type === "aoitelegram" &&
       typeof options.code !== "string"
     ) {
-      throw new AoijsError(
+      throw new AoijsTypeError(
         "CustomEvent",
         "you did not specify the 'code' parameter",
       );
@@ -110,7 +110,7 @@ class CustomEvent extends EventEmitter {
       } else if (options.once === false || options.once === undefined) {
         super.on(options.listen, eventHandler);
       } else {
-        throw new AoijsError(
+        throw new AoijsTypeError(
           "CustomEvent",
           "the type specified for 'once' is invalid. Only 'false' and 'true' are allowed",
         );
@@ -121,7 +121,7 @@ class CustomEvent extends EventEmitter {
       } else if (options.once === false || options.once === undefined) {
         super.on(options.listen, options.callback);
       } else {
-        throw new AoijsError(
+        throw new AoijsTypeError(
           "CustomEvent",
           "the type specified for 'once' is invalid. Only 'false' and 'true' are allowed",
         );
@@ -133,18 +133,14 @@ class CustomEvent extends EventEmitter {
 
   loadEvents(dirPath: string, log: boolean = true): CustomEvent {
     if (!dirPath) {
-      throw new AoijsError(
+      throw new AoijsTypeError(
         "parameter",
         "you did not specify the 'dirPath' parameter",
       );
     }
 
     if (!fs.existsSync(dirPath)) {
-      throw new AoijsError(
-        "file",
-        "the specified file path was not found",
-        dirPath,
-      );
+      throw new AoijsTypeError("file", "the specified file path was not found");
     }
 
     if (this.#count === 1) {
@@ -200,6 +196,26 @@ class CustomEvent extends EventEmitter {
     eventName: string,
     emitEventName: string,
   ): void {
+    const validProcess = {
+      exit: "boolean",
+      worker: "boolean",
+      SIGINT: "boolean",
+      message: "boolean",
+      warning: "boolean",
+      SIGTERM: "boolean",
+      beforeExit: "boolean",
+      disconnect: "boolean",
+      multipleResolves: "boolean",
+      rejectionHandled: "boolean",
+      uncaughtException: "boolean",
+      unhandledRejection: "boolean",
+      uncaughtExceptionMonitor: "boolean",
+    };
+    for (const key in eventNames) {
+      if (!(key in validProcess) || typeof eventNames[key] !== "boolean") {
+        throw new AoijsTypeError(`Invalid value for process option '${key}'`);
+      }
+    }
     if (eventNames[eventName]) {
       process.on(eventName, async (...args: any[]) => {
         const parsedPromise = await Promise.all(args);

@@ -1,6 +1,6 @@
 import { AoiLogger } from "./AoiLogger";
-import { AoijsError } from "./AoiError";
 import { Collection } from "@telegram.ts/collection";
+import { AoijsError, AoijsTypeError } from "./AoiError";
 import {
   StorageDB,
   MongoDB,
@@ -19,7 +19,7 @@ type AoiManagerOptions = { logging?: boolean } & (
 
 class AoiManager<Value = any> {
   public readonly tables: string[];
-  public readonly database:
+  public readonly database!:
     | StorageDB<Value>
     | MongoDB<Value>
     | FirebaseDB<Value>;
@@ -35,7 +35,13 @@ class AoiManager<Value = any> {
       },
     },
   ) {
-    options.options = !options.options ? {} : options.options;
+    if (typeof options !== "object") {
+      throw new AoijsTypeError(
+        `The expected type is "object", but received type ${typeof options}`,
+      );
+    } else this.#validateOptions(options);
+
+    options.options ??= {};
     if (Array.isArray(options.options?.tables)) {
       options.options.tables = [...options.options.tables, "timeout"];
     } else {
@@ -48,8 +54,6 @@ class AoiManager<Value = any> {
       this.database = new MongoDB(options.url, options.options);
     } else if (options.type === "firebase") {
       this.database = new FirebaseDB(options.url, options.options);
-    } else {
-      throw new AoijsError("type", "Invalid database type specified");
     }
 
     if (options.logging === undefined || options.logging) {
@@ -202,10 +206,50 @@ class AoiManager<Value = any> {
         }
       }
     } else {
-      throw new AoijsError(
+      throw new AoijsTypeError(
         "parameter",
         "The parameter should be of type 'string' or 'string[]'",
       );
+    }
+  }
+
+  #validateOptions(options: Record<string, any>) {
+    if (!options.type) {
+      throw new AoijsTypeError(
+        "You need to specify the type of database you will be using, available options are storage | mongo | firebase",
+      );
+    }
+
+    if ("type" in options) {
+      if (
+        options.type !== "storage" &&
+        options.type !== "mongo" &&
+        options.type !== "firebase"
+      ) {
+        throw new AoijsTypeError(
+          'Only "storage", "mongo", or "firebase" are valid values for the type property',
+        );
+      }
+
+      if (
+        (options.type === "mongo" || options.type === "firebase") &&
+        !("url" in options)
+      ) {
+        throw new AoijsTypeError(
+          'For "mongo" or "firebase" type, a "url" parameter is required',
+        );
+      }
+    }
+
+    if ("logging" in options) {
+      if (
+        typeof options.logging !== "boolean" &&
+        typeof options.logging !== "undefined"
+      ) {
+        throw new AoijsTypeError(
+          "Logging property must be a boolean or undefined",
+        );
+      }
     }
   }
 }

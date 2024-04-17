@@ -28,16 +28,13 @@ class FunctionManager {
   ) => PossiblyAsync<ICallbackResolve | ICallbackReject>;
   public code?: string;
 
-  constructor(
-    parameters: DataFunction = {
-      fields: [],
-    } as unknown as DataFunction,
-  ) {
+  constructor(parameters: DataFunction = {} as DataFunction) {
     if (typeof parameters !== "object") {
       throw new AoijsTypeError(
         `The expected type is "object", but received type ${typeof parameters}`,
       );
-    }
+    } else this.#validateOptions(parameters);
+
     this.name = parameters.name;
     this.aliases = parameters.aliases || [];
     this.type = parameters.type || "javascript";
@@ -163,6 +160,118 @@ class FunctionManager {
     }
     this.code = code;
     return this;
+  }
+
+  #validateOptions(options: Record<string, any>) {
+    if ("name" in options && typeof options.name !== "string") {
+      throw new AoijsTypeError("Name property is missing or not a string");
+    }
+
+    if (
+      options.aliases &&
+      (!Array.isArray(options.aliases) ||
+        !options.aliases.every((element) => typeof element === "string"))
+    ) {
+      throw new AoijsTypeError("Each element in aliases should be a string");
+    }
+
+    if (
+      options.type !== "javascript" &&
+      options.type !== "aoitelegram" &&
+      options.type !== undefined
+    ) {
+      throw new AoijsTypeError(
+        'Type must be either "javascript" or "aoitelegram"',
+      );
+    }
+
+    if ("brackets" in options && typeof options.brackets !== "boolean") {
+      throw new AoijsTypeError("Brackets must be a boolean value");
+    }
+
+    if ("fields" in options) {
+      if ("inside" in options) {
+        throw new AoijsTypeError(
+          'If you specified "inside" earlier, then "fields" cannot be entities',
+        );
+      }
+
+      if (!Array.isArray(options.fields)) {
+        throw new AoijsTypeError(
+          `Fields must be an array, but received type ${typeof options.fields}`,
+        );
+      }
+
+      if (!("brackets" in options)) {
+        throw new AoijsTypeError(
+          'If you specified "fields", then "brackets" must also be specified',
+        );
+      }
+
+      if (!options.fields.some((element: any) => "required" in element)) {
+        throw new AoijsTypeError(
+          "Each element in fields must contain an object with a required property",
+        );
+      }
+    }
+
+    if ("inside" in options) {
+      if ("fields" in options) {
+        throw new AoijsTypeError(
+          'If you specified "fields" earlier, then "inside" cannot be entities',
+        );
+      }
+
+      if (typeof options.inside !== "object") {
+        throw new AoijsTypeError(
+          `Inside must be an object, but received type ${typeof options.inside}`,
+        );
+      }
+
+      if (!("required" in options.inside)) {
+        throw new AoijsTypeError("Each parameter must contain a string");
+      }
+    }
+
+    if ("params" in options) {
+      if (options.params.some((element: any) => typeof element !== "string")) {
+        throw new AoijsTypeError("Each element in params must be a string");
+      }
+
+      if (options.type !== "aoitelegram") {
+        throw new AoijsTypeError(
+          "Params method is only accessible for type 'javascript' when type is set to 'aoitelegram'",
+        );
+      }
+    }
+
+    if ("callback" in options) {
+      if (typeof options.callback !== "function") {
+        throw new AoijsTypeError(
+          `Callback must be a function, but received type ${typeof options.callback}`,
+        );
+      }
+
+      if (options.type === "aoitelegram") {
+        throw new AoijsTypeError(
+          "Callback method is not accessible for type 'aoitelegram' when type is set to 'javascript'",
+        );
+      }
+    }
+
+    if ("code" in options) {
+      if (typeof options.code !== "string") {
+        throw new AoijsTypeError(
+          `Code must be a string, but received type ${typeof options.code}`,
+        );
+      }
+
+      if (options.type !== "aoitelegram") {
+        throw new AoijsTypeError(
+          "Code method is not accessible for type 'javascript' when type is set to 'aoitelegram'",
+        );
+      }
+    }
   }
 }
 
