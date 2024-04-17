@@ -23,8 +23,8 @@ class Compiler {
   processFunctionNames(): void {
     for (const [name, func] of this.availableFunctions) {
       if (!func.aliases) continue;
-      delete func["aliases"];
       func.aliases.forEach((name: string) => {
+        delete func["aliases"];
         this.availableFunctions.set(name, func);
       });
     }
