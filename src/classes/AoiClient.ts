@@ -60,13 +60,14 @@ class AoiClient extends AoiBase {
       parameters.disableAoiDB,
     );
 
-    const allAoiExtends = parameters.extensions?.every(
+    const allAoiExtends = parameters.extensions?.every?.(
       (cls) => cls instanceof AoiExtension,
     );
+
     if (!allAoiExtends && Array.isArray(parameters.extensions)) {
       throw new AoijsError(
         "extensions",
-        "in the parameter 'extensions', all classes should be inherited from the class 'AoiExtension'",
+        "In the parameter 'extensions', all classes should be inherited from the class 'AoiExtension'",
       );
     }
 
