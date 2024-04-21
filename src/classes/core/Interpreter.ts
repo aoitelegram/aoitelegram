@@ -1,27 +1,34 @@
 import { Container } from "./Container";
-import { AoijsTypeError } from "../AoiError";
 import type { ContextEvent } from "../AoiTyping";
 import type { ParserFunction } from "./ParserFunction";
+import { RuntimeError, AoijsTypeError } from "../AoiError";
 import { getObjectKey, removePattern } from "../../utils/";
+import type { ErrorCompiler, SuccessCompiler } from "./Compiler";
 
 class Interpreter {
   public readonly container: Container;
-  public readonly inputData: Record<string, any> & {
-    functions: ParserFunction[];
-  };
+  public readonly inputData: SuccessCompiler | ErrorCompiler;
 
-  constructor(
-    inputData: Record<string, any> & {
-      functions: ParserFunction[];
-    },
-    ctx: ContextEvent,
-  ) {
+  constructor(inputData: SuccessCompiler | ErrorCompiler, ctx: ContextEvent) {
     this.inputData = inputData;
     this.container = new Container(ctx);
   }
 
   async runInput(): Promise<string> {
     let textResult = this.inputData.code;
+
+    if ("description" in this.inputData) {
+      await this.#sendErrorMessage(
+        this.inputData.description,
+        removePattern(this.inputData.func),
+        false,
+        {
+          code: this.inputData.code.split("\n")[this.inputData.line],
+          line: this.inputData.line,
+        },
+      );
+      return "";
+    }
 
     for await (const dataFunction of this.inputData.functions) {
       try {
@@ -72,6 +79,7 @@ class Interpreter {
     error: string,
     functionName: string,
     custom: boolean = false,
+    options?: { code: string; line: number },
   ): Promise<void> {
     if (
       !custom &&
@@ -91,7 +99,7 @@ class Interpreter {
 
           const dataError = {
             name: functionName,
-            command: this.inputData.name,
+            command: "name" in this.inputData ? this.inputData.name : null,
             error,
           };
           const result = getObjectKey(dataError, options);
@@ -107,8 +115,8 @@ class Interpreter {
 
     if (
       !custom &&
-      this.container?.suppressErrors &&
-      this.container.eventData?.sendMessage
+      typeof this.container?.suppressErrors === "string" &&
+      "reply" in this.container.eventData
     ) {
       await this.container.eventData.sendMessage(
         this.container.suppressErrors,
@@ -120,7 +128,7 @@ class Interpreter {
     } else if (
       this.container?.telegram?.sendMessageError &&
       !this.container?.telegram?.functionError &&
-      this.container.eventData?.sendMessage
+      "reply" in this.container.eventData
     ) {
       await this.container.eventData.sendMessage(
         custom ? error : `❌ <b>${functionName}:</b> <code>${error}</code>`,
@@ -128,7 +136,7 @@ class Interpreter {
       );
       return;
     } else if (!this.container?.telegram?.functionError) {
-      throw new AoijsTypeError(error);
+      throw new RuntimeError(error, options?.line, options?.code);
     }
   }
 }

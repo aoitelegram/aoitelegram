@@ -17,7 +17,7 @@ abstract class AoiExtension {
       if (this.targetVersion > version) {
         throw new AoijsError(
           this.name,
-          `the extension supports only "${this.targetVersion}" and above`,
+          `The extension supports only '${this.targetVersion}' and above`,
         );
       }
     }
@@ -27,7 +27,7 @@ abstract class AoiExtension {
       if (!requireVersion) {
         throw new AoijsError(
           this.name,
-          `this extension does not support version "${version}" of the library. To ensure everything works correctly, use ${this.targetVersion.slice(0, 10).join(", ")} and others`,
+          `This extension does not support version '${version}' of the library. To ensure everything works correctly, use ${this.targetVersion.slice(0, 10).join(", ")} and others`,
         );
       }
     }
@@ -41,7 +41,7 @@ abstract class AoiExtension {
         if (hasExtensions === -1) {
           throw new AoijsError(
             this.name,
-            `the extension requires the extension: "${extension}". Also, make sure you have the dependencies that the extension requires: ${this.requireExtension.slice(0, 10).join(", ")}`,
+            `The extension requires the extension: '${extension}'. Also, make sure you have the dependencies that the extension requires: ${this.requireExtension.slice(0, 10).join(", ")}`,
           );
         }
       }

@@ -1,5 +1,5 @@
 import { getObjectKey } from "../utils/";
-import { AoijsError } from "../classes/AoiError";
+import { AoijsTypeError } from "../classes/AoiError";
 import { Collection } from "@telegram.ts/collection";
 import type { AoiClient } from "../classes/AoiClient";
 import { setInterval, clearInterval } from "long-timeout";
@@ -26,9 +26,8 @@ class Awaited {
     if (!existingIndex) {
       this.awaiteds.set(awaited.awaited, awaited);
     } else {
-      throw new AoijsError(
-        "awaited",
-        `the awaited "${awaited.awaited}" already exists`,
+      throw new AoijsTypeError(
+        `The awaited '${awaited.awaited}' already exists`,
       );
     }
 

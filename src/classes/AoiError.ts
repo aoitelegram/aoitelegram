@@ -1,29 +1,57 @@
-class AoijsError extends Error {
-  public name: string;
-  public description: string;
-  public command?: unknown;
-  public functions?: string;
+import { version } from "../index.js";
 
-  constructor(
-    name: string | null,
-    description: string,
-    command?: unknown,
-    functions?: string,
-  ) {
+interface IOptionsTypeError {
+  path?: string;
+  name?: string;
+  command?: string;
+}
+
+class AoijsError extends Error {
+  public readonly name: string;
+  public readonly version: string;
+  public readonly description: string;
+
+  constructor(description: string, name?: string) {
     super(description);
 
-    this.name = name ? `AoijsError[${name}]` : `AoijsError`;
+    this.name = name || "AoijsError";
+    this.version = version;
     this.description = description;
-    this.command = command;
-    this.functions = functions;
   }
 }
 
 class AoijsTypeError extends TypeError {
-  constructor(description: string, name?: string) {
+  public readonly name: string;
+  public readonly path?: string;
+  public readonly version: string;
+  public readonly command?: string;
+  public readonly description: string;
+  public readonly expectedType?: string;
+
+  constructor(description: string, options?: IOptionsTypeError) {
     super(description);
-    this.name = name ? `AoijsTypeError[${name}]` : "AoijsTypeError";
+
+    this.path = options?.path;
+    this.version = version;
+    this.name = options?.name || "AoijsTypeError";
+    this.command = options?.command;
+    this.description = description;
   }
 }
 
-export { AoijsError, AoijsTypeError };
+class RuntimeError extends Error {
+  public readonly line: number;
+  public readonly code: string;
+  public readonly name: string = "RuntimeError";
+  public readonly description: string;
+
+  constructor(description: string, line?: number, code?: string) {
+    super(description);
+
+    this.line = line || 0;
+    this.code = code || "unknown";
+    this.description = description;
+  }
+}
+
+export { AoijsError, AoijsTypeError, RuntimeError, IOptionsTypeError };

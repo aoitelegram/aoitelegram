@@ -3,6 +3,18 @@ import { ParserFunction } from "./ParserFunction";
 import { Collection } from "@telegram.ts/collection";
 import type { CustomJSFunction } from "../AoiTyping";
 
+interface SuccessCompiler {
+  code: string;
+  functions: ParserFunction[];
+}
+
+interface ErrorCompiler {
+  func: string;
+  code: string;
+  line: number;
+  description: string;
+}
+
 class Compiler {
   public code: string;
   public readonly reverseFunctions?: boolean;
@@ -39,7 +51,7 @@ class Compiler {
     }
   }
 
-  compile(): { code: string; functions: ParserFunction[] } {
+  compile(): SuccessCompiler | ErrorCompiler {
     const parsedFunctions: ParserFunction[] = [];
     const functionRegExp = new RegExp(
       `(${this.availableFunctions
@@ -68,7 +80,7 @@ class Compiler {
         dataFunction.fields?.[0].required &&
         !segmentCode.startsWith("[")
       ) {
-        throwBracketError(dataFunction, this.code, "brackets");
+        return searchBracketError(dataFunction.name, this.code, "brackets");
       }
 
       if (
@@ -76,7 +88,11 @@ class Compiler {
         segmentCode.startsWith("[") &&
         !segmentCode.includes("]")
       ) {
-        throwBracketError(dataFunction, this.code, "bracket closing");
+        return searchBracketError(
+          dataFunction.name,
+          this.code,
+          "bracket closing",
+        );
       }
 
       if (segmentCode.startsWith("[")) {
@@ -103,7 +119,9 @@ class Compiler {
       if (processedIds.includes(func.id)) {
         const overloads = func.filterFunctions(parsedFunctions);
         if (overloads.length) {
-          for (const overload of overloads) {
+          for (const overload of this.reverseFunctions
+            ? overloads.reverse()
+            : overloads) {
             func.addOverload(overload);
             processedIds.push(overload.id);
           }
@@ -111,7 +129,9 @@ class Compiler {
       } else {
         const overloads = func.filterFunctions(parsedFunctions);
         if (overloads.length) {
-          for (const overload of overloads) {
+          for (const overload of this.reverseFunctions
+            ? overloads.reverse()
+            : overloads) {
             func.addOverload(overload);
             processedIds.push(overload.id);
           }
@@ -161,24 +181,21 @@ class Compiler {
   }
 }
 
-function throwBracketError(
-  func: CustomJSFunction,
+function searchBracketError(
+  func: string,
   code: string,
   errorType: string,
-): never {
-  const errorMessage = `${func.name}`;
-  const pointer = " ".repeat(7) + "^".repeat(func.name.length);
+): { func: string; line: number; code: string; description: string } {
   const lines = code.split(/\n/g);
-  let lineNumber = lines.findIndex((line) => line.includes(func.name)) + 1;
-  const lastIndexOfFunc =
-    lineNumber !== 0 ? lines[lineNumber - 1].lastIndexOf(func.name) : 0;
+  const lineNumber = lines.findIndex((line) => line.includes(func)) + 1;
+  const errorLine = lineNumber ? lines[lineNumber - 1].lastIndexOf(func) : 0;
 
-  const errorLine =
-    typeof lastIndexOfFunc !== "number" ? lastIndexOfFunc : lastIndexOfFunc + 1;
-
-  throw new AoijsTypeError(
-    `${errorMessage}\n${pointer} this function requires ${errorType} at line ${lineNumber}:${errorLine}.`,
-  );
+  return {
+    func,
+    line: errorLine,
+    code: lines[errorLine],
+    description: `this function requires ${errorType} at line ${lineNumber}:${errorLine}`,
+  };
 }
 
-export { Compiler };
+export { Compiler, SuccessCompiler, ErrorCompiler };

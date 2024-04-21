@@ -207,7 +207,6 @@ class AoiManager<Value = any> {
       }
     } else {
       throw new AoijsTypeError(
-        "parameter",
         "The parameter should be of type 'string' or 'string[]'",
       );
     }

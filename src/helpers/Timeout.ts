@@ -27,7 +27,7 @@ class Timeout {
     } else {
       throw new AoijsError(
         "timeout",
-        `the current timeout "${timeout.id}" already exists`,
+        `The current timeout '${timeout.id}' already exists`,
       );
     }
 

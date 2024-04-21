@@ -31,7 +31,7 @@ class FunctionManager {
   constructor(parameters: DataFunction = {} as DataFunction) {
     if (typeof parameters !== "object") {
       throw new AoijsTypeError(
-        `The expected type is "object", but received type ${typeof parameters}`,
+        `The expected type is 'object', but received type ${typeof parameters}`,
       );
     } else this.#validateOptions(parameters);
 
@@ -50,7 +50,7 @@ class FunctionManager {
   setName(name: string): FunctionManager {
     if (typeof name !== "string") {
       throw new AoijsTypeError(
-        `The expected type is "string", but received type ${typeof name}`,
+        `The expected type is 'string', but received type ${typeof name}`,
       );
     }
     this.name = name;
@@ -60,7 +60,7 @@ class FunctionManager {
   setAliases(aliases: string | string[]): FunctionManager {
     if (typeof aliases !== "string" && !Array.isArray(aliases)) {
       throw new AoijsTypeError(
-        `The expected type is "string | array", but received type ${typeof aliases}`,
+        `The expected type is 'string | array', but received type ${typeof aliases}`,
       );
     }
     if (Array.isArray(aliases)) {
@@ -81,12 +81,12 @@ class FunctionManager {
     }
     if (typeof fields !== "object" && !Array.isArray(fields)) {
       throw new AoijsTypeError(
-        `The expected type is "array | object", but received type ${typeof fields}`,
+        `The expected type is 'array | object', but received type ${typeof fields}`,
       );
     }
     if (Object.keys(this.inside).length > 1) {
       throw new AoijsTypeError(
-        'If you specified "inside" early, then the specified "fields" cannot be entities',
+        "If you specified 'inside' early, then the specified 'fields' cannot be entities",
       );
     }
     if (Array.isArray(fields)) {
@@ -108,7 +108,7 @@ class FunctionManager {
   setBrackets(brackets: boolean = true): FunctionManager {
     if (typeof brackets !== "boolean") {
       throw new AoijsTypeError(
-        `The expected type is "boolean", but received type ${typeof brackets}`,
+        `The expected type is 'boolean', but received type ${typeof brackets}`,
       );
     }
     this.brackets = brackets;
@@ -128,7 +128,7 @@ class FunctionManager {
     }
     if (typeof callback !== "function") {
       throw new AoijsTypeError(
-        `The expected type is "function", but received type ${typeof callback}`,
+        `The expected type is 'function', but received type ${typeof callback}`,
       );
     }
     this.callback = callback;
@@ -143,7 +143,7 @@ class FunctionManager {
     }
     if (typeof params !== "string" && !Array.isArray(params)) {
       throw new AoijsTypeError(
-        `The expected type is "string | array", but received type ${typeof params}`,
+        `The expected type is 'string | array', but received type ${typeof params}`,
       );
     }
     if (Array.isArray(params)) {
@@ -181,7 +181,7 @@ class FunctionManager {
       options.type !== undefined
     ) {
       throw new AoijsTypeError(
-        'Type must be either "javascript" or "aoitelegram"',
+        "Type must be either 'javascript' or 'aoitelegram'",
       );
     }
 
@@ -192,7 +192,7 @@ class FunctionManager {
     if ("fields" in options) {
       if ("inside" in options) {
         throw new AoijsTypeError(
-          'If you specified "inside" earlier, then "fields" cannot be entities',
+          "If you specified 'inside' earlier, then 'fields' cannot be entities",
         );
       }
 
@@ -204,7 +204,7 @@ class FunctionManager {
 
       if (!("brackets" in options)) {
         throw new AoijsTypeError(
-          'If you specified "fields", then "brackets" must also be specified',
+          "If you specified 'fields', then 'brackets' must also be specified",
         );
       }
 
@@ -218,7 +218,7 @@ class FunctionManager {
     if ("inside" in options) {
       if ("fields" in options) {
         throw new AoijsTypeError(
-          'If you specified "fields" earlier, then "inside" cannot be entities',
+          "If you specified 'fields' earlier, then 'inside' cannot be entities",
         );
       }
 

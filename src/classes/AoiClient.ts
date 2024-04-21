@@ -1,8 +1,7 @@
-import fs from "node:fs";
 import chalk from "chalk";
 import path from "node:path";
+import fs from "node:fs/promises";
 import { AoiLogger } from "./AoiLogger";
-import { AoijsError } from "./AoiError";
 import aoiStart from "../utils/AoiStart";
 import { CustomEvent } from "./CustomEvent";
 import type { RequestInit } from "node-fetch";
@@ -12,6 +11,7 @@ import type { ILoginOptions } from "telegramsjs";
 import type { LoadCommands } from "./LoadCommands";
 import { Collection } from "@telegram.ts/collection";
 import type { AoiManagerOptions } from "./AoiManager";
+import { AoijsError, AoijsTypeError } from "./AoiError";
 import { AoiBase, type IEventsOptions } from "./AoiBase";
 import { Timeout, TimeoutDescription } from "../helpers/Timeout";
 import { Awaited, AwaitedDescription } from "../helpers/Awaited";
@@ -65,8 +65,7 @@ class AoiClient extends AoiBase {
     );
 
     if (!allAoiExtends && Array.isArray(parameters.extensions)) {
-      throw new AoijsError(
-        "extensions",
+      throw new AoijsTypeError(
         "In the parameter 'extensions', all classes should be inherited from the class 'AoiExtension'",
       );
     }
@@ -83,16 +82,10 @@ class AoiClient extends AoiBase {
 
   addCommand(options: ICommandDescription): AoiClient {
     if (!options?.name) {
-      throw new AoijsError(
-        "parameter",
-        "you did not specify the 'name' parameter",
-      );
+      throw new AoijsError("You did not specify the 'name' parameter");
     }
     if (!options?.code) {
-      throw new AoijsError(
-        "parameter",
-        "you did not specify the 'code' parameter",
-      );
+      throw new AoijsError("You did not specify the 'code' parameter");
     }
     if (!this.commands.has("command")) {
       const commandsType = this.commands.get("command");
@@ -103,16 +96,10 @@ class AoiClient extends AoiBase {
 
   addAction(options: IActionDescription): AoiClient {
     if (!options?.data) {
-      throw new AoijsError(
-        "parameter",
-        "you did not specify the 'data' parameter",
-      );
+      throw new AoijsError("You did not specify the 'data' parameter");
     }
     if (!options?.code) {
-      throw new AoijsError(
-        "parameter",
-        "you did not specify the 'code' parameter",
-      );
+      throw new AoijsError("You did not specify the 'code' parameter");
     }
     if (!this.commands.has("action")) {
       const actionType = this.commands.get("action");
@@ -123,16 +110,10 @@ class AoiClient extends AoiBase {
 
   timeoutCommand(options: TimeoutDescription): AoiClient {
     if (!options?.id) {
-      throw new AoijsError(
-        "parameter",
-        "you did not specify the 'id' parameter",
-      );
+      throw new AoijsError("You did not specify the 'id' parameter");
     }
     if (!options?.code) {
-      throw new AoijsError(
-        "parameter",
-        "you did not specify the 'code' parameter",
-      );
+      throw new AoijsError("You did not specify the 'code' parameter");
     }
     this.registerTimeout.register(options);
     return this;
@@ -140,16 +121,10 @@ class AoiClient extends AoiBase {
 
   awaitedCommand(options: AwaitedDescription): AoiClient {
     if (!options?.awaited) {
-      throw new AoijsError(
-        "parameter",
-        "you did not specify the 'awaited' parameter",
-      );
+      throw new AoijsError("You did not specify the 'awaited' parameter");
     }
     if (!options?.code) {
-      throw new AoijsError(
-        "parameter",
-        "you did not specify the 'code' parameter",
-      );
+      throw new AoijsError("You did not specify the 'code' parameter");
     }
     this.registerAwaited.register(options);
     return this;
@@ -157,24 +132,15 @@ class AoiClient extends AoiBase {
 
   addCallback(options: CallbackDescription): AoiClient {
     if (!options?.name) {
-      throw new AoijsError(
-        "parameter",
-        "You did not specify the 'name' parameter.",
-      );
+      throw new AoijsError("You did not specify the 'name' parameter.");
     }
 
     if (options.type === "aoitelegram" && !options?.code) {
-      throw new AoijsError(
-        "parameter",
-        "You did not specify the 'code' parameter.",
-      );
+      throw new AoijsError("You did not specify the 'code' parameter.");
     }
 
     if (options.type === "js" && !options?.callback) {
-      throw new AoijsError(
-        "parameter",
-        "You did not specify the 'callback' parameter.",
-      );
+      throw new AoijsError("You did not specify the 'callback' parameter.");
     }
 
     this.registerCallback.register(options);
@@ -183,10 +149,7 @@ class AoiClient extends AoiBase {
 
   functionErrorCommand(options: IEventsOptions): AoiClient {
     if (!options?.code) {
-      throw new AoijsError(
-        "parameter",
-        "you did not specify the 'code' parameter",
-      );
+      throw new AoijsError("You did not specify the 'code' parameter");
     }
     this.on("functionError", async (context, telegram) => {
       telegram.functionError = false;
@@ -211,7 +174,7 @@ class AoiClient extends AoiBase {
         try {
           await initPlugins["initPlugins"](this);
           AoiLogger.info(
-            `Plugin "${initPlugins.name}" has been dreadfully registered`,
+            `Plugin '${initPlugins.name}' has been dreadfully registered`,
           );
         } catch (err) {
           AoiLogger.error(err);
@@ -229,47 +192,34 @@ class AoiClient extends AoiBase {
   }
 
   async #loadFunctionsLib(dirPath: string): Promise<void> {
-    const processFile = async (itemPath: string) => {
-      try {
-        const dataFunction = require(itemPath).default;
-        if (
-          !dataFunction ||
-          typeof dataFunction.name !== "string" ||
-          typeof dataFunction.callback !== "function"
-        ) {
-          return;
-        }
-        const dataFunctionName = dataFunction.name.toLowerCase();
-        if (this.parameters.disableFunctions?.includes(dataFunctionName))
-          return;
+    const items = await fs.readdir(dirPath, {
+      recursive: true,
+    });
 
-        this.availableFunctions.set(dataFunctionName, dataFunction);
-      } catch (err) {
-        console.error(err);
-      }
-    };
+    for (const itemPath of items) {
+      if (!itemPath.endsWith(".js")) continue;
+      const { default: dataFunction } = (
+        await import(path.join(__dirname, `../function/${itemPath}`))
+      ).default;
 
-    const processItem = async (item: string) => {
-      const itemPath = path.join(dirPath, item);
-      try {
-        const stats = await fs.promises.stat(itemPath);
-        if (stats.isDirectory()) {
-          await this.#loadFunctionsLib(itemPath);
-        } else if (itemPath.endsWith(".js")) {
-          await processFile(itemPath);
-        }
-      } catch (err) {
-        console.error(err);
+      if (
+        !dataFunction ||
+        typeof dataFunction.name !== "string" ||
+        typeof dataFunction.callback !== "function"
+      ) {
+        continue;
       }
-    };
 
-    try {
-      const items = await fs.promises.readdir(dirPath);
-      for (const item of items) {
-        await processItem(item);
+      const dataFunctionName = dataFunction.name.toLowerCase();
+      if (
+        this.parameters.disableFunctions?.find(
+          (name) => name === dataFunctionName,
+        )
+      ) {
+        continue;
       }
-    } catch (err) {
-      console.error(err);
+
+      this.availableFunctions.set(dataFunctionName, dataFunction);
     }
   }
 }

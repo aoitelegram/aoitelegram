@@ -13,7 +13,7 @@ class Container {
   public readonly random: Collection<string, number> = new Collection();
   public readonly condition: typeof ConditionChecker = ConditionChecker;
   public readonly wordMatcher: typeof WordMatcher = WordMatcher;
-  public suppressErrors: string = "";
+  public suppressErrors: string | null = null;
   public readonly eventData: ContextEvent;
   public readonly telegram: AoiClient;
 
@@ -26,7 +26,7 @@ class Container {
         : {}) as unknown as AoiClient;
   }
 
-  setSuppressErrors(reason: string): Container {
+  setSuppressErrors(reason: string | null): Container {
     this.suppressErrors = reason;
     return this;
   }

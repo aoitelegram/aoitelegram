@@ -20,7 +20,7 @@ function onCommand(telegram: AoiClient): void {
     const cmdName = cmdMessage[0].search;
     if (!cmdName) return;
 
-    const botUsername = ctx.botInfo.username;
+    const botUsername = ctx.api.botInfo.username;
 
     for (const cmd of commands) {
       if (!("name" in cmd)) continue;

@@ -37,7 +37,7 @@ class Callback {
     } else {
       throw new AoijsError(
         "callback",
-        `the callback "${callback.name}" already exists`,
+        `The callback '${callback.name}' already exists`,
       );
     }
 
@@ -52,7 +52,7 @@ class Callback {
     if (!name) {
       throw new AoijsError(
         "callback",
-        "you did not specify the 'name' parameter",
+        "You did not specify the 'name' parameter",
       );
     }
 
@@ -108,7 +108,7 @@ class Callback {
 
     throw new AoijsError(
       "callback",
-      "the passed parameters do not match the expected ones",
+      "The passed parameters do not match the expected ones",
     );
   }
 }

@@ -9,7 +9,6 @@ import { AoijsTypeError } from "./AoiError";
 import type { DataEvent } from "./AoiTyping";
 
 class CustomEvent extends EventEmitter {
-  #count: number = 1;
   public readonly aoitelegram: AoiClient;
 
   constructor(
@@ -61,25 +60,16 @@ class CustomEvent extends EventEmitter {
 
   command(options: DataEvent): CustomEvent {
     if (!options?.listen) {
-      throw new AoijsTypeError(
-        "CustomEvent",
-        `you did not specify the 'listen' parameter`,
-      );
+      throw new AoijsTypeError("You did not specify the 'listen' parameter");
     }
 
     if (options.type === "js" && typeof options.callback !== "function") {
-      throw new AoijsTypeError(
-        "CustomEvent",
-        "you did not specify the 'callback' parameter",
-      );
+      throw new AoijsTypeError("You did not specify the 'callback' parameter");
     } else if (
       options.type === "aoitelegram" &&
       typeof options.code !== "string"
     ) {
-      throw new AoijsTypeError(
-        "CustomEvent",
-        "you did not specify the 'code' parameter",
-      );
+      throw new AoijsTypeError("You did not specify the 'code' parameter");
     }
 
     if ((options.type === "aoitelegram" || !options.type) && options.code) {
@@ -111,8 +101,7 @@ class CustomEvent extends EventEmitter {
         super.on(options.listen, eventHandler);
       } else {
         throw new AoijsTypeError(
-          "CustomEvent",
-          "the type specified for 'once' is invalid. Only 'false' and 'true' are allowed",
+          "The type specified for 'once' is invalid. Only 'false' and 'true' are allowed",
         );
       }
     } else if (options.type === "js" && options.callback) {
@@ -122,8 +111,7 @@ class CustomEvent extends EventEmitter {
         super.on(options.listen, options.callback);
       } else {
         throw new AoijsTypeError(
-          "CustomEvent",
-          "the type specified for 'once' is invalid. Only 'false' and 'true' are allowed",
+          "The type specified for 'once' is invalid. Only 'false' and 'true' are allowed",
         );
       }
     }
@@ -131,63 +119,48 @@ class CustomEvent extends EventEmitter {
     return this;
   }
 
-  loadEvents(dirPath: string, log: boolean = true): CustomEvent {
+  loadEvents(dirPath: string, logger: boolean = true): CustomEvent {
     if (!dirPath) {
+      throw new AoijsTypeError("You did not specify the 'dirPath' parameter");
+    }
+
+    dirPath = path.join(process.cwd(), dirPath);
+    if (!fs.existsSync(dirPath)) {
       throw new AoijsTypeError(
-        "parameter",
-        "you did not specify the 'dirPath' parameter",
+        `The specified file path was not found: ${dirPath}`,
       );
     }
 
-    if (!fs.existsSync(dirPath)) {
-      throw new AoijsTypeError("file", "the specified file path was not found");
+    if (logger) {
+      const bigText = figlet.textSync("Custom Event");
+      console.log(bigText);
     }
 
-    if (this.#count === 1) {
-      dirPath = path.join(process.cwd(), dirPath);
-      if (log) {
-        const bigText = figlet.textSync("Custom Event");
-        console.log(bigText);
-      }
-      this.#count = 0;
-    }
-
-    const items = fs.readdirSync(dirPath);
+    const items = fs.readdirSync(dirPath, { recursive: true });
 
     for (const item of items) {
-      const itemPath = path.join(dirPath, item);
-      const stats = fs.statSync(itemPath);
+      if (typeof item !== "string" || !item.endsWith(".js")) continue;
+      const itemPath = path.join(process.cwd(), item);
 
-      if (stats.isDirectory()) {
-        this.loadEvents(itemPath, log);
-      } else if (itemPath.endsWith(".js")) {
-        try {
-          const requireEvent = importSync(itemPath);
-          const dataEvent = requireEvent.default || requireEvent;
-          if (Array.isArray(dataEvent)) {
-            dataEvent.forEach((dataEvent) => {
-              if (log) {
-                console.log(
-                  `|---------------------------------------------------------------------|\n`,
-                  `| Loading in ${itemPath} | Loaded '${dataEvent.listen}' | type ${dataEvent.type || "aoitelegram"} | custom-event |`,
-                );
-              }
-              this.command(dataEvent);
-            });
-          } else {
-            if (log) {
-              console.log(
-                `|---------------------------------------------------------------------|\n`,
-                `| Loading in ${itemPath} | Loaded '${dataEvent.listen}' | type ${dataEvent.type || "aoitelegram"} | custom-event |`,
-              );
-            }
-            this.command(dataEvent);
+      try {
+        const requireEvent = require(itemPath);
+        const dataEvent = requireEvent.default || requireEvent;
+        const dataArr = Array.isArray(dataEvent) ? dataEvent : [dataEvent];
+
+        for (const event of dataArr) {
+          this.command(event);
+          if (logger) {
+            console.log(
+              `|---------------------------------------------------------------------|\n`,
+              `| Loading in ${itemPath} | Loaded '${event.listen}' | type ${event.type || "aoitelegram"} | custom-event |`,
+            );
           }
-        } catch (err) {
-          console.error(err);
         }
+      } catch (err) {
+        console.error(err);
       }
     }
+
     return this;
   }
 

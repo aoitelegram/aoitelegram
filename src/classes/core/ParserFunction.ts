@@ -78,7 +78,7 @@ class ParserFunction {
   ): Promise<any[]> {
     this.checkArguments();
     if (!this.fields) {
-      throw new Error(
+      throw new AoijsTypeError(
         `Attempted to resolve array of functions with no fields: ${removePattern(this.structures.name)}`,
       );
     }
