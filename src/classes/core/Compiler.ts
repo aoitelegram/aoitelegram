@@ -10,8 +10,8 @@ interface SuccessCompiler {
 
 interface ErrorCompiler {
   func: string;
-  code: string;
   line: number;
+  errorCode: string;
   description: string;
 }
 
@@ -185,7 +185,7 @@ function searchBracketError(
   func: string,
   code: string,
   errorType: string,
-): { func: string; line: number; code: string; description: string } {
+): { func: string; line: number; errorCode: string; description: string } {
   const lines = code.split(/\n/g);
   const lineNumber = lines.findIndex((line) => line.includes(func)) + 1;
   const errorLine = lineNumber ? lines[lineNumber - 1].lastIndexOf(func) : 0;
@@ -193,7 +193,7 @@ function searchBracketError(
   return {
     func,
     line: errorLine,
-    code: lines[errorLine],
+    errorCode: lines[errorLine],
     description: `this function requires ${errorType} at line ${lineNumber}:${errorLine}`,
   };
 }

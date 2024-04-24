@@ -15,20 +15,20 @@ class Interpreter {
   }
 
   async runInput(): Promise<string> {
-    let textResult = this.inputData.code;
-
     if ("description" in this.inputData) {
       await this.#sendErrorMessage(
         this.inputData.description,
         removePattern(this.inputData.func),
         false,
         {
-          code: this.inputData.code.split("\n")[this.inputData.line],
+          code: this.inputData.errorCode.split("\n")[this.inputData.line],
           line: this.inputData.line,
         },
       );
       return "";
     }
+
+    let textResult = this.inputData.code;
 
     for await (const dataFunction of this.inputData.functions) {
       try {
