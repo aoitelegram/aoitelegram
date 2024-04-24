@@ -35,7 +35,7 @@ class ParserFunction {
   }
 
   get rawTotal(): string {
-    return this.structures.brackets && !!this.inside
+    return this.structures.brackets && this.inside
       ? `${this.structures.name}[${this.raw}]`
       : this.structures.name;
   }
@@ -76,7 +76,6 @@ class ParserFunction {
     container: Container,
     indexes?: number[],
   ): Promise<any[]> {
-    this.checkArguments();
     if (!this.fields) {
       throw new AoijsTypeError(
         `Attempted to resolve array of functions with no fields: ${removePattern(this.structures.name)}`,
@@ -118,7 +117,7 @@ class ParserFunction {
     return resolvedFields;
   }
 
-  checkArguments(): boolean {
+  checkArguments(): void {
     const argsRequired =
       this.structures.fields?.filter(({ required }) => required) || [];
     if (argsRequired.length > this.fields.length) {
@@ -126,7 +125,6 @@ class ParserFunction {
         `The function ${removePattern(this.structures.name)} expects ${argsRequired.length} parameters, but ${this.fields.length} were received`,
       );
     }
-    return true;
   }
 
   async resolveCode(context: Container, code: string): Promise<string> {
