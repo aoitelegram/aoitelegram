@@ -5,8 +5,8 @@ function onVariableCreate(telegram: AoiClient): void {
   const events = telegram.events.get("variableCreate");
   if (!events) return;
 
-  for (const event of events) {
-    telegram.database.on("create", async (newVariable) => {
+  telegram.database.on("create", async (newVariable) => {
+    for (const event of events) {
       telegram.ensureCustomFunction({
         name: "$newVariable",
         brackets: true,
@@ -22,8 +22,8 @@ function onVariableCreate(telegram: AoiClient): void {
         },
       });
       await telegram.evaluateCommand(event, { newVariable, telegram });
-    });
-  }
+    }
+  });
 }
 
 export default onVariableCreate;

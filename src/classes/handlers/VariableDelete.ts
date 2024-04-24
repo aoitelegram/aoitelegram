@@ -5,8 +5,8 @@ function onVariableDelete(telegram: AoiClient): void {
   const events = telegram.events.get("variableDelete");
   if (!events) return;
 
-  for (const event of events) {
-    telegram.database.on("create", async (oldVariable) => {
+  telegram.database.on("create", async (oldVariable) => {
+    for (const event of events) {
       telegram.ensureCustomFunction({
         name: "$oldVariable",
         brackets: true,
@@ -22,8 +22,8 @@ function onVariableDelete(telegram: AoiClient): void {
         },
       });
       await telegram.evaluateCommand(event, { oldVariable, telegram });
-    });
-  }
+    }
+  });
 }
 
 export default onVariableDelete;

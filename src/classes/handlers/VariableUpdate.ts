@@ -5,8 +5,8 @@ function onVariableUpdate(telegram: AoiClient): void {
   const events = telegram.events.get("variableUpdate");
   if (!events) return;
 
-  for (const event of events) {
-    telegram.database.on("update", async (variable) => {
+  telegram.database.on("update", async (variable) => {
+    for (const event of events) {
       telegram.ensureCustomFunction({
         name: "$variable",
         brackets: true,
@@ -22,8 +22,8 @@ function onVariableUpdate(telegram: AoiClient): void {
         },
       });
       await telegram.evaluateCommand(event, { variable, telegram });
-    });
-  }
+    }
+  });
 }
 
 export default onVariableUpdate;
