@@ -4,11 +4,11 @@ function onChatBoost(telegram: AoiClient): void {
   const events = telegram.events.get("chatBoost");
   if (!events) return;
 
-  for (const event of events) {
-    telegram.on("chat_boost", async (ctx) => {
+  telegram.on("chat_boost", async (ctx) => {
+    for (const event of events) {
       await telegram.evaluateCommand(event, ctx);
-    });
-  }
+    }
+  });
 }
 
 export default onChatBoost;

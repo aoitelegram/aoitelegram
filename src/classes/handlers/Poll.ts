@@ -4,11 +4,11 @@ function onPoll(telegram: AoiClient): void {
   const events = telegram.events.get("poll");
   if (!events) return;
 
-  for (const event of events) {
-    telegram.on("poll", async (ctx) => {
+  telegram.on("poll", async (ctx) => {
+    for (const event of events) {
       await telegram.evaluateCommand(event, ctx);
-    });
-  }
+    }
+  });
 }
 
 export default onPoll;

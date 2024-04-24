@@ -4,11 +4,11 @@ function onEditedChannelPost(telegram: AoiClient): void {
   const events = telegram.events.get("editedChannelPost");
   if (!events) return;
 
-  for (const event of events) {
-    telegram.on("edited_channel_post", async (ctx) => {
+  telegram.on("edited_channel_post", async (ctx) => {
+    for (const event of events) {
       await telegram.evaluateCommand(event, ctx);
-    });
-  }
+    }
+  });
 }
 
 export default onEditedChannelPost;

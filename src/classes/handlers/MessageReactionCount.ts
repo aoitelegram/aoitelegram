@@ -4,11 +4,11 @@ function onMessageReactionCount(telegram: AoiClient): void {
   const events = telegram.events.get("messageReactionCount");
   if (!events) return;
 
-  for (const event of events) {
-    telegram.on("message_reaction_count", async (ctx) => {
+  telegram.on("message_reaction_count", async (ctx) => {
+    for (const event of events) {
       await telegram.evaluateCommand(event, ctx);
-    });
-  }
+    }
+  });
 }
 
 export default onMessageReactionCount;

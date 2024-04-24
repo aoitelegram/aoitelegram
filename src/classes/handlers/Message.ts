@@ -4,11 +4,11 @@ function onMessage(telegram: AoiClient): void {
   const events = telegram.events.get("message");
   if (!events) return;
 
-  for (const event of events) {
-    telegram.on("message", async (ctx) => {
+  telegram.on("message", async (ctx) => {
+    for (const event of events) {
       await telegram.evaluateCommand(event, ctx);
-    });
-  }
+    }
+  });
 }
 
 export default onMessage;
