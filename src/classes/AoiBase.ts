@@ -89,7 +89,7 @@ class AoiBase extends TelegramBot {
         availableFunctions: this.availableFunctions,
       });
       const interpreter = new Interpreter(
-        Object.assign(command, complited.compile()),
+        Object.assign({}, command, complited.compile()),
         eventData,
       );
       return await interpreter.runInput();

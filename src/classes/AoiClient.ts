@@ -87,7 +87,7 @@ class AoiClient extends AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
-    if (!this.commands.has("command")) {
+    if (this.commands.has("command")) {
       const commandsType = this.commands.get("command");
       this.commands.set("command", [...(commandsType || []), options]);
     } else this.commands.set("command", [options]);
@@ -101,7 +101,7 @@ class AoiClient extends AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
-    if (!this.commands.has("action")) {
+    if (this.commands.has("action")) {
       const actionType = this.commands.get("action");
       this.commands.set("action", [...(actionType || []), options]);
     } else this.commands.set("action", [options]);
