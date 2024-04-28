@@ -87,7 +87,6 @@ class ParserFunction {
     const resolvedFields = [];
 
     for (let i = 0; i < this.fields.length; i++) {
-      // вроде должно фиксануть ошибку :D
       if (indexes && indexes.indexOf(i) === -1) {
           continue;
       }
