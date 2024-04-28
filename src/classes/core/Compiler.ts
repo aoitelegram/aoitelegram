@@ -73,7 +73,7 @@ class Compiler {
 
       const parserFunction = new ParserFunction(dataFunction);
       const segmentCode =
-        this.code.split(new RegExp(`\\${matches}`, "gm")).at(-1) || "";
+        this.code.split(new RegExp(`\\${matches}`, "gm")).pop() || "";
 
       if (
         dataFunction.brackets &&

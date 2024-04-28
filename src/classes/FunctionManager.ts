@@ -25,6 +25,7 @@ class FunctionManager {
   public callback?: (
     ctx: Container,
     func: ParserFunction,
+    code?: string,
   ) => PossiblyAsync<ICallbackResolve | ICallbackReject>;
   public code?: string;
 
@@ -119,6 +120,7 @@ class FunctionManager {
     callback: (
       ctx: Container,
       func: ParserFunction,
+      code?: string,
     ) => PossiblyAsync<ICallbackResolve | ICallbackReject>,
   ): FunctionManager {
     if (this.type === "aoitelegram") {

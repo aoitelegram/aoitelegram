@@ -69,6 +69,7 @@ interface CustomJSFunction {
   callback: (
     context: Container,
     func: ParserFunction,
+    code?: string,
   ) => PossiblyAsync<ICallbackResolve | ICallbackReject>;
 }
 

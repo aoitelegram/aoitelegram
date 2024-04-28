@@ -30,11 +30,14 @@ class Interpreter {
 
     let textResult = this.inputData.code;
 
-    for await (const dataFunction of this.inputData.functions) {
+    const functions = this.extractIfBlocks(this.inputData.functions);
+
+    for await (const dataFunction of functions || []) {
       try {
-        const result = await dataFunction.structures.callback(
+        const result = await dataFunction.callback(
           this.container,
           dataFunction,
+          textResult,
         );
         if (typeof result !== "object") {
           throw new AoijsTypeError(
@@ -54,7 +57,7 @@ class Interpreter {
           }
           break;
         }
-
+        textResult = "code" in result && result.code ? result.code : textResult;
         textResult = textResult.replace(result.id, result.with);
       } catch (err) {
         if (err instanceof AoijsTypeError) {
@@ -73,6 +76,46 @@ class Interpreter {
       }
     }
     return textResult;
+  }
+
+  extractIfBlocks(
+    structures: SuccessCompiler["functions"],
+  ): SuccessCompiler["functions"] | void {
+    const stack: SuccessCompiler["functions"] = [];
+    const result: SuccessCompiler["functions"] = [];
+
+    for (const func of structures) {
+      const structure = func.structures;
+
+      if (removePattern(structure.name) === "$if") {
+        func.ifContent = [];
+        stack.push(func);
+      } else if (removePattern(structure.name) === "$endif") {
+        const ifStructure = stack.pop();
+        if (!ifStructure) {
+          this.#sendErrorMessage("No matching $if found for $endif", "$endif");
+          return;
+        }
+        if (stack.length > 0) {
+          stack[stack.length - 1].ifContent.push(ifStructure);
+        } else {
+          result.push(ifStructure);
+        }
+      } else {
+        if (stack.length > 0) {
+          stack[stack.length - 1].ifContent.push(func);
+        } else {
+          result.push(func);
+        }
+      }
+    }
+
+    if (stack.length > 0) {
+      this.#sendErrorMessage("Unclosed $if blocks found", "$if");
+      return;
+    }
+
+    return result;
   }
 
   async #sendErrorMessage(
