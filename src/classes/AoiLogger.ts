@@ -1,4 +1,5 @@
 import { inspect } from "node:util";
+import { Temporal, Intl } from "temporal-polyfill";
 import chalk, { type ForegroundColor } from "chalk";
 
 class AoiLogger {
@@ -15,10 +16,17 @@ class AoiLogger {
     type: keyof (typeof AoiLogger)["textColors"],
     ...args: unknown[]
   ): void {
+    const intlDate = new Intl.DateTimeFormat(undefined, {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: false,
+    }).format();
     console.log(
-      AoiLogger.dateColors(
-        `[${new Date().toLocaleDateString("de-DE")} ${new Date().toLocaleTimeString()}]`,
-      ),
+      AoiLogger.dateColors(`[${intlDate}]`),
       AoiLogger.textColors[type](`[${type.toUpperCase()}]`),
       ...args.map((arg) =>
         AoiLogger.textColors[type](
