@@ -84,6 +84,13 @@ class Interpreter {
     const stack: SuccessCompiler["functions"] = [];
     const result: SuccessCompiler["functions"] = [];
 
+    if (
+      structures.findIndex(
+        ({ structures }) => removePattern(structures.name) === "$if",
+      ) === -1
+    )
+      return structures;
+
     for (const func of structures) {
       const structure = func.structures;
 
