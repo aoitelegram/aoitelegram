@@ -168,15 +168,15 @@ class ParserFunction {
     return Promise.resolve(this.structures.callback(context, func, code));
   }
 
-  resolve(result?: any, code?: any): ICallbackResolve {
+  resolve(result: any = "", code?: any): ICallbackResolve {
     return { id: this.id, code, replace: this.rawTotal, with: inspect(result) };
   }
 
-  reject(reason?: string, customError?: boolean): ICallbackReject {
+  reject(reason: string = "", customError?: boolean): ICallbackReject {
     return {
       id: this.id,
       custom: customError,
-      reason: reason || "",
+      reason: reason,
     };
   }
 }

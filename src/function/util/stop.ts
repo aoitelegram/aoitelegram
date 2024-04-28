@@ -5,5 +5,5 @@ export default new AoiFunction()
     .setBrackets(false)
     .onCallback(async (ctx, func) => {
         ctx.stopCode = true;
-        return func.resolve("");
+        return func.resolve();
     })
