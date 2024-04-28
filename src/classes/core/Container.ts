@@ -17,6 +17,7 @@ class Container {
   public suppressErrors: string | null = null;
   public readonly eventData: ContextEvent;
   public readonly telegram: AoiClient;
+  public stopCode: boolean = false;
 
   constructor(ctx: ContextEvent) {
     this.eventData = ctx;

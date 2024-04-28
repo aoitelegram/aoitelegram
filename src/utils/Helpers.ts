@@ -32,4 +32,15 @@ function removePattern(name: string): string {
   return name.split(":")[0];
 }
 
-export { getObjectKey, removePattern, inspect };
+/**
+ * Returns a title-cased text.
+ * @param str - The text to title-case.
+ * @returns {string}
+ */
+function toTitleCase(str: string) {
+    return str.split(" ")
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+export { getObjectKey, removePattern, inspect, toTitleCase };
