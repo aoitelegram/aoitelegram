@@ -23,8 +23,6 @@ function inspect(obj: any): string {
       );
       return "{ " + entries.join(", ") + " }";
     }
-  } else if (typeof obj === "string") {
-    return `"${obj}"`;
   } else {
     return String(obj);
   }

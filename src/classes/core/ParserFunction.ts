@@ -6,6 +6,7 @@ import { inspect, removePattern } from "../../utils";
 
 interface ICallbackResolve {
   id: string;
+  code?: string;
   replace: string;
   with: string;
 }
@@ -23,12 +24,13 @@ interface IOveeload {
 
 class ParserFunction {
   public readonly structures: CustomJSFunction;
-  public inside: string = "";
+  public inside: string | null = null;
   public fields: string[] = [];
   public readonly id: string = `{FUN=${randomUUID()}}`;
-  public raw: string = "";
+  public raw: string | null = null;
   public overloads: ParserFunction[] = [];
-  public parentID: string = "";
+  public parentID: string | null = null;
+  public ifContent: ParserFunction[] = [];
 
   constructor(structures: CustomJSFunction) {
     this.structures = structures;
@@ -83,7 +85,6 @@ class ParserFunction {
     }
 
     const resolvedFields = [];
-    let currentIndex = 0;
 
     for (let i = 0; i < this.fields.length; i++) {
       if (indexes && indexes.find((index) => index !== i)) {
@@ -161,12 +162,13 @@ class ParserFunction {
   async callback(
     context: Container,
     func: ParserFunction,
+    code?: string,
   ): Promise<ICallbackResolve | ICallbackReject> {
-    return Promise.resolve(this.structures.callback(context, func));
+    return Promise.resolve(this.structures.callback(context, func, code));
   }
 
-  resolve(result?: any): ICallbackResolve {
-    return { id: this.id, replace: this.rawTotal, with: inspect(result) };
+  resolve(result?: any, code?: any): ICallbackResolve {
+    return { id: this.id, code, replace: this.rawTotal, with: inspect(result) };
   }
 
   reject(reason?: string, customError?: boolean): ICallbackReject {
