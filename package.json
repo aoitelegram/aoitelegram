@@ -7,7 +7,7 @@
   "scripts": {
     "clean:dist": "rm -rf dist/",
     "uglifyjs": "find ./dist/src/function -name \"*.js\" -type f -print0 | xargs -0 uglifyjs --in-situ",
-    "build:release": "npm run clean:dist && tsc && npm run uglifyjs"
+    "build:release": "npm run clean:dist && tsc && tsc-alias && npm run uglifyjs"
   },
   "engines": {
     "node": ">=16"
@@ -42,7 +42,8 @@
     "aoi.js"
   ],
   "dependencies": {
-    "@aoitelegram/database": "^0.2.1",
+    "@aoitelegram/database": "^1.0.0",
+    "@aoitelegram/plugins": "^1.0.0",
     "chalk": "^4.1.2",
     "figlet": "^1.7.0",
     "fs-extra": "^11.2.0",
@@ -63,6 +64,8 @@
     "@types/long-timeout": "^0.1.2",
     "@types/ms": "^0.7.34",
     "@types/node": "^18.19.26",
-    "@types/node-fetch": "^2.6.11"
+    "@types/node-fetch": "^2.6.11",
+    "tsc-alias": "^1.8.8",
+    "typescript": "^5.4.5"
   }
 }
