@@ -1,6 +1,6 @@
-import { FunctionManager } from "../../classes/FunctionManager";
+import { AoiFunction } from "@structures/AoiFunction";
 
-export default new FunctionManager()
+export default new AoiFunction()
   .setName("$replyMessage")
   .setBrackets(true)
   .setFields({
