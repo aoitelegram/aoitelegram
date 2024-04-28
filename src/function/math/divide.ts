@@ -7,13 +7,15 @@ export default new AoiFunction()
     .setFields({
         name: "numbers",
         required: true,
-        rest: true
+        rest: true,
     })
     .onCallback(async (ctx, func) => {
-        let untypeds: string[] = await func.resolveFields(ctx)
-        const numbers = untypeds.map(n => Number(n))
-        if (numbers.some((n) => isNaN(n))) return func.reject(`Invalid number at: "${removePattern(func.structures.name)}"`, true);
-        return func.resolve(
-            numbers.reduce((a, b) => a / b)
-        )
-    })
+        const untypeds: string[] = await func.resolveFields(ctx);
+        const numbers = untypeds.map((n) => Number(n));
+        if (numbers.some((n) => isNaN(n)))
+            return func.reject(
+                `Invalid number at: "${removePattern(func.structures.name)}"`,
+                true,
+            );
+        return func.resolve(numbers.reduce((a, b) => a / b));
+    });
