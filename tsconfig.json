@@ -19,7 +19,7 @@
     "paths": {
         "@core/*": ["src/classes/core/*"],
         "@handlers/*": ["src/classes/handlers/*"],
-        "@helpers/*": ["src/helpers/*"]
+        "@helpers/*": ["src/helpers/*"],
         "@structures/*": ["src/classes/*"],
         "@utils/*": ["src/utils/*"],
     }
