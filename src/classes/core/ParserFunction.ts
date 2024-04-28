@@ -87,9 +87,11 @@ class ParserFunction {
     const resolvedFields = [];
 
     for (let i = 0; i < this.fields.length; i++) {
-      if (indexes && indexes.find((index) => index !== i)) {
-        continue;
+      // вроде должно фиксануть ошибку :D
+      if (indexes && indexes.indexOf(i) === -1) {
+          continue;
       }
+
 
       const field = this.fields[i];
       const overloads = this.findOverloads(field);
