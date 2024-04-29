@@ -9,22 +9,17 @@ export default new AoiFunction()
       return func.reject("I don't have access to the code");
     }
     const condition = await func.resolveAllFields(context);
-    if (context.condition.checkCondition(condition)) {
-      for (const structures of func.ifContent) {
-        const result = await structures.callback(context, structures, code);
-        if ("reason" in result) {
-          return func.reject(result.reason);
-        }
-        code = code.replace(result.id, result.with);
+    const content = context.condition.checkCondition(condition)
+      ? func.ifContent
+      : func.elseProcessed
+        ? func.elseContent
+        : [];
+    for (const structures of content) {
+      const result = await structures.callback(context, structures, code);
+      if ("reason" in result) {
+        return func.reject(result.reason);
       }
-    } else if (func.elseProcessed) {
-      for (const structures of func.elseContent) {
-        const result = await structures.callback(context, structures, code);
-        if ("reason" in result) {
-          return func.reject(result.reason);
-        }
-        code = code.replace(result.id, result.with);
-      }
+      code = code.replace(result.id, result.with);
     }
     return func.resolve("", code);
   });
