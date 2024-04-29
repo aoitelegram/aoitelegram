@@ -31,6 +31,8 @@ class ParserFunction {
   public overloads: ParserFunction[] = [];
   public parentID: string | null = null;
   public ifContent: ParserFunction[] = [];
+  public elseContent: ParserFunction[] = [];
+  public elseProcessed: boolean = false;
 
   constructor(structures: CustomJSFunction) {
     this.structures = structures;
@@ -88,9 +90,8 @@ class ParserFunction {
 
     for (let i = 0; i < this.fields.length; i++) {
       if (indexes && indexes.indexOf(i) === -1) {
-          continue;
+        continue;
       }
-
 
       const field = this.fields[i];
       const overloads = this.findOverloads(field);

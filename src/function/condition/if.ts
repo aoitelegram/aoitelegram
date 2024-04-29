@@ -17,6 +17,14 @@ export default new AoiFunction()
         }
         code = code.replace(result.id, result.with);
       }
+    } else if (func.elseProcessed) {
+      for (const structures of func.elseContent) {
+        const result = await structures.callback(context, structures, code);
+        if ("reason" in result) {
+          return func.reject(result.reason);
+        }
+        code = code.replace(result.id, result.with);
+      }
     }
     return func.resolve("", code);
   });

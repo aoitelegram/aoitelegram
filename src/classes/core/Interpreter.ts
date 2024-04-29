@@ -86,19 +86,16 @@ class Interpreter {
     const stack: SuccessCompiler["functions"] = [];
     const result: SuccessCompiler["functions"] = [];
 
-    if (
-      structures.findIndex(
-        ({ structures }) => removePattern(structures.name) === "$if",
-      ) === -1
-    )
-      return structures;
-
     for (const func of structures) {
       const structure = func.structures;
 
       if (removePattern(structure.name) === "$if") {
         func.ifContent = [];
         stack.push(func);
+      } else if (removePattern(structure.name) === "$else") {
+        if (stack.length > 0) {
+          stack[stack.length - 1].elseProcessed = true;
+        }
       } else if (removePattern(structure.name) === "$endif") {
         const ifStructure = stack.pop();
         if (!ifStructure) {
@@ -112,7 +109,12 @@ class Interpreter {
         }
       } else {
         if (stack.length > 0) {
-          stack[stack.length - 1].ifContent.push(func);
+          const currentStructure = stack[stack.length - 1];
+          if (currentStructure.elseProcessed) {
+            currentStructure.elseContent.push(func);
+          } else {
+            currentStructure.ifContent.push(func);
+          }
         } else {
           result.push(func);
         }
