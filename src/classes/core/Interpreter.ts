@@ -47,6 +47,8 @@ class Interpreter {
           );
         }
 
+        if (this.container.stopCode === true) break;
+
         if ("reason" in result) {
           if (result.reason) {
             await this.#sendErrorMessage(

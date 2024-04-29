@@ -9,5 +9,5 @@ export default new AoiFunction()
   })
   .onCallback(async (context, func) => {
     console.log(await func.resolveAllFields(context));
-    return func.resolve("");
+    return func.resolve();
   });
