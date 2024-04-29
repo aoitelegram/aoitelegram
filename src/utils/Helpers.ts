@@ -38,8 +38,9 @@ function removePattern(name: string): string {
  * @returns {string}
  */
 function toTitleCase(str: string) {
-    return str.split(" ")
-    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+  return str
+    .split(" ")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
 }
 

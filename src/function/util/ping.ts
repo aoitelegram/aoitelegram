@@ -1,7 +1,6 @@
 import { AoiFunction } from "@structures/AoiFunction";
 
-export default new 
-    AoiFunction()
+export default new AoiFunction()
   .setName("$ping")
   .setBrackets(false)
   .onCallback(async (context, func) => {
