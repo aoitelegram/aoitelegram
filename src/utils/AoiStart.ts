@@ -131,7 +131,7 @@ async function aoiStart(telegram: AoiClient): Promise<void> {
     },
     args: [
       {
-        text: "https://github.com/Sempai-07/aoitelegram/issues",
+        text: "https://github.com/aoitelegram/aoitelegram.git",
         color: "blue",
         bold: true,
       },

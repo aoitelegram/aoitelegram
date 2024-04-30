@@ -3,21 +3,23 @@
 [![NPM Version](https://img.shields.io/npm/v/aoitelegram)](https://www.npmjs.com/package/aoitelegram)
 [![Bot API](https://img.shields.io/badge/Bot%20API-v.7.2-00aced.svg?style=flat-square&logo=telegram)](https://core.telegram.org/bots/api)
 [![NPM Downloads](https://img.shields.io/npm/dt/aoitelegram.svg?maxAge=3600)](https://www.npmjs.com/package/aoitelegram)
-[![License](https://img.shields.io/npm/l/aoitelegram)](https://github.com/Sempai-07/aoitelegram/blob/v1/LICENSE)
+[![License](https://img.shields.io/npm/l/aoitelegram)](https://github.com/aoitelegram/aoitelegram/blob/v1/LICENSE)
 
-`aoitelegram` is a `JavaScript/TypeScript` library for creating `Telegram` bots with ease. It simplifies the process of building and managing `Telegram` bot functionality, similar to aoijs but tailored for `Telegram`.
+`aoitelegram` is a `JavaScript/TypeScript` library for creating `Telegram` bots with ease. It simplifies the process of building and managing `Telegram` bot functionality, similar to `aoijs` but tailored for `Telegram`.
 
 ## Features
 
-- **Over 200 Pre-built Functions:** aoitelegram comes equipped with more than 200 pre-built functions, empowering you to effortlessly create dynamic and interactive Telegram bots.
+- **Over 200 Pre-built Functions:** `aoitelegram` comes equipped with more than 200 pre-built functions, empowering you to effortlessly create dynamic and interactive Telegram bots.
 
-- **Built-in Customizable Local Database:** With aoitelegram, you have a robust customizable local database right out of the box.
+- **Built-in Customizable Local Database:** With `aoitelegram`, you have a robust customizable local database right out of the box, along with Firestore and MongoDB integration.
 
-- **Built-in Custom Function System:** aoitelegram offers an easy way to create your custom functions if something is missing. Additionally, it includes the `PluginManager` class out of the box, aiding you in interacting with other `npm` packages containing custom functions for `aoitelegram`.
+- **Built-in Custom Function System:** `aoitelegram` has very good support for custom functions. Besides, `aoitelegram` has classes for working with extensions that you can create.
 
-- **User-Friendly Design:** aoitelegram is perfect for beginners with its straightforward function interface. The `$` prefix simplifies command writing, ensuring a swift launch for your bot. 🚀
+- **CommonJS/ESM Support**: `aoitelegram` now supports modules like CommonJS/ESM for more convenient development on `NodeJS`.
 
-> The syntax of `aoitelegram` and versions above `0.5.0` has been completely changed. Now the code is read from bottom to top, and the standard `$if` is used as `if: "old"` in `aoi.js` (there is no need to specify the `if: "old"` option, it is set by default).
+- **User-Friendly Design:** `aoitelegram` is perfect for beginners with its straightforward function interface. The `$` prefix simplifies command writing, ensuring a swift launch for your bot. 🚀
+
+> Starting from v1, aoitelegram has an improved parser/interpreter that ensures proper functioning of $if/$else/$endif similar to bdfd.
 
 ## Installation
 
@@ -31,8 +33,11 @@ npm install aoitelegram
 
 Here's a quick example of how to use `aoitelegram` to create a Telegram bot:
 
-```javascript
+```typescript
+// CommonJS
 const { AoiClient, LoadCommands } = require("aoitelegram");
+// Esm/TypeScript
+import { AoiClient, LoadCommands } from "aoitelegram";
 
 const bot = new AoiClient({
   token: "YOUR_BOT_TOKEN_HERE",
@@ -150,11 +155,11 @@ For detailed documentation and usage instructions, please refer to the [aoiteleg
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/Sempai-07/aoitelegram/blob/main/LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/aoitelegram/aoitelegram/blob/main/LICENSE) file for details.
 
 ## Contributing
 
-Contributions are welcome! If you find any issues or have suggestions for improvements, please create a GitHub issue or submit a pull request.
+Contributions are welcome! If you find any issues or have suggestions for improvements, please create a `GitHub` issue or submit a pull request. Additionally, feel free to reach out to me on Telegram via my username `@SempaiJS` or on Discord using my username `sempaika_chess`.
 
 <table>
   <td><image src="https://avatars.githubusercontent.com/u/101444750?v=4"><a href="https://github.com/Asayukiii">Asayukiii</a></td>
