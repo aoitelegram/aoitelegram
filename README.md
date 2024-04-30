@@ -155,3 +155,8 @@ This project is licensed under the MIT License - see the [LICENSE](https://githu
 ## Contributing
 
 Contributions are welcome! If you find any issues or have suggestions for improvements, please create a GitHub issue or submit a pull request.
+
+<table>
+  <td><image src="https://avatars.githubusercontent.com/u/101444750?v=4"><a href="https://github.com/Asayukiii">Asayukiii</a></td>
+  <td><image src="https://avatars.githubusercontent.com/u/141875262?v=4"><a href="https://github.com/gdeVanezus">gdeVanezus</a></td>
+</table>
