@@ -1,4 +1,3 @@
-import { AoijsError } from "../../classes/AoiError";
 import { Collection } from "@telegram.ts/collection";
 import type { AoiClient } from "../../classes/AoiClient";
 import { setTimeout, clearTimeout, type Timeout } from "long-timeout";

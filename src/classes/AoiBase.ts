@@ -61,8 +61,8 @@ class AoiBase extends TelegramBot {
   ) {
     if (!token) {
       throw new AoijsError(
-        "AoiBase",
         "You did not specify the 'token' parameter",
+        "AoiBase",
       );
     }
     super(token, requestOptions);
@@ -106,22 +106,22 @@ class AoiBase extends TelegramBot {
       const functionName = func?.name?.toLowerCase();
       if (!functionName) {
         throw new AoijsError(
-          "customFunction",
           "You did not specify the 'name' parameter",
+          "customFunction",
         );
       }
 
       if (this.availableFunctions.has(functionName)) {
         throw new AoijsError(
-          "customFunction",
           `The function '${functionName}' already exists; to overwrite it, use the <AoiClient>.editFunction method!`,
+          "customFunction",
         );
       }
 
       if ((func?.version || 0) > version) {
         throw new AoijsError(
-          "customFunction",
           `To load this function '${functionName}', the library version must be equal to or greater than ${func?.version || 0}`,
+          "customFunction",
         );
       }
       if (func.type === "aoitelegram") {
@@ -166,15 +166,15 @@ class AoiBase extends TelegramBot {
       const functionName = func?.name?.toLowerCase();
       if (!functionName) {
         throw new AoijsError(
-          "customFunction",
           "You did not specify the 'name' parameter",
+          "customFunction",
         );
       }
 
       if ((func?.version || 0) > version) {
         throw new AoijsError(
-          "customFunction",
           `To load this function '${functionName}', the library version must be equal to or greater than ${func?.version || 0}`,
+          "customFunction",
         );
       }
 
@@ -218,7 +218,10 @@ class AoiBase extends TelegramBot {
       : [functionName];
 
     if (functionNames.length < 1) {
-      throw new AoijsError("You did not specify the 'name' parameter");
+      throw new AoijsError(
+        "You did not specify the 'name' parameter",
+        "customFunction",
+      );
     }
 
     for (const name of functionNames) {
@@ -226,8 +229,8 @@ class AoiBase extends TelegramBot {
       const hasDeleted = this.availableFunctions.delete(lowerCaseName);
       if (!hasDeleted) {
         throw new AoijsError(
-          "customFunction",
           `The function '${lowerCaseName}' does not exist or has already been deleted`,
+          "customFunction",
         );
       }
     }
@@ -240,15 +243,18 @@ class AoiBase extends TelegramBot {
       : [dataFunction];
 
     if (!functionsToEdit.length) {
-      throw new AoijsError("You did not specify the 'name' parameter");
+      throw new AoijsError(
+        "You did not specify the 'name' parameter",
+        "customFunction",
+      );
     }
 
     for (const func of functionsToEdit) {
       const lowerCaseName = func?.name?.toLowerCase();
       if (!this.availableFunctions.has(lowerCaseName)) {
         throw new AoijsError(
-          "customFunction",
           `The function '${lowerCaseName}' does not exist; You can only modify functions that have been added recently`,
+          "customFunction",
         );
       }
 
@@ -295,7 +301,10 @@ class AoiBase extends TelegramBot {
       : [functionName];
 
     if (functionNames.length < 1) {
-      throw new AoijsError("You did not specify the 'name' parameter");
+      throw new AoijsError(
+        "You did not specify the 'name' parameter",
+        "customFunction",
+      );
     }
 
     if (functionNames.length > 1) {
@@ -319,8 +328,8 @@ class AoiBase extends TelegramBot {
       return this.availableFunctions.has(functionName) as boolean;
     } else {
       throw new AoijsError(
+        `The specified type should be "string | string[]"`,
         "customFunction",
-        `the specified type should be "string | string[]"`,
       );
     }
   }

@@ -26,7 +26,6 @@ class Timeout {
       this.timeouts.set(timeout.id, timeout);
     } else {
       throw new AoijsError(
-        "timeout",
         `The current timeout '${timeout.id}' already exists`,
       );
     }

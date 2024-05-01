@@ -18,8 +18,8 @@ class AwaitedManager {
   ): void {
     if (options.milliseconds <= 50) {
       throw new AoijsError(
-        "timeout",
         `The specified time should be greater than 50 milliseconds. Awaited: ${awaited}`,
+        "timeout",
       );
     }
 

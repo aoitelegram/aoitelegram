@@ -35,10 +35,7 @@ class Callback {
     if (!existingIndex) {
       this.callbacks.set(callback.name, callback);
     } else {
-      throw new AoijsError(
-        "callback",
-        `The callback '${callback.name}' already exists`,
-      );
+      throw new AoijsError(`The callback '${callback.name}' already exists`);
     }
 
     return this;
@@ -50,10 +47,7 @@ class Callback {
     context: Container["eventData"],
   ): Promise<boolean | string> {
     if (!name) {
-      throw new AoijsError(
-        "callback",
-        "You did not specify the 'name' parameter",
-      );
+      throw new AoijsError("You did not specify the 'name' parameter");
     }
 
     const callback = this.callbacks.get(name);
@@ -107,7 +101,6 @@ class Callback {
     }
 
     throw new AoijsError(
-      "callback",
       "The passed parameters do not match the expected ones",
     );
   }
