@@ -1,8 +1,8 @@
+import { inspect } from "../../utils";
 import { Container } from "./Container";
 import { randomUUID } from "node:crypto";
 import { AoijsTypeError } from "../AoiError";
 import type { CustomJSFunction } from "../AoiTyping";
-import { inspect, removePattern } from "../../utils";
 
 interface ICallbackResolve {
   id: string;
@@ -32,7 +32,9 @@ class ParserFunction {
   public parentID: string | null = null;
   public ifContent: ParserFunction[] = [];
   public elseContent: ParserFunction[] = [];
+  public elseIfContent: ParserFunction[] = [];
   public elseProcessed: boolean = false;
+  public elseIfProcessed: boolean = false;
 
   constructor(structures: CustomJSFunction) {
     this.structures = structures;
@@ -40,8 +42,8 @@ class ParserFunction {
 
   get rawTotal(): string {
     return this.structures.brackets && this.inside
-      ? `${this.structures.name}[${this.raw}]`
-      : this.structures.name;
+      ? `${this.structures.name.toLowerCase()}[${this.raw}]`
+      : this.structures.name.toLowerCase();
   }
 
   setInside(inside: string): ParserFunction {
@@ -82,7 +84,7 @@ class ParserFunction {
   ): Promise<any[]> {
     if (!this.fields) {
       throw new AoijsTypeError(
-        `Attempted to resolve array of functions with no fields: ${removePattern(this.structures.name)}`,
+        `Attempted to resolve array of functions with no fields: ${this.structures.name}`,
       );
     }
 
@@ -125,7 +127,7 @@ class ParserFunction {
       this.structures.fields?.filter(({ required }) => required) || [];
     if (argsRequired.length > this.fields.length) {
       throw new AoijsTypeError(
-        `The function ${removePattern(this.structures.name)} expects ${argsRequired.length} parameters, but ${this.fields.length} were received`,
+        `The function ${this.structures.name} expects ${argsRequired.length} parameters, but ${this.fields.length} were received`,
       );
     }
   }

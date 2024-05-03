@@ -40,14 +40,13 @@ class Compiler {
         this.availableFunctions.set(name, func);
       });
     }
-    for (const [name, func] of this.availableFunctions) {
-      this.code = this.code.replace(new RegExp(`\\${name}`, "gi"), (search) => {
-        const lowerCaseName = name.toLowerCase();
-        const counts = this.functionCounts.get(lowerCaseName) || 1;
-        const functionNameWithCount = `${lowerCaseName}:${counts}:`;
-        this.functionCounts.set(lowerCaseName, counts + 1);
-        return functionNameWithCount;
-      });
+    for (const [name, func] of this.availableFunctions.sort(
+      (a, b) => b[0].length - a[0].length,
+    )) {
+      this.code = this.code.replace(
+        new RegExp(`\\${name}`, "gi"),
+        name.toLowerCase(),
+      );
     }
   }
 
@@ -55,8 +54,8 @@ class Compiler {
     const parsedFunctions: ParserFunction[] = [];
     const functionRegExp = new RegExp(
       `(${this.availableFunctions
-        .keyArray()
-        .map((name) => `\\${name}:\\d+:`)
+        .keys()
+        .map((name) => `\\${name}`)
         .join("|")})`,
       "g",
     );
@@ -64,16 +63,15 @@ class Compiler {
     const segments = this.code.split(/\$/g).reverse();
     for (const segment of segments) {
       const matches = `$${segment}`.match(functionRegExp) || [];
-      const functionName = matches?.[0]?.split(":")[0];
+      const functionName = matches?.[0];
       if (!functionName || !this.availableFunctions.has(`${functionName}`))
         continue;
 
       const dataFunction = this.availableFunctions.get(`${functionName}`)!;
-      dataFunction.name = `${matches}`;
 
       const parserFunction = new ParserFunction(dataFunction);
       const segmentCode =
-        this.code.split(new RegExp(`\\${matches}`, "gm")).pop() || "";
+        this.code.split(new RegExp(`\\${functionName}`, "gm")).pop() || "";
 
       if (
         dataFunction.brackets &&
@@ -96,7 +94,7 @@ class Compiler {
       }
 
       if (segmentCode.startsWith("[")) {
-        const fields = segmentCode.slice(1).split(/\]/)[0].split(":")[0];
+        const fields = segmentCode.slice(1).split(/\]/)[0];
         parserFunction.raw = fields;
         parserFunction.setInside(this.unescapeCode(fields));
         parserFunction.setFields(

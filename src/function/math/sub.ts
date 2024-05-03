@@ -1,5 +1,4 @@
 import { AoiFunction } from "@structures/AoiFunction";
-import { removePattern } from "@utils/Helpers";
 
 export default new AoiFunction()
   .setName("$sub")
@@ -13,9 +12,6 @@ export default new AoiFunction()
     const untypeds: string[] = await func.resolveFields(ctx);
     const numbers = untypeds.map((n) => Number(n));
     if (numbers.some((n) => isNaN(n)))
-      return func.reject(
-        `Invalid number at: "${removePattern(func.structures.name)}"`,
-        true,
-      );
+      return func.reject(`Invalid number at: "${func.structures.name}"`, true);
     return func.resolve(numbers.reduce((a, b) => a - b));
   });

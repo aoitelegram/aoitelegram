@@ -1,8 +1,8 @@
 import { Container } from "./Container";
+import { getObjectKey } from "../../utils/";
 import type { ContextEvent } from "../AoiTyping";
 import type { ParserFunction } from "./ParserFunction";
 import { RuntimeError, AoijsTypeError } from "../AoiError";
-import { getObjectKey, removePattern } from "../../utils/";
 import type { ErrorCompiler, SuccessCompiler } from "./Compiler";
 
 class Interpreter {
@@ -18,7 +18,7 @@ class Interpreter {
     if ("description" in this.inputData) {
       await this.#sendErrorMessage(
         this.inputData.description,
-        removePattern(this.inputData.func),
+        this.inputData.func,
         false,
         {
           code: this.inputData.errorCode.split("\n")[this.inputData.line],
@@ -53,7 +53,7 @@ class Interpreter {
           if (result.reason) {
             await this.#sendErrorMessage(
               result.reason,
-              removePattern(dataFunction.structures.name),
+              dataFunction.structures.name,
               result.custom,
             );
           }
@@ -66,13 +66,10 @@ class Interpreter {
           const errorMessage = `${err}`.split(":").slice(1).join(" ");
           await this.#sendErrorMessage(
             errorMessage,
-            removePattern(dataFunction.structures.name),
+            dataFunction.structures.name,
           );
         } else {
-          await this.#sendErrorMessage(
-            `${err}`,
-            removePattern(dataFunction.structures.name),
-          );
+          await this.#sendErrorMessage(`${err}`, dataFunction.structures.name);
         }
         break;
       }
@@ -87,19 +84,39 @@ class Interpreter {
     const result: SuccessCompiler["functions"] = [];
 
     for (const func of structures) {
-      const structure = func.structures;
+      const name = func.structures.name.toLowerCase();
 
-      if (removePattern(structure.name) === "$if") {
+      if (name === "$if") {
         func.ifContent = [];
         stack.push(func);
-      } else if (removePattern(structure.name) === "$else") {
-        if (stack.length > 0) {
+      } else if (name === "$elseif") {
+        if (stack.length === 0) {
+          this.#sendErrorMessage(
+            "$elseIf cannot be used until $if is declared",
+            "$elseIf",
+          );
+        } else if (stack[stack.length - 1]?.elseProcessed) {
+          this.#sendErrorMessage(
+            "Cannot use $elseIf after $else has been used",
+            "$elseIf",
+          );
+        } else {
+          stack[stack.length - 1].elseIfProcessed = true;
+          stack[stack.length - 1].elseIfContent.push(func);
+        }
+      } else if (name === "$else") {
+        if (stack.length === 0) {
+          this.#sendErrorMessage(
+            "$else cannot be used until $if is declared",
+            "$else",
+          );
+        } else {
           stack[stack.length - 1].elseProcessed = true;
         }
-      } else if (removePattern(structure.name) === "$endif") {
+      } else if (name === "$endif") {
         const ifStructure = stack.pop();
         if (!ifStructure) {
-          this.#sendErrorMessage("No matching $if found for $endif", "$endif");
+          this.#sendErrorMessage("No matching $if found for $endIf", "$endIf");
           return;
         }
         if (stack.length > 0) {
@@ -112,6 +129,8 @@ class Interpreter {
           const currentStructure = stack[stack.length - 1];
           if (currentStructure.elseProcessed) {
             currentStructure.elseContent.push(func);
+          } else if (currentStructure.elseIfProcessed) {
+            currentStructure.elseIfContent.push(func);
           } else {
             currentStructure.ifContent.push(func);
           }

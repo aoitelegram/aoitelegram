@@ -28,10 +28,6 @@ function inspect(obj: any): string {
   }
 }
 
-function removePattern(name: string): string {
-  return name.split(":")[0];
-}
-
 /**
  * Returns a title-cased text.
  * @param str - The text to title-case.
@@ -44,4 +40,4 @@ function toTitleCase(str: string) {
     .join(" ");
 }
 
-export { getObjectKey, removePattern, inspect, toTitleCase };
+export { getObjectKey, inspect, toTitleCase };
