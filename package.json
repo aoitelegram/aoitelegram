@@ -50,7 +50,7 @@
     "loupe": "^3.1.0",
     "ms": "^2.1.3",
     "node-fetch": "^2.7.0",
-    "telegramsjs": "^3.0.0-beta.24",
+    "telegramsjs": "^3.0.0-beta.25",
     "temporal-polyfill": "^0.2.4",
     "tslib": "^2.6.2"
   },
