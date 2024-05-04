@@ -1,9 +1,9 @@
-import { AoiFunction } from "@structures/AoiFunction";
+import { AoiFunction, ArgsType } from "@structures/AoiFunction";
 
 export default new AoiFunction()
   .setName("$eval")
   .setBrackets(true)
-  .setFields({ required: true })
+  .setFields({ name: "code", type: [ArgsType.String], required: true })
   .onCallback(async (context, func) => {
     const result = await context.telegram.evaluateCommand(
       {

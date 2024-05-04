@@ -1,3 +1,4 @@
+import { ArgsType } from "../AoiFunction";
 import { getObjectKey } from "../../utils";
 import type { AoiClient } from "../AoiClient";
 
@@ -12,6 +13,8 @@ function onVariableCreate(telegram: AoiClient): void {
         brackets: true,
         fields: [
           {
+            name: "property",
+            type: [ArgsType.String],
             required: false,
           },
         ],

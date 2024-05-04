@@ -1,3 +1,5 @@
+import type { ArgsType } from "@structures/AoiFunction";
+
 function isInteger(content: string) {
   let isBigInt: boolean = false;
   try {
@@ -6,12 +8,7 @@ function isInteger(content: string) {
   } catch (err) {
     isBigInt = false;
   }
-  return (
-    Number.isInteger(Number(content)) &&
-    !isBoolean(content) &&
-    !isNull(content) &&
-    isBigInt
-  );
+  return Number.isInteger(Number(content)) && !isBoolean(content) && isBigInt;
 }
 
 function isFloat(content: string) {
@@ -26,11 +23,6 @@ function isBoolean(content: string) {
   else return false;
 }
 
-function isNull(content: string) {
-  if (content === "null") return true;
-  else return false;
-}
-
 function isObject(content: string) {
   if (content.startsWith("{") && content.endsWith("}")) {
     try {
@@ -42,17 +34,6 @@ function isObject(content: string) {
   return false;
 }
 
-function isUndefined(content: string) {
-  if (content === "undefined") return true;
-  else if (content.trim() === "") return true;
-  else return false;
-}
-
-function isNaN(content: string) {
-  if (content === "NaN") return true;
-  else return false;
-}
-
 function isNumber(content: string) {
   return isFloat(content) || isInteger(content);
 }
@@ -60,18 +41,12 @@ function isNumber(content: string) {
 function toParse(character?: string) {
   if (!character) return "unknown";
   switch (true) {
-    case isUndefined(character):
-      return "undefined";
     case isNumber(character):
       return "number";
-    case isNaN(character):
-      return "nan";
     case isObject(character):
       return "object";
     case isBoolean(character):
       return "boolean";
-    case isNull(character):
-      return "null";
     default:
       return "string";
   }
@@ -80,18 +55,12 @@ function toParse(character?: string) {
 function toConvertParse(character?: string) {
   if (!character) return undefined;
   switch (true) {
-    case isUndefined(character):
-      return undefined;
     case isNumber(character):
       return Number(character);
-    case isNaN(character):
-      return NaN;
     case isObject(character):
       return JSON.parse(character);
     case isBoolean(character):
       return character === "true";
-    case isNull(character):
-      return null;
     default:
       return character;
   }

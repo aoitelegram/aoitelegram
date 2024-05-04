@@ -3,6 +3,7 @@ import path from "node:path";
 import figlet from "figlet";
 import importSync from "import-sync";
 import { AoiClient } from "./AoiClient";
+import { ArgsType } from "./AoiFunction";
 import { getObjectKey } from "../utils/";
 import { EventEmitter } from "node:events";
 import { AoijsTypeError } from "./AoiError";
@@ -79,6 +80,8 @@ class CustomEvent extends EventEmitter {
           brackets: true,
           fields: [
             {
+              name: "property",
+              type: [ArgsType.String],
               required: false,
             },
           ],

@@ -1,8 +1,9 @@
-import { inspect } from "../../utils";
 import { Container } from "./Container";
 import { randomUUID } from "node:crypto";
+import { ArgsType } from "../AoiFunction";
 import { AoijsTypeError } from "../AoiError";
 import type { CustomJSFunction } from "../AoiTyping";
+import { inspect, toParse, toConvertParse } from "../../utils";
 
 interface ICallbackResolve {
   id: string;
@@ -81,6 +82,7 @@ class ParserFunction {
   async resolveFields(
     container: Container,
     indexes?: number[],
+    checkArguments: boolean = true,
   ): Promise<any[]> {
     if (!this.fields) {
       throw new AoijsTypeError(
@@ -119,17 +121,109 @@ class ParserFunction {
       } else resolvedFields.push(field);
     }
 
+    if (checkArguments) {
+      return this.resolveTypeArguments(resolvedFields, indexes);
+    }
+
     return resolvedFields;
   }
 
-  checkArguments(): void {
-    const argsRequired =
-      this.structures.fields?.filter(({ required }) => required) || [];
+  resolveTypeArguments(array: any[], indexes?: number[]): any[] {
+    if (!array) return [];
+    const result: any[] = [];
+    const currentFields = this.structures;
+
+    if (!currentFields || !currentFields.fields) {
+      throw new AoijsTypeError(
+        "To check the specified arguments, the function must have a description of the arguments (fields)",
+        { errorFunction: this.structures.name },
+      );
+    }
+
+    const argsRequired = currentFields.fields.filter(
+      ({ required }) => required,
+    );
     if (argsRequired.length > this.fields.length) {
       throw new AoijsTypeError(
         `The function ${this.structures.name} expects ${argsRequired.length} parameters, but ${this.fields.length} were received`,
       );
     }
+
+    if (array.length < currentFields.fields.length) {
+      for (let i = 0; i < currentFields.fields.length - array.length; i++) {
+        array.push(undefined);
+      }
+    }
+
+    for (let i = 0; i < array.length; i++) {
+      const currentField = array[i];
+      const currentFieldInfo = currentFields.fields[i];
+
+      if (!currentFieldInfo) {
+        throw new AoijsTypeError(
+          `Failed to find information about field ${i} in the argument description`,
+          { errorFunction: this.structures.name },
+        );
+      }
+
+      const expectType = currentFieldInfo.type;
+
+      if (currentFieldInfo.rest) {
+        if (currentFields.fields.slice(i + 1).length > 1) {
+          throw new AoijsTypeError(
+            "When using rest parameters, description of the following parameters is not available",
+            { errorFunction: this.structures.name },
+          );
+        }
+
+        if (!currentField && currentFieldInfo.defaultValue) {
+          if (Array.isArray(currentFieldInfo.defaultValue)) {
+            result.push(...currentFieldInfo.defaultValue);
+          } else result.push(currentFieldInfo.defaultValue);
+          continue;
+        }
+
+        for (let x = i; x < array.length; x++) {
+          const receivedType = toParse(array[x]) as ArgsType;
+          if (
+            !expectType ||
+            expectType.indexOf(ArgsType.String) !== -1 ||
+            expectType.indexOf(ArgsType.Any) !== -1
+          ) {
+            result.push(toConvertParse(array[x]));
+          } else if (expectType.indexOf(receivedType) !== -1) {
+            result.push(toConvertParse(array[x]));
+          } else {
+            throw new AoijsTypeError(
+              `Expected type: ...${Array.from(new Set(expectType)).join(", ")}. Received: ${toParse(array[x])}`,
+              { errorFunction: this.structures.name },
+            );
+          }
+        }
+        return result;
+      }
+
+      if (!currentField && currentFieldInfo.defaultValue) {
+        result.push(currentFieldInfo.defaultValue);
+        continue;
+      }
+
+      if (
+        !expectType ||
+        expectType.indexOf(ArgsType.String) !== -1 ||
+        expectType.indexOf(ArgsType.Any) !== -1
+      ) {
+        result.push(toConvertParse(currentField));
+      } else if (expectType.indexOf(toParse(currentField) as ArgsType) !== -1) {
+        result.push(toConvertParse(currentField));
+      } else {
+        throw new AoijsTypeError(
+          `Expected type: ${Array.from(new Set(expectType)).join(", ")}. Received: ${toParse(currentField)}`,
+          { errorFunction: this.structures.name },
+        );
+      }
+    }
+    return result;
   }
 
   async resolveCode(context: Container, code: string): Promise<string> {

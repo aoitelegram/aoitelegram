@@ -7,6 +7,14 @@ import type {
   ICallbackReject,
 } from "./core/";
 
+enum ArgsType {
+  String = "string",
+  Number = "number",
+  Boolean = "boolean",
+  Object = "object",
+  Any = "any",
+}
+
 class AoiFunction {
   public name: string;
   public params: string[];
@@ -15,8 +23,10 @@ class AoiFunction {
   public type?: "javascript" | "aoitelegram";
   public fields: {
     name?: string;
-    required?: boolean;
     rest?: boolean;
+    type?: ArgsType[];
+    required?: boolean;
+    defaultValue?: any[];
   }[];
   public inside: {
     name?: string;
@@ -72,8 +82,20 @@ class AoiFunction {
 
   setFields(
     fields:
-      | { name?: string; required: boolean; rest?: boolean }
-      | { name?: string; required: boolean; rest?: boolean }[],
+      | {
+          name?: string;
+          rest?: boolean;
+          type?: ArgsType[];
+          required?: boolean;
+          defaultValue?: any[];
+        }
+      | {
+          name?: string;
+          rest?: boolean;
+          type?: ArgsType[];
+          required?: boolean;
+          defaultValue?: any[];
+        }[],
   ): AoiFunction {
     if (this.type === "aoitelegram") {
       throw new AoijsTypeError(
@@ -277,4 +299,4 @@ class AoiFunction {
   }
 }
 
-export { AoiFunction };
+export { AoiFunction, ArgsType };

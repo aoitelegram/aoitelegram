@@ -1,4 +1,4 @@
-import { AoiFunction } from "@structures/AoiFunction";
+import { AoiFunction, ArgsType } from "@structures/AoiFunction";
 import type { ParserFunction } from "@core/ParserFunction";
 
 function groupFunctionsByName(functions: ParserFunction[]): ParserFunction[][] {
@@ -25,7 +25,7 @@ function groupFunctionsByName(functions: ParserFunction[]): ParserFunction[][] {
 export default new AoiFunction()
   .setName("$if")
   .setBrackets(true)
-  .setFields({ required: true })
+  .setFields({ name: "condition", type: [ArgsType.String], required: true })
   .onCallback(async (context, func, code) => {
     if (!code) {
       return func.reject("I don't have access to the code");

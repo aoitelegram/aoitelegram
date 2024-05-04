@@ -1,4 +1,5 @@
 import type { AoiClient } from "./AoiClient";
+import type { ArgsType } from "./AoiFunction";
 import type { AoiManager } from "./AoiManager";
 import type { Context, IEventFunctions } from "telegramsjs";
 import type { ValueDatabase } from "../helpers/manager/TimeoutManager";
@@ -63,7 +64,13 @@ interface CustomJSFunction {
   name: string;
   aliases?: string[];
   type?: "javascript";
-  fields?: { required: boolean; rest?: boolean }[];
+  fields?: {
+    name?: string;
+    rest?: boolean;
+    type?: ArgsType[];
+    required?: boolean;
+    defaultValue?: any[];
+  }[];
   brackets?: boolean;
   version?: string;
   callback: (

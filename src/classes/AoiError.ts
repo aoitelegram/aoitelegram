@@ -4,6 +4,7 @@ interface IOptionsTypeError {
   path?: string;
   name?: string;
   command?: string;
+  errorFunction?: string;
 }
 
 class AoijsError extends Error {
@@ -27,6 +28,7 @@ class AoijsTypeError extends TypeError {
   public readonly command?: string;
   public readonly description: string;
   public readonly expectedType?: string;
+  public readonly errorFunction?: string;
 
   constructor(description: string, options?: IOptionsTypeError) {
     super(description);
@@ -36,6 +38,7 @@ class AoijsTypeError extends TypeError {
     this.name = options?.name || "AoijsTypeError";
     this.command = options?.command;
     this.description = description;
+    this.errorFunction = options?.errorFunction;
   }
 }
 
@@ -44,13 +47,18 @@ class RuntimeError extends Error {
   public readonly code: string;
   public readonly name: string = "RuntimeError";
   public readonly description: string;
+  public readonly errorFunction?: string;
 
-  constructor(description: string, line?: number, code?: string) {
+  constructor(
+    description: string,
+    options?: { line?: number; code?: string; errorFunction?: string },
+  ) {
     super(description);
 
-    this.line = line || 0;
-    this.code = code || "unknown";
+    this.line = options?.line || 0;
+    this.code = options?.code || "unknown";
     this.description = description;
+    this.errorFunction = options?.errorFunction;
   }
 }
 

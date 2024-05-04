@@ -65,8 +65,10 @@ class Interpreter {
         if (err instanceof AoijsTypeError) {
           const errorMessage = `${err}`.split(":").slice(1).join(" ");
           await this.#sendErrorMessage(
-            errorMessage,
-            dataFunction.structures.name,
+            errorMessage.trimLeft(),
+            err?.errorFunction
+              ? err.errorFunction
+              : dataFunction.structures.name,
           );
         } else {
           await this.#sendErrorMessage(`${err}`, dataFunction.structures.name);
@@ -209,7 +211,11 @@ class Interpreter {
       );
       return;
     } else if (!this.container?.telegram?.functionError) {
-      throw new RuntimeError(error, options?.line, options?.code);
+      throw new RuntimeError(error, {
+        line: options?.line,
+        code: options?.code,
+        errorFunction: functionName,
+      });
     }
   }
 }
