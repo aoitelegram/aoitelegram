@@ -87,6 +87,7 @@ class ParserFunction {
     if (!this.fields) {
       throw new AoijsTypeError(
         `Attempted to resolve array of functions with no fields: ${this.structures.name}`,
+        { errorFunction: this.structures.name },
       );
     }
 
@@ -146,6 +147,7 @@ class ParserFunction {
     if (argsRequired.length > this.fields.length) {
       throw new AoijsTypeError(
         `The function ${this.structures.name} expects ${argsRequired.length} parameters, but ${this.fields.length} were received`,
+        { errorFunction: this.structures.name },
       );
     }
 
@@ -156,12 +158,16 @@ class ParserFunction {
     }
 
     for (let i = 0; i < array.length; i++) {
+      if (indexes && indexes.indexOf(i) === -1) {
+        continue;
+      }
+
       const currentField = array[i];
       const currentFieldInfo = currentFields.fields[i];
 
       if (!currentFieldInfo) {
         throw new AoijsTypeError(
-          `Failed to find information about field ${i} in the argument description`,
+          `Failed to find information about field ${i + 1} in the argument description`,
           { errorFunction: this.structures.name },
         );
       }
@@ -233,7 +239,8 @@ class ParserFunction {
 
     for (const overload of this.findOverloads(code)) {
       const result = await overload.callback(context, overload);
-      if (result === null) {
+
+      if (!result) {
         return code;
       }
       if ("reason" in result) {
