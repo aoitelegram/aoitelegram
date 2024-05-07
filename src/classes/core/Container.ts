@@ -60,6 +60,38 @@ class Container {
     );
   }
 
+  isBusinessConnection(): this is EventData<Update["business_connection"]> {
+    return (
+      "updateType" in this.eventData &&
+      this.eventData.updateType === "business_connection"
+    );
+  }
+
+  isBusinessMessage(): this is EventData<Update["business_message"]> {
+    return (
+      "updateType" in this.eventData &&
+      this.eventData.updateType === "business_message"
+    );
+  }
+
+  isEditedBusinessMessage(): this is EventData<
+    Update["edited_business_message"]
+  > {
+    return (
+      "updateType" in this.eventData &&
+      this.eventData.updateType === "edited_business_message"
+    );
+  }
+
+  isDeletedBusinessMessages(): this is EventData<
+    Update["deleted_business_messages"]
+  > {
+    return (
+      "updateType" in this.eventData &&
+      this.eventData.updateType === "deleted_business_messages"
+    );
+  }
+
   isMessageReaction(): this is EventData<Update["message_reaction"]> {
     return (
       "updateType" in this.eventData &&
