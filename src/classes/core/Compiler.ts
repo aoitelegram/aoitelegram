@@ -15,6 +15,13 @@ interface ErrorCompiler {
   description: string;
 }
 
+interface BracketError {
+  func: string;
+  line: number;
+  errorCode: string;
+  description: string;
+}
+
 class Compiler {
   public code: string;
   public readonly reverseFunctions?: boolean;
@@ -94,7 +101,12 @@ class Compiler {
       }
 
       if (segmentCode.startsWith("[")) {
-        const fields = segmentCode.slice(1).split(/\]/)[0];
+        const fields = this.extractFields(dataFunction.name, segmentCode);
+
+        if (typeof fields !== "string") {
+          return fields;
+        }
+
         parserFunction.raw = fields;
         parserFunction.setInside(this.unescapeCode(fields));
         parserFunction.setFields(
@@ -148,6 +160,29 @@ class Compiler {
     };
   }
 
+  extractFields(name: string, segmentCode: string): BracketError | string {
+    let count = 0;
+    let endIndex = -1;
+
+    for (let i = 0; i < segmentCode.length; i++) {
+      if (segmentCode[i] === "[") {
+        count++;
+      } else if (segmentCode[i] === "]") {
+        count--;
+        if (count === 0) {
+          endIndex = i;
+          break;
+        }
+      }
+    }
+
+    if (endIndex !== -1 && count === 0) {
+      return segmentCode.substring(1, endIndex);
+    } else {
+      return searchBracketError(name, this.code, "bracket closing");
+    }
+  }
+
   replaceLast(content: string, search: string, toReplace: string): string {
     let splits = content.split(search);
     content = splits.pop()!;
@@ -183,7 +218,7 @@ function searchBracketError(
   func: string,
   code: string,
   errorType: string,
-): { func: string; line: number; errorCode: string; description: string } {
+): BracketError {
   const lines = code.split(/\n/g);
   const lineNumber = lines.findIndex((line) => line.includes(func)) + 1;
   const errorLine = lineNumber ? lines[lineNumber - 1].lastIndexOf(func) : 0;
@@ -192,8 +227,8 @@ function searchBracketError(
     func,
     line: errorLine,
     errorCode: lines[errorLine],
-    description: `this function requires ${errorType} at line ${lineNumber}:${errorLine}`,
+    description: `this function requires ${errorType} at line ${lines.length}:${errorLine}`,
   };
 }
 
-export { Compiler, SuccessCompiler, ErrorCompiler };
+export { Compiler, SuccessCompiler, ErrorCompiler, BracketError };
