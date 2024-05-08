@@ -22,6 +22,10 @@ class AoiBase extends TelegramBot {
   public database: AoiManager = {} as AoiManager;
   public readonly events: Collection<string, IEventsOptions[]> =
     new Collection();
+  public readonly availableVariables: Collection<
+    undefined | string | string[],
+    { [key: string]: any }
+  > = new Collection();
   public readonly availableFunctions: Collection<string, CustomJSFunction> =
     new Collection();
   public readonly availableCollectFunctions = [
@@ -587,16 +591,11 @@ class AoiBase extends TelegramBot {
     } else this.events.set(type, [command]);
   }
 
-  async variables(
-    options: { [key: string]: any },
+  variables(
+    variable: { [key: string]: any },
     tables?: string | string[],
-  ): Promise<AoiBase> {
-    if (!("variables" in this.database)) {
-      throw new AoijsTypeError(
-        "No method named 'variables' was found in the database class",
-      );
-    }
-    await this.database.variables(options, tables);
+  ): AoiBase {
+    this.availableVariables.set(tables, variable);
     return this;
   }
 }

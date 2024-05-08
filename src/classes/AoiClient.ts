@@ -10,11 +10,11 @@ import type { DataFunction } from "./AoiTyping";
 import type { ILoginOptions } from "telegramsjs";
 import type { LoadCommands } from "./LoadCommands";
 import { Collection } from "@telegram.ts/collection";
-import type { AoiManagerOptions } from "./AoiManager";
 import { AoijsError, AoijsTypeError } from "./AoiError";
 import { AoiBase, type IEventsOptions } from "./AoiBase";
 import { Timeout, TimeoutDescription } from "../helpers/Timeout";
 import { Awaited, AwaitedDescription } from "../helpers/Awaited";
+import { AoiManager, type AoiManagerOptions } from "./AoiManager";
 import { AoiWarning, type AoiWarningOptions } from "./AoiWarning";
 import type { IActionDescription } from "./handlers/command/Action";
 import type { ICommandDescription } from "./handlers/command/Command";
@@ -167,6 +167,17 @@ class AoiClient extends AoiBase {
     }
     this.registerTimeout.handler();
     this.registerAwaited.handler();
+
+    if ("connect" in this.database) {
+      await this.database.connect().then(async () => {
+        if (this.database instanceof AoiManager) {
+          this.database.createDatabaseFunction(this);
+          for (const [tables, variables] of this.availableVariables) {
+            await this.database.variables?.(variables, tables);
+          }
+        }
+      });
+    }
 
     if (extensions.length > 0) {
       for (let i = 0; i < extensions.length; i++) {
