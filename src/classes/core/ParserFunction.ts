@@ -174,6 +174,11 @@ class ParserFunction {
 
       const expectType = currentFieldInfo.type;
 
+      if (typeof currentField === "undefined" && !currentFieldInfo.required) {
+        result.push(undefined);
+        continue;
+      }
+
       if (currentFieldInfo.rest) {
         if (currentFields.fields.slice(i + 1).length > 1) {
           throw new AoijsTypeError(
