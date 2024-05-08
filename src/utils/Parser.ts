@@ -1,6 +1,7 @@
+import { unInspect } from "./Helpers";
 import type { ArgsType } from "@structures/AoiFunction";
 
-function isInteger(content: string) {
+function isInteger(content: string): boolean {
   let isBigInt: boolean = false;
   try {
     BigInt(content);
@@ -11,40 +12,55 @@ function isInteger(content: string) {
   return Number.isInteger(Number(content)) && !isBoolean(content) && isBigInt;
 }
 
-function isFloat(content: string) {
+function isFloat(content: string): boolean {
   if (!content.includes(".")) return false;
   if (!Number.isNaN(parseFloat(content))) return true;
   else return false;
 }
 
-function isBoolean(content: string) {
+function isBoolean(content: string): boolean {
   if (content === "true") return true;
   else if (content === "false") return true;
   else return false;
 }
 
-function isObject(content: string) {
+function isObject(content: string): boolean {
   if (content.startsWith("{") && content.endsWith("}")) {
     try {
-      return !!JSON.parse(JSON.stringify(content));
+      return !!JSON.parse(content);
     } catch (err) {
-      return false;
+      try {
+        return !!JSON.parse(JSON.stringify(content));
+      } catch (err) {
+        return false;
+      }
     }
   }
   return false;
 }
 
-function isNumber(content: string) {
+function isArray(content: string): boolean {
+  if (content.startsWith("[") && content.endsWith("]")) {
+    return true;
+  }
+  return false;
+}
+
+function isNumber(content: string): boolean {
   return isFloat(content) || isInteger(content);
 }
 
-function toParse(character?: string) {
+function toParse(
+  character?: string,
+): "string" | "unknown" | "object" | "boolean" | "number" | "array" {
   if (!character) return "unknown";
   switch (true) {
     case isNumber(character):
       return "number";
     case isObject(character):
       return "object";
+    case isArray(character):
+      return "array";
     case isBoolean(character):
       return "boolean";
     default:
@@ -52,13 +68,15 @@ function toParse(character?: string) {
   }
 }
 
-function toConvertParse(character?: string) {
+function toConvertParse(character?: string): any {
   if (!character) return undefined;
   switch (true) {
     case isNumber(character):
       return Number(character);
     case isObject(character):
-      return JSON.parse(character);
+      return unInspect(character);
+    case isArray(character):
+      return unInspect(character);
     case isBoolean(character):
       return character === "true";
     default:
@@ -66,7 +84,19 @@ function toConvertParse(character?: string) {
   }
 }
 
-function formatTime(milliseconds: number) {
+function formatTime(milliseconds: number): {
+  units: {
+    years: number;
+    months: number;
+    weeks: number;
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+    ms: number;
+    fullTime: () => string;
+  };
+} {
   const calculateUnit = (unitInMilliseconds: number): number => {
     const result = Math.trunc(Math.abs(milliseconds) / unitInMilliseconds);
     milliseconds -= result * unitInMilliseconds;
@@ -118,7 +148,7 @@ function replaceData(
     fullTime: () => string;
   },
   text: string,
-) {
+): string {
   Object.entries(date).map((unit) => {
     const regexp = new RegExp(`%${unit[0]}%`, "g");
     text = text.replace(
@@ -129,9 +159,4 @@ function replaceData(
   return text;
 }
 
-function arrayAt<T>(arr: ArrayLike<T>, index: number): T | undefined {
-  const realIndex = index >= 0 ? index : arr.length + index;
-  return arr[realIndex];
-}
-
-export { toParse, toConvertParse, formatTime, replaceData, arrayAt };
+export { toParse, toConvertParse, formatTime, replaceData };

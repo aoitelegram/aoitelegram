@@ -12,6 +12,7 @@ enum ArgsType {
   Number = "number",
   Boolean = "boolean",
   Object = "object",
+  Array = "array",
   Any = "any",
 }
 

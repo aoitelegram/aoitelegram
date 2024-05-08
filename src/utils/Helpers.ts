@@ -28,6 +28,45 @@ function inspect(obj: any): string {
   }
 }
 
+function unInspect(str: string): any {
+  const trimmedStr = str.trim();
+
+  if (trimmedStr.startsWith("{") && trimmedStr.endsWith("}")) {
+    const innerStr = trimmedStr.slice(1, -1);
+    const keyValuePairs = innerStr
+      .split(",")
+      .map((pair) => (pair ? pair.trim() : pair));
+
+    const obj: { [key: string]: any } = {};
+    keyValuePairs.forEach((pair) => {
+      if (pair) {
+        const [key, value] = pair.split(":").map((item) => item.trim());
+        obj[key.slice(1, -1)] = unInspect(value);
+      }
+    });
+
+    return obj;
+  } else if (trimmedStr.startsWith("[") && trimmedStr.endsWith("]")) {
+    const innerStr = trimmedStr.slice(1, -1);
+    const elements = innerStr
+      ? innerStr.split(",").map((item) => item.trim())
+      : [];
+    return elements.map(unInspect);
+  } else {
+    if (trimmedStr === "undefined") return undefined;
+    if (trimmedStr === "null") return null;
+    if (trimmedStr === "true") return true;
+    if (trimmedStr === "false") return false;
+    if (!isNaN(Number(trimmedStr)) && trimmedStr !== "")
+      return Number(trimmedStr);
+    if (trimmedStr.startsWith('"') && trimmedStr.endsWith('"')) {
+      return trimmedStr.slice(1, -1);
+    } else {
+      return trimmedStr;
+    }
+  }
+}
+
 /**
  * Returns a title-cased text.
  * @param str - The text to title-case.
@@ -40,4 +79,4 @@ function toTitleCase(str: string) {
     .join(" ");
 }
 
-export { getObjectKey, inspect, toTitleCase };
+export { getObjectKey, inspect, unInspect, toTitleCase };
