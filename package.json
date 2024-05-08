@@ -6,7 +6,8 @@
   "version": "1.0.0-beta.1",
   "scripts": {
     "clean:dist": "rm -rf dist/",
-    "uglifyjs": "find ./dist/function -name \"*.js\" -type f -print0 | xargs -0 uglifyjs --in-situ",
+    "uglifyjs": "find ./dist/function -type f -name \"*.d.ts\" -exec rm {} && uglifyjs --in-situ dist/function/**/**",
+    "build:test": "npm run clean:dist && tsc && tsc-alias",
     "build:release": "npm run clean:dist && tsc && tsc-alias && npm run uglifyjs"
   },
   "engines": {
