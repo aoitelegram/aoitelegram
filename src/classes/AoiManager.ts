@@ -1,6 +1,4 @@
 import { AoiLogger } from "./AoiLogger";
-import { ArgsType } from "./AoiFunction";
-import type { AoiBase } from "./AoiBase";
 import { Collection } from "@telegram.ts/collection";
 import { AoijsError, AoijsTypeError } from "./AoiError";
 import {
@@ -211,53 +209,6 @@ class AoiManager<Value = any> {
         "The parameter should be of type 'string' or 'string[]'",
       );
     }
-  }
-
-  createDatabaseFunction(aoitelegram: AoiBase): AoiManager {
-    aoitelegram.createCustomFunction([
-      {
-        name: "$setUserVar",
-        brackets: true,
-        fields: [
-          {
-            name: "variable",
-            required: true,
-            type: [ArgsType.String],
-          },
-          {
-            name: "value",
-            required: true,
-            type: [ArgsType.String],
-          },
-          {
-            name: "userId",
-            required: false,
-            type: [ArgsType.Number],
-          },
-        ],
-        callback: async (context, func) => {
-          const [
-            variable,
-            value,
-            userId = context.eventData.from?.id ||
-              context.eventData.message?.from?.id,
-            table = this.tables[0],
-          ] = await func.resolveFields(context);
-
-          const chatId =
-            context.eventData.chat?.id || context.eventData.message?.chat.id;
-
-          if (!(await this.has(table, variable))) {
-            return func.reject(`Invalid variable ${variable} not found`);
-          }
-
-          await this.set(table, `user_${userId}_${chatId}_${variable}`, value);
-
-          return func.resolve(true);
-        },
-      },
-    ]);
-    return this;
   }
 
   #validateOptions(options: Record<string, any>) {

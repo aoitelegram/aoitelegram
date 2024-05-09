@@ -171,7 +171,6 @@ class AoiClient extends AoiBase {
     if ("connect" in this.database) {
       await this.database.connect().then(async () => {
         if (this.database instanceof AoiManager) {
-          this.database.createDatabaseFunction(this);
           for (const [tables, variables] of this.availableVariables) {
             await this.database.variables?.(variables, tables);
           }
