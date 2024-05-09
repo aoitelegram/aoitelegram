@@ -23,6 +23,13 @@ interface IOveeload {
   callback: Function;
 }
 
+function makeMessageError(argType: ArgsType[]): string {
+  if (argType.length === 1) {
+    return `Invalid ${argType[0].charAt(0).toUpperCase() + argType[0].slice(1)} Provided In`;
+  }
+  return `Invalid ${argType.map((type) => `${type.charAt(0).toUpperCase() + type.slice(1)} | `)} Provided In`;
+}
+
 class ParserFunction {
   public readonly structures: CustomJSFunction;
   public inside: string | null = null;
@@ -206,7 +213,7 @@ class ParserFunction {
             result.push(toConvertParse(array[x]));
           } else {
             throw new AoijsTypeError(
-              `Expected type: ...${Array.from(new Set(expectType)).join(", ")}. Received: ${toParse(array[x])}`,
+              `${makeMessageError(Array.from(new Set(expectType)))} "${array[x]}"`,
               { errorFunction: this.structures.name },
             );
           }
@@ -229,7 +236,7 @@ class ParserFunction {
         result.push(toConvertParse(currentField));
       } else {
         throw new AoijsTypeError(
-          `Expected type: ${Array.from(new Set(expectType)).join(", ")}. Received: ${toParse(currentField)}`,
+          `${makeMessageError(Array.from(new Set(expectType)))} "${currentField}"`,
           { errorFunction: this.structures.name },
         );
       }
