@@ -1,5 +1,6 @@
 import { AoiBase } from "../AoiBase";
 import type { AoiClient } from "../AoiClient";
+import type { AoiManager } from "../AoiManager";
 import type { ContextEvent } from "../AoiTyping";
 import type { Update } from "@telegram.ts/types";
 import { Collection } from "@telegram.ts/collection";
@@ -17,6 +18,7 @@ class Container {
   public suppressErrors: string | null = null;
   public readonly eventData: ContextEvent;
   public readonly telegram: AoiClient;
+  public readonly database: AoiManager;
   public stopCode: boolean = false;
 
   constructor(ctx: ContextEvent) {
@@ -26,6 +28,7 @@ class Container {
       : ctx?.api instanceof AoiBase
         ? ctx.api
         : {}) as unknown as AoiClient;
+    this.database = this.telegram.database;
   }
 
   setSuppressErrors(reason: string | null): Container {
