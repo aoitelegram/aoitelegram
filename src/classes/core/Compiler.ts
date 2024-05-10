@@ -11,14 +11,7 @@ interface SuccessCompiler {
 interface ErrorCompiler {
   func: string;
   line: number;
-  errorCode: string;
-  description: string;
-}
-
-interface BracketError {
-  func: string;
-  line: number;
-  errorCode: string;
+  errorCode?: string;
   description: string;
 }
 
@@ -160,7 +153,7 @@ class Compiler {
     };
   }
 
-  extractFields(name: string, segmentCode: string): BracketError | string {
+  extractFields(name: string, segmentCode: string): ErrorCompiler | string {
     let count = 0;
     let endIndex = -1;
 
@@ -218,7 +211,7 @@ function searchBracketError(
   func: string,
   code: string,
   errorType: string,
-): BracketError {
+): ErrorCompiler {
   const lines = code.split(/\n/g);
   const lineNumber = lines.findIndex((line) => line.includes(func)) + 1;
   const errorLine = lineNumber ? lines[lineNumber - 1].lastIndexOf(func) : 0;
@@ -231,4 +224,4 @@ function searchBracketError(
   };
 }
 
-export { Compiler, SuccessCompiler, ErrorCompiler, BracketError };
+export { Compiler, SuccessCompiler, ErrorCompiler };
