@@ -7,7 +7,7 @@ export default new AoiFunction()
   .onCallback(async (context, func) => {
     const result = await context.telegram.evaluateCommand(
       {
-        code: func.inside,
+        code: await func.resolveCode(context, `${func.inside}`),
       },
       context.eventData,
     );
