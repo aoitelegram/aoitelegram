@@ -21,7 +21,7 @@ class Interpreter {
         this.inputData.func,
         false,
         {
-          code: this.inputData.errorCode.split("\n")[this.inputData.line],
+          code: this.inputData.errorCode?.split("\n")[this.inputData.line],
           line: this.inputData.line,
         },
       );
@@ -154,7 +154,7 @@ class Interpreter {
     error: string,
     functionName: string,
     custom: boolean = false,
-    options?: { code: string; line: number },
+    options: { code?: string; line?: number } = {},
   ): Promise<void> {
     if (
       !custom &&
