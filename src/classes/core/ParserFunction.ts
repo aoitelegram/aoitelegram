@@ -255,9 +255,11 @@ class ParserFunction {
       if (!result) {
         return code;
       }
+
       if ("reason" in result) {
         throw new AoijsTypeError(result.reason);
       }
+
       code = code.replace(result.id, result.with);
     }
 
