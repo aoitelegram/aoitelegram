@@ -1,5 +1,10 @@
 import { AoijsTypeError } from "./AoiError";
-import type { PossiblyAsync, DataFunction } from "./AoiTyping";
+import type {
+  PossiblyAsync,
+  DefaultFnValue,
+  ReturnPrimitive,
+  DataFunction,
+} from "./AoiTyping";
 import type {
   Container,
   ParserFunction,
@@ -27,7 +32,7 @@ class AoiFunction {
     rest?: boolean;
     type?: ArgsType[];
     required?: boolean;
-    defaultValue?: any[];
+    defaultValue?: PossiblyAsync<DefaultFnValue | ReturnPrimitive>;
   }[];
   public inside: {
     name?: string;
@@ -88,14 +93,14 @@ class AoiFunction {
           rest?: boolean;
           type?: ArgsType[];
           required?: boolean;
-          defaultValue?: any[];
+          defaultValue?: DefaultFnValue | ReturnPrimitive;
         }
       | {
           name?: string;
           rest?: boolean;
           type?: ArgsType[];
           required?: boolean;
-          defaultValue?: any[];
+          defaultValue?: DefaultFnValue | ReturnPrimitive;
         }[],
   ): AoiFunction {
     if (this.type === "aoitelegram") {

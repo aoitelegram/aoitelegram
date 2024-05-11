@@ -130,13 +130,21 @@ class ParserFunction {
     }
 
     if (checkArguments) {
-      return this.resolveTypeArguments(resolvedFields, indexes);
+      return await this.resolveTypeArguments(
+        resolvedFields,
+        container,
+        indexes,
+      );
     }
 
     return resolvedFields;
   }
 
-  resolveTypeArguments(array: any[], indexes?: number[]): any[] {
+  async resolveTypeArguments(
+    array: any[],
+    container: Container,
+    indexes?: number[],
+  ): Promise<any[]> {
     if (!array) return [];
     const result: any[] = [];
     const currentFields = this.structures;
@@ -181,8 +189,12 @@ class ParserFunction {
 
       const expectType = currentFieldInfo.type;
 
-      if (typeof currentField === "undefined" && !currentFieldInfo.required) {
-        result.push(undefined);
+      if (typeof currentField === "undefined") {
+        if ("defaultValue" in currentFieldInfo && !currentFieldInfo.required) {
+          if (typeof currentFieldInfo.defaultValue === "function") {
+            result.push(await currentFieldInfo.defaultValue(container));
+          } else result.push(currentFieldInfo.defaultValue);
+        } else result.push(undefined);
         continue;
       }
 
@@ -192,13 +204,6 @@ class ParserFunction {
             "When using rest parameters, description of the following parameters is not available",
             { errorFunction: this.structures.name },
           );
-        }
-
-        if (!currentField && currentFieldInfo.defaultValue) {
-          if (Array.isArray(currentFieldInfo.defaultValue)) {
-            result.push(...currentFieldInfo.defaultValue);
-          } else result.push(currentFieldInfo.defaultValue);
-          continue;
         }
 
         for (let x = i; x < array.length; x++) {
@@ -221,11 +226,6 @@ class ParserFunction {
         return result;
       }
 
-      if (!currentField && currentFieldInfo.defaultValue) {
-        result.push(currentFieldInfo.defaultValue);
-        continue;
-      }
-
       if (
         !expectType ||
         expectType.indexOf(ArgsType.String) !== -1 ||
@@ -244,13 +244,13 @@ class ParserFunction {
     return result;
   }
 
-  async resolveCode(context: Container, code: string): Promise<string> {
+  async resolveCode(container: Container, code: string): Promise<string> {
     if (code === undefined) {
       return "";
     }
 
     for (const overload of this.findOverloads(code)) {
-      const result = await overload.callback(context, overload);
+      const result = await overload.callback(container, overload);
 
       if (!result) {
         return code;
@@ -279,11 +279,11 @@ class ParserFunction {
   }
 
   async callback(
-    context: Container,
+    container: Container,
     func: ParserFunction,
     code?: string,
   ): Promise<ICallbackResolve | ICallbackReject> {
-    return Promise.resolve(this.structures.callback(context, func, code));
+    return Promise.resolve(this.structures.callback(container, func, code));
   }
 
   resolve(result: any = "", code?: any): ICallbackResolve {

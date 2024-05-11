@@ -60,6 +60,16 @@ interface CustomAoiFunction {
   code: string;
 }
 
+type Primitive = string | number | boolean | undefined | null;
+
+type ReturnObject = Record<string, Primitive>;
+
+type ReturnArray = Array<Primitive>;
+
+type ReturnPrimitive = Primitive | ReturnObject | ReturnArray;
+
+type DefaultFnValue = (ctx: Container) => PossiblyAsync<ReturnPrimitive>;
+
 interface CustomJSFunction {
   name: string;
   aliases?: string[];
@@ -69,7 +79,7 @@ interface CustomJSFunction {
     rest?: boolean;
     type?: ArgsType[];
     required?: boolean;
-    defaultValue?: any[];
+    defaultValue?: DefaultFnValue | ReturnPrimitive;
   }[];
   brackets?: boolean;
   version?: string;
@@ -113,6 +123,8 @@ export {
   ContextEvent,
   CustomJSFunction,
   CustomAoiFunction,
+  DefaultFnValue,
+  ReturnPrimitive,
   DataFunction,
   DataEvent,
   PossiblyAsync,
