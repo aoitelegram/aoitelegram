@@ -1,6 +1,7 @@
 import { AoijsTypeError } from "./AoiError";
 import type {
   PossiblyAsync,
+  MaybeArray,
   DefaultFnValue,
   ReturnPrimitive,
   DataFunction,
@@ -24,8 +25,10 @@ enum ArgsType {
 class AoiFunction {
   public name: string;
   public params: string[];
+  public version?: string;
   public aliases: string[];
   public brackets?: boolean;
+  public reverseReading?: boolean;
   public type?: "javascript" | "aoitelegram";
   public fields: {
     name?: string;
@@ -53,10 +56,13 @@ class AoiFunction {
     } else this.#validateOptions(parameters);
 
     this.name = parameters.name;
+    this.version = parameters.version;
     this.aliases = parameters.aliases || [];
     this.type = parameters.type || "javascript";
     this.brackets = ("brackets" in parameters && parameters.brackets) || false;
     this.fields = ("fields" in parameters && parameters.fields) || [];
+    this.reverseReading =
+      ("reverseReading" in parameters && parameters.reverseReading) || false;
     this.inside = ("inside" in parameters && parameters.inside) || {};
     this.params = ("params" in parameters && parameters.params) || [];
     this.callback =
@@ -74,6 +80,26 @@ class AoiFunction {
     return this;
   }
 
+  setVersion(version: string): AoiFunction {
+    if (typeof version !== "string") {
+      throw new AoijsTypeError(
+        `The expected type is 'string', but received type ${typeof version}`,
+      );
+    }
+    this.version = version;
+    return this;
+  }
+
+  setReverseReading(reverseReading: boolean): AoiFunction {
+    if (typeof reverseReading !== "boolean") {
+      throw new AoijsTypeError(
+        `The expected type is 'boolean', but received type ${typeof reverseReading}`,
+      );
+    }
+    this.reverseReading = reverseReading;
+    return this;
+  }
+
   setAliases(aliases: string | string[]): AoiFunction {
     if (typeof aliases !== "string" && !Array.isArray(aliases)) {
       throw new AoijsTypeError(
@@ -87,21 +113,21 @@ class AoiFunction {
   }
 
   setFields(
-    fields:
+    fields: MaybeArray<
       | {
-          name?: string;
+          name: string;
           rest?: boolean;
           type?: ArgsType[];
-          required?: boolean;
-          defaultValue?: DefaultFnValue | ReturnPrimitive;
+          required: true;
         }
       | {
-          name?: string;
+          name: string;
           rest?: boolean;
           type?: ArgsType[];
-          required?: boolean;
+          required?: false;
           defaultValue?: DefaultFnValue | ReturnPrimitive;
-        }[],
+        }
+    >,
   ): AoiFunction {
     if (this.type === "aoitelegram") {
       throw new AoijsTypeError(
@@ -219,6 +245,10 @@ class AoiFunction {
       throw new AoijsTypeError("Brackets must be a boolean value");
     }
 
+    if ("version" in options && typeof options.version !== "string") {
+      throw new AoijsTypeError("Version must be a string value");
+    }
+
     if ("fields" in options) {
       if ("inside" in options) {
         throw new AoijsTypeError(
@@ -260,6 +290,20 @@ class AoiFunction {
 
       if (!("required" in options.inside)) {
         throw new AoijsTypeError("Each parameter must contain a string");
+      }
+    }
+
+    if ("reverseReading" in options) {
+      if (options.type !== "aoitelegram") {
+        throw new AoijsTypeError(
+          "Params method is only accessible for type 'javascript' when type is set to 'aoitelegram'",
+        );
+      }
+
+      if (typeof options.reverseReading !== "boolean") {
+        throw new AoijsTypeError(
+          `ReverseReading must be a boolean, but received type ${typeof options.reverseReading}`,
+        );
       }
     }
 

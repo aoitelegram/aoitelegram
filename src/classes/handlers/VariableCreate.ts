@@ -1,29 +1,29 @@
-import { ArgsType } from "../AoiFunction";
-import { getObjectKey } from "../../utils";
+import { getObjectKey } from "@utils/Helpers";
 import type { AoiClient } from "../AoiClient";
+import { ArgsType, AoiFunction } from "../AoiFunction";
 
 function onVariableCreate(telegram: AoiClient): void {
-  const events = telegram.events.get("variableCreate");
-  if (!events) return;
-
   telegram.database.on("create", async (newVariable) => {
+    const events = telegram.events.get("variableCreate");
+    if (!events) return;
+
     for (const event of events) {
-      telegram.ensureCustomFunction({
-        name: "$newVariable",
-        brackets: true,
-        fields: [
-          {
+      telegram.ensureCustomFunction(
+        new AoiFunction()
+          .setName("$newVariable")
+          .setBrackets(true)
+          .setFields({
             name: "property",
             type: [ArgsType.String],
             required: false,
-          },
-        ],
-        callback: async (context, func) => {
-          const options = await func.resolveAllFields(context);
-          const result = getObjectKey(newVariable, options);
-          return func.resolve(result);
-        },
-      });
+          })
+          .onCallback(async (context, func) => {
+            const options = await func.resolveAllFields(context);
+            const result = getObjectKey(newVariable, options);
+            return func.resolve(result);
+          }),
+      );
+
       await telegram.evaluateCommand(event, { newVariable, telegram });
     }
   });

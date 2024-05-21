@@ -3,11 +3,11 @@ import path from "node:path";
 import figlet from "figlet";
 import importSync from "import-sync";
 import { AoiClient } from "./AoiClient";
-import { ArgsType } from "./AoiFunction";
 import { getObjectKey } from "../utils/";
 import { EventEmitter } from "node:events";
 import { AoijsTypeError } from "./AoiError";
 import type { DataEvent } from "./AoiTyping";
+import { ArgsType, AoiFunction } from "./AoiFunction";
 
 class CustomEvent extends EventEmitter {
   public readonly aoitelegram: AoiClient;
@@ -64,7 +64,10 @@ class CustomEvent extends EventEmitter {
       throw new AoijsTypeError("You did not specify the 'listen' parameter");
     }
 
-    if (options.type === "js" && typeof options.callback !== "function") {
+    if (
+      options.type === "javascript" &&
+      typeof options.callback !== "function"
+    ) {
       throw new AoijsTypeError("You did not specify the 'callback' parameter");
     } else if (
       options.type === "aoitelegram" &&
@@ -75,22 +78,21 @@ class CustomEvent extends EventEmitter {
 
     if ((options.type === "aoitelegram" || !options.type) && options.code) {
       const eventHandler = async (...args: string[]) => {
-        this.aoitelegram.editCustomFunction({
-          name: "$eventData",
-          brackets: true,
-          fields: [
-            {
+        this.aoitelegram.editCustomFunction(
+          new AoiFunction()
+            .setName("$eventData")
+            .setBrackets(true)
+            .setFields({
               name: "property",
               type: [ArgsType.String],
               required: false,
-            },
-          ],
-          callback: async (context, func) => {
-            const options = await func.resolveAllFields(context);
-            const result = getObjectKey({ ...args }, options);
-            return func.resolve(result);
-          },
-        });
+            })
+            .onCallback(async (context, func) => {
+              const options = await func.resolveAllFields(context);
+              const result = getObjectKey({ ...args }, options);
+              return func.resolve(result);
+            }),
+        );
 
         await this.aoitelegram.evaluateCommand(options, {
           ...args,
@@ -107,7 +109,7 @@ class CustomEvent extends EventEmitter {
           "The type specified for 'once' is invalid. Only 'false' and 'true' are allowed",
         );
       }
-    } else if (options.type === "js" && options.callback) {
+    } else if (options.type === "javascript" && options.callback) {
       if (options.once === true) {
         super.once(options.listen, options.callback);
       } else if (options.once === false || options.once === undefined) {

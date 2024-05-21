@@ -1,19 +1,10 @@
 import type { AoiClient } from "../../AoiClient";
 
-interface ICommandDescription {
-  name: string;
-  code: string;
-  aliases?: string[];
-  description?: string;
-  chatId?: number | string;
-  reverseReading?: boolean;
-}
-
 function onCommand(telegram: AoiClient): void {
-  const commands = telegram.commands.get("command");
-  if (!commands) return;
-
   telegram.on("message:text", async (ctx) => {
+    const commands = telegram.commands.get("command");
+    if (!commands) return;
+
     const cmdMessage = ctx.entities.botCommand;
     if (!cmdMessage || cmdMessage.length === 0) return;
 
@@ -43,4 +34,3 @@ function onCommand(telegram: AoiClient): void {
 }
 
 export default onCommand;
-export { ICommandDescription };

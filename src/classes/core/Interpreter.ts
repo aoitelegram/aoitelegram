@@ -1,5 +1,4 @@
 import { Container } from "./Container";
-import { getObjectKey } from "../../utils/";
 import type { ContextEvent } from "../AoiTyping";
 import type { ParserFunction } from "./ParserFunction";
 import { RuntimeError, AoijsTypeError } from "../AoiError";
@@ -11,7 +10,7 @@ class Interpreter {
 
   constructor(inputData: SuccessCompiler | ErrorCompiler, ctx: ContextEvent) {
     this.inputData = inputData;
-    this.container = new Container(ctx);
+    this.container = new Container(ctx, inputData as SuccessCompiler);
   }
 
   async runInput(): Promise<string> {
@@ -21,7 +20,7 @@ class Interpreter {
         this.inputData.func,
         false,
         {
-          code: this.inputData.errorCode?.split("\n")[this.inputData.line],
+          code: this.inputData.errorCode,
           line: this.inputData.line,
         },
       );
@@ -62,6 +61,8 @@ class Interpreter {
         textResult = "code" in result && result.code ? result.code : textResult;
         textResult = textResult.replace(result.id, result.with);
       } catch (err) {
+        if (this.container.stopCode === true) break;
+
         if (err instanceof AoijsTypeError) {
           const errorMessage = `${err}`.split(":").slice(1).join(" ");
           await this.#sendErrorMessage(
@@ -156,64 +157,36 @@ class Interpreter {
     custom: boolean = false,
     options: { code?: string; line?: number } = {},
   ): Promise<void> {
-    if (
-      !custom &&
-      !this.container?.suppressErrors &&
-      this.container?.telegram?.functionError
-    ) {
-      this.container.telegram.ensureCustomFunction({
-        name: "$handleerror",
-        brackets: true,
-        fields: [
-          {
-            required: false,
-          },
-        ],
-        callback: async (context, func) => {
-          const options = await func.resolveAllFields(context);
+    const { container } = this;
+    const { suppressErrors, telegram, eventData } = container || {};
+    const { functionError, sendMessageError } = telegram || {};
 
-          const dataError = {
-            name: functionName,
-            command: "name" in this.inputData ? this.inputData.name : null,
-            error,
-          };
-          const result = getObjectKey(dataError, options);
-          return func.resolve(result);
-        },
+    const shouldEmitFunctionError = !custom && !suppressErrors && functionError;
+    const shouldSendMessage =
+      !custom && typeof suppressErrors === "string" && eventData?.reply;
+    const shouldSendErrorMessage =
+      sendMessageError && !functionError && eventData?.reply;
+    const shouldThrowRuntimeError = !functionError;
+
+    if (shouldEmitFunctionError) {
+      telegram.emit("functionError", container, {
+        errorMessage: error,
+        functionName,
+        ...this.inputData,
       });
-      this.container.telegram.emit(
-        "functionError",
-        this.container.eventData,
-        this.container.telegram,
-      );
-    }
-
-    if (
-      !custom &&
-      typeof this.container?.suppressErrors === "string" &&
-      "reply" in this.container.eventData
-    ) {
-      await this.container.eventData.sendMessage(
-        this.container.suppressErrors,
-        {
-          parse_mode: "HTML",
-        },
-      );
+    } else if (shouldSendMessage) {
+      await eventData.sendMessage(suppressErrors, { parse_mode: "HTML" });
       return;
-    } else if (
-      this.container?.telegram?.sendMessageError &&
-      !this.container?.telegram?.functionError &&
-      "reply" in this.container.eventData
-    ) {
-      await this.container.eventData.sendMessage(
-        custom ? error : `❌ <b>${functionName}:</b> <code>${error}</code>`,
-        { parse_mode: "HTML" },
-      );
+    } else if (shouldSendErrorMessage) {
+      const message = custom
+        ? error
+        : `❌ <b>${functionName}:</b> <code>${error}</code>`;
+      await eventData.sendMessage(message, { parse_mode: "HTML" });
       return;
-    } else if (!this.container?.telegram?.functionError) {
+    } else if (shouldThrowRuntimeError) {
       throw new RuntimeError(error, {
-        line: options?.line,
-        code: options?.code,
+        line: options.line,
+        code: options.code,
         errorFunction: functionName,
       });
     }

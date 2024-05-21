@@ -1,26 +1,27 @@
+import path from "node:path";
 import { version } from "../index";
 import { getObjectKey } from "../utils/";
 import type { RequestInit } from "node-fetch";
 import { Interpreter, Compiler } from "./core/";
 import type { Update } from "@telegram.ts/types";
+import type { AoiFunction } from "./AoiFunction";
 import { AoijsError, AoijsTypeError } from "./AoiError";
-import type { ContextEvent, EventHandlers } from "./AoiTyping";
+import { CustomFunctionManager } from "./CustomFunctionManager";
 import { AoiManager, type AoiManagerOptions } from "./AoiManager";
-import type { DataFunction, CustomJSFunction } from "./AoiTyping";
 import { TelegramBot, Collection, type Context } from "telegramsjs";
-
-interface IEventsOptions {
-  name: string;
-  every?: number;
-  description?: string;
-  reverseReading?: boolean;
-  chatId?: number | string;
-  code: string;
-}
+import type {
+  DataFunction,
+  MaybeArray,
+  CustomJSFunction,
+  ContextEvent,
+  CommandData,
+  EventHandlers,
+} from "./AoiTyping";
 
 class AoiBase extends TelegramBot {
-  public database: AoiManager = {} as AoiManager;
-  public readonly events: Collection<string, IEventsOptions[]> =
+  public database!: AoiManager;
+  public customFunction: CustomFunctionManager;
+  public readonly events: Collection<string, { [key: string]: any }[]> =
     new Collection();
   public readonly availableVariables: Collection<
     undefined | string | string[],
@@ -28,7 +29,7 @@ class AoiBase extends TelegramBot {
   > = new Collection();
   public readonly availableFunctions: Collection<string, CustomJSFunction> =
     new Collection();
-  public readonly availableCollectFunctions = [
+  public readonly availableCollectEvents = [
     "callbackQuery",
     "editedMessage",
     "myChatMember",
@@ -55,7 +56,9 @@ class AoiBase extends TelegramBot {
     "deletedBusinessMessages",
     "messageReactionCount",
     "removedChatBoost",
+    "functionError",
   ];
+  #registerCollectEvent: Set<string> = new Set();
 
   constructor(
     token: string,
@@ -74,6 +77,10 @@ class AoiBase extends TelegramBot {
     if (!disableAoiDB) {
       this.database = new AoiManager(database);
     }
+    this.customFunction = new CustomFunctionManager(
+      this,
+      this.availableFunctions,
+    );
   }
 
   on(event: string, listener: (...args: any[]) => void): this;
@@ -85,13 +92,14 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  async evaluateCommand(command: Record<string, any>, eventData: any) {
+  async evaluateCommand(command: any, eventData: any) {
     try {
       const complited = new Compiler({
         code: command.code,
         reverseFunctions: command.reverseReading,
         availableFunctions: this.availableFunctions,
       });
+
       const interpreter = new Interpreter(
         Object.assign({}, command, complited.compile()),
         eventData,
@@ -102,247 +110,57 @@ class AoiBase extends TelegramBot {
     }
   }
 
-  createCustomFunction(dataFunction: DataFunction | DataFunction[]) {
-    const arrayDataFunction = Array.isArray(dataFunction)
-      ? dataFunction
-      : [dataFunction];
-    for (const func of arrayDataFunction) {
-      const functionName = func?.name?.toLowerCase();
-      if (!functionName) {
-        throw new AoijsError(
-          "You did not specify the 'name' parameter",
-          "customFunction",
-        );
+  addEvent(
+    events: `on${Capitalize<(typeof this.availableCollectEvents)[number]>}`[],
+  ): AoiBase {
+    for (const event of Array.from(new Set(events))) {
+      const normalizedEventName =
+        event.charAt(2).toLowerCase() + event.slice(3);
+      const eventIndex =
+        this.availableCollectEvents.indexOf(normalizedEventName);
+
+      if (eventIndex === -1) {
+        throw new AoijsTypeError(`Invalid event name ${event}`);
+      } else this.#registerCollectEvent.add(normalizedEventName);
+
+      if (normalizedEventName === "ready" || normalizedEventName === "loop") {
+        continue;
       }
 
-      if (this.availableFunctions.has(functionName)) {
-        throw new AoijsError(
-          `The function '${functionName}' already exists; to overwrite it, use the <AoiClient>.editFunction method!`,
-          "customFunction",
-        );
+      if (normalizedEventName === "message") {
+        const {
+          default: commandHandlers,
+        } = require("./handlers/command/Command");
+        commandHandlers(this);
       }
 
-      if ((func?.version || 0) > version) {
-        throw new AoijsError(
-          `To load this function '${functionName}', the library version must be equal to or greater than ${func?.version || 0}`,
-          "customFunction",
-        );
+      if (normalizedEventName === "callbackQuery") {
+        const {
+          default: actionHandlers,
+        } = require("./handlers/command/Action");
+        actionHandlers(this);
       }
-      if (func.type === "aoitelegram") {
-        this.availableFunctions.set(functionName, {
-          name: functionName,
-          version: func.version,
-          aliases: func.aliases,
-          brackets: func.params?.length! > 0,
-          fields: func.params?.map((name) => {
-            return {
-              name: name.replace("?", "").replace("...", ""),
-              required: !name.endsWith("?"),
-              rest: name.startsWith("..."),
-            };
-          }),
-          callback: async (ctx, fun) => {
-            const result = await this.evaluateCommand(
-              {
-                name: func.name,
-                reverseReading: func.reverseReading,
-                code: func.code,
-              },
-              ctx.eventData,
-            );
-            return fun.resolve(result);
-          },
-        });
-      } else
-        this.availableFunctions.set(
-          functionName,
-          func as unknown as CustomJSFunction,
-        );
+
+      if (normalizedEventName === "functionError") {
+        const {
+          default: functionErrorHandlers,
+        } = require("./handlers/custom/FunctionError");
+        functionErrorHandlers(this);
+        continue;
+      }
+
+      const { default: eventHandler } = require(
+        path.join(__dirname, "/handlers", normalizedEventName),
+      );
+
+      eventHandler(this);
     }
     return this;
   }
 
-  ensureCustomFunction(dataFunction: DataFunction | DataFunction[]) {
-    const arrayDataFunction = Array.isArray(dataFunction)
-      ? dataFunction
-      : [dataFunction];
-    for (const func of arrayDataFunction) {
-      const functionName = func?.name?.toLowerCase();
-      if (!functionName) {
-        throw new AoijsError(
-          "You did not specify the 'name' parameter",
-          "customFunction",
-        );
-      }
-
-      if ((func?.version || 0) > version) {
-        throw new AoijsError(
-          `To load this function '${functionName}', the library version must be equal to or greater than ${func?.version || 0}`,
-          "customFunction",
-        );
-      }
-
-      if (func.type === "aoitelegram") {
-        this.availableFunctions.set(functionName, {
-          name: functionName,
-          version: func.version,
-          aliases: func.aliases,
-          brackets: func.params?.length! > 0,
-          fields: func.params?.map((name) => {
-            return {
-              name: name.replace("?", "").replace("...", ""),
-              required: name.endsWith("?"),
-              rest: name.startsWith("..."),
-            };
-          }),
-          callback: async (ctx, fun) => {
-            const result = await this.evaluateCommand(
-              {
-                name: func.name,
-                reverseReading: func.reverseReading,
-                code: func.code,
-              },
-              ctx.eventData,
-            );
-            return fun.resolve(result);
-          },
-        });
-      } else
-        this.availableFunctions.set(
-          functionName,
-          func as unknown as CustomJSFunction,
-        );
-    }
-    return this;
-  }
-
-  removeFunction(functionName: string | string[]): boolean {
-    const functionNames = Array.isArray(functionName)
-      ? functionName
-      : [functionName];
-
-    if (functionNames.length < 1) {
-      throw new AoijsError(
-        "You did not specify the 'name' parameter",
-        "customFunction",
-      );
-    }
-
-    for (const name of functionNames) {
-      const lowerCaseName = name.toLowerCase();
-      const hasDeleted = this.availableFunctions.delete(lowerCaseName);
-      if (!hasDeleted) {
-        throw new AoijsError(
-          `The function '${lowerCaseName}' does not exist or has already been deleted`,
-          "customFunction",
-        );
-      }
-    }
-    return true;
-  }
-
-  editCustomFunction(dataFunction: DataFunction | DataFunction[]) {
-    const functionsToEdit = Array.isArray(dataFunction)
-      ? dataFunction
-      : [dataFunction];
-
-    if (!functionsToEdit.length) {
-      throw new AoijsError(
-        "You did not specify the 'name' parameter",
-        "customFunction",
-      );
-    }
-
-    for (const func of functionsToEdit) {
-      const lowerCaseName = func?.name?.toLowerCase();
-      if (!this.availableFunctions.has(lowerCaseName)) {
-        throw new AoijsError(
-          `The function '${lowerCaseName}' does not exist; You can only modify functions that have been added recently`,
-          "customFunction",
-        );
-      }
-
-      if (func.type === "aoitelegram") {
-        this.availableFunctions.set(lowerCaseName, {
-          name: lowerCaseName,
-          version: func.version,
-          aliases: func.aliases,
-          brackets: func.params?.length! > 0,
-          fields: func.params?.map((name) => {
-            return {
-              name: name.replace("?", "").replace("...", ""),
-              required: name.endsWith("?"),
-              rest: name.startsWith("..."),
-            };
-          }),
-          callback: async (ctx, fun) => {
-            const result = await this.evaluateCommand(
-              {
-                name: func.name,
-                reverseReading: func.reverseReading,
-                code: func.code,
-              },
-              ctx.eventData,
-            );
-            return fun.resolve(result);
-          },
-        });
-      } else
-        this.availableFunctions.set(
-          lowerCaseName,
-          func as unknown as CustomJSFunction,
-        );
-    }
-
-    return true;
-  }
-
-  getCustomFunction(functionName: string): CustomJSFunction | undefined;
-  getCustomFunction(functionName: string[]): (CustomJSFunction | undefined)[];
-  getCustomFunction(functionName: string | string[]) {
-    const functionNames = Array.isArray(functionName)
-      ? functionName
-      : [functionName];
-
-    if (functionNames.length < 1) {
-      throw new AoijsError(
-        "You did not specify the 'name' parameter",
-        "customFunction",
-      );
-    }
-
-    if (functionNames.length > 1) {
-      return functionNames.map((name) => this.availableFunctions.get(name));
-    } else {
-      return this.availableFunctions.get(functionNames[0]);
-    }
-  }
-
-  hasCustomFunction(functionName: string): boolean;
-  hasCustomFunction(
-    functionName: string[],
-  ): { name: string; result: boolean }[];
-  hasCustomFunction(functionName: string | string[]) {
-    if (Array.isArray(functionName)) {
-      return functionName.map((fun) => ({
-        name: fun,
-        result: this.availableFunctions.has(fun),
-      }));
-    } else if (typeof functionName === "string") {
-      return this.availableFunctions.has(functionName) as boolean;
-    } else {
-      throw new AoijsError(
-        `The specified type should be "string | string[]"`,
-        "customFunction",
-      );
-    }
-  }
-
-  get countCustomFunction() {
-    return this.availableFunctions.size;
-  }
-
-  loopCommand(options: IEventsOptions): AoiBase {
+  loopCommand(
+    options: CommandData<{ every?: number; executeOnStartup?: boolean }>,
+  ): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -350,7 +168,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  readyCommand(options: IEventsOptions): AoiBase {
+  readyCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -358,7 +176,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  messageCommand(options: IEventsOptions): AoiBase {
+  messageCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -366,7 +184,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  callbackQueryCommand(options: IEventsOptions): AoiBase {
+  callbackQueryCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -374,7 +192,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  messageReactionCommand(options: IEventsOptions): AoiBase {
+  messageReactionCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -382,7 +200,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  messageReactionCountCommand(options: IEventsOptions): AoiBase {
+  messageReactionCountCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -390,7 +208,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  editedMessageCommand(options: IEventsOptions): AoiBase {
+  editedMessageCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -398,7 +216,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  channelPostCommand(options: IEventsOptions): AoiBase {
+  channelPostCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -406,7 +224,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  editedChannelPostCommand(options: IEventsOptions): AoiBase {
+  editedChannelPostCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -414,7 +232,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  businessConnectionCommand(options: IEventsOptions): AoiBase {
+  businessConnectionCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -422,7 +240,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  businessMessageCommand(options: IEventsOptions): AoiBase {
+  businessMessageCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -430,7 +248,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  editedBusinessMessageCommand(options: IEventsOptions): AoiBase {
+  editedBusinessMessageCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -438,7 +256,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  deletedBusinessMessagesCommand(options: IEventsOptions): AoiBase {
+  deletedBusinessMessagesCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -446,7 +264,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  inlineQueryCommand(options: IEventsOptions): AoiBase {
+  inlineQueryCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -454,7 +272,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  shippingQueryCommand(options: IEventsOptions): AoiBase {
+  shippingQueryCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -462,7 +280,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  preCheckoutQueryCommand(options: IEventsOptions): AoiBase {
+  preCheckoutQueryCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -470,7 +288,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  pollCommand(options: IEventsOptions): AoiBase {
+  pollCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -478,7 +296,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  pollAnswerCommand(options: IEventsOptions): AoiBase {
+  pollAnswerCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -486,7 +304,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  chatMemberCommand(options: IEventsOptions): AoiBase {
+  chatMemberCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -494,7 +312,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  myChatMemberCommand(options: IEventsOptions): AoiBase {
+  myChatMemberCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -502,7 +320,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  chatJoinRequestCommand(options: IEventsOptions): AoiBase {
+  chatJoinRequestCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -510,7 +328,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  chatBoostCommand(options: IEventsOptions): AoiBase {
+  chatBoostCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -518,7 +336,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  removedChatBoostCommand(options: IEventsOptions): AoiBase {
+  removedChatBoostCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -526,7 +344,16 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  variableCreateCommand(options: IEventsOptions): AoiBase {
+  functionErrorCommand(options: CommandData): AoiBase {
+    if (!options?.code) {
+      throw new AoijsError("You did not specify the 'code' parameter");
+    }
+
+    this.#addEvents("functionError", options);
+    return this;
+  }
+
+  variableCreateCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -534,7 +361,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  variableUpdateCommand(options: IEventsOptions): AoiBase {
+  variableUpdateCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -542,7 +369,7 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  variableDeleteCommand(options: IEventsOptions): AoiBase {
+  variableDeleteCommand(options: CommandData): AoiBase {
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
@@ -550,41 +377,73 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
+  createCustomFunction(
+    dataFunction: MaybeArray<DataFunction | AoiFunction>,
+  ): AoiBase {
+    this.customFunction.createCustomFunction(dataFunction);
+    return this;
+  }
+
+  ensureCustomFunction(
+    dataFunction: MaybeArray<DataFunction | AoiFunction>,
+  ): AoiBase {
+    this.customFunction.ensureCustomFunction(dataFunction);
+    return this;
+  }
+
+  removeFunction(functionName: string | string[]): boolean {
+    return this.customFunction.removeFunction(functionName);
+  }
+
+  editCustomFunction(
+    dataFunction: MaybeArray<DataFunction | AoiFunction>,
+  ): boolean {
+    return this.customFunction.editCustomFunction(dataFunction);
+  }
+
+  getCustomFunction(functionName: string): CustomJSFunction | undefined;
+  getCustomFunction(functionName: string[]): (CustomJSFunction | undefined)[];
+  getCustomFunction(functionName: string | string[]) {
+    if (Array.isArray(functionName)) {
+      return this.customFunction.getCustomFunction(functionName as string[]);
+    } else {
+      return this.customFunction.getCustomFunction(functionName as string);
+    }
+  }
+
+  hasCustomFunction(functionName: string): boolean;
+  hasCustomFunction(functionName: string[]): {
+    name: string;
+    result: boolean;
+  }[];
+  hasCustomFunction(functionName: string | string[]) {
+    if (Array.isArray(functionName)) {
+      return this.customFunction.hasCustomFunction(functionName as string[]);
+    } else {
+      return this.customFunction.hasCustomFunction(functionName as string);
+    }
+  }
+
+  get countCustomFunction(): number {
+    return this.customFunction.countCustomFunction;
+  }
+
   #addEvents(
-    type:
-      | "callbackQuery"
-      | "editedMessage"
-      | "myChatMember"
-      | "shippingQuery"
-      | "channelPost"
-      | "inlineQuery"
-      | "poll"
-      | "variableCreate"
-      | "chatBoost"
-      | "loop"
-      | "pollAnswer"
-      | "variableDelete"
-      | "chatJoinRequest"
-      | "message"
-      | "preCheckoutQuery"
-      | "variableUpdate"
-      | "chatMember"
-      | "messageReaction"
-      | "ready"
-      | "editedChannelPost"
-      | "businessConnection"
-      | "businessMessage"
-      | "editedBusinessMessage"
-      | "deletedBusinessMessages"
-      | "messageReactionCount"
-      | "removedChatBoost",
-    command: IEventsOptions,
+    type: (typeof this.availableCollectEvents)[number],
+    command: { [key: string]: any },
   ): void {
-    if (!this.availableCollectFunctions.includes(type)) {
+    if (!this.availableCollectEvents.includes(type)) {
       throw new AoijsTypeError(
-        `The specified type '${type}' does not exist for recording, here are all the available types: ${this.availableCollectFunctions.join(", ")}`,
+        `The specified type '${type}' does not exist for recording, here are all the available types: ${this.availableCollectEvents.join(", ")}`,
       );
     }
+
+    if (!this.#registerCollectEvent.has(type)) {
+      throw new AoijsTypeError(
+        `This event "${type}" has not been registered, please use the <AoiClient>.addEvent method to register the event`,
+      );
+    }
+
     if (this.events.has(type)) {
       const eventsType = this.events.get(type);
       this.events.set(type, [...(eventsType || []), command]);
@@ -600,4 +459,4 @@ class AoiBase extends TelegramBot {
   }
 }
 
-export { AoiBase, IEventsOptions };
+export { AoiBase };

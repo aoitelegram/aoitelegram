@@ -1,13 +1,23 @@
 function getObjectKey<T extends Record<string, any>>(
   object: T,
+  property?: undefined,
+): T;
+function getObjectKey<T extends Record<string, any>>(
+  object: T,
   property: string,
+  parse?: boolean,
+): string;
+function getObjectKey<T extends Record<string, any>>(
+  object: T,
+  property?: string,
   parse: boolean = true,
-): string {
+) {
+  if (!property) return object;
   try {
     const resultProperty = property.startsWith("[")
       ? eval(`object${property}`)
       : eval(`object.${property}`);
-    return inspect(resultProperty);
+    return parse ? inspect(resultProperty) : resultProperty;
   } catch (err) {
     return inspect(undefined);
   }
@@ -29,7 +39,7 @@ function inspect(obj: any): string {
 }
 
 function unInspect(str: string): any {
-  const trimmedStr = str.trim();
+  const trimmedStr = str || "";
 
   if (trimmedStr.startsWith("{") && trimmedStr.endsWith("}")) {
     const innerStr = trimmedStr.slice(1, -1);
@@ -40,8 +50,12 @@ function unInspect(str: string): any {
     const obj: { [key: string]: any } = {};
     keyValuePairs.forEach((pair) => {
       if (pair) {
-        const [key, value] = pair.split(":").map((item) => item.trim());
-        obj[key.slice(1, -1)] = unInspect(value);
+        const [rawKey, value] = pair.split(":").map((item) => item.trim());
+        const key =
+          rawKey.startsWith('"') && rawKey.endsWith('"')
+            ? rawKey.slice(1, -1)
+            : rawKey;
+        obj[key] = unInspect(value);
       }
     });
 
@@ -67,16 +81,36 @@ function unInspect(str: string): any {
   }
 }
 
-/**
- * Returns a title-cased text.
- * @param str - The text to title-case.
- * @returns {string}
- */
-function toTitleCase(str: string) {
-  return str
-    .split(" ")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
+function unescapeCode(code: string): string {
+  return code
+    .replace(/@at/gi, "@")
+    .replace(/@left/gi, "[")
+    .replace(/@right/gi, "]")
+    .replace(/@semi/gi, ";")
+    .replace(/@colon/gi, ":")
+    .replace(/@equal/gi, "=")
+    .replace(/@or/gi, "||")
+    .replace(/@and/gi, "&&")
+    .replace(/@higher/gi, ">")
+    .replace(/@lower/gi, "<")
+    .replace(/@left_parent/gi, ")")
+    .replace(/@right_parent/gi, "(")
+    .replace(/@dollar/gi, "$");
 }
 
-export { getObjectKey, inspect, unInspect, toTitleCase };
+function escapeCode(code: string): string {
+  return code
+    .replace(/@/g, "@at")
+    .replace(/\]/g, "@right")
+    .replace(/\[/g, "@left")
+    .replace(/;/g, "@semi")
+    .replace(/:/g, "@colon")
+    .replace(/=/g, "@equal")
+    .replace(/\|\|/g, "@or")
+    .replace(/&&/g, "@and")
+    .replace(/>/g, "@higher")
+    .replace(/</g, "@lower")
+    .replace(/\$/g, "@dollar");
+}
+
+export { getObjectKey, inspect, unInspect, escapeCode, unescapeCode };

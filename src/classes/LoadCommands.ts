@@ -132,7 +132,7 @@ class LoadCommands {
       }
 
       if ("awaited" in data) {
-        this.aoitelegram.awaitedCommand(data);
+        this.aoitelegram.loopCommand(data);
         console.log(
           `|---------------------------------------------------------------------|\n`,
           `| Loading in ${itemPath} | Loaded ${data.awaited} | awaited |`,

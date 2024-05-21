@@ -1,10 +1,10 @@
 import type { AoiClient } from "../AoiClient";
 
 function onChatBoost(telegram: AoiClient): void {
-  const events = telegram.events.get("chatBoost");
-  if (!events) return;
-
   telegram.on("chat_boost", async (ctx) => {
+    const events = telegram.events.get("chatBoost");
+    if (!events) return;
+
     for (const event of events) {
       await telegram.evaluateCommand(event, ctx);
     }

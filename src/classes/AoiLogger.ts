@@ -1,5 +1,4 @@
 import { inspect } from "node:util";
-import { Temporal, Intl } from "temporal-polyfill";
 import chalk, { type ForegroundColor } from "chalk";
 
 class AoiLogger {

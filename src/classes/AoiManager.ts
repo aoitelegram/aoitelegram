@@ -176,6 +176,10 @@ class AoiManager<Value = any> {
     return await this.database.connect();
   }
 
+  hasTable(table: string): boolean {
+    return this.tables.indexOf(table) !== -1;
+  }
+
   defaulValue(vars: string, table: string): any {
     return this.collection.get(`${vars}_${table}`);
   }

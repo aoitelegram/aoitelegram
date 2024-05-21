@@ -1,10 +1,11 @@
 import { AoiBase } from "../AoiBase";
 import type { AoiClient } from "../AoiClient";
 import type { AoiManager } from "../AoiManager";
-import type { ContextEvent } from "../AoiTyping";
 import type { Update } from "@telegram.ts/types";
+import type { SuccessCompiler } from "./Compiler";
 import { Collection } from "@telegram.ts/collection";
 import { ConditionChecker, WordMatcher } from "../../utils/";
+import type { ContextEvent, CommandData } from "../AoiTyping";
 
 type EventData<T> = { eventData: T } & Container;
 
@@ -21,7 +22,10 @@ class Container {
   public readonly database: AoiManager;
   public stopCode: boolean = false;
 
-  constructor(ctx: ContextEvent) {
+  constructor(
+    ctx: ContextEvent,
+    public readonly command: CommandData & SuccessCompiler,
+  ) {
     this.eventData = ctx;
     this.telegram = (ctx instanceof AoiBase
       ? ctx

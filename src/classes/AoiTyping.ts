@@ -2,7 +2,7 @@ import type { AoiClient } from "./AoiClient";
 import type { ArgsType } from "./AoiFunction";
 import type { AoiManager } from "./AoiManager";
 import type { Context, IEventFunctions } from "telegramsjs";
-import type { ValueDatabase } from "../helpers/manager/TimeoutManager";
+import type { TimeoutData } from "../helpers/TimeoutManager";
 import type {
   Container,
   ParserFunction,
@@ -34,30 +34,33 @@ interface CaptionableMessage {
 }
 
 interface AwaitedEvent {
-  awaited: string;
-  milliseconds: number;
-  data: string;
-  code: string;
+  name: string;
+  count: number;
+  outData: Record<string, ReturnPrimitive>;
 }
 
 interface EventHandlers extends IEventFunctions {
-  timeout: (client: AoiClient, database: ValueDatabase) => void;
-  awaited: (event: AwaitedEvent, data: unknown) => void;
+  timeout: (timeoutData: TimeoutData) => void;
+  addAwaited: (event: AwaitedEvent, data: Container) => void;
   functionError: (
-    client: AoiClient,
-    eventContext: Context & { telegram: AoiClient },
+    eventContext: Container,
+    errorData: {
+      errorMessage: string;
+      functionName: string;
+      outData: { [key: string]: any };
+    },
   ) => void;
-  addTimeout: (eventContext: ValueDatabase) => void;
+  addTimeout: (eventContext: TimeoutData) => void;
 }
 
 interface CustomAoiFunction {
   name: string;
+  code: string;
+  type: "aoitelegram";
+  params?: string[];
+  version?: string;
   aliases?: string[];
   reverseReading?: boolean;
-  type: "aoitelegram";
-  version?: string;
-  params?: string[];
-  code: string;
 }
 
 type Primitive = string | number | boolean | undefined | null;
@@ -70,25 +73,52 @@ type ReturnPrimitive = Primitive | ReturnObject | ReturnArray;
 
 type DefaultFnValue = (ctx: Container) => PossiblyAsync<ReturnPrimitive>;
 
-interface CustomJSFunction {
-  name: string;
-  aliases?: string[];
-  type?: "javascript";
-  fields?: {
-    name?: string;
-    rest?: boolean;
-    type?: ArgsType[];
-    required?: boolean;
-    defaultValue?: DefaultFnValue | ReturnPrimitive;
-  }[];
-  brackets?: boolean;
-  version?: string;
-  callback: (
-    context: Container,
-    func: ParserFunction,
-    code?: string,
-  ) => PossiblyAsync<ICallbackResolve | ICallbackReject>;
-}
+type CustomJSFunction =
+  | {
+      name: string;
+      type?: "javascript";
+      aliases?: string[];
+      fields: (
+        | {
+            name: string;
+            rest?: boolean;
+            type?: ArgsType[];
+            required?: false;
+            defaultValue?: DefaultFnValue | ReturnPrimitive;
+          }
+        | {
+            name: string;
+            rest?: boolean;
+            type?: ArgsType[];
+            required: true;
+          }
+      )[];
+      brackets: true;
+      version?: string;
+      callback: (
+        context: Container,
+        func: ParserFunction,
+        code?: string,
+      ) => PossiblyAsync<ICallbackResolve | ICallbackReject>;
+    }
+  | {
+      name: string;
+      type?: "javascript";
+      aliases?: string[];
+      brackets?: false;
+      version?: string;
+      callback: (
+        context: Container,
+        func: ParserFunction,
+        code?: string,
+      ) => PossiblyAsync<ICallbackResolve | ICallbackReject>;
+    };
+
+type CommandData<OutOptions = { [key: string]: any }> = {
+  code: string;
+  chatId?: number | string;
+  reverseReading?: boolean;
+} & OutOptions;
 
 type DataFunction = CustomAoiFunction | CustomJSFunction;
 
@@ -108,15 +138,23 @@ type ContextEvent = Context &
   ChatBoostUpdated &
   ChatBoostRemoved & { api: AoiClient };
 
-type DataEvent = {
-  listen: string;
-  type: string;
-  once?: boolean;
-  code?: string;
-  callback?: (...args: any[]) => void;
-};
+type DataEvent =
+  | {
+      listen: string;
+      type: "javascript";
+      once?: boolean;
+      callback: (...args: any[]) => PossiblyAsync<void>;
+    }
+  | {
+      listen: string;
+      type?: "aoitelegram";
+      once?: boolean;
+      code: string;
+    };
 
 type PossiblyAsync<T> = T | Promise<T>;
+
+type MaybeArray<T> = T | Array<T>;
 
 export {
   EventHandlers,
@@ -126,6 +164,8 @@ export {
   DefaultFnValue,
   ReturnPrimitive,
   DataFunction,
+  CommandData,
   DataEvent,
+  MaybeArray,
   PossiblyAsync,
 };

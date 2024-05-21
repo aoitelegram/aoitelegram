@@ -114,6 +114,10 @@ class ParserFunction {
         for (const overload of overloads) {
           const result = await overload.callback(container, overload);
 
+          if (container.stopCode === true) {
+            throw new AoijsTypeError("The process has been stopped");
+          }
+
           if (typeof result !== "object") {
             return [];
           }
@@ -147,29 +151,30 @@ class ParserFunction {
   ): Promise<any[]> {
     if (!array) return [];
     const result: any[] = [];
-    const currentFields = this.structures;
+    const currentStructures = this.structures;
 
-    if (!currentFields || !currentFields.fields) {
+    if (!("fields" in currentStructures)) {
       throw new AoijsTypeError(
         "To check the specified arguments, the function must have a description of the arguments (fields)",
-        { errorFunction: this.structures.name },
+        { errorFunction: currentStructures.name },
       );
     }
 
-    const argsRequired = currentFields.fields.filter(
+    const argsRequired = currentStructures.fields.filter(
       ({ required }) => required,
     );
     if (argsRequired.length > this.fields.length) {
       throw new AoijsTypeError(
-        `The function ${this.structures.name} expects ${argsRequired.length} parameters, but ${this.fields.length} were received`,
-        { errorFunction: this.structures.name },
+        `The function ${currentStructures.name} expects ${argsRequired.length} parameters, but ${this.fields.length} were received`,
+        { errorFunction: currentStructures.name },
       );
     }
 
-    if (array.length < currentFields.fields.length) {
-      for (let i = 0; i < currentFields.fields.length - array.length; i++) {
+    if (array.length < currentStructures.fields.length) {
+      for (let i = 0; i < currentStructures.fields.length; i++) {
         array.push(undefined);
       }
+      array = array.slice(0, currentStructures.fields.length);
     }
 
     for (let i = 0; i < array.length; i++) {
@@ -178,12 +183,12 @@ class ParserFunction {
       }
 
       const currentField = array[i];
-      const currentFieldInfo = currentFields.fields[i];
+      const currentFieldInfo = currentStructures.fields[i];
 
       if (!currentFieldInfo) {
         throw new AoijsTypeError(
           `Failed to find information about field ${i + 1} in the argument description`,
-          { errorFunction: this.structures.name },
+          { errorFunction: currentStructures.name },
         );
       }
 
@@ -199,10 +204,10 @@ class ParserFunction {
       }
 
       if (currentFieldInfo.rest) {
-        if (currentFields.fields.slice(i + 1).length > 1) {
+        if (currentStructures.fields.slice(i + 1).length > 1) {
           throw new AoijsTypeError(
             "When using rest parameters, description of the following parameters is not available",
-            { errorFunction: this.structures.name },
+            { errorFunction: currentStructures.name },
           );
         }
 
@@ -219,7 +224,7 @@ class ParserFunction {
           } else {
             throw new AoijsTypeError(
               `${makeMessageError(Array.from(new Set(expectType)))} "${array[x]}"`,
-              { errorFunction: this.structures.name },
+              { errorFunction: currentStructures.name },
             );
           }
         }
@@ -237,7 +242,7 @@ class ParserFunction {
       } else {
         throw new AoijsTypeError(
           `${makeMessageError(Array.from(new Set(expectType)))} "${currentField}"`,
-          { errorFunction: this.structures.name },
+          { errorFunction: currentStructures.name },
         );
       }
     }
@@ -251,6 +256,10 @@ class ParserFunction {
 
     for (const overload of this.findOverloads(code)) {
       const result = await overload.callback(container, overload);
+
+      if (container.stopCode === true) {
+        throw new AoijsTypeError("The process has been stopped");
+      }
 
       if (!result) {
         return code;

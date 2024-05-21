@@ -1,12 +1,10 @@
 import { AoijsTypeError } from "../AoiError";
 import { ParserFunction } from "./ParserFunction";
 import { Collection } from "@telegram.ts/collection";
-import type { CustomJSFunction } from "../AoiTyping";
+import { unescapeCode, escapeCode } from "@utils/Helpers";
+import type { CommandData, CustomJSFunction } from "../AoiTyping";
 
-interface SuccessCompiler {
-  code: string;
-  functions: ParserFunction[];
-}
+type SuccessCompiler = CommandData<{ functions: ParserFunction[] }>;
 
 interface ErrorCompiler {
   func: string;
@@ -78,7 +76,7 @@ class Compiler {
         dataFunction.fields?.[0].required &&
         !segmentCode.startsWith("[")
       ) {
-        return searchBracketError(dataFunction.name, this.code, "brackets");
+        return this.bracketError(dataFunction.name, "brackets");
       }
 
       if (
@@ -86,11 +84,7 @@ class Compiler {
         segmentCode.startsWith("[") &&
         !segmentCode.includes("]")
       ) {
-        return searchBracketError(
-          dataFunction.name,
-          this.code,
-          "bracket closing",
-        );
+        return this.bracketError(dataFunction.name, "bracket closing");
       }
 
       if (segmentCode.startsWith("[")) {
@@ -101,9 +95,9 @@ class Compiler {
         }
 
         parserFunction.raw = fields;
-        parserFunction.setInside(this.unescapeCode(fields));
+        parserFunction.setInside(unescapeCode(fields));
         parserFunction.setFields(
-          fields.split(";").map((field) => this.unescapeCode(field)),
+          fields.split(";").map((field) => unescapeCode(field)),
         );
       }
 
@@ -146,7 +140,7 @@ class Compiler {
     }
 
     return {
-      code: this.unescapeCode(this.code),
+      code: unescapeCode(this.code),
       functions: this.reverseFunctions
         ? loadedFunctions.reverse()
         : loadedFunctions,
@@ -172,56 +166,35 @@ class Compiler {
     if (endIndex !== -1 && count === 0) {
       return segmentCode.substring(1, endIndex);
     } else {
-      return searchBracketError(name, this.code, "bracket closing");
+      return this.bracketError(name, "bracket closing");
     }
   }
 
-  replaceLast(content: string, search: string, toReplace: string): string {
-    let splits = content.split(search);
-    content = splits.pop()!;
-    return splits.join(search) + toReplace + content;
+  bracketError(func: string, description: string): ErrorCompiler {
+    const lines = this.reverseFunctions
+      ? this.code.split(/\n/g).reverse()
+      : this.code.split(/\n/g);
+    const errorLine = lines.findIndex((line) => line.includes(func)) + 1;
+
+    return {
+      func,
+      line: errorLine,
+      errorCode: lines[errorLine],
+      description: `This function requires ${description} at line ${lines.length}:${errorLine}`,
+    };
   }
 
-  escapeCode(content: string): string {
-    return content
-      .split("\\[")
-      .join("{#REPLACED_BRACKET_RIGHT#}")
-      .split("\\]")
-      .join("{#REPLACED_BRACKET_LEFT#}")
-      .split("\\$")
-      .join("{#REPLACED_DOLLAR_SIGN#}")
-      .split("\\;")
-      .join("{#REPLACED_SEMICOLON_SIGN#}");
+  replaceLast(str: string, search: string, replacement: string): string {
+    const lastIndex = str.lastIndexOf(search);
+    if (lastIndex === -1) {
+      return str;
+    }
+    return (
+      str.slice(0, lastIndex) +
+      replacement +
+      str.slice(lastIndex + search.length)
+    );
   }
-
-  unescapeCode(content: string): string {
-    return content
-      .split("{#REPLACED_BRACKET_RIGHT#}")
-      .join("[")
-      .split("{#REPLACED_BRACKET_LEFT#}")
-      .join("]")
-      .split("{#REPLACED_DOLLAR_SIGN#}")
-      .join("$")
-      .split("{#REPLACED_SEMICOLON_SIGN#}")
-      .join(";");
-  }
-}
-
-function searchBracketError(
-  func: string,
-  code: string,
-  errorType: string,
-): ErrorCompiler {
-  const lines = code.split(/\n/g);
-  const lineNumber = lines.findIndex((line) => line.includes(func)) + 1;
-  const errorLine = lineNumber ? lines[lineNumber - 1].lastIndexOf(func) : 0;
-
-  return {
-    func,
-    line: errorLine,
-    errorCode: lines[errorLine],
-    description: `this function requires ${errorType} at line ${lines.length}:${errorLine}`,
-  };
 }
 
 export { Compiler, SuccessCompiler, ErrorCompiler };
