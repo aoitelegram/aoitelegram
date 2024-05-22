@@ -15,16 +15,19 @@ interface ErrorCompiler {
 
 class Compiler {
   public code: string;
+  public readonly searchFailed?: boolean;
   public readonly reverseFunctions?: boolean;
   public readonly availableFunctions: Collection<string, CustomJSFunction>;
   public readonly functionCounts: Collection<string, number> = new Collection();
 
   constructor(parameters: {
     code: string;
+    searchFailed?: boolean;
     reverseFunctions?: boolean;
     availableFunctions: Collection<string, CustomJSFunction>;
   }) {
     this.code = parameters.code;
+    this.searchFailed = parameters.searchFailed;
     this.reverseFunctions = parameters.reverseFunctions;
     this.availableFunctions = parameters.availableFunctions;
     this.processFunctionNames();
@@ -60,6 +63,17 @@ class Compiler {
 
     const segments = this.code.split(/\$/g).reverse();
     for (const segment of segments) {
+      if (
+        this.searchFailed &&
+        `$${segment}`.trim() !== "$" &&
+        `$${segment}`.match(functionRegExp) === null
+      ) {
+        return this.makeError(
+          `$${segment.replace("\n", "").trim()}`,
+          `$${segment.replace("\n", "").trim()} does not exist`,
+        );
+      }
+
       const matches = `$${segment}`.match(functionRegExp) || [];
       const functionName = matches?.[0];
       if (!functionName || !this.availableFunctions.has(`${functionName}`))
@@ -76,7 +90,7 @@ class Compiler {
         dataFunction.fields?.[0].required &&
         !segmentCode.startsWith("[")
       ) {
-        return this.bracketError(dataFunction.name, "brackets");
+        return this.makeError(dataFunction.name, "requires brackets");
       }
 
       if (
@@ -84,7 +98,7 @@ class Compiler {
         segmentCode.startsWith("[") &&
         !segmentCode.includes("]")
       ) {
-        return this.bracketError(dataFunction.name, "bracket closing");
+        return this.makeError(dataFunction.name, "requires bracket closing");
       }
 
       if (segmentCode.startsWith("[")) {
@@ -166,11 +180,11 @@ class Compiler {
     if (endIndex !== -1 && count === 0) {
       return segmentCode.substring(1, endIndex);
     } else {
-      return this.bracketError(name, "bracket closing");
+      return this.makeError(name, "requires bracket closing");
     }
   }
 
-  bracketError(func: string, description: string): ErrorCompiler {
+  makeError(func: string, description: string): ErrorCompiler {
     const lines = this.reverseFunctions
       ? this.code.split(/\n/g).reverse()
       : this.code.split(/\n/g);
@@ -179,8 +193,8 @@ class Compiler {
     return {
       func,
       line: errorLine,
-      errorCode: lines[errorLine],
-      description: `This function requires ${description} at line ${lines.length}:${errorLine}`,
+      errorCode: lines[errorLine - 1],
+      description: `This function ${description} at line ${lines.length}:${errorLine}`,
     };
   }
 

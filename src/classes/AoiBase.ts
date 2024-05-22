@@ -96,6 +96,7 @@ class AoiBase extends TelegramBot {
     try {
       const complited = new Compiler({
         code: command.code,
+        searchFailed: command.searchFailed,
         reverseFunctions: command.reverseReading,
         availableFunctions: this.availableFunctions,
       });

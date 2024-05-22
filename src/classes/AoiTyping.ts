@@ -81,8 +81,6 @@ type CustomJSFunction =
       fields: (
         | {
             name: string;
-            rest?: boolean;
-            type?: ArgsType[];
             required?: false;
             defaultValue?: DefaultFnValue | ReturnPrimitive;
           }
@@ -117,6 +115,7 @@ type CustomJSFunction =
 type CommandData<OutOptions = { [key: string]: any }> = {
   code: string;
   chatId?: number | string;
+  searchFailed?: boolean;
   reverseReading?: boolean;
 } & OutOptions;
 
@@ -138,20 +137,6 @@ type ContextEvent = Context &
   ChatBoostUpdated &
   ChatBoostRemoved & { api: AoiClient };
 
-type DataEvent =
-  | {
-      listen: string;
-      type: "javascript";
-      once?: boolean;
-      callback: (...args: any[]) => PossiblyAsync<void>;
-    }
-  | {
-      listen: string;
-      type?: "aoitelegram";
-      once?: boolean;
-      code: string;
-    };
-
 type PossiblyAsync<T> = T | Promise<T>;
 
 type MaybeArray<T> = T | Array<T>;
@@ -165,7 +150,6 @@ export {
   ReturnPrimitive,
   DataFunction,
   CommandData,
-  DataEvent,
   MaybeArray,
   PossiblyAsync,
 };
