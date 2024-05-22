@@ -192,8 +192,6 @@ class ParserFunction {
         );
       }
 
-      const expectType = currentFieldInfo.type;
-
       if (typeof currentField === "undefined") {
         if ("defaultValue" in currentFieldInfo && !currentFieldInfo.required) {
           if (typeof currentFieldInfo.defaultValue === "function") {
@@ -203,7 +201,10 @@ class ParserFunction {
         continue;
       }
 
-      if (currentFieldInfo.rest) {
+      const expectType =
+        "type" in currentFieldInfo ? currentFieldInfo.type : [ArgsType.Any];
+
+      if ("rest" in currentFieldInfo && currentFieldInfo.rest) {
         if (currentStructures.fields.slice(i + 1).length > 1) {
           throw new AoijsTypeError(
             "When using rest parameters, description of the following parameters is not available",
