@@ -9,6 +9,8 @@ import type { ContextEvent, CommandData } from "../AoiTyping";
 
 type EventData<T> = { eventData: T } & Container;
 
+type UpdateHandler = Required<Update>;
+
 class Container {
   public readonly array: Collection<string, any[]> = new Collection();
   public readonly object: Collection<string, object> = new Collection();
@@ -40,41 +42,45 @@ class Container {
     return this;
   }
 
-  isMessage(): this is EventData<Update["message"]> {
+  isMessage(): this is EventData<UpdateHandler["message"]> {
     return (
       "updateType" in this.eventData && this.eventData.updateType === "message"
     );
   }
 
-  isEditedMessage(): this is EventData<Update["edited_message"]> {
+  isEditedMessage(): this is EventData<UpdateHandler["edited_message"]> {
     return (
       "updateType" in this.eventData &&
       this.eventData.updateType === "edited_message"
     );
   }
 
-  isChannelPost(): this is EventData<Update["channel_post"]> {
+  isChannelPost(): this is EventData<UpdateHandler["channel_post"]> {
     return (
       "updateType" in this.eventData &&
       this.eventData.updateType === "channel_post"
     );
   }
 
-  isEditedChannelPost(): this is EventData<Update["edited_channel_post"]> {
+  isEditedChannelPost(): this is EventData<
+    UpdateHandler["edited_channel_post"]
+  > {
     return (
       "updateType" in this.eventData &&
       this.eventData.updateType === "edited_channel_post"
     );
   }
 
-  isBusinessConnection(): this is EventData<Update["business_connection"]> {
+  isBusinessConnection(): this is EventData<
+    UpdateHandler["business_connection"]
+  > {
     return (
       "updateType" in this.eventData &&
       this.eventData.updateType === "business_connection"
     );
   }
 
-  isBusinessMessage(): this is EventData<Update["business_message"]> {
+  isBusinessMessage(): this is EventData<UpdateHandler["business_message"]> {
     return (
       "updateType" in this.eventData &&
       this.eventData.updateType === "business_message"
@@ -82,7 +88,7 @@ class Container {
   }
 
   isEditedBusinessMessage(): this is EventData<
-    Update["edited_business_message"]
+    UpdateHandler["edited_business_message"]
   > {
     return (
       "updateType" in this.eventData &&
@@ -91,7 +97,7 @@ class Container {
   }
 
   isDeletedBusinessMessages(): this is EventData<
-    Update["deleted_business_messages"]
+    UpdateHandler["deleted_business_messages"]
   > {
     return (
       "updateType" in this.eventData &&
@@ -99,7 +105,7 @@ class Container {
     );
   }
 
-  isMessageReaction(): this is EventData<Update["message_reaction"]> {
+  isMessageReaction(): this is EventData<UpdateHandler["message_reaction"]> {
     return (
       "updateType" in this.eventData &&
       this.eventData.updateType === "message_reaction"
@@ -107,7 +113,7 @@ class Container {
   }
 
   isMessageReactionCount(): this is EventData<
-    Update["message_reaction_count"]
+    UpdateHandler["message_reaction_count"]
   > {
     return (
       "updateType" in this.eventData &&
@@ -115,83 +121,85 @@ class Container {
     );
   }
 
-  isInlineQuery(): this is EventData<Update["inline_query"]> {
+  isInlineQuery(): this is EventData<UpdateHandler["inline_query"]> {
     return (
       "updateType" in this.eventData &&
       this.eventData.updateType === "inline_query"
     );
   }
 
-  isChosenInlineResult(): this is EventData<Update["chosen_inline_result"]> {
+  isChosenInlineResult(): this is EventData<
+    UpdateHandler["chosen_inline_result"]
+  > {
     return (
       "updateType" in this.eventData &&
       this.eventData.updateType === "chosen_inline_result"
     );
   }
 
-  isCallbackQuery(): this is EventData<Update["callback_query"]> {
+  isCallbackQuery(): this is EventData<UpdateHandler["callback_query"]> {
     return (
       "updateType" in this.eventData &&
       this.eventData.updateType === "callback_query"
     );
   }
 
-  isShippingQuery(): this is EventData<Update["shipping_query"]> {
+  isShippingQuery(): this is EventData<UpdateHandler["shipping_query"]> {
     return (
       "updateType" in this.eventData &&
       this.eventData.updateType === "shipping_query"
     );
   }
 
-  isPreCheckoutQuery(): this is EventData<Update["pre_checkout_query"]> {
+  isPreCheckoutQuery(): this is EventData<UpdateHandler["pre_checkout_query"]> {
     return (
       "updateType" in this.eventData &&
       this.eventData.updateType === "pre_checkout_query"
     );
   }
 
-  isPoll(): this is EventData<Update["poll"]> {
+  isPoll(): this is EventData<UpdateHandler["poll"]> {
     return (
       "updateType" in this.eventData && this.eventData.updateType === "poll"
     );
   }
 
-  isPollAnswer(): this is EventData<Update["poll_answer"]> {
+  isPollAnswer(): this is EventData<UpdateHandler["poll_answer"]> {
     return (
       "updateType" in this.eventData &&
       this.eventData.updateType === "poll_answer"
     );
   }
 
-  isMyChatMember(): this is EventData<Update["my_chat_member"]> {
+  isMyChatMember(): this is EventData<UpdateHandler["my_chat_member"]> {
     return (
       "updateType" in this.eventData &&
       this.eventData.updateType === "my_chat_member"
     );
   }
 
-  isChatMember(): this is EventData<Update["chat_member"]> {
+  isChatMember(): this is EventData<UpdateHandler["chat_member"]> {
     return (
       "updateType" in this.eventData &&
       this.eventData.updateType === "chat_member"
     );
   }
 
-  isChatJoinRequest(): this is EventData<Update["chat_join_request"]> {
+  isChatJoinRequest(): this is EventData<UpdateHandler["chat_join_request"]> {
     return (
       "updateType" in this.eventData &&
       this.eventData.updateType === "chat_join_request"
     );
   }
 
-  isChatBoost(): this is EventData<Update["chat_boost"]> {
+  isChatBoost(): this is EventData<UpdateHandler["chat_boost"]> {
     return (
       "updateType" in this.eventData &&
       this.eventData.updateType === "chat_boost"
     );
   }
 
-  isRemovedChatBoost(): this is EventData<Update["removed_chat_boost"]> {
+  isRemovedChatBoost(): this is EventData<UpdateHandler["removed_chat_boost"]> {
     return (
       "updateType" in this.eventData &&
       this.eventData.updateType === "removed_chat_boost"
