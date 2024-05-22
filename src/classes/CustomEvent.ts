@@ -6,7 +6,7 @@ import { AoiClient } from "./AoiClient";
 import { getObjectKey } from "../utils/";
 import { EventEmitter } from "node:events";
 import { AoijsTypeError } from "./AoiError";
-import type { DataEvent } from "./AoiTyping";
+import type { PossiblyAsync } from "./AoiTyping";
 import { ArgsType, AoiFunction } from "./AoiFunction";
 
 class CustomEvent extends EventEmitter {
@@ -59,7 +59,22 @@ class CustomEvent extends EventEmitter {
     });
   }
 
-  command(options: DataEvent): CustomEvent {
+  command(
+    options:
+      | {
+          listen: string;
+          once?: boolean;
+          type?: "aoitelegram";
+          reverseReading?: boolean;
+          code: string;
+        }
+      | {
+          listen: string;
+          once?: boolean;
+          type: "javascript";
+          callback: (...args: any[]) => PossiblyAsync<void>;
+        },
+  ): CustomEvent {
     if (!options?.listen) {
       throw new AoijsTypeError("You did not specify the 'listen' parameter");
     }
