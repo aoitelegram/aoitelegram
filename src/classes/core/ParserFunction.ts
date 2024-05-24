@@ -23,11 +23,16 @@ interface IOveeload {
   callback: Function;
 }
 
-function makeMessageError(argType: ArgsType[]): string {
-  if (argType.length === 1) {
-    return `Invalid ${argType[0].charAt(0).toUpperCase() + argType[0].slice(1)} Provided In`;
+function makeMessageError(argTypes: ArgsType[]): string {
+  const capitalize = (str: string) =>
+    str.charAt(0).toUpperCase() + str.slice(1);
+
+  if (argTypes.length === 1) {
+    return `Invalid ${capitalize(argTypes[0])} Provided In`;
   }
-  return `Invalid ${argType.map((type) => `${type.charAt(0).toUpperCase() + type.slice(1)} | `)} Provided In`;
+
+  const formattedTypes = argTypes.map(capitalize).join(" | ");
+  return `Invalid ${formattedTypes} Provided In`;
 }
 
 class ParserFunction {
