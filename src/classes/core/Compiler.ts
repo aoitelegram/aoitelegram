@@ -63,23 +63,24 @@ class Compiler {
 
     const segments = this.code.split(/\$/g).reverse();
     for (const segment of segments) {
+      const segmentFunction = `$${segment}`;
+
       if (
         this.searchFailed &&
-        `$${segment}`.trim() !== "$" &&
-        `$${segment}`.match(functionRegExp) === null
+        segmentFunction.trim() !== "$" &&
+        segmentFunction.match(functionRegExp) === null
       ) {
         return this.makeError(
-          `$${segment.replace("\n", "").trim()}`,
-          `$${segment.replace("\n", "").trim()} does not exist`,
+          `${segmentFunction.replace("\n", "").trim()}`,
+          `${segmentFunction.replace("\n", "").trim()} does not exist`,
         );
       }
 
-      const matches = `$${segment}`.match(functionRegExp) || [];
+      const matches = segmentFunction.match(functionRegExp) || [];
       const functionName = matches?.[0];
-      if (!functionName || !this.availableFunctions.has(`${functionName}`))
-        continue;
 
-      const dataFunction = this.availableFunctions.get(`${functionName}`)!;
+      const dataFunction = this.availableFunctions.get(`${functionName}`);
+      if (!dataFunction) continue;
 
       const parserFunction = new ParserFunction(dataFunction);
       const segmentCode =
