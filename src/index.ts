@@ -8,5 +8,4 @@ export * from "./classes/AoiTyping";
 export * from "./classes/CustomEvent";
 export * from "./classes/LoadCommands";
 export * from "./classes/AoiExtension";
-export * from "@aoitelegram/plugins";
 export { version } from "../package.json";

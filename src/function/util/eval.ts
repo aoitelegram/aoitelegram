@@ -11,5 +11,8 @@ export default new AoiFunction()
       },
       context.eventData,
     );
-    return func.resolve(result);
+    if (result?.includes("{FUN=")) {
+      context.stopCode = true;
+      return func.resolve();
+    } else return func.resolve(result);
   });

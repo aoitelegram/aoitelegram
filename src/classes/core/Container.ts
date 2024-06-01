@@ -14,8 +14,8 @@ type UpdateHandler = Required<Update>;
 class Container {
   public readonly array: Collection<string, any[]> = new Collection();
   public readonly object: Collection<string, object> = new Collection();
-  public readonly random: Collection<string, number> = new Collection();
-  public readonly variable: Collection<string, any> = new Collection();
+  public readonly random: Collection<any, number> = new Collection();
+  public readonly variable: Collection<any, any> = new Collection();
   public readonly condition: typeof ConditionChecker = ConditionChecker;
   public readonly wordMatcher: typeof WordMatcher = WordMatcher;
   public suppressErrors: string | null = null;

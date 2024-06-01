@@ -18,11 +18,6 @@ interface ICallbackReject {
   custom?: boolean;
 }
 
-interface IOveeload {
-  id: string;
-  callback: Function;
-}
-
 function makeMessageError(argTypes: ArgsType[]): string {
   const capitalize = (str: string) =>
     str.charAt(0).toUpperCase() + str.slice(1);
@@ -48,6 +43,9 @@ class ParserFunction {
   public elseIfContent: ParserFunction[] = [];
   public elseProcessed: boolean = false;
   public elseIfProcessed: boolean = false;
+  public catchProcessed: boolean = false;
+  public tryContent: ParserFunction[] = [];
+  public catchContent: ParserFunction[] = [];
 
   constructor(structures: CustomJSFunction) {
     this.structures = structures;
@@ -314,4 +312,4 @@ class ParserFunction {
   }
 }
 
-export { ParserFunction, ICallbackResolve, ICallbackReject, IOveeload };
+export { ParserFunction, ICallbackResolve, ICallbackReject };
