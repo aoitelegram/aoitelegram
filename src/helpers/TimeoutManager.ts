@@ -2,15 +2,15 @@ import { getObjectKey } from "../utils/";
 import { Collection } from "@telegram.ts/collection";
 import { AoijsTypeError } from "../classes/AoiError";
 import type { AoiClient } from "../classes/AoiClient";
+import type { CommandData } from "../classes/AoiTyping";
 import { ArgsType, AoiFunction } from "../classes/AoiFunction";
 import { setTimeout, clearTimeout, type Timeout } from "long-timeout";
-import type { CommandData, ReturnPrimitive } from "../classes/AoiTyping";
 
 interface TimeoutData {
   id: string;
   time: number;
   datestamp: number;
-  outData: Record<string, ReturnPrimitive>;
+  outData: Record<string, any>;
 }
 
 class TimeoutManager {
@@ -45,7 +45,7 @@ class TimeoutManager {
     id: string,
     options: {
       time: number;
-      outData: ReturnPrimitive;
+      outData: Record<string, any>;
     },
   ): Promise<string> {
     const data = { ...options, id, datestamp: Date.now() };
@@ -111,7 +111,7 @@ class TimeoutManager {
         .setFields({
           name: "property",
           required: false,
-          type: [ArgsType.String],
+          type: [ArgsType.Any],
         })
         .onCallback(async (ctx, func) => {
           const options = await func.resolveAllFields(ctx);

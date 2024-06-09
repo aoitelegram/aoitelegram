@@ -6,11 +6,11 @@ import type { AoiClient } from "./AoiClient";
 
 class LoadCommands {
   private path?: string;
-  public readonly aoitelegram: AoiClient;
+  public readonly telegram: AoiClient;
 
-  constructor(aoitelegram: AoiClient) {
-    aoitelegram.loadCommands = this;
-    this.aoitelegram = aoitelegram;
+  constructor(telegram: AoiClient) {
+    telegram.loadCommands = this;
+    this.telegram = telegram;
   }
 
   loadCommands(dirPath: string, logger: boolean = true) {
@@ -87,7 +87,7 @@ class LoadCommands {
           : [requireFun];
 
         for (const { variables, tables } of requireArray) {
-          this.aoitelegram.variables(variables, tables);
+          this.telegram.variables(variables, tables);
         }
 
         console.log(
@@ -108,7 +108,7 @@ class LoadCommands {
 
     for (const data of requireArray) {
       if ("name" in data) {
-        this.aoitelegram.addCommand(data);
+        this.telegram.addCommand(data);
         console.log(
           `|---------------------------------------------------------------------|\n`,
           `| Loading in ${itemPath} | Loaded ${data.name} | command |`,
@@ -116,7 +116,7 @@ class LoadCommands {
       }
 
       if ("data" in data) {
-        this.aoitelegram.addAction(data);
+        this.telegram.addAction(data);
         console.log(
           `|---------------------------------------------------------------------|\n`,
           `| Loading in ${itemPath} | Loaded ${data.data} | action |`,
@@ -124,7 +124,7 @@ class LoadCommands {
       }
 
       if ("id" in data) {
-        this.aoitelegram.timeoutCommand(data);
+        this.telegram.timeoutCommand(data);
         console.log(
           `|---------------------------------------------------------------------|\n`,
           `| Loading in ${itemPath} | Loaded ${data.id} | timeout |`,
@@ -132,7 +132,7 @@ class LoadCommands {
       }
 
       if ("awaited" in data) {
-        this.aoitelegram.loopCommand(data);
+        this.telegram.loopCommand(data);
         console.log(
           `|---------------------------------------------------------------------|\n`,
           `| Loading in ${itemPath} | Loaded ${data.awaited} | awaited |`,
@@ -142,85 +142,85 @@ class LoadCommands {
       if ("type" in data) {
         switch (data.type) {
           case "ready":
-            this.aoitelegram.readyCommand(data);
+            this.telegram.readyCommand(data);
             break;
           case "message":
-            this.aoitelegram.messageCommand(data);
+            this.telegram.messageCommand(data);
             break;
           case "channel_post":
-            this.aoitelegram.channelPostCommand(data);
+            this.telegram.channelPostCommand(data);
             break;
           case "callback_query":
-            this.aoitelegram.callbackQueryCommand(data);
+            this.telegram.callbackQueryCommand(data);
             break;
           case "edited_message":
-            this.aoitelegram.editedMessageCommand(data);
+            this.telegram.editedMessageCommand(data);
             break;
           case "message_reaction":
-            this.aoitelegram.messageReactionCommand(data);
+            this.telegram.messageReactionCommand(data);
             break;
           case "message_reaction_count":
-            this.aoitelegram.messageReactionCountCommand(data);
+            this.telegram.messageReactionCountCommand(data);
             break;
           case "edited_channel_post":
-            this.aoitelegram.editedChannelPostCommand(data);
+            this.telegram.editedChannelPostCommand(data);
             break;
           case "inline_query":
-            this.aoitelegram.inlineQueryCommand(data);
+            this.telegram.inlineQueryCommand(data);
             break;
           case "shipping_query":
-            this.aoitelegram.shippingQueryCommand(data);
+            this.telegram.shippingQueryCommand(data);
             break;
           case "pre_checkout_query":
-            this.aoitelegram.preCheckoutQueryCommand(data);
+            this.telegram.preCheckoutQueryCommand(data);
             break;
           case "poll":
-            this.aoitelegram.pollCommand(data);
+            this.telegram.pollCommand(data);
             break;
           case "poll_answer":
-            this.aoitelegram.pollAnswerCommand(data);
+            this.telegram.pollAnswerCommand(data);
             break;
           case "chat_member":
-            this.aoitelegram.chatMemberCommand(data);
+            this.telegram.chatMemberCommand(data);
             break;
           case "my_chat_member":
-            this.aoitelegram.myChatMemberCommand(data);
+            this.telegram.myChatMemberCommand(data);
             break;
           case "chat_join_request":
-            this.aoitelegram.chatJoinRequestCommand(data);
+            this.telegram.chatJoinRequestCommand(data);
             break;
           case "chat_boost":
-            this.aoitelegram.chatBoostCommand(data);
+            this.telegram.chatBoostCommand(data);
             break;
           case "removed_chat_boost":
-            this.aoitelegram.removedChatBoostCommand(data);
+            this.telegram.removedChatBoostCommand(data);
             break;
           case "business_connection":
-            this.aoitelegram.businessConnectionCommand(data);
+            this.telegram.businessConnectionCommand(data);
             break;
           case "business_message":
-            this.aoitelegram.businessMessageCommand(data);
+            this.telegram.businessMessageCommand(data);
             break;
           case "edited_business_message":
-            this.aoitelegram.editedBusinessMessageCommand(data);
+            this.telegram.editedBusinessMessageCommand(data);
             break;
           case "deleted_business_messages":
-            this.aoitelegram.deletedBusinessMessagesCommand(data);
+            this.telegram.deletedBusinessMessagesCommand(data);
             break;
           case "loop":
-            this.aoitelegram.loopCommand(data);
+            this.telegram.loopCommand(data);
             break;
           case "variableCreate":
-            this.aoitelegram.variableCreateCommand(data);
+            this.telegram.variableCreateCommand(data);
             break;
           case "variableUpdate":
-            this.aoitelegram.variableUpdateCommand(data);
+            this.telegram.variableUpdateCommand(data);
             break;
           case "variableDelete":
-            this.aoitelegram.variableDeleteCommand(data);
+            this.telegram.variableDeleteCommand(data);
             break;
           case "functionError":
-            this.aoitelegram.functionErrorCommand(data);
+            this.telegram.functionErrorCommand(data);
             break;
           default:
             throw new AoijsTypeError(`Event '${data.type}' is not defined`);

@@ -3,11 +3,11 @@ import { AoiFunction, ArgsType } from "@structures/AoiFunction";
 export default new AoiFunction()
   .setName("$ternary")
   .setBrackets(true)
-  .setFields({ name: "condition", type: [ArgsType.String], required: true })
-  .setFields({ name: "conditionTrue", type: [ArgsType.String], required: true })
+  .setFields({ name: "condition", type: [ArgsType.Any], required: true })
+  .setFields({ name: "conditionTrue", type: [ArgsType.Any], required: true })
   .setFields({
     name: "conditionFalse",
-    type: [ArgsType.String],
+    type: [ArgsType.Any],
     required: false,
   })
   .onCallback(async (context, func) => {

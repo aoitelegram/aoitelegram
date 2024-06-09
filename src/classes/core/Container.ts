@@ -6,6 +6,7 @@ import type { SuccessCompiler } from "./Compiler";
 import { Collection } from "@telegram.ts/collection";
 import { ConditionChecker, WordMatcher } from "../../utils/";
 import type { ContextEvent, CommandData } from "../AoiTyping";
+import { ArrayID, SplitTextID, BufferID, HttpID } from "../../function/";
 
 type EventData<T> = { eventData: T } & Container;
 
@@ -35,6 +36,10 @@ class Container {
         ? ctx.api
         : {}) as unknown as AoiClient;
     this.database = this.telegram.database;
+    this.variable.set(ArrayID, {});
+    this.variable.set(SplitTextID, []);
+    this.variable.set(BufferID, {});
+    this.variable.set(HttpID, {});
   }
 
   setSuppressErrors(reason: string | null): Container {

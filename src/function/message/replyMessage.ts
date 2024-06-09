@@ -6,7 +6,7 @@ export default new AoiFunction()
   .setFields({
     name: "text",
     rest: true,
-    type: [ArgsType.String],
+    type: [ArgsType.Any],
     required: true,
   })
   .onCallback(async (context, func) => {

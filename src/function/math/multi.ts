@@ -6,8 +6,8 @@ export default new AoiFunction()
   .setFields({
     name: "numbers",
     rest: true,
-    type: [ArgsType.Number],
     required: true,
+    type: [ArgsType.Number],
   })
   .onCallback(async (ctx, func) => {
     const numbers = await func.resolveFields(ctx);

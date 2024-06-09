@@ -14,7 +14,7 @@ function onVariableCreate(telegram: AoiClient): void {
           .setBrackets(true)
           .setFields({
             name: "property",
-            type: [ArgsType.String],
+            type: [ArgsType.Any],
             required: false,
           })
           .onCallback(async (context, func) => {

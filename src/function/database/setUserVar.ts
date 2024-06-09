@@ -7,17 +7,32 @@ export default new AoiFunction()
   .setFields({
     name: "variable",
     required: true,
-    type: [ArgsType.String],
+    type: [ArgsType.Any],
   })
   .setFields({
     name: "value",
     required: true,
-    type: [ArgsType.String],
+    type: [ArgsType.Any],
   })
   .setFields({
     name: "userId",
     required: false,
     type: [ArgsType.Number],
+    defaultValue: (context) =>
+      context.eventData.from?.id || context.eventData.message?.from?.id,
+  })
+  .setFields({
+    name: "chatId",
+    required: false,
+    type: [ArgsType.Any],
+    defaultValue: (context) =>
+      context.eventData.chat?.id || context.eventData.message?.chat?.id,
+  })
+  .setFields({
+    name: "table",
+    required: false,
+    type: [ArgsType.Any],
+    defaultValue: (context) => context.database.tables[0],
   })
   .onCallback(async (context, func) => {
     if (!(context.database instanceof AoiManager)) {
@@ -26,19 +41,15 @@ export default new AoiFunction()
       );
     }
 
-    const [
-      variable,
-      value,
-      userId = context.eventData.from?.id ||
-        context.eventData.message?.from?.id,
-      table = context.database.tables[0],
-    ] = await func.resolveFields(context);
+    const [variable, value, userId, chatId, table] =
+      await func.resolveFields(context);
 
-    const chatId =
-      context.eventData.chat?.id || context.eventData.message?.chat.id;
+    if (!(await context.database.hasTable(table))) {
+      return func.reject(`Invalid table "${table}" not found`);
+    }
 
-    if (!(await context.database.has(table, variable))) {
-      return func.reject(`Invalid variable ${variable} not found`);
+    if (!context.database.collection.has(`${variable}_${table}`)) {
+      return func.reject(`Invalid variable "${variable}" not found`);
     }
 
     await context.database.set(

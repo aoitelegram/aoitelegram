@@ -5,6 +5,7 @@ interface IOptionsTypeError {
   name?: string;
   command?: string;
   errorFunction?: string;
+  customError?: boolean;
 }
 
 class AoijsError extends Error {
@@ -29,6 +30,7 @@ class AoijsTypeError extends TypeError {
   public readonly description: string;
   public readonly expectedType?: string;
   public readonly errorFunction?: string;
+  public readonly customError?: boolean;
 
   constructor(description: string, options?: IOptionsTypeError) {
     super(description);
@@ -38,6 +40,7 @@ class AoijsTypeError extends TypeError {
     this.name = options?.name || "AoijsTypeError";
     this.command = options?.command;
     this.description = description;
+    this.customError = options?.customError;
     this.errorFunction = options?.errorFunction;
   }
 }

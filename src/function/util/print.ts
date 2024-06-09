@@ -7,7 +7,7 @@ export default new AoiFunction()
     name: "args",
     rest: true,
     required: true,
-    type: [ArgsType.String],
+    type: [ArgsType.Any],
   })
   .onCallback(async (context, func) => {
     console.log(...(await func.resolveFields(context)));

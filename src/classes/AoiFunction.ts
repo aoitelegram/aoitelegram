@@ -14,12 +14,15 @@ import type {
 } from "./core/";
 
 enum ArgsType {
+  Any = "any",
   String = "string",
   Number = "number",
   Boolean = "boolean",
   Object = "object",
   Array = "array",
-  Any = "any",
+  Time = "time",
+  Chat = "chat",
+  Url = "url",
 }
 
 class AoiFunction {
@@ -35,6 +38,7 @@ class AoiFunction {
     rest?: boolean;
     type?: ArgsType[];
     required?: boolean;
+    converType?: ArgsType;
     defaultValue?: PossiblyAsync<DefaultFnValue | ReturnPrimitive>;
   }[];
   public inside: {
@@ -118,6 +122,7 @@ class AoiFunction {
           name: string;
           rest?: boolean;
           type?: ArgsType[];
+          converType?: ArgsType;
           required: true;
         }
       | {

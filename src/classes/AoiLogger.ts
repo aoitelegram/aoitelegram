@@ -1,4 +1,3 @@
-import { inspect } from "node:util";
 import chalk, { type ForegroundColor } from "chalk";
 
 class AoiLogger {
@@ -29,7 +28,7 @@ class AoiLogger {
       AoiLogger.textColors[type](`[${type.toUpperCase()}]`),
       ...args.map((arg) =>
         AoiLogger.textColors[type](
-          typeof arg === "string" ? arg : inspect(arg),
+          typeof arg === "string" ? arg : JSON.stringify(arg),
         ),
       ),
     );

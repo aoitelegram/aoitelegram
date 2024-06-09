@@ -178,9 +178,14 @@ class AoiClient extends AoiBase {
 
     for (const itemPath of items) {
       if (!itemPath.endsWith(".js")) continue;
+      if (this.parameters.disableAoiDB && itemPath.includes("database"))
+        continue;
       const { default: dataFunction } = require(`${dirPath}/${itemPath}`);
 
-      if (dataFunction && !(dataFunction instanceof AoiFunction)) {
+      if (
+        !dataFunction ||
+        (dataFunction && !(dataFunction instanceof AoiFunction))
+      ) {
         continue;
       }
 

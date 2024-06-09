@@ -46,12 +46,18 @@ class ParserFunction {
   public catchProcessed: boolean = false;
   public tryContent: ParserFunction[] = [];
   public catchContent: ParserFunction[] = [];
+  public isSilentFunction: boolean = false;
 
   constructor(structures: CustomJSFunction) {
     this.structures = structures;
   }
 
   get rawTotal(): string {
+    if (this.isSilentFunction) {
+      return this.structures.brackets && this.inside
+        ? `$#${this.structures.name.toLowerCase().substr(1)}[${this.raw}]`
+        : `$#${this.structures.name.toLowerCase().substr(1)}`;
+    }
     return this.structures.brackets && this.inside
       ? `${this.structures.name.toLowerCase()}[${this.raw}]`
       : this.structures.name.toLowerCase();
@@ -117,6 +123,10 @@ class ParserFunction {
         for (const overload of overloads) {
           const result = await overload.callback(container, overload);
 
+          if (overload.isSilentFunction && "reason" in result) {
+            modifiedField = modifiedField.replace(result.id, "undefined");
+          }
+
           if (container.stopCode === true) {
             throw new AoijsTypeError("The process has been stopped");
           }
@@ -126,7 +136,10 @@ class ParserFunction {
           }
 
           if ("reason" in result) {
-            throw new AoijsTypeError(result.reason);
+            throw new AoijsTypeError(result.reason, {
+              errorFunction: overload.structures.name,
+              customError: result.custom,
+            });
           }
 
           modifiedField = modifiedField.replace(result.id, result.with);
@@ -180,6 +193,14 @@ class ParserFunction {
       array = array.slice(0, currentStructures.fields.length);
     }
 
+    const parsedFields = await Promise.all(
+      array.map((field, i) =>
+        indexes && indexes.indexOf(i) === -1
+          ? null
+          : toParse(field, container.telegram),
+      ),
+    );
+
     for (let i = 0; i < array.length; i++) {
       if (indexes && indexes.indexOf(i) === -1) {
         continue;
@@ -195,7 +216,7 @@ class ParserFunction {
         );
       }
 
-      if (typeof currentField === "undefined") {
+      if (!currentField) {
         if ("defaultValue" in currentFieldInfo && !currentFieldInfo.required) {
           if (typeof currentFieldInfo.defaultValue === "function") {
             result.push(await currentFieldInfo.defaultValue(container));
@@ -216,15 +237,23 @@ class ParserFunction {
         }
 
         for (let x = i; x < array.length; x++) {
-          const receivedType = toParse(array[x]) as ArgsType;
-          if (
-            !expectType ||
-            expectType.indexOf(ArgsType.String) !== -1 ||
-            expectType.indexOf(ArgsType.Any) !== -1
-          ) {
-            result.push(toConvertParse(array[x]));
+          const receivedType = parsedFields[x] as ArgsType;
+          if (!expectType || expectType.indexOf(ArgsType.Any) !== -1) {
+            result.push(
+              toConvertParse(
+                array[x],
+                currentFieldInfo.converType || receivedType,
+              ),
+            );
           } else if (expectType.indexOf(receivedType) !== -1) {
-            result.push(toConvertParse(array[x]));
+            result.push(
+              toConvertParse(
+                array[x],
+                currentFieldInfo.converType || receivedType,
+              ),
+            );
+          } else if (this.isSilentFunction) {
+            result.push(undefined);
           } else {
             throw new AoijsTypeError(
               `${makeMessageError(Array.from(new Set(expectType)))} "${array[x]}"`,
@@ -235,14 +264,25 @@ class ParserFunction {
         return result;
       }
 
-      if (
-        !expectType ||
-        expectType.indexOf(ArgsType.String) !== -1 ||
-        expectType.indexOf(ArgsType.Any) !== -1
-      ) {
-        result.push(toConvertParse(currentField));
-      } else if (expectType.indexOf(toParse(currentField) as ArgsType) !== -1) {
-        result.push(toConvertParse(currentField));
+      const receivedType = parsedFields[i] as ArgsType;
+      if (!expectType || expectType.indexOf(ArgsType.Any) !== -1) {
+        result.push(
+          toConvertParse(
+            currentField,
+            ("converType" in currentFieldInfo && currentFieldInfo.converType) ||
+              receivedType,
+          ),
+        );
+      } else if (expectType.indexOf(receivedType) !== -1) {
+        result.push(
+          toConvertParse(
+            currentField,
+            ("converType" in currentFieldInfo && currentFieldInfo.converType) ||
+              receivedType,
+          ),
+        );
+      } else if (this.isSilentFunction) {
+        result.push(undefined);
       } else {
         throw new AoijsTypeError(
           `${makeMessageError(Array.from(new Set(expectType)))} "${currentField}"`,
@@ -259,7 +299,12 @@ class ParserFunction {
     }
 
     for (const overload of this.findOverloads(code)) {
-      const result = await overload.callback(container, overload);
+      const result = await overload.callback(container, overload, code);
+
+      if (overload.structures.name === "$return") {
+        container.stopCode = false;
+        return "with" in result ? result.with : "";
+      }
 
       if (container.stopCode === true) {
         throw new AoijsTypeError("The process has been stopped");
@@ -269,8 +314,15 @@ class ParserFunction {
         return code;
       }
 
+      if (overload.isSilentFunction && "reason" in result) {
+        code = code.replace(result.id, "undefined");
+      }
+
       if ("reason" in result) {
-        throw new AoijsTypeError(result.reason);
+        throw new AoijsTypeError(result.reason, {
+          errorFunction: overload.structures.name,
+          customError: result.custom,
+        });
       }
 
       code = code.replace(result.id, result.with);

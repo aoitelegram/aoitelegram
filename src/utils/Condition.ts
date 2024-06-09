@@ -1,3 +1,5 @@
+import { inspect } from "./Helpers";
+
 class ConditionChecker {
   static hasOperator(msg: string, operator: string) {
     return msg.includes(operator);
@@ -137,7 +139,9 @@ class ConditionChecker {
 
   static checkCondition(code: string): boolean {
     try {
-      return eval(ConditionChecker.solve(code));
+      return eval(
+        ConditionChecker.solve(typeof code === "string" ? inspect(code) : code),
+      );
     } catch {
       return false;
     }

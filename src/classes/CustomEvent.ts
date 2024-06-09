@@ -99,7 +99,7 @@ class CustomEvent extends EventEmitter {
             .setBrackets(true)
             .setFields({
               name: "property",
-              type: [ArgsType.String],
+              type: [ArgsType.Any],
               required: false,
             })
             .onCallback(async (context, func) => {

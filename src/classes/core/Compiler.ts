@@ -45,7 +45,7 @@ class Compiler {
       (a, b) => b[0].length - a[0].length,
     )) {
       this.code = this.code.replace(
-        new RegExp(`\\${name}`, "gi"),
+        new RegExp(`\\${name}|$#${name.substr(1)}`, "gi"),
         name.toLowerCase(),
       );
     }
@@ -56,13 +56,14 @@ class Compiler {
     const functionRegExp = new RegExp(
       `(${this.availableFunctions
         .keys()
-        .map((name) => `\\${name}`)
+        .map((name) => `\\${name}|\\$#${name.substr(1)}`)
         .join("|")})`,
       "g",
     );
 
     const segments = this.code.split(/\$/g).reverse();
     for (const segment of segments) {
+      const isSilentFunction = segment.startsWith("#");
       const segmentFunction = `$${segment}`;
 
       if (
@@ -77,14 +78,19 @@ class Compiler {
       }
 
       const matches = segmentFunction.match(functionRegExp) || [];
-      const functionName = matches?.[0];
+      const functionName = matches?.[0]?.replace("$#", "$");
+      if (!functionName) continue;
 
-      const dataFunction = this.availableFunctions.get(`${functionName}`);
+      const dataFunction = this.availableFunctions.get(functionName);
       if (!dataFunction) continue;
 
       const parserFunction = new ParserFunction(dataFunction);
       const segmentCode =
-        this.code.split(new RegExp(`\\${functionName}`, "gm")).pop() || "";
+        this.code
+          .split(
+            new RegExp(`\\${functionName}|\\$#${functionName.substr(1)}`, "gm"),
+          )
+          .pop() || "";
 
       if (
         dataFunction.brackets &&
@@ -114,6 +120,7 @@ class Compiler {
         parserFunction.setFields(
           fields.split(";").map((field) => unescapeCode(field)),
         );
+        parserFunction.isSilentFunction = isSilentFunction;
       }
 
       this.code = this.replaceLast(

@@ -47,9 +47,17 @@ class Interpreter {
           );
         }
 
+        if (dataFunction.structures.name === "$return") {
+          return "with" in result ? result.with : "";
+        }
+
         if (this.container.stopCode) break;
 
         if ("reason" in result) {
+          if (dataFunction.isSilentFunction) {
+            textResult = textResult.replace(result.id, "undefined");
+            continue;
+          }
           if (result.reason) {
             await this.sendErrorMessage(
               result.reason,
@@ -63,6 +71,12 @@ class Interpreter {
         textResult = result.code ? result.code : textResult;
         textResult = textResult.replace(result.id, result.with);
       } catch (err) {
+        if (dataFunction.isSilentFunction) {
+          this.container.stopCode = false;
+          textResult = textResult.replace(dataFunction.id, "undefined");
+          continue;
+        }
+
         if (this.container.stopCode) break;
 
         if (err instanceof AoijsTypeError) {
@@ -70,6 +84,7 @@ class Interpreter {
           await this.sendErrorMessage(
             errorMessage.trimLeft(),
             err.errorFunction || dataFunction.structures.name,
+            { custom: err.customError },
           );
         } else {
           await this.sendErrorMessage(`${err}`, dataFunction.structures.name);

@@ -25,7 +25,7 @@ function groupFunctionsByName(functions: ParserFunction[]): ParserFunction[][] {
 export default new AoiFunction()
   .setName("$if")
   .setBrackets(true)
-  .setFields({ name: "condition", type: [ArgsType.String], required: true })
+  .setFields({ name: "condition", type: [ArgsType.Any], required: true })
   .onCallback(async (context, func, code) => {
     if (!code) {
       return func.reject("I don't have access to the code");

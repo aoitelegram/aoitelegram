@@ -88,6 +88,7 @@ type CustomJSFunction =
             name: string;
             rest?: boolean;
             type?: ArgsType[];
+            converType?: ArgsType;
             required: true;
           }
       )[];

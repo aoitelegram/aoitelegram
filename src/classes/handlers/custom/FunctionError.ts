@@ -16,7 +16,7 @@ function onFunctionError(telegram: AoiClient): void {
           .setFields({
             name: "property",
             required: false,
-            type: [ArgsType.String],
+            type: [ArgsType.Any],
           })
           .onCallback(async (context, func) => {
             const options = await func.resolveAllFields(context);

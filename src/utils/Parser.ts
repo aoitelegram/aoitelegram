@@ -1,83 +1,116 @@
+import fetch from "node-fetch";
 import { unInspect } from "./Helpers";
 import type { ArgsType } from "@structures/AoiFunction";
+import type { AoiClient } from "@structures/AoiClient";
 
 function isInteger(content: string): boolean {
-  let isBigInt: boolean = false;
-  try {
-    BigInt(content);
-    isBigInt = true;
-  } catch (err) {
-    isBigInt = false;
-  }
-  return Number.isInteger(Number(content)) && !isBoolean(content) && isBigInt;
+  return (
+    !isNaN(Number(content)) &&
+    !isBoolean(content) &&
+    content === content.trim() &&
+    /^\d+$/.test(content)
+  );
 }
 
 function isFloat(content: string): boolean {
-  if (!content.includes(".")) return false;
-  if (!Number.isNaN(parseFloat(content))) return true;
-  else return false;
+  return !isNaN(parseFloat(content)) && content.includes(".");
 }
 
 function isBoolean(content: string): boolean {
-  if (content === "true") return true;
-  else if (content === "false") return true;
-  else return false;
+  return content === "true" || content === "false";
 }
 
 function isObject(content: string): boolean {
   if (content.startsWith("{") && content.endsWith("}")) {
-    try {
-      return !!JSON.parse(content);
-    } catch (err) {
-      try {
-        return !!JSON.parse(JSON.stringify(content));
-      } catch (err) {
-        return false;
-      }
-    }
+    const result = unInspect(content);
+    return typeof result === "object" && !Array.isArray(result);
   }
   return false;
 }
 
 function isArray(content: string): boolean {
-  if (content.startsWith("[") && content.endsWith("]")) {
-    return true;
+  try {
+    return Array.isArray(unInspect(content));
+  } catch {
+    return false;
   }
-  return false;
 }
 
 function isNumber(content: string): boolean {
-  return isFloat(content) || isInteger(content);
+  return isInteger(content) || isFloat(content);
 }
 
-function toParse(
-  character?: string,
-): "string" | "unknown" | "object" | "boolean" | "number" | "array" {
-  if (!character) return "unknown";
-  switch (true) {
-    case isNumber(character):
-      return "number";
-    case isObject(character):
-      return "object";
-    case isArray(character):
-      return "array";
-    case isBoolean(character):
-      return "boolean";
-    default:
-      return "string";
+async function isChat(chatId: string, telegram: AoiClient): Promise<boolean> {
+  try {
+    const { id } = await telegram.getChat(chatId);
+    return typeof id === "number";
+  } catch {
+    return false;
   }
 }
 
-function toConvertParse(character?: string): any {
-  if (!character) return undefined;
-  switch (true) {
-    case isNumber(character):
+async function isUrl(content: string): Promise<boolean> {
+  try {
+    const { statusText } = await fetch(content);
+    return statusText === "OK";
+  } catch {
+    return false;
+  }
+}
+
+function isTime(content: string): boolean {
+  return Boolean(parseTime(content).ms);
+}
+
+async function toParse(
+  character: string,
+  telegram: AoiClient,
+): Promise<
+  | "string"
+  | "unknown"
+  | "object"
+  | "boolean"
+  | "number"
+  | "array"
+  | "chat"
+  | "time"
+  | "url"
+> {
+  if (!character) return "unknown";
+
+  if (isNumber(character)) {
+    if (await isChat(character, telegram)) return "chat";
+    return "number";
+  }
+
+  if (character.includes("http") && (await isUrl(character))) return "url";
+  if (isTime(character)) return "time";
+  if (isObject(character)) return "object";
+  if (isArray(character)) return "array";
+  if (isBoolean(character)) return "boolean";
+
+  return "string";
+}
+
+function toConvertParse(
+  character: string,
+  type: ArgsType | Awaited<ReturnType<typeof toParse>>,
+): any {
+  if (!character || type === "unknown") return undefined;
+
+  switch (type) {
+    case "time":
+      const time = parseTime(character);
+      return { ...time, ...formatTime(time.ms) };
+    case "chat":
+    case "url":
+      return character;
+    case "number":
       return Number(character);
-    case isObject(character):
+    case "object":
+    case "array":
       return unInspect(character);
-    case isArray(character):
-      return unInspect(character);
-    case isBoolean(character):
+    case "boolean":
       return character === "true";
     default:
       return character;
@@ -97,42 +130,90 @@ function formatTime(milliseconds: number): {
     fullTime: () => string;
   };
 } {
-  const calculateUnit = (unitInMilliseconds: number): number => {
-    const result = Math.trunc(Math.abs(milliseconds) / unitInMilliseconds);
-    milliseconds -= result * unitInMilliseconds;
-    return result;
-  };
+  const units = [
+    { name: "years", ms: 31536000000 },
+    { name: "months", ms: 2628002880 },
+    { name: "weeks", ms: 604800000 },
+    { name: "days", ms: 86400000 },
+    { name: "hours", ms: 3600000 },
+    { name: "minutes", ms: 60000 },
+    { name: "seconds", ms: 1000 },
+    { name: "ms", ms: 1 },
+  ];
 
-  const timeData = {
+  const result: Record<string, number> = {};
+  units.forEach((unit) => {
+    result[unit.name] = Math.trunc(milliseconds / unit.ms);
+    milliseconds %= unit.ms;
+  });
+
+  return {
     units: {
-      years: calculateUnit(31536000000),
-      months: calculateUnit(2628746000),
-      weeks: calculateUnit(604800000),
-      days: calculateUnit(86400000),
-      hours: calculateUnit(3600000),
-      minutes: calculateUnit(60000),
-      seconds: calculateUnit(1000),
-      ms: calculateUnit(1),
-      fullTime: function (): string {
-        const timeString = Object.entries(timeData.units)
-          .slice(0, -1)
-          .map(([unit, value]) => {
-            if (unit === "fullTime") return "";
-            if (value) {
-              const abbreviation = ["months", "ms"].includes(unit)
-                ? unit.slice(0, 3)
-                : unit.slice(0, 1);
-              return `${value}${abbreviation}`;
-            }
-            return "";
-          })
-          .filter(Boolean);
-
-        return timeString.join(" ");
-      },
+      years: result["years"],
+      months: result["months"],
+      weeks: result["weeks"],
+      days: result["days"],
+      hours: result["hours"],
+      minutes: result["minutes"],
+      seconds: result["seconds"],
+      ms: result["ms"],
+      fullTime: () =>
+        units
+          .map((unit) =>
+            result[unit.name] ? `${result[unit.name]}${unit.name[0]}` : "",
+          )
+          .filter(Boolean)
+          .join(" "),
     },
   };
-  return timeData;
+}
+
+function parseTime(time: string): { ms: number; format: string } {
+  if (typeof time !== "string") {
+    throw new TypeError("'time' must be a string");
+  }
+
+  const timeUnits: Record<string, number> = {
+    y: 31536000000,
+    mon: 2628002880,
+    w: 604800000,
+    d: 86400000,
+    h: 3600000,
+    min: 60000,
+    s: 1000,
+    ms: 1,
+  };
+
+  const regex = /(\d+)(y|mon|w|d|h|min|s|ms)/g;
+  let match;
+  let ms = 0;
+  let format = [];
+
+  while ((match = regex.exec(time)) !== null) {
+    const value = parseInt(match[1], 10);
+    const unit = match[2];
+    ms += value * timeUnits[unit];
+    format.push(pluralize(value, unit));
+  }
+
+  return {
+    ms,
+    format: format.join(", "),
+  };
+}
+
+function pluralize(num: number, unit: string): string {
+  const unitsMap: Record<string, string> = {
+    y: "year",
+    mon: "month",
+    w: "week",
+    d: "day",
+    h: "hour",
+    min: "minute",
+    s: "second",
+    ms: "millisecond",
+  };
+  return `${num} ${unitsMap[unit]}${num !== 1 ? "s" : ""}`;
 }
 
 function replaceData(
@@ -149,14 +230,25 @@ function replaceData(
   },
   text: string,
 ): string {
-  Object.entries(date).map((unit) => {
-    const regexp = new RegExp(`%${unit[0]}%`, "g");
-    text = text.replace(
-      regexp,
-      typeof unit[1] === "function" ? unit[1]() : `${unit[1]}`,
+  return Object.entries(date).reduce((text, [unit, value]) => {
+    const regex = new RegExp(`%${unit}%`, "g");
+    return text.replace(
+      regex,
+      typeof value === "function" ? value() : `${value}`,
     );
-  });
-  return text;
+  }, text);
 }
 
-export { toParse, toConvertParse, formatTime, replaceData };
+const types = {
+  isInteger,
+  isFloat,
+  isBoolean,
+  isObject,
+  isArray,
+  isNumber,
+  isChat,
+  isUrl,
+  isTime,
+};
+
+export { toParse, toConvertParse, formatTime, pluralize, replaceData, types };

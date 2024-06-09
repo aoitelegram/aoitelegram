@@ -23,8 +23,141 @@ function getObjectKey<T extends Record<string, any>>(
   }
 }
 
+function unInspect(str: string): any {
+  const trimmedStr = str.trim();
+
+  if (trimmedStr.startsWith("{") && trimmedStr.endsWith("}")) {
+    return parseObject(trimmedStr);
+  } else if (trimmedStr.startsWith("[") && trimmedStr.endsWith("]")) {
+    return parseArray(trimmedStr);
+  } else {
+    return parseValue(trimmedStr);
+  }
+}
+
+function parseObject(str: string): any {
+  const obj: { [key: string]: any } = {};
+  let key = "";
+  let value = "";
+  let isParsingKey = true;
+  let inString = false;
+  let currentStringDelimiter = "";
+  let bracketCount = 0;
+
+  for (let i = 1; i < str.length - 1; i++) {
+    const char = str[i];
+
+    if (char === '"' || char === "'") {
+      if (inString && currentStringDelimiter === char) {
+        inString = false;
+      } else if (!inString) {
+        inString = true;
+        currentStringDelimiter = char;
+      }
+    }
+
+    if (inString) {
+      if (isParsingKey) {
+        key += char;
+      } else {
+        value += char;
+      }
+    } else {
+      if (char === "{" || char === "[") {
+        bracketCount++;
+      } else if (char === "}" || char === "]") {
+        bracketCount--;
+      }
+
+      if (bracketCount === 0 && char === ":" && isParsingKey) {
+        isParsingKey = false;
+      } else if (bracketCount === 0 && char === "," && !isParsingKey) {
+        obj[parseKey(key)] = unInspect(value.trim());
+        key = "";
+        value = "";
+        isParsingKey = true;
+      } else {
+        if (isParsingKey) {
+          key += char;
+        } else {
+          value += char;
+        }
+      }
+    }
+  }
+
+  if (key !== "" && value !== "") {
+    obj[parseKey(key)] = unInspect(value.trim());
+  }
+
+  return obj;
+}
+
+function parseArray(str: string): any[] {
+  const arr: any[] = [];
+  let value = "";
+  let inString = false;
+  let currentStringDelimiter = "";
+  let bracketCount = 0;
+
+  for (let i = 1; i < str.length - 1; i++) {
+    const char = str[i];
+
+    if (char === '"' || char === "'") {
+      if (inString && currentStringDelimiter === char) {
+        inString = false;
+      } else if (!inString) {
+        inString = true;
+        currentStringDelimiter = char;
+      }
+    }
+
+    if (inString) {
+      value += char;
+    } else {
+      if (char === "{" || char === "[") {
+        bracketCount++;
+      } else if (char === "}" || char === "]") {
+        bracketCount--;
+      }
+
+      if (bracketCount === 0 && char === "," && !inString) {
+        arr.push(unInspect(value.trim()));
+        value = "";
+      } else {
+        value += char;
+      }
+    }
+  }
+
+  if (value.trim() !== "") {
+    arr.push(unInspect(value.trim()));
+  }
+
+  return arr;
+}
+
+function parseValue(str: string): any {
+  if (str === "undefined") return undefined;
+  if (str === "null") return null;
+  if (str === "true") return true;
+  if (str === "false") return false;
+  if (!isNaN(Number(str)) && str !== "") return Number(str);
+  if (
+    (str.startsWith('"') && str.endsWith('"')) ||
+    (str.startsWith("'") && str.endsWith("'"))
+  ) {
+    return str.slice(1, -1);
+  }
+  return str;
+}
+
+function parseKey(str: string): string {
+  return str.trim().replace(/^["']|["']$/g, "");
+}
+
 function inspect(obj: any): string {
-  if (typeof obj === "object") {
+  if (typeof obj === "object" && obj !== null) {
     if (Array.isArray(obj)) {
       return "[" + obj.map(inspect).join(", ") + "]";
     } else {
@@ -35,49 +168,6 @@ function inspect(obj: any): string {
     }
   } else {
     return String(obj);
-  }
-}
-
-function unInspect(str: string): any {
-  const trimmedStr = str || "";
-
-  if (trimmedStr.startsWith("{") && trimmedStr.endsWith("}")) {
-    const innerStr = trimmedStr.slice(1, -1);
-    const keyValuePairs = innerStr
-      .split(",")
-      .map((pair) => (pair ? pair.trim() : pair));
-
-    const obj: { [key: string]: any } = {};
-    keyValuePairs.forEach((pair) => {
-      if (pair) {
-        const [rawKey, value] = pair.split(":").map((item) => item.trim());
-        const key =
-          rawKey.startsWith('"') && rawKey.endsWith('"')
-            ? rawKey.slice(1, -1)
-            : rawKey;
-        obj[key] = unInspect(value);
-      }
-    });
-
-    return obj;
-  } else if (trimmedStr.startsWith("[") && trimmedStr.endsWith("]")) {
-    const innerStr = trimmedStr.slice(1, -1);
-    const elements = innerStr
-      ? innerStr.split(",").map((item) => item.trim())
-      : [];
-    return elements.map(unInspect);
-  } else {
-    if (trimmedStr === "undefined") return undefined;
-    if (trimmedStr === "null") return null;
-    if (trimmedStr === "true") return true;
-    if (trimmedStr === "false") return false;
-    if (!isNaN(Number(trimmedStr)) && trimmedStr !== "")
-      return Number(trimmedStr);
-    if (trimmedStr.startsWith('"') && trimmedStr.endsWith('"')) {
-      return trimmedStr.slice(1, -1);
-    } else {
-      return trimmedStr;
-    }
   }
 }
 
