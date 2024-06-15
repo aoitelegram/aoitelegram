@@ -2,7 +2,7 @@ import { BufferID } from "../index";
 import { AoiFunction, ArgsType } from "@structures/AoiFunction";
 
 export default new AoiFunction()
-  .setName("$bufferReadInt32")
+  .setName("$bufferToString")
   .setBrackets(true)
   .setFields({
     name: "name",

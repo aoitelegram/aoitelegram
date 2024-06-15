@@ -6,8 +6,8 @@ abstract class AoiExtension {
   abstract name: string;
   abstract description: string;
   abstract version: string;
-  abstract targetVersion?: string | string[];
-  abstract requireExtension?: string[];
+  public targetVersion?: string | string[];
+  public requireExtension?: string[];
 
   abstract init(aoitelegram: AoiClient): void;
   abstract init(aoitelegram: AoiClient): Promise<void>;
@@ -22,7 +22,7 @@ abstract class AoiExtension {
       }
     }
 
-    if (Array.isArray(this.targetVersion)) {
+    if (Array.isArray(this.targetVersion) && this.targetVersion.length > 0) {
       const requireVersion = this.targetVersion.indexOf(version);
       if (requireVersion === -1) {
         throw new AoijsError(

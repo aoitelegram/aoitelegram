@@ -114,6 +114,7 @@ class Interpreter {
             "$elseIf cannot be used until $if is declared",
             "$elseIf",
           );
+          return;
         } else if (stack[stack.length - 1]?.elseProcessed) {
           this.sendErrorMessage(
             "Cannot use $elseIf after $else has been used",
@@ -129,6 +130,7 @@ class Interpreter {
             "$else cannot be used until $if is declared",
             "$else",
           );
+          return;
         } else {
           stack[stack.length - 1].elseProcessed = true;
         }

@@ -1,12 +1,22 @@
 import { AoiBase } from "../AoiBase";
 import type { AoiClient } from "../AoiClient";
-import type { AoiManager } from "../AoiManager";
+import { InlineKeyboard, Keyboard } from "telegramsjs";
 import type { Update } from "@telegram.ts/types";
 import type { SuccessCompiler } from "./Compiler";
 import { Collection } from "@telegram.ts/collection";
-import { ConditionChecker, WordMatcher } from "../../utils/";
+import { ConditionChecker } from "../../utils/";
 import type { ContextEvent, CommandData } from "../AoiTyping";
-import { ArrayID, SplitTextID, BufferID, HttpID } from "../../function/";
+import {
+  ArrayID,
+  SplitTextID,
+  BufferID,
+  HttpID,
+  KeyboardID,
+  KeyboardOptionsID,
+  InlineKeyboardID,
+  ReplyParametersID,
+  FileID,
+} from "../../function/";
 
 type EventData<T> = { eventData: T } & Container;
 
@@ -18,11 +28,9 @@ class Container {
   public readonly random: Collection<any, number> = new Collection();
   public readonly variable: Collection<any, any> = new Collection();
   public readonly condition: typeof ConditionChecker = ConditionChecker;
-  public readonly wordMatcher: typeof WordMatcher = WordMatcher;
   public suppressErrors: string | null = null;
   public readonly eventData: ContextEvent;
   public readonly telegram: AoiClient;
-  public readonly database: AoiManager;
   public stopCode: boolean = false;
 
   constructor(
@@ -35,16 +43,42 @@ class Container {
       : ctx?.api instanceof AoiBase
         ? ctx.api
         : {}) as unknown as AoiClient;
-    this.database = this.telegram.database;
     this.variable.set(ArrayID, {});
     this.variable.set(SplitTextID, []);
     this.variable.set(BufferID, {});
     this.variable.set(HttpID, {});
+    this.variable.set(KeyboardID, []);
+    this.variable.set(KeyboardOptionsID, {});
+    this.variable.set(InlineKeyboardID, []);
+    this.variable.set(ReplyParametersID, {});
+    this.variable.set(FileID, {});
   }
 
   setSuppressErrors(reason: string | null): Container {
     this.suppressErrors = reason;
     return this;
+  }
+
+  getMessageOptions(): any {
+    const keyboard: Keyboard[][] = this.variable
+      .get(KeyboardID)
+      .map((keyboard: Keyboard) => keyboard.keyboard);
+    const inline_keyboard: InlineKeyboard[][] = this.variable
+      .get(InlineKeyboardID)
+      .map((keyboard: InlineKeyboard) => keyboard.inline_keyboard);
+
+    return {
+      reply_markup: {
+        keyboard: keyboard.reduce((acc, innerArray) => {
+          return acc.concat(innerArray);
+        }, []),
+        inline_keyboard: inline_keyboard.reduce((acc, innerArray) => {
+          return acc.concat(innerArray);
+        }, []),
+        ...this.variable.get(KeyboardOptionsID),
+      },
+      reply_parameters: this.variable.get(ReplyParametersID),
+    };
   }
 
   isMessage(): this is EventData<UpdateHandler["message"]> {

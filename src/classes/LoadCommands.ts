@@ -42,62 +42,6 @@ class LoadCommands {
     }
   }
 
-  loadVariables(dirPath: string, logger: boolean = true) {
-    if (!dirPath) {
-      throw new AoijsTypeError("You did not specify the 'dirPath' parameter");
-    }
-
-    dirPath = path.join(process.cwd(), dirPath);
-    if (!fs.existsSync(dirPath)) {
-      throw new AoijsTypeError(
-        `The specified file path was not found: ${dirPath}`,
-      );
-    }
-
-    if (logger) {
-      const bigText = figlet.textSync("Variables");
-      console.log(bigText);
-    }
-
-    const items = fs.readdirSync(dirPath, { recursive: true });
-
-    for (const item of items) {
-      if (typeof item !== "string" || !item.endsWith(".js")) continue;
-
-      const itemPath = path.join(dirPath, item);
-      const itemData = require(itemPath);
-
-      if (itemData) {
-        const requireFun = itemData.default || itemData;
-
-        const isArrayOrEmptyObject =
-          (!Array.isArray(requireFun) && typeof requireFun !== "object") ||
-          requireFun?.length === 0 ||
-          Object.keys(requireFun)?.length === 0;
-
-        if (isArrayOrEmptyObject) {
-          throw new AoijsTypeError(
-            "To store variables from the loader, specify an array or an object of parameters",
-            { path: itemPath },
-          );
-        }
-
-        const requireArray = Array.isArray(requireFun)
-          ? requireFun
-          : [requireFun];
-
-        for (const { variables, tables } of requireArray) {
-          this.telegram.variables(variables, tables);
-        }
-
-        console.log(
-          `|---------------------------------------------------------------------|\n`,
-          `| Loading in ${itemPath} | Loaded | variables |`,
-        );
-      }
-    }
-  }
-
   #registerCommand(
     itemData: Record<string, any>,
     itemPath: string,
@@ -120,14 +64,6 @@ class LoadCommands {
         console.log(
           `|---------------------------------------------------------------------|\n`,
           `| Loading in ${itemPath} | Loaded ${data.data} | action |`,
-        );
-      }
-
-      if ("id" in data) {
-        this.telegram.timeoutCommand(data);
-        console.log(
-          `|---------------------------------------------------------------------|\n`,
-          `| Loading in ${itemPath} | Loaded ${data.id} | timeout |`,
         );
       }
 
@@ -209,15 +145,6 @@ class LoadCommands {
             break;
           case "loop":
             this.telegram.loopCommand(data);
-            break;
-          case "variableCreate":
-            this.telegram.variableCreateCommand(data);
-            break;
-          case "variableUpdate":
-            this.telegram.variableUpdateCommand(data);
-            break;
-          case "variableDelete":
-            this.telegram.variableDeleteCommand(data);
             break;
           case "functionError":
             this.telegram.functionErrorCommand(data);

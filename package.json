@@ -3,7 +3,7 @@
   "description": "A powerful package to create Telegram Bots with built-in string functions",
   "main": "./dist/index.js",
   "typing": "./dist/index.d.ts",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "scripts": {
     "clean:dist": "rm -rf dist/",
     "uglifyjs": "find ./dist/function -type f -name \"*.d.ts\" -exec rm {} && uglifyjs --in-situ dist/function/**/**",
@@ -36,7 +36,7 @@
   "homepage": "https://aoitelegram.vercel.app",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Sempai-07/aoitelegram"
+    "url": "git+https://github.com/Sempai-07/aoitelegram.git"
   },
   "bugs": {
     "url": "https://github.com/Sempai-07/aoitelegram/issues"
@@ -55,8 +55,6 @@
     "aoi.js"
   ],
   "dependencies": {
-    "@aoitelegram/database": "^1.0.0",
-    "@aoitelegram/plugins": "^1.0.0",
     "chalk": "^4.1.2",
     "figlet": "^1.7.0",
     "long-timeout": "^0.1.1",

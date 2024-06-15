@@ -12,17 +12,14 @@ import aoiStart from "./handlers/custom/AoiStart";
 import type { LoadCommands } from "./LoadCommands";
 import { Collection } from "@telegram.ts/collection";
 import { AoijsError, AoijsTypeError } from "./AoiError";
-import { TimeoutManager } from "../helpers/TimeoutManager";
 import { AwaitedManager } from "../helpers/AwaitedManager";
 import type { DataFunction, CommandData } from "./AoiTyping";
-import { AoiManager, type AoiManagerOptions } from "./AoiManager";
 import { AoiWarning, type AoiWarningOptions } from "./AoiWarning";
 
 class AoiClient extends AoiBase {
   public customEvent?: CustomEvent;
   public warningManager: AoiWarning;
   public loadCommands?: LoadCommands;
-  public timeoutManager: TimeoutManager;
   public awaitedManager: AwaitedManager;
   public functionError?: boolean = false;
   public sendMessageError?: boolean = true;
@@ -39,22 +36,15 @@ class AoiClient extends AoiBase {
     token: string,
     public readonly parameters: {
       requestOptions?: RequestInit;
-      database?: AoiManagerOptions;
       disableFunctions?: string[];
       extensions?: AoiExtension[];
       functionError?: boolean;
       sendMessageError?: boolean;
-      disableAoiDB?: boolean;
       logging?: boolean;
       autoUpdate?: AoiWarningOptions;
     } = {},
   ) {
-    super(
-      token,
-      parameters.requestOptions,
-      parameters.database,
-      parameters.disableAoiDB,
-    );
+    super(token, parameters.requestOptions);
 
     const allAoiExtends = parameters.extensions?.every?.(
       (cls) => cls instanceof AoiExtension,
@@ -71,7 +61,6 @@ class AoiClient extends AoiBase {
       typeof parameters.sendMessageError === "undefined"
         ? true
         : parameters.sendMessageError;
-    this.timeoutManager = new TimeoutManager(this);
     this.awaitedManager = new AwaitedManager(this);
     this.warningManager = new AoiWarning(parameters.autoUpdate || {});
   }
@@ -109,17 +98,6 @@ class AoiClient extends AoiBase {
     return this;
   }
 
-  timeoutCommand(options: CommandData<{ id: string }>): AoiClient {
-    if (!options?.id) {
-      throw new AoijsError("You did not specify the 'id' parameter");
-    }
-    if (!options?.code) {
-      throw new AoijsError("You did not specify the 'code' parameter");
-    }
-    this.timeoutManager.registerTimeout(options);
-    return this;
-  }
-
   awaitedCommand(options: CommandData<{ name: string }>): AoiClient {
     if (!options?.name) {
       throw new AoijsError("You did not specify the 'name' parameter");
@@ -139,16 +117,6 @@ class AoiClient extends AoiBase {
     }
     this.awaitedManager.handleAwaited();
 
-    if ("connect" in this.database) {
-      await this.database.connect().then(async () => {
-        if (this.database instanceof AoiManager) {
-          for (const [tables, variables] of this.availableVariables) {
-            await this.database.variables?.(variables, tables);
-          }
-        }
-      });
-    }
-
     if (extensions.length > 0) {
       for (let i = 0; i < extensions.length; i++) {
         const initPlugins = extensions[i];
@@ -158,7 +126,7 @@ class AoiClient extends AoiBase {
             `Plugin '${initPlugins.name}' has been dreadfully registered`,
           );
         } catch (err) {
-          AoiLogger.error(err);
+          AoiLogger.error(`${err}`);
         }
       }
     }
@@ -178,14 +146,9 @@ class AoiClient extends AoiBase {
 
     for (const itemPath of items) {
       if (!itemPath.endsWith(".js")) continue;
-      if (this.parameters.disableAoiDB && itemPath.includes("database"))
-        continue;
       const { default: dataFunction } = require(`${dirPath}/${itemPath}`);
 
-      if (
-        !dataFunction ||
-        (dataFunction && !(dataFunction instanceof AoiFunction))
-      ) {
+      if (!dataFunction || !(dataFunction instanceof AoiFunction)) {
         continue;
       }
 
@@ -194,7 +157,7 @@ class AoiClient extends AoiBase {
         continue;
       }
 
-      this.availableFunctions.set(dataFunctionName, dataFunction);
+      this.createCustomFunction(dataFunction);
     }
   }
 }

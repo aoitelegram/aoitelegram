@@ -1,19 +1,18 @@
 import fs from "node:fs";
 import path from "node:path";
 import figlet from "figlet";
-import importSync from "import-sync";
-import { AoiClient } from "./AoiClient";
 import { getObjectKey } from "../utils/";
 import { EventEmitter } from "node:events";
 import { AoijsTypeError } from "./AoiError";
+import type { AoiClient } from "./AoiClient";
 import type { PossiblyAsync } from "./AoiTyping";
 import { ArgsType, AoiFunction } from "./AoiFunction";
 
 class CustomEvent extends EventEmitter {
-  public readonly aoitelegram: AoiClient;
+  public readonly telegram: AoiClient;
 
   constructor(
-    aoitelegram: AoiClient,
+    telegram: AoiClient,
     options: {
       process?: {
         exit?: boolean;
@@ -33,8 +32,8 @@ class CustomEvent extends EventEmitter {
     } = {},
   ) {
     super();
-    this.aoitelegram = aoitelegram;
-    aoitelegram.customEvent = this;
+    this.telegram = telegram;
+    telegram.customEvent = this;
 
     const { process = {} } = options;
 
@@ -93,7 +92,7 @@ class CustomEvent extends EventEmitter {
 
     if ((options.type === "aoitelegram" || !options.type) && options.code) {
       const eventHandler = async (...args: string[]) => {
-        this.aoitelegram.editCustomFunction(
+        this.telegram.editCustomFunction(
           new AoiFunction()
             .setName("$eventData")
             .setBrackets(true)
@@ -109,9 +108,9 @@ class CustomEvent extends EventEmitter {
             }),
         );
 
-        await this.aoitelegram.evaluateCommand(options, {
+        await this.telegram.evaluateCommand(options, {
           ...args,
-          telegram: this.aoitelegram,
+          telegram: this.telegram,
         });
       };
 

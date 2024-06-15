@@ -163,7 +163,7 @@ class CustomFunctionManager {
 
     if (this.availableFunctions.has(name)) {
       throw new AoijsTypeError(
-        `The function '${name}' already exists; to overwrite it, use the <AoiClient>.editFunction method!`,
+        `The function '${name}' already exists; to overwrite it, use the <AoiClient>.editCustomFunction method!`,
       );
     }
 

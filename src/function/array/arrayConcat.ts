@@ -2,7 +2,7 @@ import { ArrayID } from "../index";
 import { AoiFunction, ArgsType } from "@structures/AoiFunction";
 
 export default new AoiFunction()
-  .setName("$arrayClear")
+  .setName("$arrayConcat")
   .setBrackets(true)
   .setFields({
     name: "name | array",

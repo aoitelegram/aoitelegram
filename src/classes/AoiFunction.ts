@@ -31,6 +31,7 @@ class AoiFunction {
   public version?: string;
   public aliases: string[];
   public brackets?: boolean;
+  public other?: any;
   public reverseReading?: boolean;
   public type?: "javascript" | "aoitelegram";
   public fields: {
@@ -41,10 +42,6 @@ class AoiFunction {
     converType?: ArgsType;
     defaultValue?: PossiblyAsync<DefaultFnValue | ReturnPrimitive>;
   }[];
-  public inside: {
-    name?: string;
-    required?: boolean;
-  };
   public callback?: (
     ctx: Container,
     func: ParserFunction,
@@ -60,6 +57,7 @@ class AoiFunction {
     } else this.#validateOptions(parameters);
 
     this.name = parameters.name;
+    this.other = "other" in parameters ? parameters.other : undefined;
     this.version = parameters.version;
     this.aliases = parameters.aliases || [];
     this.type = parameters.type || "javascript";
@@ -67,7 +65,6 @@ class AoiFunction {
     this.fields = ("fields" in parameters && parameters.fields) || [];
     this.reverseReading =
       ("reverseReading" in parameters && parameters.reverseReading) || false;
-    this.inside = ("inside" in parameters && parameters.inside) || {};
     this.params = ("params" in parameters && parameters.params) || [];
     this.callback =
       ("callback" in parameters && parameters.callback) || undefined;
@@ -94,7 +91,17 @@ class AoiFunction {
     return this;
   }
 
+  setOther(other: any) {
+    this.other = other;
+    return this;
+  }
+
   setReverseReading(reverseReading: boolean): AoiFunction {
+    if (this.type === "aoitelegram") {
+      throw new AoijsTypeError(
+        "Methods for type 'javascript' are not accessible when the type is set to 'aoitelegram'",
+      );
+    }
     if (typeof reverseReading !== "boolean") {
       throw new AoijsTypeError(
         `The expected type is 'boolean', but received type ${typeof reverseReading}`,
@@ -144,24 +151,9 @@ class AoiFunction {
         `The expected type is 'array | object', but received type ${typeof fields}`,
       );
     }
-    if (Object.keys(this.inside).length > 1) {
-      throw new AoijsTypeError(
-        "If you specified 'inside' early, then the specified 'fields' cannot be entities",
-      );
-    }
     if (Array.isArray(fields)) {
       this.fields.push(...fields);
     } else this.fields.push(fields);
-    return this;
-  }
-
-  setInside(inside: { name?: string; required: boolean }): AoiFunction {
-    if (this.type === "aoitelegram") {
-      throw new AoijsTypeError(
-        "Methods for type 'javascript' are not accessible when the type is set to 'aoitelegram'",
-      );
-    }
-    this.inside = inside;
     return this;
   }
 
@@ -255,12 +247,6 @@ class AoiFunction {
     }
 
     if ("fields" in options) {
-      if ("inside" in options) {
-        throw new AoijsTypeError(
-          "If you specified 'inside' earlier, then 'fields' cannot be entities",
-        );
-      }
-
       if (!Array.isArray(options.fields)) {
         throw new AoijsTypeError(
           `Fields must be an array, but received type ${typeof options.fields}`,
@@ -277,24 +263,6 @@ class AoiFunction {
         throw new AoijsTypeError(
           "Each element in fields must contain an object with a required property",
         );
-      }
-    }
-
-    if ("inside" in options) {
-      if ("fields" in options) {
-        throw new AoijsTypeError(
-          "If you specified 'fields' earlier, then 'inside' cannot be entities",
-        );
-      }
-
-      if (typeof options.inside !== "object") {
-        throw new AoijsTypeError(
-          `Inside must be an object, but received type ${typeof options.inside}`,
-        );
-      }
-
-      if (!("required" in options.inside)) {
-        throw new AoijsTypeError("Each parameter must contain a string");
       }
     }
 

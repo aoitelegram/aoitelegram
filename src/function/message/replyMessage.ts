@@ -11,6 +11,6 @@ export default new AoiFunction()
   })
   .onCallback(async (context, func) => {
     const text = await func.resolveAllFields(context);
-    await context.eventData.reply(text);
-    return func.resolve("");
+    await context.eventData.reply(text, context.getMessageOptions());
+    return func.resolve();
   });

@@ -1,8 +1,6 @@
 import type { AoiClient } from "./AoiClient";
 import type { ArgsType } from "./AoiFunction";
-import type { AoiManager } from "./AoiManager";
 import type { Context, IEventFunctions } from "telegramsjs";
-import type { TimeoutData } from "../helpers/TimeoutManager";
 import type {
   Container,
   ParserFunction,
@@ -40,7 +38,6 @@ interface AwaitedEvent {
 }
 
 interface EventHandlers extends IEventFunctions {
-  timeout: (timeoutData: TimeoutData) => void;
   addAwaited: (event: AwaitedEvent, data: Container) => void;
   functionError: (
     eventContext: Container,
@@ -50,7 +47,6 @@ interface EventHandlers extends IEventFunctions {
       outData: { [key: string]: any };
     },
   ) => void;
-  addTimeout: (eventContext: TimeoutData) => void;
 }
 
 interface CustomAoiFunction {
@@ -93,6 +89,7 @@ type CustomJSFunction =
           }
       )[];
       brackets: true;
+      other?: any;
       version?: string;
       callback: (
         context: Container,
@@ -102,6 +99,7 @@ type CustomJSFunction =
     }
   | {
       name: string;
+      other?: any;
       type?: "javascript";
       aliases?: string[];
       brackets?: false;

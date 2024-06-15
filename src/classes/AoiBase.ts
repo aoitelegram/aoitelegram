@@ -1,13 +1,13 @@
 import path from "node:path";
 import { version } from "../index";
 import { getObjectKey } from "../utils/";
+import { AoiLogger } from "./AoiLogger";
 import type { RequestInit } from "node-fetch";
 import { Interpreter, Compiler } from "./core/";
 import type { Update } from "@telegram.ts/types";
 import type { AoiFunction } from "./AoiFunction";
 import { AoijsError, AoijsTypeError } from "./AoiError";
 import { CustomFunctionManager } from "./CustomFunctionManager";
-import { AoiManager, type AoiManagerOptions } from "./AoiManager";
 import { TelegramBot, Collection, type Context } from "telegramsjs";
 import type {
   DataFunction,
@@ -19,14 +19,9 @@ import type {
 } from "./AoiTyping";
 
 class AoiBase extends TelegramBot {
-  public database!: AoiManager;
   public customFunction: CustomFunctionManager;
   public readonly events: Collection<string, { [key: string]: any }[]> =
     new Collection();
-  public readonly availableVariables: Collection<
-    undefined | string | string[],
-    { [key: string]: any }
-  > = new Collection();
   public readonly availableFunctions: Collection<string, CustomJSFunction> =
     new Collection();
   public readonly availableCollectEvents = [
@@ -37,15 +32,12 @@ class AoiBase extends TelegramBot {
     "channelPost",
     "inlineQuery",
     "poll",
-    "variableCreate",
     "chatBoost",
     "loop",
     "pollAnswer",
-    "variableDelete",
     "chatJoinRequest",
     "message",
     "preCheckoutQuery",
-    "variableUpdate",
     "chatMember",
     "messageReaction",
     "ready",
@@ -60,12 +52,7 @@ class AoiBase extends TelegramBot {
   ];
   #registerCollectEvent: Set<string> = new Set();
 
-  constructor(
-    token: string,
-    requestOptions?: RequestInit,
-    database?: AoiManagerOptions,
-    disableAoiDB?: boolean,
-  ) {
+  constructor(token: string, requestOptions?: RequestInit) {
     if (!token) {
       throw new AoijsError(
         "You did not specify the 'token' parameter",
@@ -74,9 +61,6 @@ class AoiBase extends TelegramBot {
     }
     super(token, requestOptions);
 
-    if (!disableAoiDB) {
-      this.database = new AoiManager(database);
-    }
     this.customFunction = new CustomFunctionManager(
       this,
       this.availableFunctions,
@@ -107,7 +91,7 @@ class AoiBase extends TelegramBot {
       );
       return await interpreter.runInput();
     } catch (err) {
-      console.log(err);
+      AoiLogger.error(`${err}`);
     }
   }
 
@@ -354,30 +338,6 @@ class AoiBase extends TelegramBot {
     return this;
   }
 
-  variableCreateCommand(options: CommandData): AoiBase {
-    if (!options?.code) {
-      throw new AoijsError("You did not specify the 'code' parameter");
-    }
-    this.#addEvents("variableCreate", options);
-    return this;
-  }
-
-  variableUpdateCommand(options: CommandData): AoiBase {
-    if (!options?.code) {
-      throw new AoijsError("You did not specify the 'code' parameter");
-    }
-    this.#addEvents("variableUpdate", options);
-    return this;
-  }
-
-  variableDeleteCommand(options: CommandData): AoiBase {
-    if (!options?.code) {
-      throw new AoijsError("You did not specify the 'code' parameter");
-    }
-    this.#addEvents("variableDelete", options);
-    return this;
-  }
-
   createCustomFunction(
     dataFunction: MaybeArray<DataFunction | AoiFunction>,
   ): AoiBase {
@@ -449,14 +409,6 @@ class AoiBase extends TelegramBot {
       const eventsType = this.events.get(type);
       this.events.set(type, [...(eventsType || []), command]);
     } else this.events.set(type, [command]);
-  }
-
-  variables(
-    variable: { [key: string]: any },
-    tables?: string | string[],
-  ): AoiBase {
-    this.availableVariables.set(tables, variable);
-    return this;
   }
 }
 

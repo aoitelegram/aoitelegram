@@ -343,6 +343,10 @@ class ParserFunction {
     return this.overloads.filter((func) => code.includes(func.id));
   }
 
+  getOther<T>(): T {
+    return this.structures.other as T;
+  }
+
   async callback(
     container: Container,
     func: ParserFunction,

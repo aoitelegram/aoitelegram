@@ -1,4 +1,5 @@
 import { AoijsTypeError } from "../AoiError";
+import { WordMatcher } from "@utils/WordMatcher";
 import { ParserFunction } from "./ParserFunction";
 import { Collection } from "@telegram.ts/collection";
 import { unescapeCode, escapeCode } from "@utils/Helpers";
@@ -71,9 +72,10 @@ class Compiler {
         segmentFunction.trim() !== "$" &&
         segmentFunction.match(functionRegExp) === null
       ) {
+        const functionName = segmentFunction.replace("\n", "").trim();
         return this.makeError(
-          `${segmentFunction.replace("\n", "").trim()}`,
-          `${segmentFunction.replace("\n", "").trim()} does not exist`,
+          `${functionName}`,
+          `${functionName} does not exist. Perhaps you meant to specify the function "${new WordMatcher(this.availableFunctions.keys()).search(functionName)}"`,
         );
       }
 
