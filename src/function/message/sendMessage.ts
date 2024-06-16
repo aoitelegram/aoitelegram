@@ -1,18 +1,17 @@
-import { FileAnswerID } from "../index";
 import { AoiFunction, ArgsType } from "@structures/AoiFunction";
 
 export default new AoiFunction()
-  .setName("$sendSticker")
+  .setName("$sendMessage")
   .setBrackets(true)
+  .setFields({
+    name: "text",
+    required: true,
+    type: [ArgsType.String],
+  })
   .setFields({
     name: "chat_id",
     required: true,
     type: [ArgsType.Chat],
-  })
-  .setFields({
-    name: "sticker",
-    required: false,
-    type: [ArgsType.String],
   })
   .setFields({
     name: "business_connection_id",
@@ -25,9 +24,19 @@ export default new AoiFunction()
     type: [ArgsType.Number],
   })
   .setFields({
-    name: "emoji",
+    name: "parse_mode",
     required: false,
     type: [ArgsType.String],
+  })
+  .setFields({
+    name: "entities",
+    required: false,
+    type: [ArgsType.Array],
+  })
+  .setFields({
+    name: "link_preview_options",
+    required: false,
+    type: [ArgsType.Object],
   })
   .setFields({
     name: "disable_notification",
@@ -46,30 +55,26 @@ export default new AoiFunction()
   })
   .onCallback(async (context, func) => {
     const [
+      text,
       chat_id,
-      sticker,
       business_connection_id,
       message_thread_id,
-      emoji,
+      parse_mode,
+      entities,
+      link_preview_options,
       disable_notification,
       protect_content,
       message_effect_id,
     ] = await func.resolveFields(context);
 
-    const variableFile = context.variable.get(FileAnswerID);
-
-    if (!variableFile?.[sticker] && !sticker.startsWith("http")) {
-      return func.reject(
-        `The specified variable "${sticker}" does not exist for the file`,
-      );
-    }
-
-    const result = await context.telegram.sendSticker({
-      business_connection_id,
+    const result = await context.telegram.sendMessage({
+      text,
       chat_id,
+      business_connection_id,
       message_thread_id,
-      sticker: sticker.startsWith("http") ? sticker : variableFile[sticker],
-      emoji,
+      parse_mode,
+      entities,
+      link_preview_options,
       disable_notification,
       protect_content,
       message_effect_id,

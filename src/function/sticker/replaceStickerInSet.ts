@@ -29,9 +29,21 @@ export default new AoiFunction()
       await func.resolveFields(context);
 
     if (typeof sticker === "object") {
-      sticker.sticker = sticker.sticker.startsWith("http")
-        ? sticker.sticker
-        : context.variable.get(FileAnswerID);
+      if (sticker.sticker?.startsWith("http")) {
+        sticker.sticker = sticker.sticker;
+      } else {
+        const variableFile = context.variable.get(FileAnswerID);
+
+        if (
+          !variableFile?.[sticker.sticker] &&
+          !sticker.sticker?.startsWith("http")
+        ) {
+          return func.reject(
+            `The specified variable "${sticker.sticker}" does not exist for the file`,
+          );
+        }
+        sticker.sticker = variableFile[sticker.sticker];
+      }
     }
 
     return func.resolve(

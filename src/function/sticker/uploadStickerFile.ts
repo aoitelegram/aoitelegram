@@ -7,7 +7,7 @@ export default new AoiFunction()
   .setFields({
     name: "user_id",
     required: true,
-    type: [ArgsType.String],
+    type: [ArgsType.Chat],
   })
   .setFields({
     name: "sticker_format",
@@ -16,18 +16,26 @@ export default new AoiFunction()
   })
   .setFields({
     name: "sticker",
-    required: false,
+    required: true,
     type: [ArgsType.String],
   })
   .onCallback(async (context, func) => {
     const [user_id, sticker_format, sticker] =
       await func.resolveFields(context);
 
+    const variableFile = context.variable.get(FileAnswerID);
+
+    if (!variableFile?.[sticker] && !sticker.startsWith("http")) {
+      return func.reject(
+        `The specified variable "${sticker}" does not exist for the file`,
+      );
+    }
+
     return func.resolve(
       await context.telegram.uploadStickerFile({
         user_id,
         sticker_format,
-        sticker: sticker ? sticker : context.variable.get(FileAnswerID),
+        sticker: sticker.startsWith("http") ? sticker : variableFile[sticker],
       }),
     );
   });

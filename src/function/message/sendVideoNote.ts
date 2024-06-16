@@ -2,22 +2,17 @@ import { FileAnswerID } from "../index";
 import { AoiFunction, ArgsType } from "@structures/AoiFunction";
 
 export default new AoiFunction()
-  .setName("$sendSticker")
+  .setName("$sendVideoNote")
   .setBrackets(true)
-  .setFields({
-    name: "chat_id",
-    required: true,
-    type: [ArgsType.Chat],
-  })
-  .setFields({
-    name: "sticker",
-    required: false,
-    type: [ArgsType.String],
-  })
   .setFields({
     name: "business_connection_id",
     required: false,
     type: [ArgsType.String],
+  })
+  .setFields({
+    name: "chat_id",
+    required: true,
+    type: [ArgsType.Chat],
   })
   .setFields({
     name: "message_thread_id",
@@ -25,7 +20,22 @@ export default new AoiFunction()
     type: [ArgsType.Number],
   })
   .setFields({
-    name: "emoji",
+    name: "video_note",
+    required: true,
+    type: [ArgsType.String],
+  })
+  .setFields({
+    name: "duration",
+    required: false,
+    type: [ArgsType.Number],
+  })
+  .setFields({
+    name: "length",
+    required: false,
+    type: [ArgsType.Number],
+  })
+  .setFields({
+    name: "thumbnail",
     required: false,
     type: [ArgsType.String],
   })
@@ -46,11 +56,13 @@ export default new AoiFunction()
   })
   .onCallback(async (context, func) => {
     const [
-      chat_id,
-      sticker,
       business_connection_id,
+      chat_id,
       message_thread_id,
-      emoji,
+      video_note,
+      duration,
+      length,
+      thumbnail,
       disable_notification,
       protect_content,
       message_effect_id,
@@ -58,18 +70,24 @@ export default new AoiFunction()
 
     const variableFile = context.variable.get(FileAnswerID);
 
-    if (!variableFile?.[sticker] && !sticker.startsWith("http")) {
+    if (!variableFile?.[video_note] && !video_note.startsWith("http")) {
       return func.reject(
-        `The specified variable "${sticker}" does not exist for the file`,
+        `The specified variable "${video_note}" does not exist for the file`,
       );
     }
 
-    const result = await context.telegram.sendSticker({
+    const result = await context.telegram.sendVideoNote({
       business_connection_id,
       chat_id,
       message_thread_id,
-      sticker: sticker.startsWith("http") ? sticker : variableFile[sticker],
-      emoji,
+      video_note: video_note.startsWith("http")
+        ? video_note
+        : variableFile[video_note],
+      duration,
+      length,
+      thumbnail: thumbnail.startsWith("http")
+        ? thumbnail
+        : variableFile[thumbnail],
       disable_notification,
       protect_content,
       message_effect_id,

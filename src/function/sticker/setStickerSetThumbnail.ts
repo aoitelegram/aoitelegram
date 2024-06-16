@@ -21,12 +21,20 @@ export default new AoiFunction()
   })
   .setFields({
     name: "thumbnail",
-    required: false,
+    required: true,
     type: [ArgsType.String],
   })
   .onCallback(async (context, func) => {
     const [name, user_id, format, thumbnail] =
       await func.resolveFields(context);
+
+    const variableFile = context.variable.get(FileAnswerID);
+
+    if (!variableFile?.[thumbnail] && !thumbnail.startsWith("http")) {
+      return func.reject(
+        `The specified variable "${thumbnail}" does not exist for the file`,
+      );
+    }
 
     return func.resolve(
       await context.telegram.setStickerSetThumbnail({
@@ -35,7 +43,7 @@ export default new AoiFunction()
         format,
         thumbnail: thumbnail.startsWith("http")
           ? thumbnail
-          : context.variable.get(FileAnswerID),
+          : variableFile[thumbnail],
       }),
     );
   });

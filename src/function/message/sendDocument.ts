@@ -2,22 +2,17 @@ import { FileAnswerID } from "../index";
 import { AoiFunction, ArgsType } from "@structures/AoiFunction";
 
 export default new AoiFunction()
-  .setName("$sendSticker")
+  .setName("$sendDocument")
   .setBrackets(true)
-  .setFields({
-    name: "chat_id",
-    required: true,
-    type: [ArgsType.Chat],
-  })
-  .setFields({
-    name: "sticker",
-    required: false,
-    type: [ArgsType.String],
-  })
   .setFields({
     name: "business_connection_id",
     required: false,
     type: [ArgsType.String],
+  })
+  .setFields({
+    name: "chat_id",
+    required: true,
+    type: [ArgsType.Chat],
   })
   .setFields({
     name: "message_thread_id",
@@ -25,9 +20,34 @@ export default new AoiFunction()
     type: [ArgsType.Number],
   })
   .setFields({
-    name: "emoji",
+    name: "document",
+    required: true,
+    type: [ArgsType.String],
+  })
+  .setFields({
+    name: "thumbnail",
     required: false,
     type: [ArgsType.String],
+  })
+  .setFields({
+    name: "caption",
+    required: false,
+    type: [ArgsType.String],
+  })
+  .setFields({
+    name: "parse_mode",
+    required: false,
+    type: [ArgsType.String],
+  })
+  .setFields({
+    name: "caption_entities",
+    required: false,
+    type: [ArgsType.Array],
+  })
+  .setFields({
+    name: "disable_content_type_detection",
+    required: false,
+    type: [ArgsType.Boolean],
   })
   .setFields({
     name: "disable_notification",
@@ -46,11 +66,15 @@ export default new AoiFunction()
   })
   .onCallback(async (context, func) => {
     const [
-      chat_id,
-      sticker,
       business_connection_id,
+      chat_id,
       message_thread_id,
-      emoji,
+      document,
+      thumbnail,
+      caption,
+      parse_mode,
+      caption_entities,
+      disable_content_type_detection,
       disable_notification,
       protect_content,
       message_effect_id,
@@ -58,18 +82,24 @@ export default new AoiFunction()
 
     const variableFile = context.variable.get(FileAnswerID);
 
-    if (!variableFile?.[sticker] && !sticker.startsWith("http")) {
+    if (!variableFile?.[document] && !document.startsWith("http")) {
       return func.reject(
-        `The specified variable "${sticker}" does not exist for the file`,
+        `The specified variable "${document}" does not exist for the file`,
       );
     }
 
-    const result = await context.telegram.sendSticker({
+    const result = await context.telegram.sendDocument({
       business_connection_id,
       chat_id,
       message_thread_id,
-      sticker: sticker.startsWith("http") ? sticker : variableFile[sticker],
-      emoji,
+      document: document.startsWith("http") ? document : variableFile[document],
+      thumbnail: thumbnail.startsWith("http")
+        ? thumbnail
+        : variableFile[thumbnail],
+      caption,
+      parse_mode,
+      caption_entities,
+      disable_content_type_detection,
       disable_notification,
       protect_content,
       message_effect_id,

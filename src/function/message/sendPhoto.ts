@@ -2,7 +2,7 @@ import { FileAnswerID } from "../index";
 import { AoiFunction, ArgsType } from "@structures/AoiFunction";
 
 export default new AoiFunction()
-  .setName("$sendSticker")
+  .setName("$sendPhoto")
   .setBrackets(true)
   .setFields({
     name: "chat_id",
@@ -10,8 +10,8 @@ export default new AoiFunction()
     type: [ArgsType.Chat],
   })
   .setFields({
-    name: "sticker",
-    required: false,
+    name: "photo",
+    required: true,
     type: [ArgsType.String],
   })
   .setFields({
@@ -25,9 +25,29 @@ export default new AoiFunction()
     type: [ArgsType.Number],
   })
   .setFields({
-    name: "emoji",
+    name: "caption",
     required: false,
     type: [ArgsType.String],
+  })
+  .setFields({
+    name: "parse_mode",
+    required: false,
+    type: [ArgsType.String],
+  })
+  .setFields({
+    name: "caption_entities",
+    required: false,
+    type: [ArgsType.Array],
+  })
+  .setFields({
+    name: "show_caption_above_media",
+    required: false,
+    type: [ArgsType.Boolean],
+  })
+  .setFields({
+    name: "has_spoiler",
+    required: false,
+    type: [ArgsType.Boolean],
   })
   .setFields({
     name: "disable_notification",
@@ -47,10 +67,14 @@ export default new AoiFunction()
   .onCallback(async (context, func) => {
     const [
       chat_id,
-      sticker,
+      photo,
       business_connection_id,
       message_thread_id,
-      emoji,
+      caption,
+      parse_mode,
+      caption_entities,
+      show_caption_above_media,
+      has_spoiler,
       disable_notification,
       protect_content,
       message_effect_id,
@@ -58,18 +82,22 @@ export default new AoiFunction()
 
     const variableFile = context.variable.get(FileAnswerID);
 
-    if (!variableFile?.[sticker] && !sticker.startsWith("http")) {
+    if (!variableFile?.[photo] && !photo.startsWith("http")) {
       return func.reject(
-        `The specified variable "${sticker}" does not exist for the file`,
+        `The specified variable "${photo}" does not exist for the file`,
       );
     }
 
-    const result = await context.telegram.sendSticker({
+    const result = await context.telegram.sendPhoto({
       business_connection_id,
       chat_id,
       message_thread_id,
-      sticker: sticker.startsWith("http") ? sticker : variableFile[sticker],
-      emoji,
+      photo: photo.startsWith("http") ? photo : variableFile[photo],
+      caption,
+      parse_mode,
+      caption_entities,
+      show_caption_above_media,
+      has_spoiler,
       disable_notification,
       protect_content,
       message_effect_id,

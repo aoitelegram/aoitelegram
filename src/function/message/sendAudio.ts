@@ -2,22 +2,17 @@ import { FileAnswerID } from "../index";
 import { AoiFunction, ArgsType } from "@structures/AoiFunction";
 
 export default new AoiFunction()
-  .setName("$sendSticker")
+  .setName("$sendAudio")
   .setBrackets(true)
-  .setFields({
-    name: "chat_id",
-    required: true,
-    type: [ArgsType.Chat],
-  })
-  .setFields({
-    name: "sticker",
-    required: false,
-    type: [ArgsType.String],
-  })
   .setFields({
     name: "business_connection_id",
     required: false,
     type: [ArgsType.String],
+  })
+  .setFields({
+    name: "chat_id",
+    required: true,
+    type: [ArgsType.Chat],
   })
   .setFields({
     name: "message_thread_id",
@@ -25,7 +20,42 @@ export default new AoiFunction()
     type: [ArgsType.Number],
   })
   .setFields({
-    name: "emoji",
+    name: "audio",
+    required: true,
+    type: [ArgsType.String],
+  })
+  .setFields({
+    name: "caption",
+    required: false,
+    type: [ArgsType.String],
+  })
+  .setFields({
+    name: "parse_mode",
+    required: false,
+    type: [ArgsType.String],
+  })
+  .setFields({
+    name: "caption_entities",
+    required: false,
+    type: [ArgsType.Array],
+  })
+  .setFields({
+    name: "duration",
+    required: false,
+    type: [ArgsType.Number],
+  })
+  .setFields({
+    name: "performer",
+    required: false,
+    type: [ArgsType.String],
+  })
+  .setFields({
+    name: "title",
+    required: false,
+    type: [ArgsType.String],
+  })
+  .setFields({
+    name: "thumbnail",
     required: false,
     type: [ArgsType.String],
   })
@@ -46,11 +76,17 @@ export default new AoiFunction()
   })
   .onCallback(async (context, func) => {
     const [
-      chat_id,
-      sticker,
       business_connection_id,
+      chat_id,
       message_thread_id,
-      emoji,
+      audio,
+      caption,
+      parse_mode,
+      caption_entities,
+      duration,
+      performer,
+      title,
+      thumbnail,
       disable_notification,
       protect_content,
       message_effect_id,
@@ -58,18 +94,26 @@ export default new AoiFunction()
 
     const variableFile = context.variable.get(FileAnswerID);
 
-    if (!variableFile?.[sticker] && !sticker.startsWith("http")) {
+    if (!variableFile?.[audio] && !audio.startsWith("http")) {
       return func.reject(
-        `The specified variable "${sticker}" does not exist for the file`,
+        `The specified variable "${audio}" does not exist for the file`,
       );
     }
 
-    const result = await context.telegram.sendSticker({
+    const result = await context.telegram.sendAudio({
       business_connection_id,
       chat_id,
       message_thread_id,
-      sticker: sticker.startsWith("http") ? sticker : variableFile[sticker],
-      emoji,
+      audio: audio.startsWith("http") ? audio : variableFile[audio],
+      caption,
+      parse_mode,
+      caption_entities,
+      duration,
+      performer,
+      title,
+      thumbnail: thumbnail.startsWith("http")
+        ? thumbnail
+        : variableFile[thumbnail],
       disable_notification,
       protect_content,
       message_effect_id,

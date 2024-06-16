@@ -1,8 +1,7 @@
-import { FileAnswerID } from "../index";
 import { AoiFunction, ArgsType } from "@structures/AoiFunction";
 
 export default new AoiFunction()
-  .setName("$sendSticker")
+  .setName("$sendGame")
   .setBrackets(true)
   .setFields({
     name: "chat_id",
@@ -10,8 +9,8 @@ export default new AoiFunction()
     type: [ArgsType.Chat],
   })
   .setFields({
-    name: "sticker",
-    required: false,
+    name: "game_short_name",
+    required: true,
     type: [ArgsType.String],
   })
   .setFields({
@@ -23,11 +22,6 @@ export default new AoiFunction()
     name: "message_thread_id",
     required: false,
     type: [ArgsType.Number],
-  })
-  .setFields({
-    name: "emoji",
-    required: false,
-    type: [ArgsType.String],
   })
   .setFields({
     name: "disable_notification",
@@ -47,29 +41,19 @@ export default new AoiFunction()
   .onCallback(async (context, func) => {
     const [
       chat_id,
-      sticker,
+      game_short_name,
       business_connection_id,
       message_thread_id,
-      emoji,
       disable_notification,
       protect_content,
       message_effect_id,
     ] = await func.resolveFields(context);
 
-    const variableFile = context.variable.get(FileAnswerID);
-
-    if (!variableFile?.[sticker] && !sticker.startsWith("http")) {
-      return func.reject(
-        `The specified variable "${sticker}" does not exist for the file`,
-      );
-    }
-
-    const result = await context.telegram.sendSticker({
-      business_connection_id,
+    const message = await context.telegram.sendGame({
       chat_id,
+      game_short_name,
+      business_connection_id,
       message_thread_id,
-      sticker: sticker.startsWith("http") ? sticker : variableFile[sticker],
-      emoji,
       disable_notification,
       protect_content,
       message_effect_id,
@@ -77,5 +61,5 @@ export default new AoiFunction()
       reply_markup: context.getMessageOptions().reply_markup,
     });
 
-    return func.resolve(result);
+    return func.resolve(message);
   });

@@ -16,6 +16,7 @@ import {
   InlineKeyboardID,
   ReplyParametersID,
   FileID,
+  FileAnswerID,
 } from "../../function/";
 
 type EventData<T> = { eventData: T } & Container;
@@ -52,6 +53,7 @@ class Container {
     this.variable.set(InlineKeyboardID, []);
     this.variable.set(ReplyParametersID, {});
     this.variable.set(FileID, {});
+    this.variable.set(FileAnswerID, {});
   }
 
   setSuppressErrors(reason: string | null): Container {

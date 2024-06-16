@@ -7,7 +7,7 @@ export default new AoiFunction()
   .setFields({
     name: "user_id",
     required: true,
-    type: [ArgsType.Number],
+    type: [ArgsType.Chat],
   })
   .setFields({
     name: "name",
@@ -41,9 +41,17 @@ export default new AoiFunction()
 
     stickers.map((item: any) => {
       if (typeof item === "object") {
-        item.sticker = item.sticker?.startsWith("http")
-          ? item.sticker
-          : context.variable.get(FileAnswerID);
+        if (item.sticker?.startsWith("http")) {
+          item.sticker = item.sticker;
+        } else {
+          const variableFile = context.variable.get(FileAnswerID);
+          if (!variableFile?.[item.sticker]) {
+            throw new Error(
+              `The specified variable "${item.sticker}" does not exist for the file`,
+            );
+          }
+          item.sticker = variableFile[item.sticker];
+        }
         return item;
       }
       return item;
