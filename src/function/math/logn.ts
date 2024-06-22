@@ -1,7 +1,7 @@
 import { AoiFunction, ArgsType } from "@structures/AoiFunction";
 
 export default new AoiFunction()
-  .setName("$long")
+  .setName("$logn")
   .setBrackets(true)
   .setFields({
     name: "number",
