@@ -33,7 +33,6 @@ class CustomEvent extends EventEmitter {
   ) {
     super();
     this.telegram = telegram;
-    telegram.customEvent = this;
 
     const { process = {} } = options;
 
@@ -56,6 +55,27 @@ class CustomEvent extends EventEmitter {
     processListeners.forEach(([eventName, emitEventName]) => {
       this.addProcessListener(process, eventName, emitEventName);
     });
+
+    telegram.createCustomFunction(
+      new AoiFunction()
+        .setName("$emitData")
+        .setBrackets(true)
+        .setFields({
+          name: "eventName",
+          required: true,
+          type: [ArgsType.String],
+        })
+        .setFields({
+          name: "eventData",
+          rest: true,
+          required: false,
+          type: [ArgsType.Any],
+        })
+        .onCallback(async (context, func) => {
+          const [eventName, ...eventData] = await func.resolveFields(context);
+          return func.resolve(this.emit(eventName, ...eventData));
+        }),
+    );
   }
 
   command(

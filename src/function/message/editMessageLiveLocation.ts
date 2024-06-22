@@ -4,6 +4,11 @@ export default new AoiFunction()
   .setName("$editMessageLiveLocation")
   .setBrackets(true)
   .setFields({
+    name: "business_connection_id",
+    required: false,
+    type: [ArgsType.String],
+  })
+  .setFields({
     name: "latitude",
     required: true,
     type: [ArgsType.Number],
@@ -50,6 +55,7 @@ export default new AoiFunction()
   })
   .onCallback(async (context, func) => {
     const [
+      business_connection_id,
       latitude,
       longitude,
       chat_id,
@@ -62,6 +68,7 @@ export default new AoiFunction()
     ] = await func.resolveFields(context);
 
     const result = await context.telegram.editMessageLiveLocation({
+      business_connection_id,
       chat_id,
       message_id,
       inline_message_id,

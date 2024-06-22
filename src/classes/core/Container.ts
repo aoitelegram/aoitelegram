@@ -8,6 +8,7 @@ import { ConditionChecker } from "../../utils/";
 import type { ContextEvent, CommandData } from "../AoiTyping";
 import {
   ArrayID,
+  ObjectID,
   SplitTextID,
   BufferID,
   HttpID,
@@ -17,6 +18,7 @@ import {
   ReplyParametersID,
   FileID,
   FileAnswerID,
+  RandomID,
 } from "../../function/";
 
 type EventData<T> = { eventData: T } & Container;
@@ -24,15 +26,13 @@ type EventData<T> = { eventData: T } & Container;
 type UpdateHandler = Required<Update>;
 
 class Container {
-  public readonly array: Collection<string, any[]> = new Collection();
-  public readonly object: Collection<string, object> = new Collection();
-  public readonly random: Collection<any, number> = new Collection();
   public readonly variable: Collection<any, any> = new Collection();
   public readonly condition: typeof ConditionChecker = ConditionChecker;
   public suppressErrors: string | null = null;
   public readonly eventData: ContextEvent;
   public readonly telegram: AoiClient;
   public stopCode: boolean = false;
+  public executionTimestamp: number = performance.now();
 
   constructor(
     ctx: ContextEvent,
@@ -45,6 +45,7 @@ class Container {
         ? ctx.api
         : {}) as unknown as AoiClient;
     this.variable.set(ArrayID, {});
+    this.variable.set(ObjectID, {});
     this.variable.set(SplitTextID, []);
     this.variable.set(BufferID, {});
     this.variable.set(HttpID, {});
@@ -54,6 +55,7 @@ class Container {
     this.variable.set(ReplyParametersID, {});
     this.variable.set(FileID, {});
     this.variable.set(FileAnswerID, {});
+    this.variable.set(RandomID, {});
   }
 
   setSuppressErrors(reason: string | null): Container {

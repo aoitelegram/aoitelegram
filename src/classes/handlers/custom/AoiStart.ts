@@ -3,7 +3,7 @@ import { AoiLogger } from "../../AoiLogger";
 import type { AoiClient } from "../../AoiClient";
 
 async function aoiStart(telegram: AoiClient): Promise<void> {
-  const username = `@${telegram.botInfo.username}`;
+  const username = `@${(await telegram.getMe()).username}`;
 
   const loopCommands = telegram.events.get("loop");
   const readyCommands = telegram.events.get("ready");

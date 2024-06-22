@@ -40,6 +40,7 @@ class AoiBase extends TelegramBot {
     "preCheckoutQuery",
     "chatMember",
     "messageReaction",
+    "rateLimit",
     "ready",
     "editedChannelPost",
     "businessConnection",
@@ -158,6 +159,14 @@ class AoiBase extends TelegramBot {
       throw new AoijsError("You did not specify the 'code' parameter");
     }
     this.#addEvents("ready", options);
+    return this;
+  }
+
+  rateLimitCommand(options: CommandData): AoiBase {
+    if (!options?.code) {
+      throw new AoijsError("You did not specify the 'code' parameter");
+    }
+    this.#addEvents("rateLimit", options);
     return this;
   }
 

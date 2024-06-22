@@ -1,16 +1,35 @@
 import fs from "node:fs";
 import path from "node:path";
 import figlet from "figlet";
+import { AoiFunction, ArgsType } from "./AoiFunction";
 import { AoijsTypeError } from "./AoiError";
 import type { AoiClient } from "./AoiClient";
 
 class LoadCommands {
-  private path?: string;
   public readonly telegram: AoiClient;
+  public readonly paths: Set<string> = new Set();
 
   constructor(telegram: AoiClient) {
-    telegram.loadCommands = this;
     this.telegram = telegram;
+    telegram.createCustomFunction(
+      new AoiFunction()
+        .setName("$updateCommands")
+        .setBrackets(true)
+        .setFields({
+          name: "logger",
+          required: false,
+          type: [ArgsType.Boolean],
+        })
+        .onCallback(async (context, func) => {
+          const [logger] = await func.resolveFields(context);
+          telegram.events.clear();
+          telegram.commands.clear();
+          for (const path of Array.from(this.paths)) {
+            this.loadCommands(path, logger);
+          }
+          return func.resolve();
+        }),
+    );
   }
 
   loadCommands(dirPath: string, logger: boolean = true) {
@@ -18,6 +37,7 @@ class LoadCommands {
       throw new AoijsTypeError("You did not specify the 'dirPath' parameter");
     }
 
+    this.paths.add(dirPath);
     dirPath = path.join(process.cwd(), dirPath);
     if (!fs.existsSync(dirPath)) {
       throw new AoijsTypeError(
@@ -35,9 +55,11 @@ class LoadCommands {
     for (const itemPath of items) {
       if (typeof itemPath !== "string" || !itemPath.endsWith(".js")) continue;
 
-      const itemData = require(path.join(dirPath, itemPath));
+      const resolvePaths = path.join(dirPath, itemPath);
+      delete require.cache[resolvePaths];
+      const itemData = require(resolvePaths);
       if (itemData) {
-        this.#registerCommand(itemData, path.join(dirPath, itemPath), logger);
+        this.#registerCommand(itemData, resolvePaths, logger);
       }
     }
   }
@@ -51,28 +73,34 @@ class LoadCommands {
     const requireArray = Array.isArray(requireFun) ? requireFun : [requireFun];
 
     for (const data of requireArray) {
-      if ("name" in data) {
+      if ("command" in data) {
         this.telegram.addCommand(data);
-        console.log(
-          `|---------------------------------------------------------------------|\n`,
-          `| Loading in ${itemPath} | Loaded ${data.name} | command |`,
-        );
+        if (logger) {
+          console.log(
+            `|---------------------------------------------------------------------|\n`,
+            `| Loading in ${itemPath} | Loaded ${data.command} | command |`,
+          );
+        }
       }
 
       if ("data" in data) {
         this.telegram.addAction(data);
-        console.log(
-          `|---------------------------------------------------------------------|\n`,
-          `| Loading in ${itemPath} | Loaded ${data.data} | action |`,
-        );
+        if (logger) {
+          console.log(
+            `|---------------------------------------------------------------------|\n`,
+            `| Loading in ${itemPath} | Loaded ${data.data} | action |`,
+          );
+        }
       }
 
       if ("awaited" in data) {
         this.telegram.loopCommand(data);
-        console.log(
-          `|---------------------------------------------------------------------|\n`,
-          `| Loading in ${itemPath} | Loaded ${data.awaited} | awaited |`,
-        );
+        if (logger) {
+          console.log(
+            `|---------------------------------------------------------------------|\n`,
+            `| Loading in ${itemPath} | Loaded ${data.awaited} | awaited |`,
+          );
+        }
       }
 
       if ("type" in data) {
@@ -153,10 +181,12 @@ class LoadCommands {
             throw new AoijsTypeError(`Event '${data.type}' is not defined`);
         }
 
-        console.log(
-          `|---------------------------------------------------------------------|\n`,
-          `| Loading in ${itemPath} | Loaded | events |`,
-        );
+        if (logger) {
+          console.log(
+            `|---------------------------------------------------------------------|\n`,
+            `| Loading in ${itemPath} | Loaded ${data.type} | events |`,
+          );
+        }
       }
     }
   }

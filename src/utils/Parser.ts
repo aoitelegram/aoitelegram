@@ -64,6 +64,7 @@ function isTime(content: string): boolean {
 
 async function toParse(
   character: string,
+  convertAny: boolean,
   telegram: AoiClient,
 ): Promise<
   | "string"
@@ -79,12 +80,13 @@ async function toParse(
   if (!character) return "unknown";
 
   if (isNumber(character)) {
-    if (await isChat(character, telegram)) return "chat";
+    if (!convertAny && (await isChat(character, telegram))) return "chat";
     return "number";
   }
 
-  if (character.includes("http") && (await isUrl(character))) return "url";
-  if (isTime(character)) return "time";
+  if (!convertAny && character.includes("http") && (await isUrl(character)))
+    return "url";
+  if (!convertAny && isTime(character)) return "time";
   if (isObject(character)) return "object";
   if (isArray(character)) return "array";
   if (isBoolean(character)) return "boolean";

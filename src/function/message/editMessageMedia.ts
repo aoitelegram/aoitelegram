@@ -5,6 +5,11 @@ export default new AoiFunction()
   .setName("$editMessageMedia")
   .setBrackets(true)
   .setFields({
+    name: "business_connection_id",
+    required: false,
+    type: [ArgsType.String],
+  })
+  .setFields({
     name: "chat_id",
     required: false,
     type: [ArgsType.Chat],
@@ -25,8 +30,13 @@ export default new AoiFunction()
     type: [ArgsType.Object],
   })
   .onCallback(async (context, func) => {
-    const [chat_id, message_id, inline_message_id, media] =
-      await func.resolveFields(context);
+    const [
+      business_connection_id,
+      chat_id,
+      message_id,
+      inline_message_id,
+      media,
+    ] = await func.resolveFields(context);
 
     const variableFile = context.variable.get(FileAnswerID);
     if (media.media?.startsWith("http")) {
@@ -43,6 +53,7 @@ export default new AoiFunction()
     } else media.thumbnail = variableFile[media.thumbnail];
 
     const result = await context.telegram.editMessageMedia({
+      business_connection_id,
       chat_id,
       message_id,
       inline_message_id,

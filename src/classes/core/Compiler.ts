@@ -5,13 +5,15 @@ import { Collection } from "@telegram.ts/collection";
 import { unescapeCode, escapeCode } from "@utils/Helpers";
 import type { CommandData, CustomJSFunction } from "../AoiTyping";
 
+const SymbolDescription = Symbol("Description");
+
 type SuccessCompiler = CommandData<{ functions: ParserFunction[] }>;
 
 interface ErrorCompiler {
   func: string;
   line: number;
   errorCode?: string;
-  description: string;
+  [SymbolDescription]: string;
 }
 
 class Compiler {
@@ -163,12 +165,161 @@ class Compiler {
       }
     }
 
+    const resultFunctions = this.extractIfBlocks(
+      this.reverseFunctions ? loadedFunctions.reverse() : loadedFunctions,
+    );
+
+    if (SymbolDescription in resultFunctions) {
+      return resultFunctions;
+    }
+
     return {
       code: unescapeCode(this.code),
-      functions: this.reverseFunctions
-        ? loadedFunctions.reverse()
-        : loadedFunctions,
+      functions: resultFunctions,
     };
+  }
+
+  extractIfBlocks(
+    structures: SuccessCompiler["functions"],
+  ): SuccessCompiler["functions"] | ErrorCompiler {
+    const stack: SuccessCompiler["functions"] = [];
+    const result: SuccessCompiler["functions"] = [];
+
+    for (const func of structures) {
+      const name = func.structures.name.toLowerCase();
+
+      if (name === "$if") {
+        func.ifContent = [];
+        stack.push(func);
+      } else if (name === "$elseif") {
+        if (stack.length === 0) {
+          return this.makeError(
+            "$elseIf",
+            "$elseIf cannot be used until $if is declared",
+          );
+        } else if (stack[stack.length - 1]?.elseProcessed) {
+          return this.makeError(
+            "$elseIf",
+            "Cannot use $elseIf after $else has been used",
+          );
+        } else {
+          stack[stack.length - 1].elseIfProcessed = true;
+          stack[stack.length - 1].elseIfContent.push(func);
+        }
+      } else if (name === "$else") {
+        if (stack.length === 0) {
+          return this.makeError(
+            "$else",
+            "$else cannot be used until $if is declared",
+          );
+        } else {
+          stack[stack.length - 1].elseProcessed = true;
+        }
+      } else if (name === "$endif") {
+        const ifStructure = stack.pop();
+        if (!ifStructure) {
+          return this.makeError("$endIf", "No matching $if found for $endIf");
+        }
+        if (stack.length > 0) {
+          stack[stack.length - 1].ifContent.push(ifStructure);
+        } else {
+          result.push(ifStructure);
+        }
+      } else {
+        if (stack.length > 0) {
+          const currentStructure = stack[stack.length - 1];
+          if (currentStructure.elseProcessed) {
+            currentStructure.elseContent.push(func);
+          } else if (currentStructure.elseIfProcessed) {
+            currentStructure.elseIfContent.push(func);
+          } else {
+            currentStructure.ifContent.push(func);
+          }
+        } else {
+          result.push(func);
+        }
+      }
+    }
+
+    if (stack.length > 0) {
+      return this.makeError("$if", "Unclosed $if blocks found");
+    }
+
+    for (let i = 0; i < result.length; i++) {
+      const ifContent = this.extractTryCatchBlocks(result[i].ifContent);
+      const elseContent = this.extractTryCatchBlocks(result[i].elseContent);
+      const elseIfContent = this.extractTryCatchBlocks(result[i].elseIfContent);
+
+      if (typeof ifContent === "object" && SymbolDescription in ifContent) {
+        return ifContent;
+      }
+      if (typeof elseContent === "object" && SymbolDescription in elseContent) {
+        return elseContent;
+      }
+      if (
+        typeof elseIfContent === "object" &&
+        SymbolDescription in elseIfContent
+      ) {
+        return elseIfContent;
+      }
+
+      result[i].ifContent = ifContent;
+      result[i].elseContent = elseContent;
+      result[i].elseIfContent = elseIfContent;
+    }
+
+    return this.extractTryCatchBlocks(result);
+  }
+
+  extractTryCatchBlocks(
+    structures: SuccessCompiler["functions"],
+  ): SuccessCompiler["functions"] | ErrorCompiler {
+    const stack: SuccessCompiler["functions"] = [];
+    const result: SuccessCompiler["functions"] = [];
+
+    for (const func of structures) {
+      const name = func.structures.name.toLowerCase();
+
+      if (name === "$try") {
+        func.tryContent = [];
+        stack.push(func);
+      } else if (name === "$catch") {
+        if (stack.length > 0) {
+          stack[stack.length - 1].catchProcessed = true;
+          stack[stack.length - 1].catchContent.push(func);
+        }
+      } else if (name === "$endtry") {
+        const tryStructure = stack.pop();
+        if (!tryStructure) {
+          return this.makeError(
+            "$endTry",
+            "No matching $try found for $endTry",
+          );
+        }
+        if (stack.length > 0) {
+          stack[stack.length - 1].tryContent.push(tryStructure);
+        } else {
+          result.push(tryStructure);
+        }
+      } else {
+        if (stack.length > 0) {
+          const currentStructure = stack[stack.length - 1];
+          if (currentStructure.catchProcessed) {
+            currentStructure.catchContent.push(func);
+          } else {
+            currentStructure.tryContent.push(func);
+          }
+        } else {
+          result.push(func);
+        }
+      }
+    }
+
+    if (stack.length > 0) {
+      return this.makeError("$try", "Unclosed $try blocks found");
+    }
+
+    return result;
   }
 
   extractFields(name: string, segmentCode: string): ErrorCompiler | string {
@@ -204,7 +355,7 @@ class Compiler {
       func,
       line: errorLine,
       errorCode: lines[errorLine - 1],
-      description: `This function ${description} at line ${lines.length}:${errorLine}`,
+      [SymbolDescription]: `This function ${description} at line ${lines.length}:${errorLine}`,
     };
   }
 
@@ -221,4 +372,4 @@ class Compiler {
   }
 }
 
-export { Compiler, SuccessCompiler, ErrorCompiler };
+export { Compiler, SymbolDescription, SuccessCompiler, ErrorCompiler };

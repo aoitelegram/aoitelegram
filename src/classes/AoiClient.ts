@@ -3,23 +3,20 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import { AoiBase } from "./AoiBase";
 import { AoiLogger } from "./AoiLogger";
-import { CustomEvent } from "./CustomEvent";
 import { AoiFunction } from "./AoiFunction";
 import type { RequestInit } from "node-fetch";
 import { AoiExtension } from "./AoiExtension";
 import type { ILoginOptions } from "telegramsjs";
 import aoiStart from "./handlers/custom/AoiStart";
-import type { LoadCommands } from "./LoadCommands";
 import { Collection } from "@telegram.ts/collection";
 import { AoijsError, AoijsTypeError } from "./AoiError";
 import { AwaitedManager } from "../helpers/AwaitedManager";
 import type { DataFunction, CommandData } from "./AoiTyping";
 import { AoiWarning, type AoiWarningOptions } from "./AoiWarning";
+import type { BotCommand, BotCommandScope } from "@telegram.ts/types";
 
 class AoiClient extends AoiBase {
-  public customEvent?: CustomEvent;
   public warningManager: AoiWarning;
-  public loadCommands?: LoadCommands;
   public awaitedManager: AwaitedManager;
   public functionError?: boolean = false;
   public sendMessageError?: boolean = true;
@@ -27,7 +24,11 @@ class AoiClient extends AoiBase {
     string,
     (
       | CommandData<{ data: string }>
-      | CommandData<{ name: string; aliases?: string[] }>
+      | CommandData<{
+          command: string;
+          description?: string;
+          aliases?: string[];
+        }>
     )[]
   > = new Collection();
   public readonly globalVars: Collection<string, unknown> = new Collection();
@@ -41,6 +42,11 @@ class AoiClient extends AoiBase {
       functionError?: boolean;
       sendMessageError?: boolean;
       logging?: boolean;
+      myCommands?: {
+        register?: boolean;
+        language_code?: string;
+        scope?: BotCommandScope;
+      };
       autoUpdate?: AoiWarningOptions;
     } = {},
   ) {
@@ -67,12 +73,13 @@ class AoiClient extends AoiBase {
 
   addCommand(
     options: CommandData<{
-      name: string;
+      command: string;
+      description?: string;
       aliases?: string[];
     }>,
   ): AoiClient {
-    if (!options?.name) {
-      throw new AoijsError("You did not specify the 'name' parameter");
+    if (!options?.command) {
+      throw new AoijsError("You did not specify the 'command' parameter");
     }
     if (!options?.code) {
       throw new AoijsError("You did not specify the 'code' parameter");
@@ -110,11 +117,34 @@ class AoiClient extends AoiBase {
   }
 
   async connect(options?: ILoginOptions): Promise<void> {
-    const { autoUpdate = {}, extensions = [], logging } = this.parameters;
+    const {
+      autoUpdate = {},
+      extensions = [],
+      logging,
+      myCommands = {},
+    } = this.parameters;
 
     if (autoUpdate.aoiWarning) {
       await this.warningManager.checkUpdates();
     }
+    await this.#loadFunctions();
+
+    if (myCommands.register) {
+      await this.setMyCommands({
+        scope: myCommands.scope,
+        language_code: myCommands.language_code,
+        commands: (
+          Object.values(this.commands.get("command") || {}).filter(
+            (value) =>
+              typeof value === "object" &&
+              value !== null &&
+              "command" in value &&
+              "description" in value,
+          ) as BotCommand[]
+        ).map((cmd) => ({ ...cmd, command: `/${cmd.command}` })),
+      });
+    }
+
     this.awaitedManager.handleAwaited();
 
     if (extensions.length > 0) {
@@ -130,11 +160,7 @@ class AoiClient extends AoiBase {
         }
       }
     }
-
-    this.on("ready", async (ctx) => {
-      await this.#loadFunctions();
-      aoiStart(this);
-    });
+    this.on("ready", async () => await aoiStart(this));
     super.login();
   }
 

@@ -121,7 +121,11 @@ class ParserFunction {
         let modifiedField = field;
 
         for (const overload of overloads) {
-          const result = await overload.callback(container, overload);
+          const result = await overload.callback(
+            container,
+            overload,
+            `${this.inside}`,
+          );
 
           if (overload.isSilentFunction && "reason" in result) {
             modifiedField = modifiedField.replace(result.id, "undefined");
@@ -194,11 +198,19 @@ class ParserFunction {
     }
 
     const parsedFields = await Promise.all(
-      array.map((field, i) =>
-        indexes && indexes.indexOf(i) === -1
-          ? null
-          : toParse(field, container.telegram),
-      ),
+      array.map((field, i) => {
+        if (indexes && indexes.indexOf(i) === -1) {
+          return null;
+        } else {
+          return toParse(
+            field,
+            (
+              currentStructures.fields[i] as { type: ArgsType[] }
+            )?.type?.indexOf(ArgsType.Any) !== -1,
+            container.telegram,
+          );
+        }
+      }),
     );
 
     for (let i = 0; i < array.length; i++) {

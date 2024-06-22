@@ -4,6 +4,11 @@ export default new AoiFunction()
   .setName("$stopPoll")
   .setBrackets(true)
   .setFields({
+    name: "business_connection_id",
+    required: false,
+    type: [ArgsType.String],
+  })
+  .setFields({
     name: "chat_id",
     required: true,
     type: [ArgsType.Chat],
@@ -14,9 +19,11 @@ export default new AoiFunction()
     type: [ArgsType.Number],
   })
   .onCallback(async (context, func) => {
-    const [chat_id, message_id] = await func.resolveFields(context);
+    const [business_connection_id, chat_id, message_id] =
+      await func.resolveFields(context);
 
     const result = await context.telegram.stopPoll({
+      business_connection_id,
       chat_id,
       message_id,
       reply_markup: context.getMessageOptions().reply_markup,

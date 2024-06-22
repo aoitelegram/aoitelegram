@@ -61,11 +61,11 @@
     "loupe": "^3.1.0",
     "ms": "^2.1.3",
     "node-fetch": "^2.7.0",
-    "telegramsjs": "^3.1.4",
+    "telegramsjs": "^3.2.0",
     "tslib": "^2.6.2"
   },
   "devDependencies": {
-    "@telegram.ts/types": "^1.10.0",
+    "@telegram.ts/types": "^1.11.0",
     "@types/figlet": "^1.5.8",
     "@types/long-timeout": "^0.1.2",
     "@types/ms": "^0.7.34",

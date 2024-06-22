@@ -14,9 +14,9 @@ function onCommand(telegram: AoiClient): void {
     const botUsername = ctx.api.botInfo.username;
 
     for (const cmd of commands) {
-      if (!("name" in cmd)) continue;
-      const cmdAlias = `/${cmd.name}`;
-      const cmdAliasWithUsername = `/${cmd.name}@${botUsername}`;
+      if (!("command" in cmd)) continue;
+      const cmdAlias = `/${cmd.command}`;
+      const cmdAliasWithUsername = `/${cmd.command}@${botUsername}`;
 
       if (
         cmdName !== cmdAlias &&

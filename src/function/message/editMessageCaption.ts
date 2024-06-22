@@ -4,6 +4,11 @@ export default new AoiFunction()
   .setName("$editMessageCaption")
   .setBrackets(true)
   .setFields({
+    name: "business_connection_id",
+    required: false,
+    type: [ArgsType.String],
+  })
+  .setFields({
     name: "chat_id",
     required: false,
     type: [ArgsType.Chat],
@@ -45,6 +50,7 @@ export default new AoiFunction()
   })
   .onCallback(async (context, func) => {
     const [
+      business_connection_id,
       chat_id,
       message_id,
       inline_message_id,
@@ -55,6 +61,7 @@ export default new AoiFunction()
     ] = await func.resolveFields(context);
 
     const result = await context.telegram.editMessageCaption({
+      business_connection_id,
       chat_id,
       message_id,
       inline_message_id,

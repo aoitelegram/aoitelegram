@@ -1,7 +1,7 @@
 # AoiTelegram
 
 [![NPM Version](https://img.shields.io/npm/v/aoitelegram)](https://www.npmjs.com/package/aoitelegram)
-[![Bot API](https://img.shields.io/badge/Bot%20API-v.7.2-00aced.svg?style=flat-square&logo=telegram)](https://core.telegram.org/bots/api)
+[![Bot API](https://img.shields.io/badge/Bot%20API-v.7.5-00aced.svg?style=flat-square&logo=telegram)](https://core.telegram.org/bots/api)
 [![NPM Downloads](https://img.shields.io/npm/dt/aoitelegram.svg?maxAge=3600)](https://www.npmjs.com/package/aoitelegram)
 [![License](https://img.shields.io/npm/l/aoitelegram)](https://github.com/aoitelegram/aoitelegram/blob/v1/LICENSE)
 
@@ -10,8 +10,6 @@
 ## Features
 
 - **Over 200 Pre-built Functions:** `aoitelegram` comes equipped with more than 200 pre-built functions, empowering you to effortlessly create dynamic and interactive Telegram bots.
-
-- **Built-in Customizable Local Database:** With `aoitelegram`, you have a robust customizable local database right out of the box, along with Firestore and MongoDB integration.
 
 - **Built-in Custom Function System:** `aoitelegram` has very good support for custom functions. Besides, `aoitelegram` has classes for working with extensions that you can create.
 
@@ -39,54 +37,38 @@ const { AoiClient, LoadCommands } = require("aoitelegram");
 // Esm/TypeScript
 import { AoiClient, LoadCommands } from "aoitelegram";
 
-const bot = new AoiClient({
-  token: "YOUR_BOT_TOKEN_HERE",
-  telegram: {
-    /** The maximum number of updates to fetch at once. Defaults to 100. */
-    limit: 100,
-    /** The timeout for long polling in seconds. Defaults to 60 seconds. */
-    timeout: 60000,
-    /** An array of allowed update types to receive. Defaults to all updates. */
-    allowed_updates: [],
-    /** An optional session object for managing user sessions  */
-    session: {},
-  },
-  database: {
-    /** The available database type to be used is MongoDB, with KeyValue as the default **/
-    type: "KeyValue",
-    /** The link for connecting to MongoDB **/
-    url: "mongodb+srv:...",
-    /** The file path to the database storage. */
-    path: "./database/",
-    /** An array of table names within the database.*/
-    tables: ["main"],
-    /** The file extension name used for the database file. */
-    extname: ".sql",
-  },
+const bot = new AoiClient("YOUR_BOT_TOKEN_HERE", {
+  /** Optional request options for fetch **/
+  telegram?: RequestInit;
   /** Functions that will be removed from the library's loading functions. **/
-  disableFunctions: [],
-  /** Adds native functions to the command handler **/
-  native: [],
+  disableFunctions?: string[],
   /** An array of AoiExtension functions **/
-  extension: [],
+  extension?: AoiExtension[],
   /** For the error handler of functions **/
-  functionError: true,
+  functionError?: boolean,
   /** To disable text errors **/
-  sendMessageError: true,
-  /** Disabled built-in database. **/
-  disableAoiDB: false,
+  sendMessageError?: boolean,
   /** Outputting system messages to the console. **/
-  logging: true,
-  /** Checks for available package updates and performs an update if enabled (beta) **/
-  autoUpdate: {
+  logging?: boolean,
+  /** Auto register bot commands **/
+  myCommands?: {
+    /** Allow command registration **/
+    register?: boolean;
+    /** An object, describing scope of users for which the commands are relevant. Defaults to BotCommandScopeDefault. */
+    scope?: BotCommandScope;
+   /** A two-letter ISO 639-1 language code. If empty, commands will be applied to all users from the given scope, for whose language there are no dedicated commands */
+    language_code?: string;
+  },
+  /** Checks for available package updates and performs an update if enabled **/
+  autoUpdate?: {
     /** Displaying messages about new versions. **/
-    aoiWarning: true,
+    aoiWarning?: boolean,
     /**  Whether automatic updates are enabled. **/
-    autoUpdate: true,
+    autoUpdate?: boolean,
     /** Whether to enable development versions. **/
-    enableDev: true,
+    enableDev?: boolean,
     /** Whether to enable beta versions. **/
-    enableBeta: true,
+    enableBeta?: boolean,
   },
 });
 
@@ -95,7 +77,7 @@ bot.functionErrorCommand({
 });
 
 bot.readyCommand({
-  code: `$print[Starting @$clientUsername]`,
+  code: `$print[Starting @$getObjectKey[$getMe;username]]`,
 });
 
 bot.messageCommand({
@@ -132,19 +114,6 @@ Ping: $pingms
 
 const loader = new LoadCommands(bot);
 loader.loadCommands("./command/");
-loader.loadVariables("./variables/");
-
-// Set user variables in a table.
-bot.variables(
-  {
-    sempai: 10,
-    string: "Hello, world!",
-    aoijs: true,
-    webapp: false,
-    mz: [],
-  },
-  "main",
-);
 
 bot.connect();
 ```
@@ -159,7 +128,7 @@ This project is licensed under the MIT License - see the [LICENSE](https://githu
 
 ## Contributing
 
-Contributions are welcome! If you find any issues or have suggestions for improvements, please create a `GitHub` issue or submit a pull request. Additionally, feel free to reach out to me on Telegram via my username `@SempaiJS` or on Discord using my username `sempaika_chess`.
+Contributions are welcome! If you find any issues or have suggestions for improvements, please create a `GitHub` issue or submit a pull request. Additionally, feel free to reach out to me on Telegram via my group [AoiTelegram](https://t.me/aoitegram) or on Discord using my username `sempaika_chess`.
 
 <table>
   <td><image src="https://avatars.githubusercontent.com/u/101444750?v=4"><a href="https://github.com/Asayukiii">Asayukiii</a></td>
