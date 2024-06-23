@@ -1,7 +1,7 @@
 import { AoiFunction, ArgsType } from "@structures/AoiFunction";
 
 export default new AoiFunction()
-  .setName("$floot")
+  .setName("$floor")
   .setBrackets(true)
   .setFields({
     name: "number",
