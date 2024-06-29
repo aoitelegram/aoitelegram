@@ -1,8 +1,15 @@
-import { AoiFunction } from "@structures/AoiFunction";
+import { AoiFunction, ArgsType } from "@structures/AoiFunction";
 
 export default new AoiFunction()
   .setName("$getMe")
-  .setBrackets(false)
+  .setBrackets(true)
+  .setFields({
+    name: "data",
+    required: true,
+    type: [ArgsType.String]
+  })
   .onCallback(async (context, func) => {
-    return func.resolve(await context.telegram.getMe());
+    const [data] = await func.resolveFields(context);
+    const getme = await context.telegram.getMe()
+    return func.resolve((getme as Record<string, any>)[data]);
   });
