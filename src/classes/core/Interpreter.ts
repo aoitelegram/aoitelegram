@@ -1,3 +1,5 @@
+import process from "node:process";
+import { version } from "../../index";
 import { Container } from "./Container";
 import type { ContextEvent } from "../AoiTyping";
 import type { ParserFunction } from "./ParserFunction";
@@ -120,7 +122,7 @@ class Interpreter {
     } else if (sendMessageError && !functionError && "reply" in eventData) {
       const message = custom
         ? error
-        : `❌ <b>${functionName}:</b> <code>${error}</code>`;
+        : `❌ <b>${functionName}:</b> <code>${error}</code>\n<code>- command: ${Object.values(this.inputData)[0]}\n- version: ${version}\n- path: ${"path" in this.inputData ? this.inputData.path : process.mainModule?.filename}</code>`;
       await eventData.sendMessage(message, { parse_mode: "HTML" });
     } else if (!functionError) {
       throw new RuntimeError(error, {

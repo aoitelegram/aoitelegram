@@ -3,6 +3,7 @@ import path from "node:path";
 import figlet from "figlet";
 import { getObjectKey } from "../utils/";
 import { EventEmitter } from "node:events";
+import { AoiLogger } from "./AoiLogger";
 import { AoijsTypeError } from "./AoiError";
 import type { AoiClient } from "./AoiClient";
 import type { PossiblyAsync } from "./AoiTyping";
@@ -187,7 +188,7 @@ class CustomEvent extends EventEmitter {
         const dataArr = Array.isArray(dataEvent) ? dataEvent : [dataEvent];
 
         for (const event of dataArr) {
-          this.command(event);
+          this.command({ ...event, path: itemPath });
           if (logger) {
             console.log(
               `|---------------------------------------------------------------------|\n`,
@@ -196,7 +197,7 @@ class CustomEvent extends EventEmitter {
           }
         }
       } catch (err) {
-        console.error(err);
+        AoiLogger.error(`${err}`);
       }
     }
 

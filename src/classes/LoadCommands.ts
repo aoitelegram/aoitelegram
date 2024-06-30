@@ -73,8 +73,10 @@ class LoadCommands {
     const requireArray = Array.isArray(requireFun) ? requireFun : [requireFun];
 
     for (const data of requireArray) {
+      const itemData = { ...data, path: itemPath };
+
       if ("command" in data) {
-        this.telegram.addCommand(data);
+        this.telegram.addCommand(itemData);
         if (logger) {
           console.log(
             `|---------------------------------------------------------------------|\n`,
@@ -84,7 +86,7 @@ class LoadCommands {
       }
 
       if ("data" in data) {
-        this.telegram.addAction(data);
+        this.telegram.addAction(itemData);
         if (logger) {
           console.log(
             `|---------------------------------------------------------------------|\n`,
@@ -94,7 +96,7 @@ class LoadCommands {
       }
 
       if ("awaited" in data) {
-        this.telegram.loopCommand(data);
+        this.telegram.loopCommand(itemData);
         if (logger) {
           console.log(
             `|---------------------------------------------------------------------|\n`,
@@ -106,77 +108,79 @@ class LoadCommands {
       if ("type" in data) {
         switch (data.type) {
           case "ready":
-            this.telegram.readyCommand(data);
+            this.telegram.readyCommand(itemData);
             break;
           case "message":
-            this.telegram.messageCommand(data);
+            this.telegram.messageCommand(itemData);
             break;
           case "channel_post":
-            this.telegram.channelPostCommand(data);
+            this.telegram.channelPostCommand(itemData);
             break;
           case "callback_query":
-            this.telegram.callbackQueryCommand(data);
+            this.telegram.callbackQueryCommand(itemData);
             break;
           case "edited_message":
-            this.telegram.editedMessageCommand(data);
+            this.telegram.editedMessageCommand(itemData);
             break;
           case "message_reaction":
-            this.telegram.messageReactionCommand(data);
+            this.telegram.messageReactionCommand(itemData);
             break;
           case "message_reaction_count":
-            this.telegram.messageReactionCountCommand(data);
+            this.telegram.messageReactionCountCommand(itemData);
             break;
           case "edited_channel_post":
-            this.telegram.editedChannelPostCommand(data);
+            this.telegram.editedChannelPostCommand(itemData);
             break;
           case "inline_query":
-            this.telegram.inlineQueryCommand(data);
+            this.telegram.inlineQueryCommand(itemData);
             break;
           case "shipping_query":
-            this.telegram.shippingQueryCommand(data);
+            this.telegram.shippingQueryCommand(itemData);
             break;
           case "pre_checkout_query":
-            this.telegram.preCheckoutQueryCommand(data);
+            this.telegram.preCheckoutQueryCommand(itemData);
             break;
           case "poll":
-            this.telegram.pollCommand(data);
+            this.telegram.pollCommand(itemData);
             break;
           case "poll_answer":
-            this.telegram.pollAnswerCommand(data);
+            this.telegram.pollAnswerCommand(itemData);
             break;
           case "chat_member":
-            this.telegram.chatMemberCommand(data);
+            this.telegram.chatMemberCommand(itemData);
             break;
           case "my_chat_member":
-            this.telegram.myChatMemberCommand(data);
+            this.telegram.myChatMemberCommand(itemData);
             break;
           case "chat_join_request":
-            this.telegram.chatJoinRequestCommand(data);
+            this.telegram.chatJoinRequestCommand(itemData);
             break;
           case "chat_boost":
-            this.telegram.chatBoostCommand(data);
+            this.telegram.chatBoostCommand(itemData);
             break;
           case "removed_chat_boost":
-            this.telegram.removedChatBoostCommand(data);
+            this.telegram.removedChatBoostCommand(itemData);
             break;
           case "business_connection":
-            this.telegram.businessConnectionCommand(data);
+            this.telegram.businessConnectionCommand(itemData);
             break;
           case "business_message":
-            this.telegram.businessMessageCommand(data);
+            this.telegram.businessMessageCommand(itemData);
             break;
           case "edited_business_message":
-            this.telegram.editedBusinessMessageCommand(data);
+            this.telegram.editedBusinessMessageCommand(itemData);
             break;
           case "deleted_business_messages":
-            this.telegram.deletedBusinessMessagesCommand(data);
+            this.telegram.deletedBusinessMessagesCommand(itemData);
             break;
           case "loop":
-            this.telegram.loopCommand(data);
+            this.telegram.loopCommand(itemData);
             break;
           case "functionError":
-            this.telegram.functionErrorCommand(data);
+            this.telegram.functionErrorCommand(itemData);
             break;
+          case "rate_limit":
+            this.telegram.rateLimitCommand(itemData);
           default:
             throw new AoijsTypeError(`Event '${data.type}' is not defined`);
         }

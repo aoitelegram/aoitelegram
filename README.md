@@ -53,11 +53,11 @@ const bot = new AoiClient("YOUR_BOT_TOKEN_HERE", {
   /** Auto register bot commands **/
   myCommands?: {
     /** Allow command registration **/
-    register?: boolean;
+    register?: boolean,
     /** An object, describing scope of users for which the commands are relevant. Defaults to BotCommandScopeDefault. */
-    scope?: BotCommandScope;
+    scope?: BotCommandScope,
    /** A two-letter ISO 639-1 language code. If empty, commands will be applied to all users from the given scope, for whose language there are no dedicated commands */
-    language_code?: string;
+    language_code?: string,
   },
   /** Checks for available package updates and performs an update if enabled **/
   autoUpdate?: {
@@ -77,7 +77,7 @@ bot.functionErrorCommand({
 });
 
 bot.readyCommand({
-  code: `$print[Starting @$getObjectKey[$getMe;username]]`,
+  code: `$print[Starting @$getMe[username]]`,
 });
 
 bot.messageCommand({
@@ -91,7 +91,7 @@ bot.callbackQueryCommand({
 // Define a command to print a message.
 bot.addCommand({
   command: "say",
-  code: `$sendMessage[$message]`,
+  code: `$replyMessage[$message]`,
 });
 
 // Define a command to check the bot's ping.
@@ -105,9 +105,9 @@ bot.addCommand({
   command: "botinfo",
   code: `
 $replyMessage[
-Bot ID: $clientId
-Name: $clientFirstName
-Username: $clientUsername
+Bot ID: $getMe[id]
+Name: $getMe[first_name]
+Username: $getMe[username]
 Ping: $pingms
 ]`,
 });
