@@ -127,27 +127,25 @@ class CustomFunctionManager {
     let normalizedFunc: CustomJSFunction = {} as CustomJSFunction;
 
     if (func.type === "aoitelegram") {
+      const params = func.params
+        ? func.params.map((name) => ({
+            name: name.replace("?", "").replace("...", ""),
+            required: !name.endsWith("?"),
+            rest: name.startsWith("..."),
+          }))
+        : [];
       normalizedFunc = {
         name: functionName,
         version: func.version,
         aliases: func.aliases,
-        brackets: func.params?.length! > 0,
-        fields: func.params
-          ? func.params.map((name) => ({
-              name: name.replace("?", "").replace("...", ""),
-              required: !name.endsWith("?"),
-              rest: name.startsWith("..."),
-            }))
-          : [],
+        brackets: params.length > 0,
+        fields: params,
         callback: async (ctx, fun) => {
-          const result = await this.telegram.evaluateCommand(
-            {
-              name: func.name,
-              reverseReading: func.reverseReading,
-              code: func.code,
-            },
-            ctx.eventData,
-          );
+          for (let i = 0; i < params.length; i++) {
+            ctx.variable.set(params[i].name, await fun.resolveFields(ctx, [i]));
+          }
+
+          const result = await fun.resolveCode(ctx, `${fun.inside}`);
           return fun.resolve(result);
         },
       };

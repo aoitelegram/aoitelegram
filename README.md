@@ -72,6 +72,8 @@ const bot = new AoiClient("YOUR_BOT_TOKEN_HERE", {
   },
 });
 
+bot.addEvent(["onReady", "onMessage", "onCallbackQuery", "onFunctionError"]);
+
 bot.functionErrorCommand({
   code: `$sendMessage[Sorry, but there was an error in the $handleError[function] function within the $handleError[command] command: $handleError[error]]`,
 });
@@ -91,7 +93,7 @@ bot.callbackQueryCommand({
 // Define a command to print a message.
 bot.addCommand({
   command: "say",
-  code: `$replyMessage[$message]`,
+  code: `$replyMessage[$eventData[text]]`,
 });
 
 // Define a command to check the bot's ping.

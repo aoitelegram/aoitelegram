@@ -1,9 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import figlet from "figlet";
-import { getObjectKey } from "../utils/";
 import { EventEmitter } from "node:events";
-import { AoiLogger } from "./AoiLogger";
+import { Logger, getObjectKey } from "@aoitelegram/util";
 import { AoijsTypeError } from "./AoiError";
 import type { AoiClient } from "./AoiClient";
 import type { PossiblyAsync } from "./AoiTyping";
@@ -85,6 +84,7 @@ class CustomEvent extends EventEmitter {
           listen: string;
           once?: boolean;
           type?: "aoitelegram";
+          searchFailed?: boolean;
           reverseReading?: boolean;
           code: string;
         }
@@ -197,7 +197,7 @@ class CustomEvent extends EventEmitter {
           }
         }
       } catch (err) {
-        AoiLogger.error(`${err}`);
+        Logger.error(`${err}`);
       }
     }
 

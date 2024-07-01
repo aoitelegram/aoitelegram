@@ -1,9 +1,8 @@
 import { AoijsTypeError } from "../AoiError";
-import { WordMatcher } from "@utils/WordMatcher";
 import { ParserFunction } from "./ParserFunction";
 import { Collection } from "@telegram.ts/collection";
-import { unescapeCode, escapeCode } from "@utils/Helpers";
 import type { CommandData, CustomJSFunction } from "../AoiTyping";
+import { WordMatcher, unescapeCode, escapeCode } from "@aoitelegram/util";
 
 const SymbolDescription = Symbol("Description");
 

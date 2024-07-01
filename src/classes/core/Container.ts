@@ -4,7 +4,7 @@ import { InlineKeyboard, Keyboard } from "telegramsjs";
 import type { Update } from "@telegram.ts/types";
 import type { SuccessCompiler } from "./Compiler";
 import { Collection } from "@telegram.ts/collection";
-import { ConditionChecker } from "../../utils/";
+import { ConditionChecker } from "@aoitelegram/util";
 import type { ContextEvent, CommandData } from "../AoiTyping";
 import {
   ArrayID,

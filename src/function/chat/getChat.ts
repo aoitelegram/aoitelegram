@@ -1,4 +1,4 @@
-import { getObjectKey } from "@utils/Helpers";
+import { getObjectKey } from "@aoitelegram/util";
 import { AoiFunction, ArgsType } from "@structures/AoiFunction";
 
 export default new AoiFunction()

@@ -1,4 +1,4 @@
-import { getObjectKey } from "@utils/Helpers";
+import { getObjectKey } from "@aoitelegram/util";
 import type { AoiClient } from "../../AoiClient";
 import { AoiFunction, ArgsType } from "../../AoiFunction";
 
