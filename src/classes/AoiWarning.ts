@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
 import { version } from "../index";
+import process from "node:process";
 import { Logger } from "@aoitelegram/util";
 import { execSync, spawn } from "node:child_process";
 
@@ -85,7 +86,7 @@ class AoiWarning {
     try {
       Logger.info("Updating to the latest version...");
 
-      execSync(`npm i aoitelegram@${version} --no-bin-links`, {
+      execSync(`npm i aoitelegram@${version} ${process.getuid?.() === 0 ? "" : "--no-bin-links"}`, {
         stdio: "inherit",
       });
 
