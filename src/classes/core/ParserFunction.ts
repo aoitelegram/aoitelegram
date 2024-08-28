@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { ArgsType } from "../AoiFunction";
 import { AoijsTypeError } from "../AoiError";
 import type { CustomJSFunction } from "../AoiTyping";
-import { inspect, toParse, toConvertParse } from "../../utils";
+import { inspect, toParse, toConvertParse } from "@aoitelegram/util";
 
 interface ICallbackResolve {
   id: string;

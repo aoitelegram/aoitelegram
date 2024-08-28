@@ -1,4 +1,4 @@
-import { escapeCode } from "@utils/Helpers";
+import { escapeCode } from "@aoitelegram/util";
 import { AoiFunction, ArgsType } from "@structures/AoiFunction";
 
 export default new AoiFunction()

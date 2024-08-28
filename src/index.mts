@@ -1,6 +1,5 @@
 export * from "./classes/AoiBase.js";
 export * from "./classes/AoiClient.js";
-export * from "./classes/AoiLogger.js";
 export * from "./classes/AoiError.js";
 export * from "./classes/AoiWarning.js";
 export * from "./classes/AoiFunction.js";
@@ -10,4 +9,3 @@ export * from "./classes/LoadCommands.js";
 export * from "./classes/AoiExtension.js";
 export * from "./helpers/AwaitedManager.js";
 export * from "./classes/core/index.js";
-export * from "./utils/index.js";

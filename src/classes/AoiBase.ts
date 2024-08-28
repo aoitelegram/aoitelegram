@@ -1,12 +1,11 @@
 import path from "node:path";
 import { version } from "../index";
-import { getObjectKey } from "../utils/";
-import { AoiLogger } from "./AoiLogger";
 import type { RequestInit } from "node-fetch";
 import { Interpreter, Compiler } from "./core/";
 import type { Update } from "@telegram.ts/types";
 import type { AoiFunction } from "./AoiFunction";
 import { AoijsError, AoijsTypeError } from "./AoiError";
+import { Logger, getObjectKey } from "@aoitelegram/util";
 import { CustomFunctionManager } from "./CustomFunctionManager";
 import { TelegramBot, Collection, type Context } from "telegramsjs";
 import type {
@@ -92,7 +91,7 @@ class AoiBase extends TelegramBot {
       );
       return await interpreter.runInput();
     } catch (err) {
-      AoiLogger.error(`${err}`);
+      Logger.error(`${err}`);
     }
   }
 
@@ -106,7 +105,7 @@ class AoiBase extends TelegramBot {
         this.availableCollectEvents.indexOf(normalizedEventName);
 
       if (eventIndex === -1) {
-        throw new AoijsTypeError(`Invalid event name ${event}`);
+        throw new AoijsTypeError(`Invalid event name "${event}"`);
       } else this.#registerCollectEvent.add(normalizedEventName);
 
       if (normalizedEventName === "ready" || normalizedEventName === "loop") {

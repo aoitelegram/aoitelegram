@@ -2,7 +2,7 @@ import chalk from "chalk";
 import path from "node:path";
 import fs from "node:fs/promises";
 import { AoiBase } from "./AoiBase";
-import { AoiLogger } from "./AoiLogger";
+import { Logger } from "@aoitelegram/util";
 import { AoiFunction } from "./AoiFunction";
 import type { RequestInit } from "node-fetch";
 import { AoiExtension } from "./AoiExtension";
@@ -152,11 +152,11 @@ class AoiClient extends AoiBase {
         const initPlugins = extensions[i];
         try {
           await initPlugins["initPlugins"](this);
-          AoiLogger.info(
+          Logger.info(
             `Plugin '${initPlugins.name}' has been dreadfully registered`,
           );
         } catch (err) {
-          AoiLogger.error(`${err}`);
+          Logger.error(`${err}`);
         }
       }
     }

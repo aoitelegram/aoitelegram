@@ -1,4 +1,4 @@
-import { getObjectKey } from "../utils/";
+import { getObjectKey } from "@aoitelegram/util";
 import { Collection } from "@telegram.ts/collection";
 import { AoijsTypeError } from "../classes/AoiError";
 import type { AoiClient } from "../classes/AoiClient";

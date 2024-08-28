@@ -1,5 +1,5 @@
 import { Agent } from "node:https";
-import { getObjectKey } from "@utils/Helpers";
+import { getObjectKey } from "@aoitelegram/util";
 import fetch, { RequestInit } from "node-fetch";
 import { AoiFunction, ArgsType } from "@structures/AoiFunction";
 

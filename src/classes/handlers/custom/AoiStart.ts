@@ -1,5 +1,5 @@
 import { version } from "../../../index";
-import { AoiLogger } from "../../AoiLogger";
+import { Logger } from "@aoitelegram/util";
 import type { AoiClient } from "../../AoiClient";
 
 async function aoiStart(telegram: AoiClient): Promise<void> {
@@ -18,7 +18,7 @@ async function aoiStart(telegram: AoiClient): Promise<void> {
     await readyHandlers(telegram);
   }
 
-  AoiLogger.custom({
+  Logger.custom({
     title: {
       text: "[ AoiClient ]:",
       color: "red",
@@ -63,7 +63,7 @@ async function aoiStart(telegram: AoiClient): Promise<void> {
     ],
   });
 
-  AoiLogger.custom({
+  Logger.custom({
     title: {
       text: "[ Official Docs ]:",
       color: "yellow",
@@ -78,7 +78,7 @@ async function aoiStart(telegram: AoiClient): Promise<void> {
     ],
   });
 
-  AoiLogger.custom({
+  Logger.custom({
     title: {
       text: "[ Official GitHub ]:",
       color: "yellow",

@@ -1,4 +1,4 @@
-import { unescapeCode } from "@utils/Helpers";
+import { unescapeCode } from "@aoitelegram/util";
 import { AoiFunction, ArgsType } from "@structures/AoiFunction";
 
 export default new AoiFunction()
