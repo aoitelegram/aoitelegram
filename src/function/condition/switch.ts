@@ -16,6 +16,7 @@ export default new AoiFunction()
     required: true,
     rest: false
 })
+.setVersion("1.0.1")
 .onCallback(async function (ctx, fn) {
     const value: string[] = await fn.resolveFields(ctx, [0])
     // Extracting the case functions.

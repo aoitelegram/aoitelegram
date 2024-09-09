@@ -16,10 +16,11 @@ export default new AoiFunction()
     required: true,
     rest: false
 })
+.setVersion("1.0.1")
 .onCallback(async function(ctx, fn) {
     const commandFunctions = ctx.command.functions
     const parentFunction = commandFunctions.find((f) => f.id === fn.parentID)
-    
+
     if (parentFunction?.structures.name !== "$switch") {
         return fn.reject("$case cannot be used outside $switch!")
     }
