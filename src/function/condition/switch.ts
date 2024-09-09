@@ -17,7 +17,7 @@ export default new AoiFunction()
     rest: false
 })
 .onCallback(async function (ctx, fn) {
-    const value = await fn.resolveFields(ctx, [0])
+    const value: string[] = await fn.resolveFields(ctx, [0])
     // Extracting the case functions.
     const cases = fn.overloads.filter((over) => over.structures.name === "$case")
 
@@ -33,7 +33,7 @@ export default new AoiFunction()
 
     // Executing each case.
     for (const switchCase of cases) {
-        const caseValue = await switchCase.resolveFields(ctx, [0])
+        const caseValue: string[] = await switchCase.resolveFields(ctx, [0])
         if (caseValue[0] === value[0]) {
             executed = true
             returnValue = await switchCase.resolveFields(ctx, [1])
