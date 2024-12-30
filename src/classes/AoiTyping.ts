@@ -140,7 +140,7 @@ type PossiblyAsync<T> = T | Promise<T>;
 
 type MaybeArray<T> = T | Array<T>;
 
-type CommandType = "callbackQuery"
+type EventType = "callbackQuery"
   | "editedMessage"
   | "myChatMember"
   | "shippingQuery"
@@ -169,7 +169,7 @@ type CommandType = "callbackQuery"
 export {
   EventHandlers,
   ContextEvent,
-  CommandType,
+  EventType,
   CustomJSFunction,
   CustomAoiFunction,
   DefaultFnValue,
