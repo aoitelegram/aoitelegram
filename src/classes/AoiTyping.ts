@@ -140,9 +140,36 @@ type PossiblyAsync<T> = T | Promise<T>;
 
 type MaybeArray<T> = T | Array<T>;
 
+type CommandType = "callbackQuery"
+  | "editedMessage"
+  | "myChatMember"
+  | "shippingQuery"
+  | "channelPost" 
+  | "inlineQuery"
+  | "poll"
+  | "chatBoost"
+  | "loop"
+  | "pollAnswer"
+  | "chatJoinRequest"
+  | "message"
+  | "preCheckoutQuery"
+  | "chatMember"
+  | "messageReaction"
+  | "rateLimit"
+  | "ready"
+  | "editedChannelPost"
+  | "businessConnection"
+  | "businessMessage"
+  | "editedBusinessMessage"
+  | "deletedBusinessMessages"
+  | "messageReactionCount"
+  | "removedChatBoost"
+  | "functionError";
+
 export {
   EventHandlers,
   ContextEvent,
+  CommandType,
   CustomJSFunction,
   CustomAoiFunction,
   DefaultFnValue,
