@@ -3,7 +3,7 @@
   "description": "A powerful package to create Telegram Bots with built-in string functions",
   "main": "./dist/index.js",
   "typing": "./dist/index.d.ts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "clean:dist": "rm -rf dist/",
     "uglifyjs": "find ./dist/function -type f -name \"*.d.ts\" -exec rm {} && uglifyjs --in-situ dist/function/**/**",
