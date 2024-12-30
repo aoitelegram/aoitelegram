@@ -117,6 +117,7 @@ class AoiBase extends TelegramBot {
           default: commandHandlers,
         } = require("./handlers/command/Command");
         commandHandlers(this);
+        continue;
       }
 
       if (normalizedEventName === "callbackQuery") {
@@ -124,6 +125,7 @@ class AoiBase extends TelegramBot {
           default: actionHandlers,
         } = require("./handlers/command/Action");
         actionHandlers(this);
+        continue;
       }
 
       if (normalizedEventName === "functionError") {
