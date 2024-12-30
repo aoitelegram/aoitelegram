@@ -5,3 +5,4 @@
 /command/
 /node_modules/
 package-lock.json
+/__test__

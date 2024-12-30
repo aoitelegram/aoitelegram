@@ -15,6 +15,7 @@ import type {
   ContextEvent,
   CommandData,
   EventHandlers,
+  EventType,
 } from "./AoiTyping";
 
 class AoiBase extends TelegramBot {
@@ -23,7 +24,7 @@ class AoiBase extends TelegramBot {
     new Collection();
   public readonly availableFunctions: Collection<string, CustomJSFunction> =
     new Collection();
-  public readonly availableCollectEvents = [
+  public readonly availableCollectEvents: EventType[] = [
     "callbackQuery",
     "editedMessage",
     "myChatMember",
@@ -100,7 +101,7 @@ class AoiBase extends TelegramBot {
   ): AoiBase {
     for (const event of Array.from(new Set(events))) {
       const normalizedEventName =
-        event.charAt(2).toLowerCase() + event.slice(3);
+        event.charAt(2).toLowerCase() + event.slice(3) as EventType;
       const eventIndex =
         this.availableCollectEvents.indexOf(normalizedEventName);
 
@@ -117,6 +118,7 @@ class AoiBase extends TelegramBot {
           default: commandHandlers,
         } = require("./handlers/command/Command");
         commandHandlers(this);
+        continue;
       }
 
       if (normalizedEventName === "callbackQuery") {
@@ -124,6 +126,7 @@ class AoiBase extends TelegramBot {
           default: actionHandlers,
         } = require("./handlers/command/Action");
         actionHandlers(this);
+        continue;
       }
 
       if (normalizedEventName === "functionError") {

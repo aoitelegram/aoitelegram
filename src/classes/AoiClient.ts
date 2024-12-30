@@ -13,7 +13,7 @@ import { AoijsError, AoijsTypeError } from "./AoiError";
 import { AwaitedManager } from "../helpers/AwaitedManager";
 import type { DataFunction, CommandData } from "./AoiTyping";
 import { AoiWarning, type AoiWarningOptions } from "./AoiWarning";
-import type { BotCommand, BotCommandScope } from "@telegram.ts/types";
+import type { BotCommand, BotCommandScope, LanguageCode } from "@telegram.ts/types";
 
 class AoiClient extends AoiBase {
   public warningManager: AoiWarning;
@@ -132,7 +132,7 @@ class AoiClient extends AoiBase {
     if (myCommands.register) {
       await this.setMyCommands({
         scope: myCommands.scope,
-        language_code: myCommands.language_code,
+        language_code: <LanguageCode | undefined>(myCommands.language_code),
         commands: (
           Object.values(this.commands.get("command") || {}).filter(
             (value) =>
